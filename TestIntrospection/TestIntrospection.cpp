@@ -21,10 +21,24 @@ void PrintMembers(const char *type)
 	std::cout << "\t{" << std::endl;
 	for (auto i = TYPEINFO_TYPE(TYPE)->GetMembers().begin(); i != TYPEINFO_TYPE(TYPE)->GetMembers().end(); ++i)
 	{
-		std::cout << "\t\tMember name :  " << i->second->GetName() << std::endl;
-		std::cout << "\t\t     offset :  " << i->second->GetOffset() << std::endl;
+		std::cout << "\t\t Member name :  " << (*i)->GetName() << std::endl;
+		std::cout << "\t\t      offset :  " << (*i)->GetOffset() << std::endl;
+		std::cout << "\t\tserializable :  " << (*i)->GetSerializable() << std::endl;
+		std::cout << std::endl;
 	}
 	std::cout << "\t}" << std::endl;
+}
+
+template <typename T>
+void PrintMembersValue(const T& obj)
+{
+	const Introspection::TypeInfo* typeInfo = TYPEINFO_OBJECT(obj);
+	for (auto i = typeInfo->GetMembers().begin(); i != typeInfo->GetMembers().end(); ++i)
+	{
+		std::cout << "\t  Name :" << (*i)->GetName() << std::endl;
+		//std::cout << "\t Value :" << *(*i)->GetPtr<TYPEOF(obj)>(&obj) << std::endl;
+		std::cout << std::endl;
+	}
 }
 
 
@@ -43,7 +57,10 @@ int main()
 	std::cout << TYPEINFO_TYPE(std::string)->GetSize() << std::endl;
 	std::cout << std::endl;
 
+	TestObject obj(1);
 	PRINT_MEMBERS(TestObject);
+	std::cout << "TestObject Obj(1) members value :" << std::endl;
+	PrintMembersValue(obj);
 
 	S string("String within the S wrapper!");
 	std::cout << std::endl << string << std::endl;
@@ -57,6 +74,10 @@ int main()
 	// Ensure string literal typeInfo is supported
 	if (TYPEINFO_TYPE(const char *) != TYPEINFO_OBJECT("Testing with a string literal!"))
 		std::cout << "ERROR2!";
+
+	std::cout << "Serialization :" << std::endl;
+	TYPEINFO_TYPE(TestObject)->GetSerialization()->Serialize(std::cout, &obj);
+
 
 	getchar();
 

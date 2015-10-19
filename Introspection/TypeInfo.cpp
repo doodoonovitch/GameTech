@@ -7,18 +7,23 @@ namespace  Introspection
 
 
 TypeInfo::TypeInfo()	
-	: _size(0)
+	: _pSerialization(nullptr)
+	, _size(0)
+
 {
 }
 
 
 TypeInfo::~TypeInfo()
 {
+	_pSerialization = nullptr;
+
 	for (auto p : _members)
 	{
-		delete p.second;
+		delete p;
 	}
 	_members.clear();
+	_membersByName.clear();
 }
 
 void TypeInfo::Init(const std::string& name, size_t size)
@@ -28,18 +33,21 @@ void TypeInfo::Init(const std::string& name, size_t size)
 	TypeInfoManager::Add(this);
 }
 
-void TypeInfo::AddMember(const MemberInfo *member)
+void TypeInfo::AddMember(MemberInfo *member)
 {
-	assert(_members.find(member->GetName()) == _members.end());
+	assert(_membersByName.find(member->GetName()) == _membersByName.end());
 
-	_members[member->GetName()] = member;
+	_members.push_back(member);
+	_membersByName[member->GetName()] = member;
 }
 
 const MemberInfo * TypeInfo::GetMember(const std::string& name)
 {
-	auto it = _members.find(name);
-	return it != _members.end() ? it->second : nullptr;
+	auto it = _membersByName.find(name);
+	return it != _membersByName.end() ? it->second : nullptr;
 }
+
+
 
 
 } // namespace  Introspection

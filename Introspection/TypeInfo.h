@@ -8,12 +8,14 @@ namespace  Introspection
 
 
 class MemberInfo;
+class ISerialization;
 
 class TypeInfo
 {
 public:
 
-	typedef std::map<std::string, const MemberInfo *> MemberMap;
+	typedef std::map<std::string, MemberInfo *> MemberMap;
+	typedef std::vector<MemberInfo*> MemberList;
 
 
 public:
@@ -28,19 +30,24 @@ public:
 
 	size_t GetSize(void) const { return _size; }
 
-	void AddMember(const MemberInfo * member);
+	void AddMember(MemberInfo * member);
 
 	const MemberInfo * GetMember(const std::string& name);
 
-	const MemberMap& GetMembers() const { return _members; }
+	const MemberList& GetMembers() const { return _members; }
+	const MemberMap& GetMemberMap() const { return _membersByName; }
+
+	void SetSerialization(const ISerialization* serialization) { _pSerialization = serialization; }
+	const ISerialization* GetSerialization() const { return _pSerialization; }
 
 
 private:
 
-
+	const ISerialization* _pSerialization;
 	std::string _name;
 	size_t _size;
-	MemberMap _members;
+	MemberList _members;
+	MemberMap _membersByName;
 };
 
 

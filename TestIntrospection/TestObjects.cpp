@@ -4,15 +4,17 @@
 
 DEFINE_TYPEINFO(TestObject)
 {
-	ADD_MEMBER(ID);
-	ADD_MEMBER(active);
-	ADD_MEMBER(x);
+	SET_SERIALIZATION(TestObject, Introspection::TextSerialization<TestObject>::GetInstance());
+	ADD_MEMBER(ID, true);
+	ADD_MEMBER(active, true);
+	ADD_MEMBER(x, false);
 }
 
 
 TestObject::TestObject(int id)
 	: ID(0)
 	, active(true)
+	, x(0.0)
 {
 }
 
@@ -24,8 +26,8 @@ TestObject::~TestObject()
 
 DEFINE_TYPEINFO(S)
 {
-	ADD_MEMBER(data);
-	ADD_MEMBER(len);
+	ADD_MEMBER(data, true);
+	ADD_MEMBER(len, true);
 }
 
 S::S(const char *src) : data(src)
