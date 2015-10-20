@@ -16,7 +16,7 @@ TypeInfoManager::~TypeInfoManager()
 	_typeInfoByName.clear();
 }
 
-const TypeInfo* TypeInfoManager::GetTypeInfo(const std::string& name) const
+const TypeInfo* TypeInfoManager::GetTypeInfoInstance(const std::string& name) const
 {
 	auto it = _typeInfoByName.find(name);
 	return it == _typeInfoByName.end() ? nullptr : it->second;

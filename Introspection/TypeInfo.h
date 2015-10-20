@@ -24,11 +24,13 @@ public:
 
 	~TypeInfo();
 
-	void Init(const std::string& string, size_t size);
+	void Init(const std::string& string, size_t size, bool isPointer);
 
 	const std::string& GetName(void) const { return _name; }
 
 	size_t GetSize(void) const { return _size; }
+
+	bool GetIsPointer() const { return _isPointer; }
 
 	void AddMember(MemberInfo * member);
 
@@ -48,6 +50,7 @@ private:
 	size_t _size;
 	MemberList _members;
 	MemberMap _membersByName;
+	bool _isPointer;
 };
 
 

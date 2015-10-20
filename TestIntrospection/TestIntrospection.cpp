@@ -21,9 +21,14 @@ void PrintMembers(const char *type)
 	std::cout << "\t{" << std::endl;
 	for (auto i = TYPEINFO_TYPE(TYPE)->GetMembers().begin(); i != TYPEINFO_TYPE(TYPE)->GetMembers().end(); ++i)
 	{
+		const Introspection::TypeInfo* pTypeInfo = (*i)->GetTypeInfo();
+
 		std::cout << "\t\t Member name :  " << (*i)->GetName() << std::endl;
 		std::cout << "\t\t      offset :  " << (*i)->GetOffset() << std::endl;
 		std::cout << "\t\tserializable :  " << (*i)->GetSerializable() << std::endl;
+
+		std::cout << "\t\t   type name :  " << pTypeInfo->GetName() << std::endl;
+		std::cout << "\t\tis a pointer :  " << pTypeInfo->GetIsPointer() << std::endl;
 		std::cout << std::endl;
 	}
 	std::cout << "\t}" << std::endl;

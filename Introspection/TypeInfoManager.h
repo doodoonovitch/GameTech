@@ -15,7 +15,7 @@ public:
 
 	static const TypeInfo* Get(const std::string& name)
 	{
-		return GetInstance()->GetTypeInfo(name);
+		return GetInstance()->GetTypeInfoInstance(name);
 	}
 
 	static void Add(const TypeInfo* typeInfo)
@@ -34,7 +34,7 @@ private:
 		return &_typeInfoManager;
 	}
 
-	const TypeInfo* GetTypeInfo(const std::string& name) const;
+	const TypeInfo* GetTypeInfoInstance(const std::string& name) const;
 	void AddTypeInfo(const TypeInfo* typeInfo);
 
 private:

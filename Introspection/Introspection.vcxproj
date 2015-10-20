@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="Introspection.h" />
     <ClInclude Include="ISerialization.h" />
+    <ClInclude Include="Macros.h" />
     <ClInclude Include="MemberInfo.h" />
     <ClInclude Include="RemoveQualifier.h" />
     <ClInclude Include="TextSerialization.h" />

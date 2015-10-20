@@ -2,7 +2,7 @@
 #include "Introspection.h"
 
 
-namespace  Introspection
+namespace Introspection
 {
 
 
@@ -26,10 +26,11 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(const std::string& name, size_t size)
+void TypeInfo::Init(const std::string& name, size_t size, bool isPointer)
 {
 	_name = name;
 	_size = size;
+	_isPointer = isPointer;
 	TypeInfoManager::Add(this);
 }
 
