@@ -22,6 +22,12 @@ const TypeInfo* TypeInfoManager::GetTypeInfoInstance(const std::string& name) co
 	return it == _typeInfoByName.end() ? nullptr : it->second;
 }
 
+const TypeInfo* TypeInfoManager::GetTypeInfoInstance(const std::wstring& name) const
+{
+	auto it = _typeInfoByWName.find(name);
+	return it == _typeInfoByWName.end() ? nullptr : it->second;
+}
+
 void TypeInfoManager::AddTypeInfo(const TypeInfo* typeInfo)
 {
 	assert(typeInfo != nullptr);
@@ -31,6 +37,7 @@ void TypeInfoManager::AddTypeInfo(const TypeInfo* typeInfo)
 	assert(_typeInfoByName.find(typeName) == _typeInfoByName.end());
 
 	_typeInfoByName[typeName] = typeInfo;
+	_typeInfoByWName[typeInfo->GetWName()] = typeInfo;
 }
 
 

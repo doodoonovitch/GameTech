@@ -4,23 +4,25 @@
 
 DEFINE_TYPEINFO(TestObject)
 {
-	SET_SERIALIZATION(TestObject, Introspection::TextSerialization<TestObject>::GetInstance());
-	ADD_MEMBER(ID, true);
-	ADD_MEMBER(active, true);
-	ADD_MEMBER(x, false);
+	ADD_MEMBER(_Id, true);
+	ADD_MEMBER(_active, true);
+	ADD_MEMBER(_double, true);
+	ADD_MEMBER(_wstr, true);
 }
 
 
-TestObject::TestObject(int id)
-	: ID(0)
-	, active(true)
-	, x(0.0)
+TestObject::TestObject(int id, bool a)
+	: _Id(id)
+	, _active(a)
+	, _double(0.0)
+	, _wstr(_wcsdup(L"Test wchar_t string"))
 {
 }
 
 
 TestObject::~TestObject()
 {
+	delete [] _wstr;
 }
 
 

@@ -12,14 +12,15 @@ class MemberInfo
 {
 public:
 
-	MemberInfo(const std::string& name, size_t offset, const TypeInfo* typeInfo, bool serializable = false);
+	MemberInfo(const std::string& name, const std::wstring& wname, uintptr_t offset, const TypeInfo* typeInfo, bool serializable = false);
 
 	~MemberInfo();
 
 
 	const std::string& GetName(void) const { return _name; }
+	const std::wstring& GetWName(void) const { return _wname; }
 
-	size_t GetOffset(void) const { return _offset; }
+	uintptr_t GetOffset(void) const { return _offset; }
 
 	const TypeInfo *GetTypeInfo(void) const { return _pType; }
 
@@ -32,9 +33,10 @@ public:
 
 private:
 
-	size_t _offset;
+	uintptr_t _offset;
 	const TypeInfo *_pType;
 	std::string _name;
+	std::wstring _wname;
 	bool _serializable;
 
 };

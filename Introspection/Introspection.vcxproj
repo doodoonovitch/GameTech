@@ -135,11 +135,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Introspection.h" />
-    <ClInclude Include="ISerialization.h" />
+    <ClInclude Include="ISerializer.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="MemberInfo.h" />
     <ClInclude Include="RemoveQualifier.h" />
-    <ClInclude Include="TextSerialization.h" />
+    <ClInclude Include="TextSerializer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TextSerializationPrim.h" />
@@ -148,7 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MemberInfo.cpp" />
-    <ClCompile Include="TextSerialization.cpp" />
+    <ClCompile Include="TextSerializer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

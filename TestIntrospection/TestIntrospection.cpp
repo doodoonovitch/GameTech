@@ -14,21 +14,25 @@
 template <typename TYPE>
 void PrintMembers(const char *type)
 {
+	const Introspection::TypeInfo* ti = TYPEINFO_TYPE(TYPE);
+
 	std::cout << std::endl << "TypeInfo for " << type << " :" << std::endl;
-	std::cout << "\tClass name : " << TYPEINFO_TYPE(TYPE)->GetName() << std::endl;
-	std::cout << "\tSize       : " << TYPEINFO_TYPE(TYPE)->GetSize() << std::endl;
+	std::cout << "\t       Class name : " << ti->GetName() << std::endl;
+	std::cout << "\t             Size : " << ti->GetSize() << std::endl;
+	std::cout << "\t\tis a basic type :  " << ti->GetIsBasicType() << std::endl;
 
 	std::cout << "\t{" << std::endl;
 	for (auto i = TYPEINFO_TYPE(TYPE)->GetMembers().begin(); i != TYPEINFO_TYPE(TYPE)->GetMembers().end(); ++i)
 	{
 		const Introspection::TypeInfo* pTypeInfo = (*i)->GetTypeInfo();
 
-		std::cout << "\t\t Member name :  " << (*i)->GetName() << std::endl;
-		std::cout << "\t\t      offset :  " << (*i)->GetOffset() << std::endl;
-		std::cout << "\t\tserializable :  " << (*i)->GetSerializable() << std::endl;
+		std::cout << "\t\t    Member name :  " << (*i)->GetName() << std::endl;
+		std::cout << "\t\t         offset :  " << (*i)->GetOffset() << std::endl;
+		std::cout << "\t\t   serializable :  " << (*i)->GetSerializable() << std::endl;
 
-		std::cout << "\t\t   type name :  " << pTypeInfo->GetName() << std::endl;
-		std::cout << "\t\tis a pointer :  " << pTypeInfo->GetIsPointer() << std::endl;
+		std::cout << "\t\t      type name :  " << pTypeInfo->GetName() << std::endl;
+		std::cout << "\t\tis a basic type :  " << pTypeInfo->GetIsBasicType() << std::endl;
+		std::cout << "\t\tis a pointer    :  " << pTypeInfo->GetIsPointer() << std::endl;
 		std::cout << std::endl;
 	}
 	std::cout << "\t}" << std::endl;
@@ -62,7 +66,7 @@ int main()
 	std::cout << TYPEINFO_TYPE(std::string)->GetSize() << std::endl;
 	std::cout << std::endl;
 
-	TestObject obj(1);
+	TestObject obj(100, true);
 	PRINT_MEMBERS(TestObject);
 	std::cout << "TestObject Obj(1) members value :" << std::endl;
 	PrintMembersValue(obj);
@@ -80,8 +84,9 @@ int main()
 	if (TYPEINFO_TYPE(const char *) != TYPEINFO_OBJECT("Testing with a string literal!"))
 		std::cout << "ERROR2!";
 
-	std::cout << "Serialization :" << std::endl;
-	TYPEINFO_TYPE(TestObject)->GetSerialization()->Serialize(std::cout, &obj);
+	std::wcout << "Serialization :" << std::endl;
+	Introspection::TextSerialization txtSer(std::wcout);
+	TYPEINFO_TYPE(TestObject)->Serialize(txtSer, &obj);
 
 
 	getchar();

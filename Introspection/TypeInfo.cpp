@@ -7,17 +7,13 @@ namespace Introspection
 
 
 TypeInfo::TypeInfo()	
-	: _pSerialization(nullptr)
-	, _size(0)
-
+	: _size(0)
+	, _isPointer(false)
 {
 }
 
-
 TypeInfo::~TypeInfo()
 {
-	_pSerialization = nullptr;
-
 	for (auto p : _members)
 	{
 		delete p;
@@ -26,11 +22,14 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(const std::string& name, size_t size, bool isPointer)
+void TypeInfo::Init(const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer, SerializeFunc serialize)
 {
 	_name = name;
+	_wname = wname;
 	_size = size;
+	_isBasicType = isBasicType;
 	_isPointer = isPointer;
+	_serialize = serialize;
 	TypeInfoManager::Add(this);
 }
 
@@ -48,6 +47,10 @@ const MemberInfo * TypeInfo::GetMember(const std::string& name)
 	return it != _membersByName.end() ? it->second : nullptr;
 }
 
+bool TypeInfo::Serialize(ISerializer& serializer, const void* value) const
+{
+	return _serialize(serializer, value);
+}
 
 
 

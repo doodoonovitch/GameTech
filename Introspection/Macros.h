@@ -1,3 +1,4 @@
+#pragma once
 
 #define PASTE( _, __ )  _##__
 #define GENERATE_LINE( _ ) PASTE( GENERATED_TOKEN_, _ )
@@ -5,39 +6,37 @@
 #define NAME_GENERATOR( ) GENERATE_FILE( __LINE__ )
 
 
+#define DECLARE_TYPEINFO( TYPE ) \
+	static void AddMember( const std::string& name, const std::wstring& wname, uintptr_t offset, Introspection::TypeInfo *typeInfo, bool serializable ); \
+	static Introspection::RemoveQualifier<TYPE>::type *NullCast( void ); \
+	static void RegisterMembers( void )
+
 #define DEFINE_TYPEINFO( TYPE ) \
-	Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( #TYPE, sizeof( TYPE ) ); \
+	Introspection::ObjectTypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( #TYPE, L#TYPE, sizeof( TYPE ) ); \
 	Introspection::RemoveQualifier<TYPE>::type *TYPE::NullCast( void ) \
 	{ \
 		return reinterpret_cast<Introspection::RemoveQualifier<TYPE>::type *>(NULL); \
 	} \
-	void TYPE::AddMember( const std::string& name, size_t offset, Introspection::TypeInfo *typeInfo, bool serializable ) \
+	void TYPE::AddMember( const std::string& name, const std::wstring& wname, uintptr_t offset, Introspection::TypeInfo *typeInfo, bool serializable ) \
 	{ \
-		return Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type>::AddMember( name, offset, typeInfo, serializable ); \
+		return Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type>::AddMember( name, wname, offset, typeInfo, serializable ); \
 	} \
 	void Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type>::RegisterMembers( void ) \
 	{ \
+		printf("RegisterMembers for %s.\n", #TYPE);\
 		TYPE::RegisterMembers( ); \
 	} \
 	void TYPE::RegisterMembers( void )
 
-#define DECLARE_TYPEINFO( TYPE ) \
-	static void AddMember( const std::string& name, size_t offset, Introspection::TypeInfo *typeInfo, bool serializable ); \
-	static Introspection::RemoveQualifier<TYPE>::type *NullCast( void ); \
-	static void RegisterMembers( void )
-
-#define DEFINE_TYPEINFO_POD( TYPE ) \
-	Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( #TYPE, sizeof( TYPE ) ); \
+#define DEFINE_TYPEINFO_BASICTYPE( TYPE ) \
+	Introspection::BasicTypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( #TYPE, L#TYPE, sizeof( TYPE ) ); \
 	void Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type>::RegisterMembers( void ) \
 	{ \
-		Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type>::SetSerialization( Introspection::TextSerializatonPrim<Introspection::RemoveQualifier<TYPE>::type>::GetInstance() ); \
+		printf("RegisterMembers for %s.\n", #TYPE);\
 	}
 
 #define ADD_MEMBER( MEMBER, SERIALIZABLE ) \
-	AddMember( #MEMBER, (size_t)(&(NullCast( )->MEMBER)), TYPEINFO_OBJECT( NullCast( )->MEMBER ), SERIALIZABLE)
-
-#define SET_SERIALIZATION( TYPE, SERIALIZATION ) \
-	Introspection::TypeInfoCreator<Introspection::RemoveQualifier<TYPE>::type>::SetSerialization( SERIALIZATION )
+	AddMember( #MEMBER, L#MEMBER, (uintptr_t)(&(NullCast( )->MEMBER)), TYPEINFO_OBJECT( NullCast( )->MEMBER ), SERIALIZABLE)
 
 //
 // TYPEINFO_TYPE

@@ -18,6 +18,11 @@ public:
 		return GetInstance()->GetTypeInfoInstance(name);
 	}
 
+	static const TypeInfo* Get(const std::wstring& name)
+	{
+		return GetInstance()->GetTypeInfoInstance(name);
+	}
+
 	static void Add(const TypeInfo* typeInfo)
 	{
 		GetInstance()->AddTypeInfo(typeInfo);
@@ -35,12 +40,14 @@ private:
 	}
 
 	const TypeInfo* GetTypeInfoInstance(const std::string& name) const;
+	const TypeInfo* GetTypeInfoInstance(const std::wstring& name) const;
 	void AddTypeInfo(const TypeInfo* typeInfo);
 
 private:
 
 	
 	std::map<std::string, const TypeInfo*> _typeInfoByName;
+	std::map<std::wstring, const TypeInfo*> _typeInfoByWName;
 };
 
 

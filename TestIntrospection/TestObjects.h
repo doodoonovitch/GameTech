@@ -4,15 +4,16 @@
 class TestObject
 {
 public:
-	TestObject(int id);
+	TestObject(int id, bool a);
 	~TestObject();
 
 	DECLARE_TYPEINFO(TestObject);
 
 private:
-	int ID;
-	bool active;
-	double x;
+	int32_t _Id;
+	bool _active;
+	double _double;
+	wchar_t *_wstr;
 
 };
 
@@ -30,5 +31,5 @@ public:
 
 private:
 	const char *data;
-	unsigned len;
+	size_t len;
 };

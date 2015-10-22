@@ -1,5 +1,5 @@
-#ifndef INTROSPECTION_TEXTSERIALIZERPRIM_H
-#define INTROSPECTION_TEXTSERIALIZERPRIM_H
+#ifndef INTROSPECTION_TEXTSERIALIZATIONPRIM_H
+#define INTROSPECTION_TEXTSERIALIZATIONPRIM_H
 
 #pragma once
 
@@ -21,17 +21,17 @@ namespace  Introspection
 
 
 template<typename T>
-class TextSerializatonPrim : public ISerialization
+class TextSerializatonPrim 
 {
 public:
 
-	virtual bool Serialize(std::ostream& os, const void* object) const override
+	virtual bool Serialize(std::ostream& os, const void* object) const 
 	{
 		os << *reinterpret_cast<const T*>(object);
 		return true;
 	}
 
-	virtual bool Deserialize(std::istream& is, void* object) const override
+	virtual bool Deserialize(std::istream& is, void* object) const 
 	{
 		//T& v = *reinterpret_cast<T*>(object);
 		//is >> v;
@@ -53,4 +53,4 @@ private:
 
 
 } // namespace  Introspection
-#endif // INTROSPECTION_TEXTSERIALIZERPRIM_H
+#endif // INTROSPECTION_TEXTSERIALIZATIONPRIM_H
