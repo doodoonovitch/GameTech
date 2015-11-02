@@ -7,7 +7,8 @@ namespace Introspection
 
 
 TypeInfo::TypeInfo()	
-	: _serializeMember(nullptr)
+	: _parent(nullptr)
+	, _serializeMember(nullptr)
 	, _typeId(-1)
 	, _size(0)
 	, _isBasicType(false)
@@ -25,8 +26,16 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(TypeInfo::SerializeMemberFunc serializeMember, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
+void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeMemberFunc serializeMember, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
 {
+	//static bool firstTime = true;
+	//if (firstTime)
+	//{
+	//	#include "DefineBasicTypeInfo.inl"
+	//	firstTime = false;
+	//}
+	
+	_parent = parent;
 	_serializeMember = serializeMember;
 	_typeId = typeId;
 	_name = name;
@@ -59,6 +68,22 @@ bool TypeInfo::Serialize(ISerializer* serializer, const void* data) const
 	assert(_serializeMember != nullptr);
 
 	return _serializeMember(*serializer, data);
+}
+
+bool TypeInfo::IsKindOf(uint32_t typeId) const
+{
+	if (_typeId == typeId)
+	{
+		return true;
+	}
+
+	if (_parent != nullptr)
+	{
+		return _parent->IsKindOf(typeId);
+	}
+
+	return false;
+
 }
 
 

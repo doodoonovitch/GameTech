@@ -51,9 +51,9 @@ public:
 		return Select<_isBasicType, SerializeBasictType, SerializeObject>::Result::Serialize(serializer, data);
 	}
 
-	TypeInfoTraits(uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
+	TypeInfoTraits(const TypeInfo* parent, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
 	{
-		GetTypeInfo()->Init(SerializeMember, typeId, name, wname, size, _isBasicType, _isPointer);
+		GetTypeInfo()->Init(parent, SerializeMember, typeId, name, wname, size, _isBasicType, _isPointer);
 		RegisterMembers();
 	}
 

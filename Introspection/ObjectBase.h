@@ -32,7 +32,8 @@ public:
 
 	static const uint32_t _typeid = TL_Length<BasicTypeList>::value;
 
-	typedef Introspection::Typelist<ObjectBase, Introspection::NullType> ClassHierarchy;
+	typedef Introspection::NullType ParentClass;
+	//typedef Introspection::Typelist<ObjectBase, Introspection::NullType> ClassHierarchy;
 };
 
 } // namespace  Introspection

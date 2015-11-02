@@ -32,12 +32,12 @@ void TypeInfoManager::AddTypeInfo(const TypeInfo* typeInfo)
 {
 	assert(typeInfo != nullptr);
 
-	const std::string& typeName = typeInfo->GetName();
+	const std::string& typeName = typeInfo->GetTypeName();
 
 	assert(_typeInfoByName.find(typeName) == _typeInfoByName.end());
 
 	_typeInfoByName[typeName] = typeInfo;
-	_typeInfoByWName[typeInfo->GetWName()] = typeInfo;
+	_typeInfoByWName[typeInfo->GetTypeWName()] = typeInfo;
 }
 
 

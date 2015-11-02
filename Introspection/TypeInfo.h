@@ -17,13 +17,27 @@ public:
 
 public:
 
-	const std::string& GetName(void) const { return _name; }
-	const std::wstring& GetWName(void) const { return _wname; }
+	const std::string& GetTypeName(void) const { return _name; }
+	const std::wstring& GetTypeWName(void) const { return _wname; }
 
-	size_t GetSize(void) const { return _size; }
+	uint32_t GetTypeId() const
+	{
+		return _typeId;
+	}
+
+	size_t GetTypeSize(void) const { return _size; }
 
 	bool GetIsBasicType() const { return _isBasicType; }
 	bool GetIsPointer() const { return _isPointer; }
+
+	bool IsRoot() const { return _parent == nullptr; }
+	bool IsA(uint32_t typeId) const { return _typeId == typeId; }
+	bool IsA(const TypeInfo* typeInfo) const { return _typeId == typeInfo->_typeId; }
+
+	bool IsKindOf(uint32_t typeId) const;
+	bool IsKindOf(const TypeInfo* typeInfo) const { return IsKindOf(typeInfo->GetTypeId()); }
+
+	const TypeInfo* GetParent() const { return _parent; }
 
 	const MemberInfo* GetMember(const std::string& name);
 
@@ -33,18 +47,15 @@ public:
 	bool Serialize(ISerializer* serializer, const void* data) const;
 
 	void AddMember(MemberInfo* member);
-	void Init(SerializeMemberFunc serializeMember, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer);
+	void Init(const TypeInfo* parent, SerializeMemberFunc serializeMember, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer);
 
-	uint32_t GetTypeId() const
-	{
-		return _typeId;
-	}
 
 	TypeInfo();
 	virtual ~TypeInfo();
 
 private:
 
+	const TypeInfo* _parent;
 	SerializeMemberFunc _serializeMember;
 	uint32_t _typeId;
 	size_t _size;

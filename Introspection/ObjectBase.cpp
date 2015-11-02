@@ -14,7 +14,7 @@ ObjectBase::~ObjectBase()
 {
 }
 
-DEFINE_TYPEINFO(ObjectBase, ObjectBase::_typeid)
+DEFINE_TYPEINFO_OBJECTBASE(ObjectBase, ObjectBase::_typeid)
 {
 
 }

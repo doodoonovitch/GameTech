@@ -6,9 +6,10 @@
 #define NAME_GENERATOR( ) GENERATE_FILE( __LINE__ )
 
 
+//typedef Introspection::Typelist<Introspection::RemoveQualifier<TYPE>::type, Introspection::NullType> ClassHierarchy; \
+
 #define DECLARE_TYPEINFO( TYPE, PARENT ) \
-	typedef Introspection::RemoveQualifier<PARENT>::type ParentType; \
-	typedef Introspection::Typelist<Introspection::RemoveQualifier<TYPE>::type, Introspection::NullType> ClassHiearchy; \
+	typedef Introspection::RemoveQualifier<PARENT>::type ParentClass; \
 	virtual const Introspection::TypeInfo* GetTypeInfo() const override; \
 	virtual uint32_t GetTypeId() const override; \
 	virtual bool Serialize(Introspection::ISerializer& serializer) const override; \
@@ -17,13 +18,20 @@
 	static void RegisterMembers( void )
 
 #define DEFINE_TYPEINFO( TYPE, TYPEID ) \
+	Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE::ParentClass>::type>::GetTypeInfo(), (TYPEID), #TYPE, L#TYPE, sizeof( TYPE ) ); \
+	DEFINE_TYPEINFO_2( TYPE, TYPEID )
+
+#define DEFINE_TYPEINFO_OBJECTBASE( TYPE, TYPEID ) \
+	Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( nullptr, (TYPEID), #TYPE, L#TYPE, sizeof( TYPE ) ); \
+	DEFINE_TYPEINFO_2( TYPE, TYPEID )
+
+#define DEFINE_TYPEINFO_2( TYPE, TYPEID ) \
 	const Introspection::TypeInfo* TYPE::GetTypeInfo() const { return Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::GetTypeInfo(); } \
 	uint32_t TYPE::GetTypeId() const { return Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::GetTypeInfo()->GetTypeId(); } \
 	bool TYPE::Serialize(Introspection::ISerializer& serializer) const \
 	{ \
 		return Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::Serialize(serializer, *static_cast<const Introspection::RemoveQualifier<TYPE>::type*>(this)); \
 	} \
-	Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( (TYPEID), #TYPE, L#TYPE, sizeof( TYPE ) ); \
 	Introspection::RemoveQualifier<TYPE>::type* TYPE::NullCast( void ) \
 	{ \
 		return reinterpret_cast<Introspection::RemoveQualifier<TYPE>::type *>(NULL); \
@@ -40,7 +48,7 @@
 	void TYPE::RegisterMembers( void )
 
 #define DEFINE_TYPEINFO_BASICTYPE( TYPE ) \
-	Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( Introspection::TL_IndexOf<Introspection::BasicTypeList, TYPE>::value, #TYPE, L#TYPE, sizeof( TYPE ) ); \
+	Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( nullptr, Introspection::TL_IndexOf<Introspection::BasicTypeList, TYPE>::value, #TYPE, L#TYPE, sizeof( TYPE ) ); \
 	void Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::RegisterMembers( void ) \
 	{ \
 		printf("RegisterMembers for %s.\n", #TYPE);\

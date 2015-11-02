@@ -17,9 +17,9 @@ void PrintMembers(const char *type)
 	const Introspection::TypeInfo* ti = TYPEINFO_TYPE(TYPE);
 
 	std::cout << std::endl << "TypeInfo for " << type << " :" << std::endl;
-	std::cout << "\t       Class name : " << ti->GetName() << std::endl;
+	std::cout << "\t       Class name : " << ti->GetTypeName() << std::endl;
 	std::cout << "\t          Type Id : " << ti->GetTypeId() << std::endl;
-	std::cout << "\t             Size : " << ti->GetSize() << std::endl;
+	std::cout << "\t             Size : " << ti->GetTypeSize() << std::endl;
 	std::cout << "\t\tis a basic type :  " << ti->GetIsBasicType() << std::endl;
 
 	std::cout << "\t{" << std::endl;
@@ -31,7 +31,7 @@ void PrintMembers(const char *type)
 		std::cout << "\t\t         offset :  " << (*i)->GetOffset() << std::endl;
 		std::cout << "\t\t   serializable :  " << (*i)->GetSerializable() << std::endl;
 
-		std::cout << "\t\t      type name :  " << pTypeInfo->GetName() << std::endl;
+		std::cout << "\t\t      type name :  " << pTypeInfo->GetTypeName() << std::endl;
 		std::cout << "\t\t        type Id :  " << pTypeInfo->GetTypeId() << std::endl;
 		std::cout << "\t\tis a basic type :  " << pTypeInfo->GetIsBasicType() << std::endl;
 		std::cout << "\t\tis a pointer    :  " << pTypeInfo->GetIsPointer() << std::endl;
@@ -57,8 +57,8 @@ void PrintTypeInfo()
 {
 	const Introspection::TypeInfo* typeInfo = TYPEINFO_TYPE(T);
 	std::cout << "\tId: " << typeInfo->GetTypeId() << std::endl;
-	std::cout << "\tName: " << typeInfo->GetName() << std::endl;
-	std::cout << "\tSize: " << typeInfo->GetSize() << std::endl;
+	std::cout << "\tName: " << typeInfo->GetTypeName() << std::endl;
+	std::cout << "\tSize: " << typeInfo->GetTypeSize() << std::endl;
 	std::cout << std::endl;
 }
 
