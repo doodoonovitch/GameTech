@@ -12,33 +12,11 @@ class MemberInfo;
 
 
 template <typename T>
-class TypeInfoCreator
+class TypeInfoTraits
 {
-private:
-
-	struct SerializeBasictType
-	{
-		static bool Serialize(ISerializer& serializer, const T& value)
-		{
-			return serializer.SerializeBasicType(value);
-		}
-	};
-
-	struct SerializeObject
-	{
-		static bool Serialize(ISerializer& serializer, const T& obj)
-		{
-			return serializer.SerializeObject(obj);
-		}
-	};
-
-	static bool SerializeMember(ISerializer& serializer, const void* value)
-	{
-		return Serialize(serializer, *reinterpret_cast<const T*>(value));
-	}
-
 public:
-	typedef T type;
+
+	typedef T SelfClass;
 
 	static const bool _isBasicType = TL_Contains<BasicTypeList, T>::value;
 	static const bool _isPointer = std::is_pointer<T>::value;
@@ -73,10 +51,33 @@ public:
 		return Select<_isBasicType, SerializeBasictType, SerializeObject>::Result::Serialize(serializer, data);
 	}
 
-	TypeInfoCreator(uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
+	TypeInfoTraits(uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
 	{
 		GetTypeInfo()->Init(SerializeMember, typeId, name, wname, size, _isBasicType, _isPointer);
 		RegisterMembers();
+	}
+
+private:
+
+	struct SerializeBasictType
+	{
+		static bool Serialize(ISerializer& serializer, const T& value)
+		{
+			return serializer.SerializeBasicType(value);
+		}
+	};
+
+	struct SerializeObject
+	{
+		static bool Serialize(ISerializer& serializer, const T& obj)
+		{
+			return serializer.SerializeObject(obj);
+		}
+	};
+
+	static bool SerializeMember(ISerializer& serializer, const void* value)
+	{
+		return Serialize(serializer, *reinterpret_cast<const T*>(value));
 	}
 
 };

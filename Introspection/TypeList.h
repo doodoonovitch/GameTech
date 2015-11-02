@@ -416,6 +416,37 @@ public:
 };
 
 
+
+////////////////////////////////////////////////////////////////////////////////
+// class template IsSameType
+// Return true iff two given types are the same
+// Invocation: IsSameType<T, U>::value
+// where:
+// T and U are types
+// Result evaluates to true iff U == T (types equal)
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T, typename U>
+struct IsSameType
+{
+private:
+	template<typename>
+	struct In
+	{
+		enum { value = false };
+	};
+
+	template<>
+	struct In<T>
+	{
+		enum { value = true };
+	};
+
+public:
+	enum { value = In<U>::value };
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // class NullType
 // Used as a placeholder for "no type here"

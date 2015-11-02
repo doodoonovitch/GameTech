@@ -8,7 +8,7 @@
 #include "RemoveQualifier.h"
 #include "ISerializer.h"
 #include "TypeList.h"
-#include "TypeInfoCreator.h"
+#include "TypeInfoTraits.h"
 #include "TypeInfo.h"
 #include "MemberInfo.h"
 #include "ObjectBase.h"

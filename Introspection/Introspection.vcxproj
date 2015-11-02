@@ -144,7 +144,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TypeInfo.h" />
-    <ClInclude Include="TypeInfoCreator.h" />
+    <ClInclude Include="TypeInfoTraits.h" />
     <ClInclude Include="TypeInfoManager.h" />
     <ClInclude Include="TypeList.h" />
   </ItemGroup>

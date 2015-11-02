@@ -54,7 +54,7 @@
     <ClInclude Include="ObjectBase.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="TypeInfoCreator.h">
+    <ClInclude Include="TypeInfoTraits.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
