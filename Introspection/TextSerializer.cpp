@@ -27,26 +27,31 @@ void TextSerializerHelper::Padding(std::wostream& os)
 }
 
 
-bool TextSerialization::SerializeObject(const TypeInfo* typeInfo, const void* object)
+bool TextSerialization::SerializeObject(const ObjectBase& object)
 {
+	const TypeInfo* typeInfo = object.GetTypeInfo();
 	assert(typeInfo != nullptr);
 
 	TextSerializerHelper& helper = TextSerializerHelper::Get();
 	helper.Padding(_stream);
 	_stream << L"{" << std::endl;
 	helper.IncrementLevel();
+	bool first = true;
 	for (auto mi : typeInfo->GetMembers())
 	{
 		if (mi->GetSerializable())
 		{
+			if (!first)
+				_stream << ", ";
+			else
+				first = false;
 			auto miTypeInfo = mi->GetTypeInfo();
 			_stream << mi->GetWName() << L" : ";
-			miTypeInfo->Serialize(*this, mi->GetPtr(object));
-			_stream << std::endl;
+			object.SerializeMember(*this, mi);
 		}
 	}
 	helper.DecrementLevel();
-	_stream << "}" << std::endl;
+	_stream << std::endl << "}" << std::endl;
 
 	return true;
 }
@@ -167,14 +172,25 @@ bool TextSerialization::SerializeBasicType(const double * value)
 
 bool TextSerialization::SerializeBasicType(const std::string& value) 
 {
-	_stream << value.c_str();
+	_stream << "\"" << value.c_str() << "\"";
 	return true;
 }
 
 bool TextSerialization::SerializeBasicType(const std::wstring& value) 
 {
-	_stream << value.c_str();
+	_stream << "\"" << value.c_str() << "\"";
 	return true;
+}
+
+
+bool TextSerialization::SerializeBasicType(const std::string* value)
+{
+	return SerializeBasicType(*value);
+}
+
+bool TextSerialization::SerializeBasicType(const std::wstring* value)
+{
+	return SerializeBasicType(*value);
 }
 
 
@@ -185,7 +201,8 @@ bool TextSerialization::SerializeBasicType(char value)
 
 bool TextSerialization::SerializeBasicType(const char* value)
 {
-	return Serialize(value);
+	_stream << "\"" << value << "\"";
+	return true;
 }
 
 bool TextSerialization::SerializeBasicType(wchar_t value)
@@ -195,7 +212,8 @@ bool TextSerialization::SerializeBasicType(wchar_t value)
 
 bool TextSerialization::SerializeBasicType(const wchar_t* value)
 {
-	return Serialize(value);
+	_stream << "\"" << value << "\"";
+	return true;
 }
 
 

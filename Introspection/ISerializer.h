@@ -6,6 +6,7 @@
 namespace  Introspection
 {
 	class TypeInfo;
+	class ObjectBase;
 
 class ISerializer
 {
@@ -40,13 +41,16 @@ public:
 	virtual bool SerializeBasicType(const std::string& value) = 0;
 	virtual bool SerializeBasicType(const std::wstring& value) = 0;
 
+	virtual bool SerializeBasicType(const std::string* value) = 0;
+	virtual bool SerializeBasicType(const std::wstring* value) = 0;
+
 	virtual bool SerializeBasicType(char value) = 0;
 	virtual bool SerializeBasicType(const char* value) = 0;
 
 	virtual bool SerializeBasicType(wchar_t value) = 0;
 	virtual bool SerializeBasicType(const wchar_t* value) = 0;
 
-	virtual bool SerializeObject(const TypeInfo* typeInfo, const void* object) = 0;
+	virtual bool SerializeObject(const ObjectBase& object) = 0;
 
 	virtual ~ISerializer() {}
 

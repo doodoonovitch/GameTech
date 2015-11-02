@@ -18,6 +18,7 @@ void PrintMembers(const char *type)
 
 	std::cout << std::endl << "TypeInfo for " << type << " :" << std::endl;
 	std::cout << "\t       Class name : " << ti->GetName() << std::endl;
+	std::cout << "\t          Type Id : " << ti->GetTypeId() << std::endl;
 	std::cout << "\t             Size : " << ti->GetSize() << std::endl;
 	std::cout << "\t\tis a basic type :  " << ti->GetIsBasicType() << std::endl;
 
@@ -31,6 +32,7 @@ void PrintMembers(const char *type)
 		std::cout << "\t\t   serializable :  " << (*i)->GetSerializable() << std::endl;
 
 		std::cout << "\t\t      type name :  " << pTypeInfo->GetName() << std::endl;
+		std::cout << "\t\t        type Id :  " << pTypeInfo->GetTypeId() << std::endl;
 		std::cout << "\t\tis a basic type :  " << pTypeInfo->GetIsBasicType() << std::endl;
 		std::cout << "\t\tis a pointer    :  " << pTypeInfo->GetIsPointer() << std::endl;
 		std::cout << std::endl;
@@ -41,7 +43,7 @@ void PrintMembers(const char *type)
 template <typename T>
 void PrintMembersValue(const T& obj)
 {
-	const Introspection::TypeInfo* typeInfo = TYPEINFO_OBJECT(obj);
+	const Introspection::TypeInfo* typeInfo = obj.GetTypeInfo();
 	for (auto i = typeInfo->GetMembers().begin(); i != typeInfo->GetMembers().end(); ++i)
 	{
 		std::cout << "\t  Name :" << (*i)->GetName() << std::endl;
@@ -50,20 +52,53 @@ void PrintMembersValue(const T& obj)
 	}
 }
 
+template <typename T>
+void PrintTypeInfo()
+{
+	const Introspection::TypeInfo* typeInfo = TYPEINFO_TYPE(T);
+	std::cout << "\tId: " << typeInfo->GetTypeId() << std::endl;
+	std::cout << "\tName: " << typeInfo->GetName() << std::endl;
+	std::cout << "\tSize: " << typeInfo->GetSize() << std::endl;
+	std::cout << std::endl;
+}
 
 int main()
 {
-	std::cout << TYPEINFO_TYPE(int)->GetName() << std::endl;
-	std::cout << TYPEINFO_TYPE(int)->GetSize() << std::endl;
 	std::cout << std::endl;
-	std::cout << TYPEINFO_TYPE(float)->GetName() << std::endl;
-	std::cout << TYPEINFO_TYPE(float)->GetSize() << std::endl;
+	std::cout << "Basic types... :" << std::endl;
+	PrintTypeInfo<bool>();
+	PrintTypeInfo<char>();
+	PrintTypeInfo<wchar_t>();
+	PrintTypeInfo<float>();
+	PrintTypeInfo<double>();
+	PrintTypeInfo<int8_t>();
+	PrintTypeInfo<uint8_t>();
+	PrintTypeInfo<int16_t>();
+	PrintTypeInfo<uint16_t>();
+	PrintTypeInfo<int32_t>();
+	PrintTypeInfo<uint32_t>();
+	PrintTypeInfo<int64_t>();
+	PrintTypeInfo<uint64_t>();
+	PrintTypeInfo<std::string>();
+	PrintTypeInfo<std::wstring>();
 	std::cout << std::endl;
-	std::cout << TYPEINFO_TYPE(char *)->GetName() << std::endl;
-	std::cout << TYPEINFO_TYPE(char *)->GetSize() << std::endl;
-	std::cout << std::endl;
-	std::cout << TYPEINFO_TYPE(std::string)->GetName() << std::endl;
-	std::cout << TYPEINFO_TYPE(std::string)->GetSize() << std::endl;
+
+	std::cout << "Basic type pointers :" << std::endl;
+	PrintTypeInfo<bool*>();
+	PrintTypeInfo<char*>();
+	PrintTypeInfo<wchar_t*>();
+	PrintTypeInfo<float*>();
+	PrintTypeInfo<double*>();
+	PrintTypeInfo<int8_t*>();
+	PrintTypeInfo<uint8_t*>();
+	PrintTypeInfo<int16_t*>();
+	PrintTypeInfo<uint16_t*>();
+	PrintTypeInfo<int32_t*>();
+	PrintTypeInfo<uint32_t*>();
+	PrintTypeInfo<int64_t*>();
+	PrintTypeInfo<uint64_t*>();
+	PrintTypeInfo<std::string*>();
+	PrintTypeInfo<std::wstring*>();
 	std::cout << std::endl;
 
 	TestObject obj(100, true);
@@ -86,7 +121,7 @@ int main()
 
 	std::wcout << "Serialization :" << std::endl;
 	Introspection::TextSerialization txtSer(std::wcout);
-	TYPEINFO_TYPE(TestObject)->Serialize(txtSer, &obj);
+	obj.Serialize(txtSer);
 
 
 	getchar();

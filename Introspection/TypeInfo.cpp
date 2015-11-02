@@ -7,7 +7,10 @@ namespace Introspection
 
 
 TypeInfo::TypeInfo()	
-	: _size(0)
+	: _serializeMember(nullptr)
+	, _typeId(-1)
+	, _size(0)
+	, _isBasicType(false)
 	, _isPointer(false)
 {
 }
@@ -22,14 +25,15 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer, SerializeFunc serialize)
+void TypeInfo::Init(TypeInfo::SerializeMemberFunc serializeMember, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
 {
+	_serializeMember = serializeMember;
+	_typeId = typeId;
 	_name = name;
 	_wname = wname;
 	_size = size;
 	_isBasicType = isBasicType;
 	_isPointer = isPointer;
-	_serialize = serialize;
 	TypeInfoManager::Add(this);
 }
 
@@ -41,17 +45,21 @@ void TypeInfo::AddMember(MemberInfo *member)
 	_membersByName[member->GetName()] = member;
 }
 
-const MemberInfo * TypeInfo::GetMember(const std::string& name)
+const MemberInfo* TypeInfo::GetMember(const std::string& name)
 {
 	auto it = _membersByName.find(name);
 	return it != _membersByName.end() ? it->second : nullptr;
 }
 
-bool TypeInfo::Serialize(ISerializer& serializer, const void* value) const
-{
-	return _serialize(serializer, value);
-}
 
+bool TypeInfo::Serialize(ISerializer* serializer, const void* data) const
+{
+	assert(serializer != nullptr);
+	assert(data != nullptr);
+	assert(_serializeMember != nullptr);
+
+	return _serializeMember(*serializer, data);
+}
 
 
 } // namespace  Introspection

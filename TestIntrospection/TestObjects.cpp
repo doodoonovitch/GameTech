@@ -2,7 +2,7 @@
 #include "TestObjects.h"
 
 
-DEFINE_TYPEINFO(TestObject)
+DEFINE_TYPEINFO(TestObject, Introspection::ObjectBase::_typeid + 1)
 {
 	ADD_MEMBER(_Id, true);
 	ADD_MEMBER(_active, true);
@@ -26,7 +26,7 @@ TestObject::~TestObject()
 }
 
 
-DEFINE_TYPEINFO(S)
+DEFINE_TYPEINFO(S, Introspection::ObjectBase::_typeid + 2)
 {
 	ADD_MEMBER(data, true);
 	ADD_MEMBER(len, true);

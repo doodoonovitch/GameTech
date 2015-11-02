@@ -7,11 +7,14 @@
 #include "Macros.h"
 #include "RemoveQualifier.h"
 #include "ISerializer.h"
-#include "MemberInfo.h"
+#include "TypeList.h"
+#include "TypeInfoCreator.h"
 #include "TypeInfo.h"
+#include "MemberInfo.h"
+#include "ObjectBase.h"
 #include "TypeInfoManager.h"
-#include "TextSerializationPrim.h"
 #include "TextSerializer.h"
+
 
 
 #endif // INTROSPECTION_INTROSPECTION_H

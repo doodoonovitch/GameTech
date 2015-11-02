@@ -65,13 +65,17 @@ public:
 	virtual bool SerializeBasicType(const std::string& value) override;
 	virtual bool SerializeBasicType(const std::wstring& value) override;
 
+	virtual bool SerializeBasicType(const std::string* value) override;
+	virtual bool SerializeBasicType(const std::wstring* value) override;
+
+
 	virtual bool SerializeBasicType(char value) override;
 	virtual bool SerializeBasicType(const char* value) override;
 
 	virtual bool SerializeBasicType(wchar_t value) override;
 	virtual bool SerializeBasicType(const wchar_t* value) override;
 
-	virtual bool SerializeObject(const TypeInfo* typeInfo, const void* object) override;
+	virtual bool SerializeObject(const ObjectBase& object) override;
 
 protected:
 

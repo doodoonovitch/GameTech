@@ -1,13 +1,13 @@
 #pragma once
 
 
-class TestObject
+class TestObject : public Introspection::ObjectBase
 {
 public:
 	TestObject(int id, bool a);
 	~TestObject();
 
-	DECLARE_TYPEINFO(TestObject);
+	DECLARE_TYPEINFO(TestObject, Introspection::ObjectBase);
 
 private:
 	int32_t _Id;
@@ -17,7 +17,7 @@ private:
 
 };
 
-class S
+class S : public Introspection::ObjectBase
 {
 public:
 	S(const char *src);
@@ -27,7 +27,7 @@ public:
 	void Concat(const S& rhs);
 	friend std::ostream& operator<<(std::ostream &os, S &rhs);
 
-	DECLARE_TYPEINFO(S);
+	DECLARE_TYPEINFO(S, Introspection::ObjectBase);
 
 private:
 	const char *data;

@@ -39,9 +39,6 @@
     <ClInclude Include="TypeInfoManager.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="TextSerializationPrim.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="Macros.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -49,6 +46,15 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="TextSerializer.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeList.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectBase.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="TypeInfoCreator.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
@@ -66,6 +72,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="TextSerializer.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectBase.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

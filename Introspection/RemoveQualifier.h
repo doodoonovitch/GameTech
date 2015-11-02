@@ -13,7 +13,7 @@ struct isPointer
 };
 
 template<typename T>
-struct isPointer<T *> 
+struct isPointer<T*> 
 { 
 	static const bool value = true; 
 };
@@ -31,7 +31,7 @@ struct isArray
 };
 
 template<typename T>
-struct isArray<T *> 
+struct isArray<T*> 
 { 
 	static const bool value = false; 
 };
