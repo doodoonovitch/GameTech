@@ -8,32 +8,34 @@ namespace  Introspection
 
 
 
-
 class ObjectBase
 {
+	template<typename T>
+	friend class TypeInfoTraits;
+
 protected:
 	ObjectBase();
 	virtual ~ObjectBase();
 
 public:
 
-	virtual const TypeInfo* GetTypeInfo() const;
-	virtual uint32_t GetTypeId() const;
+	typedef TypeAndId<ObjectBase, TL_Length<BasicTypeList>::value> TypeNameAndId;
 
-	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, Introspection::TypeInfo* typeInfo, bool serializable); 
+	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, Introspection::TypeInfo* typeInfo, bool serializable);
 	static Introspection::RemoveQualifier<ObjectBase>::type* NullCast(void);
 	static void RegisterMembers(void);
 
-	virtual bool Serialize(ISerializer& serializer) const = 0;
+	virtual const TypeInfo* GetTypeInfo() const;
+	virtual uint32_t GetTypeId() const;
+	bool IsKindOf(const ObjectBase* parent) const;
+	virtual bool Serialize(ISerializer& serializer) const;
 
 	bool SerializeMember(ISerializer& serializer, const MemberInfo* mi) const;
 
 public:
 
-	static const uint32_t _typeid = TL_Length<BasicTypeList>::value;
-
 	typedef Introspection::NullType ParentClass;
-	//typedef Introspection::Typelist<ObjectBase, Introspection::NullType> ClassHierarchy;
+	typedef TYPELIST_1(ObjectBase) ClassHierarchy;
 };
 
 } // namespace  Introspection

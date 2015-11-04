@@ -9,6 +9,7 @@ namespace Introspection
 TypeInfo::TypeInfo()	
 	: _parent(nullptr)
 	, _serializeMember(nullptr)
+	, _create(nullptr)
 	, _typeId(-1)
 	, _size(0)
 	, _isBasicType(false)
@@ -26,7 +27,7 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeMemberFunc serializeMember, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
+void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeMemberFunc serializeMember, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
 {
 	//static bool firstTime = true;
 	//if (firstTime)
@@ -37,6 +38,7 @@ void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeMemberFunc serial
 	
 	_parent = parent;
 	_serializeMember = serializeMember;
+	_create = createFunc;
 	_typeId = typeId;
 	_name = name;
 	_wname = wname;
@@ -86,5 +88,12 @@ bool TypeInfo::IsKindOf(uint32_t typeId) const
 
 }
 
+void TypeInfo::Create(void*& var) const
+{
+	if (_create == nullptr)
+		var = nullptr;
+	else
+		_create(var);
+}
 
 } // namespace  Introspection

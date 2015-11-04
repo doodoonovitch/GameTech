@@ -33,7 +33,10 @@ class TextSerialization : public ISerializer
 {
 public:
 
-	TextSerialization(std::wostream& stream) : _stream(stream) {}
+	TextSerialization(std::wostream& stream) : _stream(stream) 
+	{
+		_stream << std::boolalpha;
+	}
 	~TextSerialization() {}
 
 	virtual bool SerializeBasicType(int8_t value) override;
@@ -86,12 +89,6 @@ protected:
 		return true;
 	}
 
-	template<>
-	bool Serialize<bool>(bool value)
-	{
-		_stream << (value ? "true" : "false");
-		return true;
-	}
 
 
 protected:

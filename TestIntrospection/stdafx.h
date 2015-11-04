@@ -18,6 +18,9 @@
 #include <map>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 #include <cassert>
+#include <limits>
+#include <codecvt>
 
 #include "Introspection.h"

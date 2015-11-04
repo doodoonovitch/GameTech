@@ -14,9 +14,14 @@ ObjectBase::~ObjectBase()
 {
 }
 
-DEFINE_TYPEINFO_OBJECTBASE(ObjectBase, ObjectBase::_typeid)
+DEFINE_TYPEINFO_OBJECTBASE(ObjectBase)
 {
 
+}
+
+bool ObjectBase::IsKindOf(const ObjectBase* parent) const
+{
+	return this->GetTypeInfo()->IsKindOf(parent->GetTypeId());
 }
 
 bool ObjectBase::SerializeMember(ISerializer& serializer, const MemberInfo* mi) const
@@ -24,6 +29,7 @@ bool ObjectBase::SerializeMember(ISerializer& serializer, const MemberInfo* mi) 
 	assert(mi != nullptr);
 	return mi->GetTypeInfo()->Serialize(&serializer, mi->GetPtr(this));
 }
+
 
 
 } // namespace  Introspection

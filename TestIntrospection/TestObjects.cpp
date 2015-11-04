@@ -2,31 +2,100 @@
 #include "TestObjects.h"
 
 
-DEFINE_TYPEINFO(TestObject, Introspection::ObjectBase::_typeid + 1)
+DEFINE_TYPEINFO(TestObject)
 {
-	ADD_MEMBER(_Id, true);
-	ADD_MEMBER(_active, true);
-	ADD_MEMBER(_double, true);
-	ADD_MEMBER(_wstr, true);
+	ADD_MEMBER(_boolMember, true);
+	ADD_MEMBER(_charMember, true);
+	ADD_MEMBER(_wchar_tMember, true);
+	ADD_MEMBER(_floatMember, true);
+	ADD_MEMBER(_doubleMember, true);
+
+	ADD_MEMBER(_int8_tMember, true);
+	ADD_MEMBER(_uint8_tMember, true);
+	ADD_MEMBER(_int16_tMember, true);
+	ADD_MEMBER(_uint16_tMember, true);
+	ADD_MEMBER(_int32_tMember, true);
+	ADD_MEMBER(_uint32_tMember, true);
+	ADD_MEMBER(_int64_tMember, true);
+	ADD_MEMBER(_uint64_tMember, true);
+
+	ADD_MEMBER(_stringMember, true);
+	ADD_MEMBER(_wstringMember, true);
 }
 
 
-TestObject::TestObject(int id, bool a)
-	: _Id(id)
-	, _active(a)
-	, _double(0.0)
-	, _wstr(_wcsdup(L"Test wchar_t string"))
+TestObject::TestObject()
 {
 }
 
 
 TestObject::~TestObject()
 {
-	delete [] _wstr;
 }
 
 
-DEFINE_TYPEINFO(S, Introspection::ObjectBase::_typeid + 2)
+
+//
+
+
+
+
+DEFINE_TYPEINFO(TestObject2)
+{
+	ADD_MEMBER(_ptr_boolMember, true);
+	ADD_MEMBER(_ptr_charMember, true);
+	ADD_MEMBER(_ptr_wchar_tMember, true);
+	ADD_MEMBER(_ptr_floatMember, true);
+	ADD_MEMBER(_ptr_doubleMember, true);
+
+	ADD_MEMBER(_ptr_int8_tMember, true);
+	ADD_MEMBER(_ptr_uint8_tMember, true);
+	ADD_MEMBER(_ptr_int16_tMember, true);
+	ADD_MEMBER(_ptr_uint16_tMember, true);
+	ADD_MEMBER(_ptr_int32_tMember, true);
+	ADD_MEMBER(_ptr_uint32_tMember, true);
+	ADD_MEMBER(_ptr_int64_tMember, true);
+	ADD_MEMBER(_ptr_uint64_tMember, true);
+
+	ADD_MEMBER(_ptr_stringMember, true);
+	ADD_MEMBER(_ptr_wstringMember, true);
+}
+
+
+
+TestObject2::TestObject2()
+{
+}
+
+
+TestObject2::~TestObject2()
+{
+	delete _ptr_boolMember;
+	delete _ptr_charMember;
+	delete _ptr_wchar_tMember;
+	delete _ptr_floatMember;
+	delete _ptr_doubleMember;
+
+	delete _ptr_int8_tMember;
+	delete _ptr_uint8_tMember;
+	delete _ptr_int16_tMember;
+	delete _ptr_uint16_tMember;
+	delete _ptr_int32_tMember;
+	delete _ptr_uint32_tMember;
+	delete _ptr_int64_tMember;
+	delete _ptr_uint64_tMember;
+
+	delete _ptr_stringMember;
+	delete _ptr_wstringMember;
+}
+
+
+
+
+//
+
+
+DEFINE_TYPEINFO(S)
 {
 	ADD_MEMBER(data, true);
 	ADD_MEMBER(len, true);

@@ -42,16 +42,16 @@ bool TextSerialization::SerializeObject(const ObjectBase& object)
 		if (mi->GetSerializable())
 		{
 			if (!first)
-				_stream << ", ";
+				_stream << L", ";
 			else
 				first = false;
 			auto miTypeInfo = mi->GetTypeInfo();
-			_stream << mi->GetWName() << L" : ";
+			_stream << mi->GetWName().c_str() << L" : ";
 			object.SerializeMember(*this, mi);
 		}
 	}
 	helper.DecrementLevel();
-	_stream << std::endl << "}" << std::endl;
+	_stream << std::endl << L"}" << std::endl;
 
 	return true;
 }
@@ -99,42 +99,42 @@ bool TextSerialization::SerializeBasicType(uint64_t value)
 
 bool TextSerialization::SerializeBasicType(const int8_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const int16_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const int32_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const int64_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const uint8_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const uint16_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const uint32_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const uint64_t * value)
 {
-	return Serialize(value);
+	return SerializeBasicType(*value);
 }
 
 
@@ -156,29 +156,29 @@ bool TextSerialization::SerializeBasicType(double value)
 
 bool TextSerialization::SerializeBasicType(const bool * value)
 {
-	return Serialize(*value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const float * value)
 {
-	return Serialize(*value);
+	return SerializeBasicType(*value);
 }
 
 bool TextSerialization::SerializeBasicType(const double * value)
 {
-	return Serialize(*value);
+	return SerializeBasicType(*value);
 }
 
 
 bool TextSerialization::SerializeBasicType(const std::string& value) 
 {
-	_stream << "\"" << value.c_str() << "\"";
+	_stream << L"\"" << value.c_str() << L"\"";
 	return true;
 }
 
 bool TextSerialization::SerializeBasicType(const std::wstring& value) 
 {
-	_stream << "\"" << value.c_str() << "\"";
+	_stream << L"\"" << value.c_str() << L"\"";
 	return true;
 }
 
@@ -201,7 +201,7 @@ bool TextSerialization::SerializeBasicType(char value)
 
 bool TextSerialization::SerializeBasicType(const char* value)
 {
-	_stream << "\"" << value << "\"";
+	return SerializeBasicType(*value);
 	return true;
 }
 
@@ -212,7 +212,7 @@ bool TextSerialization::SerializeBasicType(wchar_t value)
 
 bool TextSerialization::SerializeBasicType(const wchar_t* value)
 {
-	_stream << "\"" << value << "\"";
+	return SerializeBasicType(*value);
 	return true;
 }
 

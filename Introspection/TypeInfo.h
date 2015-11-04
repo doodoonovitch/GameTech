@@ -9,11 +9,15 @@ namespace  Introspection
 
 class TypeInfo
 {
+	template<typename T>
+	friend class TypeInfoTraits;
+
 public:
 
 	typedef std::map<std::string, MemberInfo*> MemberMap;
 	typedef std::vector<MemberInfo*> MemberList;
 	typedef bool (*SerializeMemberFunc)(ISerializer& serializer, const void* value);
+	typedef void(*CreateFunc)(void*& var);
 
 public:
 
@@ -46,9 +50,12 @@ public:
 
 	bool Serialize(ISerializer* serializer, const void* data) const;
 
-	void AddMember(MemberInfo* member);
-	void Init(const TypeInfo* parent, SerializeMemberFunc serializeMember, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer);
+	void Create(void*& var) const;
 
+protected:
+
+	void AddMember(MemberInfo* member);
+	void Init(const TypeInfo* parent, SerializeMemberFunc serializeMember, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer);
 
 	TypeInfo();
 	virtual ~TypeInfo();
@@ -57,6 +64,7 @@ private:
 
 	const TypeInfo* _parent;
 	SerializeMemberFunc _serializeMember;
+	CreateFunc _create;
 	uint32_t _typeId;
 	size_t _size;
 	std::string _name;

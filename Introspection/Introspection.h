@@ -3,6 +3,16 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
+#include <ostream>
+#include <sstream>
+#include <cassert>
+#include <limits>
+#include <codecvt>
+
 
 #include "Macros.h"
 #include "RemoveQualifier.h"

@@ -11,15 +11,46 @@ class TypeInfo;
 class MemberInfo;
 
 
+template<typename TType, uint32_t TId>
+struct TypeAndId
+{
+	typedef TType Type;
+	enum { TypeId = TId };
+};
+
+
 template <typename T>
 class TypeInfoTraits
 {
+
+	struct BasicTypeHierarchy
+	{
+		typedef NullType ClassHierarchy;
+	};
+
+	template<typename T>
+	struct ObjectTypeHierarchy
+	{
+		typedef typename T::ClassHierarchy ClassHierarchy;
+	};
+
 public:
 
-	typedef T SelfClass;
+	enum
+	{
+		IsBasicType = TL_Contains<BasicTypeList, T>::value,
+		IsPointer = std::is_pointer<T>::value
+	};
 
-	static const bool _isBasicType = TL_Contains<BasicTypeList, T>::value;
-	static const bool _isPointer = std::is_pointer<T>::value;
+	typedef T SelfClass;
+	typedef typename Select<TypeInfoTraits<T>::IsBasicType, BasicTypeHierarchy, ObjectTypeHierarchy<T>>::Result::ClassHierarchy ClassHierarchy;
+
+	// T is a kind of U
+	template<typename U>
+	static bool IsKindOf()
+	{
+		return TL_Contains<ClassHierarchy, U>::value;
+	}
 
 	static void AddMember(const std::string& memberName, const std::wstring& wMemberName, size_t memberOffset, TypeInfo* typeinfo, bool serializable)
 	{
@@ -48,16 +79,17 @@ public:
 
 	static bool Serialize(ISerializer& serializer, const T& data)
 	{
-		return Select<_isBasicType, SerializeBasictType, SerializeObject>::Result::Serialize(serializer, data);
+		return Select<IsBasicType, SerializeBasictType, SerializeObject>::Result::Serialize(serializer, data);
 	}
 
 	TypeInfoTraits(const TypeInfo* parent, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
 	{
-		GetTypeInfo()->Init(parent, SerializeMember, typeId, name, wname, size, _isBasicType, _isPointer);
+		GetTypeInfo()->Init(parent, SerializeMember, CreateMember, typeId, name, wname, size, IsBasicType, IsPointer);
 		RegisterMembers();
 	}
 
 private:
+
 
 	struct SerializeBasictType
 	{
@@ -78,6 +110,11 @@ private:
 	static bool SerializeMember(ISerializer& serializer, const void* value)
 	{
 		return Serialize(serializer, *reinterpret_cast<const T*>(value));
+	}
+
+	static void CreateMember(void*& var)
+	{
+		var = new T();
 	}
 
 };
