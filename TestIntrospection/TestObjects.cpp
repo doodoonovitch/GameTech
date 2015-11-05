@@ -42,6 +42,8 @@ TestObject::~TestObject()
 
 DEFINE_TYPEINFO(TestObject2)
 {
+	ADD_MEMBER(_ptr_S, true);
+
 	ADD_MEMBER(_ptr_boolMember, true);
 	ADD_MEMBER(_ptr_charMember, true);
 	ADD_MEMBER(_ptr_wchar_tMember, true);
@@ -129,4 +131,32 @@ std::ostream& operator<<(std::ostream &os, S &rhs)
 {
 	os << rhs.data;
 	return os;
+}
+
+DEFINE_TYPEINFO(TestDerivedObject::A)
+{
+	ADD_MEMBER(_object_A_member, true);
+}
+
+DEFINE_TYPEINFO(TestDerivedObject::B)
+{
+	ADD_MEMBER(_object_B_member, true);
+}
+
+DEFINE_TYPEINFO(TestDerivedObject::C)
+{
+	ADD_MEMBER(_object_C_member, true);
+}
+
+
+DEFINE_TYPEINFO(X)
+{
+	ADD_MEMBER(_object_X_member, true);
+}
+
+DEFINE_TYPEINFO(Y)
+{
+	ADD_MEMBER(_object_X, true);
+	ADD_MEMBER(_ptr_A, true);
+	ADD_MEMBER(_object_B, true);
 }

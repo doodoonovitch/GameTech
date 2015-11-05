@@ -11,63 +11,60 @@
 //#define PRINT_MEMBERS( TYPE ) \
 //  PrintMembers<TYPE>( #TYPE )
 
-//template <typename TYPE>
-void PrintMembers(const char *title, const Introspection::ObjectBase* obj)
+void PrintMembers(const Introspection::TypeInfo* ti)
 {
-	const Introspection::TypeInfo* ti = obj->GetTypeInfo(); //TYPEINFO_TYPE(TYPE);
+	std::wcout << std::boolalpha << std::endl ;
+	std::wcout << L"Type : '" << ti->GetTypeWName() << L"' ..." << std::endl;
+	std::wcout << L"\tType Id         : " << ti->GetTypeId() << std::endl;
+	std::wcout << L"\tSize            : " << ti->GetTypeSize() << std::endl;
+	std::wcout << L"\tis a basic type : " << ti->GetIsBasicType() << std::endl;
 
-	std::cout << std::endl << title << " :" << std::endl;
-	std::cout << "\t       Class name : " << ti->GetTypeName() << std::endl;
-	std::cout << "\t          Type Id : " << ti->GetTypeId() << std::endl;
-	std::cout << "\t             Size : " << ti->GetTypeSize() << std::endl;
-	std::cout << "\t\tis a basic type :  " << ti->GetIsBasicType() << std::endl;
-
-	std::cout << "\t{" << std::endl;
-	for (auto i = ti->GetMembers().begin(); i != ti->GetMembers().end(); ++i)
+	std::wcout << L"\tMembers ..." << std::endl;
+	for (auto mi = ti->GetMembers().begin(); mi != ti->GetMembers().end(); ++mi)
 	{
-		const Introspection::TypeInfo* pTypeInfo = (*i)->GetTypeInfo();
+		const Introspection::TypeInfo* pTypeInfo = (*mi)->GetTypeInfo();
 
-		std::cout << "\t\t    Member name :  " << (*i)->GetName() << std::endl;
-		std::cout << "\t\t         offset :  " << (*i)->GetOffset() << std::endl;
-		std::cout << "\t\t   serializable :  " << (*i)->GetSerializable() << std::endl;
+		std::wcout << L"\t\t member name     : '" << (*mi)->GetWName() << L"' ..." << std::endl;
+		std::wcout << L"\t\t offset          : " << (*mi)->GetOffset() << std::endl;
+		std::wcout << L"\t\t serializable    : " << (*mi)->GetSerializable() << std::endl;
+		std::wcout << L"\t\t is a pointer    : " << (*mi)->GetIsPointer() << std::endl;
 
-		std::cout << "\t\t      type name :  " << pTypeInfo->GetTypeName() << std::endl;
-		std::cout << "\t\t        type Id :  " << pTypeInfo->GetTypeId() << std::endl;
-		std::cout << "\t\tis a basic type :  " << pTypeInfo->GetIsBasicType() << std::endl;
-		std::cout << "\t\tis a pointer    :  " << pTypeInfo->GetIsPointer() << std::endl;
-		std::cout << std::endl;
+		std::wcout << L"\t\t type name       : " << pTypeInfo->GetTypeWName() << std::endl;
+		std::wcout << L"\t\t type Id         : " << pTypeInfo->GetTypeId() << std::endl;
+		std::wcout << L"\t\t is a basic type : " << pTypeInfo->GetIsBasicType() << std::endl;
+		std::wcout << std::endl;
 	}
-	std::cout << "\t}" << std::endl;
 }
 
-template <typename T>
-void PrintMembersValue(const T& obj)
+template <typename TYPE>
+void PrintMembers()
 {
-	const Introspection::TypeInfo* typeInfo = obj.GetTypeInfo();
-	for (auto i = typeInfo->GetMembers().begin(); i != typeInfo->GetMembers().end(); ++i)
-	{
-		std::cout << "\t  Name :" << (*i)->GetName() << std::endl;
-		//std::cout << "\t Value :" << *(*i)->GetPtr<TYPEOF(obj)>(&obj) << std::endl;
-		std::cout << std::endl;
-	}
+	const Introspection::TypeInfo* ti = TYPEINFO_TYPE(TYPE);
+	PrintMembers(ti);
+}
+
+void PrintMembers(const Introspection::ObjectBase* obj)
+{
+	const Introspection::TypeInfo* ti = obj->GetTypeInfo(); //TYPEINFO_TYPE(TYPE);
+	PrintMembers(ti);
 }
 
 template <typename T>
 void PrintTypeInfo()
 {
 	const Introspection::TypeInfo* typeInfo = TYPEINFO_TYPE(T);
-	std::cout << "\tId: " << typeInfo->GetTypeId() << std::endl;
-	std::cout << "\tName: " << typeInfo->GetTypeName() << std::endl;
-	std::cout << "\tSize: " << typeInfo->GetTypeSize() << std::endl;
-	std::cout << "\tBasic type: " << typeInfo->GetIsBasicType() << std::endl;
-	std::cout << "\tPointer: " << typeInfo->GetIsPointer() << std::endl;
-	std::cout << std::endl;
+	std::wcout << L"Name: '" << typeInfo->GetTypeWName() << L"'" << std::endl;
+	std::wcout << L"\tId: " << typeInfo->GetTypeId() << std::endl;
+	std::wcout << L"\tSize: " << typeInfo->GetTypeSize() << std::endl;
+	std::wcout << L"\tBasic type: " << typeInfo->GetIsBasicType() << std::endl;
+	std::wcout << L"\tPointer: " << typeInfo->GetIsPointer() << std::endl;
+	std::wcout << std::endl;
 }
 
 int main()
 {
-	std::cout << std::endl;
-	std::cout << "Basic types... :" << std::endl;
+	std::wcout << std::boolalpha << std::endl;
+	std::wcout << L"Basic types... :" << std::endl;
 	PrintTypeInfo<bool>();
 	PrintTypeInfo<char>();
 	PrintTypeInfo<wchar_t>();
@@ -83,9 +80,9 @@ int main()
 	PrintTypeInfo<uint64_t>();
 	PrintTypeInfo<std::string>();
 	PrintTypeInfo<std::wstring>();
-	std::cout << std::endl;
+	std::wcout << std::endl;
 
-	std::cout << "Basic type pointers :" << std::endl;
+	std::wcout << L"Basic type pointers :" << std::endl;
 	PrintTypeInfo<bool*>();
 	PrintTypeInfo<char*>();
 	PrintTypeInfo<wchar_t*>();
@@ -101,46 +98,56 @@ int main()
 	PrintTypeInfo<uint64_t*>();
 	PrintTypeInfo<std::string*>();
 	PrintTypeInfo<std::wstring*>();
-	std::cout << std::endl;
+	std::wcout << std::endl;
+
+	std::wcout << L"Others types :" << std::endl;
+	PrintTypeInfo<TestDerivedObject::A>();
+	PrintTypeInfo<TestDerivedObject::B>();
+	PrintTypeInfo<TestDerivedObject::C>();
+	PrintTypeInfo<X>();
+	PrintTypeInfo<Y>();
+	std::wcout << std::endl;
 
 	TestObject obj1;
-	PrintMembers("Type of obj1 :", &obj1);
-	//std::cout << "TestObject Obj(1) members value :" << std::endl;
-	//PrintMembersValue(obj);
+	PrintMembers(&obj1);
 
 	TestObject2 obj2;
-	PrintMembers("Type of obj2 :", &obj2);
-	//std::cout << "TestObject Obj(1) members value :" << std::endl;
-	//PrintMembersValue(obj);
-
+	PrintMembers(&obj2);
 
 	S sObject("String within the S wrapper!");
 	std::cout << std::endl << sObject << std::endl;
+	PrintMembers(&sObject);
 
-	//PrintMembers(L"Type of sObject :", &sObject);
+	PrintMembers<TestDerivedObject::A>();
+	PrintMembers<TestDerivedObject::B>();
+	PrintMembers<TestDerivedObject::C>();
 
-	const Introspection::TypeInfo *typeInfo = TYPEINFO_OBJECT("asdf");
-	if (typeInfo == nullptr || typeInfo != TYPEINFO_TYPE(const char *))
-		std::cout << "ERROR!";
+	PrintMembers<X>();
+	PrintMembers<Y>();
 
-	// Ensure string literal typeInfo is supported
-	if (TYPEINFO_TYPE(const char *) != TYPEINFO_OBJECT("Testing with a string literal!"))
-		std::cout << "ERROR2!";
+
+	//const Introspection::TypeInfo *typeInfo = TYPEINFO_OBJECT("asdf");
+	//if (typeInfo == nullptr || typeInfo != TYPEINFO_TYPE(const char *))
+	//	std::cout << "ERROR!";
+
+	//// Ensure string literal typeInfo is supported
+	//if (TYPEINFO_TYPE(const char *) != TYPEINFO_OBJECT("Testing with a string literal!"))
+	//	std::cout << "ERROR2!";
 
 	std::wostringstream strstream;
 	Introspection::TextSerialization txtSer(strstream);
 
-	strstream << "Serialization obj1:" << std::endl;
+	strstream << L"Serialization obj1:" << std::endl;
 	obj1.Serialize(txtSer);
 
-	strstream << "Serialization obj2:" << std::endl;
+	strstream << L"Serialization obj2:" << std::endl;
 	obj2.Serialize(txtSer);
 
 	std::wcout << std::endl << strstream.str();
 
-	std::wcout << std::endl << "obj2 IsKindOf(obj1) : " << obj2.IsKindOf(&obj1);
-	std::wcout << std::endl << "obj1 IsKindOf(obj2) : " << obj1.IsKindOf(&obj2);
-	std::wcout << std::endl << "obj2 IsKindOf(S) : " << obj2.IsKindOf(&sObject);
+	std::wcout << std::endl << L"obj2 IsKindOf(obj1) : " << obj2.IsKindOf(&obj1);
+	std::wcout << std::endl << L"obj1 IsKindOf(obj2) : " << obj1.IsKindOf(&obj2);
+	std::wcout << std::endl << L"obj2 IsKindOf(S) : " << obj2.IsKindOf(&sObject);
 
 	getchar();
 

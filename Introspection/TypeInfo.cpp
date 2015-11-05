@@ -8,7 +8,7 @@ namespace Introspection
 
 TypeInfo::TypeInfo()	
 	: _parent(nullptr)
-	, _serializeMember(nullptr)
+	, _serialize(nullptr)
 	, _create(nullptr)
 	, _typeId(-1)
 	, _size(0)
@@ -27,7 +27,7 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeMemberFunc serializeMember, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
+void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
 {
 	//static bool firstTime = true;
 	//if (firstTime)
@@ -37,7 +37,7 @@ void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeMemberFunc serial
 	//}
 	
 	_parent = parent;
-	_serializeMember = serializeMember;
+	_serialize = serialize;
 	_create = createFunc;
 	_typeId = typeId;
 	_name = name;
@@ -63,14 +63,15 @@ const MemberInfo* TypeInfo::GetMember(const std::string& name)
 }
 
 
-bool TypeInfo::Serialize(ISerializer* serializer, const void* data) const
+bool TypeInfo::Serialize(ISerializer* serializer, const void* data, bool isPointer) const
 {
 	assert(serializer != nullptr);
 	assert(data != nullptr);
-	assert(_serializeMember != nullptr);
+	assert(_serialize != nullptr);
 
-	return _serializeMember(*serializer, data);
+	return _serialize(*serializer, data, isPointer);
 }
+
 
 bool TypeInfo::IsKindOf(uint32_t typeId) const
 {

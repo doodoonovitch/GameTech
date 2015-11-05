@@ -10,45 +10,46 @@
 //virtual bool IsKindOf(const ObjectBase* parent) const override { return TYPEINFO_TYPE(TYPE)->IsKindOf(parent->GetTypeId()); } 
 #define DECLARE_TYPEINFO( TYPE, TYPEID, PARENT ) \
 	template<typename T> friend class TypeInfoTraits; \
-	typedef Introspection::TypeAndId<Introspection::RemoveQualifier<TYPE>::type, (TYPEID)> TypeNameAndId; \
-	typedef Introspection::RemoveQualifier<PARENT>::type ParentClass; \
-	typedef Introspection::Typelist<Introspection::RemoveQualifier<TYPE>::type, PARENT::ClassHierarchy> ClassHierarchy; \
-	virtual const Introspection::TypeInfo* GetTypeInfo() const override; \
+	typedef ::Introspection::TypeInfoTraits<TYPE> SelfTypeTraits; \
+	typedef ::Introspection::TypeAndId<TYPE, (TYPEID)> TypeNameAndId; \
+	typedef PARENT ParentClass; \
+	typedef ::Introspection::Typelist<TYPE, PARENT::ClassHierarchy> ClassHierarchy; \
+	virtual const ::Introspection::TypeInfo* GetTypeInfo() const override; \
 	virtual uint32_t GetTypeId() const override; \
-	virtual bool Serialize(Introspection::ISerializer& serializer) const override; \
-	static void AddMember( const std::string& name, const std::wstring& wname, uintptr_t offset, Introspection::TypeInfo *typeInfo, bool serializable ); \
-	static Introspection::RemoveQualifier<TYPE>::type *NullCast( void ); \
+	virtual bool Serialize(::Introspection::ISerializer& serializer) const override; \
+	static void AddMember( const ::std::string& name, const ::std::wstring& wname, uintptr_t offset, const ::Introspection::TypeInfo *typeInfo, bool isPointer, bool serializable ); \
+	static TYPE *NullCast( void ); \
 	static void RegisterMembers( void )
 
 #define DEFINE_TYPEINFO( TYPE ) \
-	DEFINE_TYPEINFO_2( TYPE, TYPE::TypeNameAndId::TypeId, Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE::ParentClass>::type>::GetTypeInfo() )
+	DEFINE_TYPEINFO_2( TYPE, TYPE::TypeNameAndId::TypeId, TYPE::ParentClass::SelfTypeTraits::GetTypeInfo() )
 
 #define DEFINE_TYPEINFO_OBJECTBASE( TYPE ) \
 	DEFINE_TYPEINFO_2( TYPE, TYPE::TypeNameAndId::TypeId, nullptr )
 
 #define DEFINE_TYPEINFO_2( TYPE, TYPEID, PARENT_TYPE_INFO ) \
-	Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( PARENT_TYPE_INFO, (TYPEID), #TYPE, L#TYPE, sizeof( TYPE ) ); \
-	const Introspection::TypeInfo* TYPE::GetTypeInfo() const \
+	TYPE::SelfTypeTraits NAME_GENERATOR( )( PARENT_TYPE_INFO, (TYPEID), #TYPE, L#TYPE, sizeof( TYPE ) ); \
+	const ::Introspection::TypeInfo* TYPE::GetTypeInfo() const \
 	{ \
-		return Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::GetTypeInfo(); \
+		return TYPE::SelfTypeTraits::GetTypeInfo(); \
 	} \
 	uint32_t TYPE::GetTypeId() const \
 	{ \
 		return TYPE::TypeNameAndId::TypeId; \
 	} \
-	bool TYPE::Serialize(Introspection::ISerializer& serializer) const \
+	bool TYPE::Serialize(::Introspection::ISerializer& serializer) const \
 	{ \
-		return Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::Serialize(serializer, *this); \
+		return TYPE::SelfTypeTraits::Serialize(serializer, *this); \
 	} \
-	Introspection::RemoveQualifier<TYPE>::type* TYPE::NullCast( void ) \
+	TYPE* TYPE::NullCast( void ) \
 	{ \
-		return reinterpret_cast<Introspection::RemoveQualifier<TYPE>::type *>(NULL); \
+		return reinterpret_cast<TYPE*>(NULL); \
 	} \
-	void TYPE::AddMember( const std::string& name, const std::wstring& wname, uintptr_t offset, Introspection::TypeInfo *typeInfo, bool serializable ) \
+	void TYPE::AddMember( const ::std::string& name, const ::std::wstring& wname, uintptr_t offset, const ::Introspection::TypeInfo *typeInfo, bool isPointer, bool serializable ) \
 	{ \
-		return Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::AddMember( name, wname, offset, typeInfo, serializable ); \
+		return TYPE::SelfTypeTraits::AddMember( name, wname, offset, typeInfo, isPointer, serializable ); \
 	} \
-	void Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::RegisterMembers( void ) \
+	void ::Introspection::TypeInfoTraits<TYPE>::RegisterMembers( void ) \
 	{ \
 		printf("RegisterMembers for %s.\n", #TYPE);\
 		TYPE::RegisterMembers( ); \
@@ -56,37 +57,40 @@
 	void TYPE::RegisterMembers( void )
 
 #define DEFINE_TYPEINFO_BASICTYPE( TYPE ) \
-	Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( nullptr, Introspection::TL_IndexOf<Introspection::BasicTypeList, TYPE>::value, #TYPE, L#TYPE, sizeof( TYPE ) ); \
-	void Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::RegisterMembers( void ) \
+	::Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type> NAME_GENERATOR( )( nullptr, ::Introspection::TL_IndexOf<::Introspection::BasicTypeList, TYPE>::value, #TYPE, L#TYPE, sizeof( TYPE ) ); \
+	void ::Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::RegisterMembers( void ) \
 	{ \
 		printf("RegisterMembers for %s.\n", #TYPE);\
 	}
 
 #define ADD_MEMBER( MEMBER, SERIALIZABLE ) \
-	AddMember( #MEMBER, L#MEMBER, (uintptr_t)(&(NullCast( )->MEMBER)), TYPEINFO_OBJECT( NullCast( )->MEMBER ), SERIALIZABLE)
+	ADD_MEMBER2( MEMBER, ::Introspection::RemoveQualifier<decltype( NullCast( )->MEMBER )>::type, SERIALIZABLE )
+
+#define ADD_MEMBER2( MEMBER, MEMBERTYPE, SERIALIZABLE ) \
+	AddMember( #MEMBER, L#MEMBER, (uintptr_t)(&(NullCast( )->MEMBER)), TYPEINFO_TYPE(::std::remove_pointer<MEMBERTYPE>::type), ::std::is_pointer<MEMBERTYPE>::value, SERIALIZABLE)
 
 //
 // TYPEINFO_TYPE
 // Purpose: Retrieves the proper TypeInfo instance of an object by type.
 //
-#define TYPEINFO_TYPE( TYPE ) (Introspection::TypeInfoTraits<Introspection::RemoveQualifier<TYPE>::type>::GetTypeInfo( ))
+#define TYPEINFO_TYPE( TYPE ) (::Introspection::TypeInfoTraits<std::remove_pointer<::Introspection::RemoveQualifier<TYPE>::type>::type>::GetTypeInfo( ))
 
 //
 // TYPEINFO_OBJECT
 // Purpose: Retrieves the proper TypeInfo instance of an object by an object's type.
 //
-#define TYPEINFO_OBJECT( OBJECT ) (Introspection::TypeInfoTraits<Introspection::RemoveQualifier<decltype( OBJECT )>::type>::GetTypeInfo( ))
+#define TYPEINFO_OBJECT( OBJECT ) (::Introspection::TypeInfoTraits<::std::remove_pointer<::Introspection::RemoveQualifier<decltype( OBJECT )>::type>::type>::GetTypeInfo( ))
 
 //
 // TYPEINFO_STR
 // Purpose : Finds a TypeInfo instance by string name
 //
-#define TYPEINFO_STR( STRING ) (Introspection::TypeInfoManager::GetTypeInfo( STRING ))
+#define TYPEINFO_STR( STRING ) (::Introspection::TypeInfoManager::GetTypeInfo( STRING ))
 
 //
 // TYPEOF
 // Purpose : Get the type of an object
 //
-#define TYPEOF(OBJECT) (Introspection::TypeInfoTraits<Introspection::RemoveQualifier<decltype( OBJECT )>::type>::type)
+#define TYPEOF(OBJECT) (::Introspection::TypeInfoTraits<::Introspection::RemoveQualifier<decltype( OBJECT )>::type>::type)
 
 

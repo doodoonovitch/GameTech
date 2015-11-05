@@ -100,24 +100,6 @@ struct RemoveQualifier<const T *>
 	typedef typename RemoveQualifier<T *>::type type;
 };
 
-template <typename T>
-struct RemovePointerQualifier
-{
-	typedef T type;
-};
-
-template <typename T>
-struct RemovePointerQualifier<const T *>
-{
-	typedef typename RemovePointerQualifier<T>::type type;
-};
-
-template <typename T>
-struct RemovePointerQualifier<T *>
-{
-	typedef typename RemovePointerQualifier<T>::type type;
-};
-
 // Array literal overloads
 ARRAY_OVERLOAD(); ARRAY_OVERLOAD(); ARRAY_OVERLOAD(); ARRAY_OVERLOAD();
 ARRAY_OVERLOAD(); ARRAY_OVERLOAD(); ARRAY_OVERLOAD(); ARRAY_OVERLOAD();

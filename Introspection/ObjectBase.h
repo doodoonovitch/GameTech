@@ -20,8 +20,11 @@ protected:
 public:
 
 	typedef TypeAndId<ObjectBase, TL_Length<BasicTypeList>::value> TypeNameAndId;
+	typedef TypeInfoTraits<ObjectBase> SelfTypeTraits;
 
-	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, Introspection::TypeInfo* typeInfo, bool serializable);
+	//static TypeInfoTraits<ObjectBase> _typeInfoTraits(nullptr, TypeNameAndId::TypeId, "BaseObject");
+
+	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, const Introspection::TypeInfo* typeInfo, bool isPointer, bool serializable);
 	static Introspection::RemoveQualifier<ObjectBase>::type* NullCast(void);
 	static void RegisterMembers(void);
 

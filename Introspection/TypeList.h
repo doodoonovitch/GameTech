@@ -385,67 +385,6 @@ struct Type2Type
 };
 
 
-////////////////////////////////////////////////////////////////////////////////
-// class template Select
-// Selects one of two types based upon a boolean constant
-// Invocation: Select<flag, T, U>::Result
-// where:
-// flag is a compile-time boolean constant
-// T and U are types
-// Result evaluates to T if flag is true, and to U otherwise.
-////////////////////////////////////////////////////////////////////////////////
-
-template <bool flag, typename T, typename U>
-struct Select
-{
-private:
-	template<bool>
-	struct In
-	{
-		typedef T Result;
-	};
-
-	template<>
-	struct In<false>
-	{
-		typedef U Result;
-	};
-
-public:
-	typedef typename In<flag>::Result Result;
-};
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-// class template IsSameType
-// Return true iff two given types are the same
-// Invocation: IsSameType<T, U>::value
-// where:
-// T and U are types
-// Result evaluates to true iff U == T (types equal)
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T, typename U>
-struct IsSameType
-{
-private:
-	template<typename>
-	struct In
-	{
-		enum { value = false };
-	};
-
-	template<>
-	struct In<T>
-	{
-		enum { value = true };
-	};
-
-public:
-	enum { value = In<U>::value };
-};
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // class NullType
@@ -523,13 +462,13 @@ public:
 
 	enum { value = type_id != sizeof(no) };
 
-	typedef typename Select
+	typedef typename std::conditional
 	<
 		type_id == Typelist_ID,
 		Typelist_tag,
-		typename Select<type_id == NullType_ID, NullType_tag, NoneList_tag>::Result
+		typename std::conditional<type_id == NullType_ID, NullType_tag, NoneList_tag>::type
 	>
-	::Result type_tag;
+	::type type_tag;
 };
 
 
@@ -670,7 +609,7 @@ private:
 	template<>
 	struct In<NullType>
 	{
-		typedef typename Select<TL_is_Typelist<T>::value, T, TYPELIST_1(T)>::Result Result;
+		typedef typename std::conditional<TL_is_Typelist<T>::value, T, TYPELIST_1(T)>::type Result;
 	};
 
 public:
@@ -782,18 +721,19 @@ public:
 
 
 
-typedef
-TYPELIST_30(
+typedef TYPELIST_15(
 	bool, char, wchar_t, float, double, // 5
 	int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, // 8
-	std::string, std::wstring,
-
-	bool*, char*, wchar_t*, float*, double*, // 5
-	int8_t*, uint8_t*, int16_t*, uint16_t*, int32_t*, uint32_t*, int64_t*, uint64_t*, // 8
-	std::string*, std::wstring*
+	std::string, std::wstring
 	) BasicTypeList;
 
 
+
+/*
+bool*, char*, wchar_t*, float*, double*, // 5
+int8_t*, uint8_t*, int16_t*, uint16_t*, int32_t*, uint32_t*, int64_t*, uint64_t*, // 8
+std::string*, std::wstring*
+*/
 
 } // namespace  Introspection
 #endif // INTROSPECTION_TYPELIST_H

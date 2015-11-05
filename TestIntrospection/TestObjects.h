@@ -30,15 +30,34 @@ private:
 	std::wstring _wstringMember = L"wstring";
 };
 
+
+class S : public Introspection::ObjectBase
+{
+public:
+	S(const char *src = "");
+	~S();
+
+	bool IsEqual(const S& rhs) const;
+	void Concat(const S& rhs);
+	friend std::ostream& operator<<(std::ostream &os, S &rhs);
+
+	DECLARE_TYPEINFO(S, Introspection::ObjectBase::TypeNameAndId::TypeId + 2, Introspection::ObjectBase);
+
+private:
+	const char *data;
+	size_t len;
+};
 class TestObject2 : public TestObject
 {
 public:
 	TestObject2();
 	virtual ~TestObject2() override;
 
-	DECLARE_TYPEINFO(TestObject2, Introspection::ObjectBase::TypeNameAndId::TypeId + 2, TestObject);
+	DECLARE_TYPEINFO(TestObject2, Introspection::ObjectBase::TypeNameAndId::TypeId + 3, TestObject);
 
 private:
+
+	S* _ptr_S = new S("object S as member variable (pointer)");
 
 	bool* _ptr_boolMember = new bool(false);
 	char* _ptr_charMember = new char('c');
@@ -60,19 +79,71 @@ private:
 
 };
 
-class S : public Introspection::ObjectBase
+namespace TestDerivedObject
+{
+	class A : public::Introspection::ObjectBase
+	{
+	public:
+		A() {};
+		virtual ~A() {}
+
+		DECLARE_TYPEINFO(TestDerivedObject::A, Introspection::ObjectBase::TypeNameAndId::TypeId + 4, Introspection::ObjectBase);
+
+	private:
+		std::wstring _object_A_member = L"Object A member";
+	};
+
+	class B : public A
+	{
+	public:
+		B() : A() {};
+		virtual ~B() {}
+
+		DECLARE_TYPEINFO(TestDerivedObject::B, Introspection::ObjectBase::TypeNameAndId::TypeId + 5, Introspection::ObjectBase);
+
+	private:
+		std::wstring _object_B_member = L"Object B member inherits fromobject 'A'";
+	};
+
+	class C : public B
+	{
+	public:
+		C() : B() {};
+		virtual ~C() {}
+
+		DECLARE_TYPEINFO(TestDerivedObject::C, Introspection::ObjectBase::TypeNameAndId::TypeId + 6, Introspection::ObjectBase);
+
+	private:
+		std::wstring _object_C_member = L"Object C member";
+	};
+}
+
+
+class X : public::Introspection::ObjectBase
 {
 public:
-	S(const char *src = "");
-	~S();
+	X() {};
+	virtual ~X() {}
 
-	bool IsEqual(const S& rhs) const;
-	void Concat(const S& rhs);
-	friend std::ostream& operator<<(std::ostream &os, S &rhs);
-
-	DECLARE_TYPEINFO(S, Introspection::ObjectBase::TypeNameAndId::TypeId + 3, Introspection::ObjectBase);
+	DECLARE_TYPEINFO(X, Introspection::ObjectBase::TypeNameAndId::TypeId + 7, Introspection::ObjectBase);
 
 private:
-	const char *data;
-	size_t len;
+	std::wstring _object_X_member = L"Object X member";
+};
+
+class Y : public::Introspection::ObjectBase
+{
+public:
+
+	Y() : _ptr_A(new TestDerivedObject::C()) {};
+	virtual ~Y() {}
+
+	DECLARE_TYPEINFO(Y, Introspection::ObjectBase::TypeNameAndId::TypeId + 8, Introspection::ObjectBase);
+
+private:
+	std::wstring _object_Y_member = L"Object Y contains X and A*";
+
+	X _object_X;
+	TestDerivedObject::A* _ptr_A = nullptr;
+	TestDerivedObject::B _object_B;
 };

@@ -27,7 +27,7 @@ bool ObjectBase::IsKindOf(const ObjectBase* parent) const
 bool ObjectBase::SerializeMember(ISerializer& serializer, const MemberInfo* mi) const
 {
 	assert(mi != nullptr);
-	return mi->GetTypeInfo()->Serialize(&serializer, mi->GetPtr(this));
+	return mi->GetTypeInfo()->Serialize(&serializer, mi->GetPtr(this), mi->GetIsPointer());
 }
 
 

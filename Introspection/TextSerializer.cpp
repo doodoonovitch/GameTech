@@ -56,6 +56,31 @@ bool TextSerialization::SerializeObject(const ObjectBase& object)
 	return true;
 }
 
+bool TextSerialization::SerializeBasicType(bool value)
+{
+	return Serialize(value);
+}
+
+bool TextSerialization::SerializeBasicType(char value)
+{
+	return Serialize(value);
+}
+
+bool TextSerialization::SerializeBasicType(wchar_t value)
+{
+	return Serialize(value);
+}
+
+bool TextSerialization::SerializeBasicType(float value)
+{
+	return Serialize(value);
+}
+
+bool TextSerialization::SerializeBasicType(double value)
+{
+	return Serialize(value);
+}
+
 bool TextSerialization::SerializeBasicType(int8_t value) 
 {
 	return Serialize(value);
@@ -96,6 +121,46 @@ bool TextSerialization::SerializeBasicType(uint64_t value)
 	return Serialize(value);
 }
 
+bool TextSerialization::SerializeBasicType(const std::string& value) 
+{
+	_stream << L"\"" << value.c_str() << L"\"";
+	return true;
+}
+
+bool TextSerialization::SerializeBasicType(const std::wstring& value) 
+{
+	_stream << L"\"" << value.c_str() << L"\"";
+	return true;
+}
+
+
+
+/*
+
+bool TextSerialization::SerializeBasicType(const bool * value)
+{
+	return SerializeBasicType(*value);
+}
+
+bool TextSerialization::SerializeBasicType(const char* value)
+{
+	return SerializeBasicType(*value);
+}
+
+bool TextSerialization::SerializeBasicType(const wchar_t* value)
+{
+	return SerializeBasicType(*value);
+}
+
+bool TextSerialization::SerializeBasicType(const float * value)
+{
+	return SerializeBasicType(*value);
+}
+
+bool TextSerialization::SerializeBasicType(const double * value)
+{
+	return SerializeBasicType(*value);
+}
 
 bool TextSerialization::SerializeBasicType(const int8_t * value)
 {
@@ -137,52 +202,6 @@ bool TextSerialization::SerializeBasicType(const uint64_t * value)
 	return SerializeBasicType(*value);
 }
 
-
-bool TextSerialization::SerializeBasicType(bool value) 
-{
-	return Serialize(value);
-}
-
-bool TextSerialization::SerializeBasicType(float value) 
-{
-	return Serialize(value);
-}
-
-bool TextSerialization::SerializeBasicType(double value) 
-{
-	return Serialize(value);
-}
-
-
-bool TextSerialization::SerializeBasicType(const bool * value)
-{
-	return SerializeBasicType(*value);
-}
-
-bool TextSerialization::SerializeBasicType(const float * value)
-{
-	return SerializeBasicType(*value);
-}
-
-bool TextSerialization::SerializeBasicType(const double * value)
-{
-	return SerializeBasicType(*value);
-}
-
-
-bool TextSerialization::SerializeBasicType(const std::string& value) 
-{
-	_stream << L"\"" << value.c_str() << L"\"";
-	return true;
-}
-
-bool TextSerialization::SerializeBasicType(const std::wstring& value) 
-{
-	_stream << L"\"" << value.c_str() << L"\"";
-	return true;
-}
-
-
 bool TextSerialization::SerializeBasicType(const std::string* value)
 {
 	return SerializeBasicType(*value);
@@ -193,29 +212,6 @@ bool TextSerialization::SerializeBasicType(const std::wstring* value)
 	return SerializeBasicType(*value);
 }
 
-
-bool TextSerialization::SerializeBasicType(char value)
-{
-	return Serialize(value);
-}
-
-bool TextSerialization::SerializeBasicType(const char* value)
-{
-	return SerializeBasicType(*value);
-	return true;
-}
-
-bool TextSerialization::SerializeBasicType(wchar_t value)
-{
-	return Serialize(value);
-}
-
-bool TextSerialization::SerializeBasicType(const wchar_t* value)
-{
-	return SerializeBasicType(*value);
-	return true;
-}
-
-
+*/
 
 } // namespace  Introspection

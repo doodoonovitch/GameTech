@@ -16,7 +16,7 @@ public:
 
 	typedef std::map<std::string, MemberInfo*> MemberMap;
 	typedef std::vector<MemberInfo*> MemberList;
-	typedef bool (*SerializeMemberFunc)(ISerializer& serializer, const void* value);
+	typedef bool (*SerializeFunc)(ISerializer& serializer, const void* value, bool isPointer);
 	typedef void(*CreateFunc)(void*& var);
 
 public:
@@ -48,14 +48,14 @@ public:
 	const MemberList& GetMembers() const { return _members; }
 	const MemberMap& GetMemberMap() const { return _membersByName; }
 
-	bool Serialize(ISerializer* serializer, const void* data) const;
+	bool Serialize(ISerializer* serializer, const void* data, bool isPointer) const;
 
 	void Create(void*& var) const;
 
 protected:
 
 	void AddMember(MemberInfo* member);
-	void Init(const TypeInfo* parent, SerializeMemberFunc serializeMember, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer);
+	void Init(const TypeInfo* parent, SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer);
 
 	TypeInfo();
 	virtual ~TypeInfo();
@@ -63,7 +63,7 @@ protected:
 private:
 
 	const TypeInfo* _parent;
-	SerializeMemberFunc _serializeMember;
+	SerializeFunc _serialize;
 	CreateFunc _create;
 	uint32_t _typeId;
 	size_t _size;

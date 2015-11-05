@@ -39,6 +39,12 @@ public:
 	}
 	~TextSerialization() {}
 
+	virtual bool SerializeBasicType(bool value) override;
+	virtual bool SerializeBasicType(char value) override;
+	virtual bool SerializeBasicType(wchar_t value) override;
+	virtual bool SerializeBasicType(float value) override;
+	virtual bool SerializeBasicType(double value) override;
+
 	virtual bool SerializeBasicType(int8_t value) override;
 	virtual bool SerializeBasicType(int16_t value) override;
 	virtual bool SerializeBasicType(int32_t value) override;
@@ -48,37 +54,28 @@ public:
 	virtual bool SerializeBasicType(uint32_t value) override;
 	virtual bool SerializeBasicType(uint64_t value) override;
 
-	virtual bool SerializeBasicType(const int8_t * value) override;
-	virtual bool SerializeBasicType(const int16_t * value) override;
-	virtual bool SerializeBasicType(const int32_t * value) override;
-	virtual bool SerializeBasicType(const int64_t * value) override;
-	virtual bool SerializeBasicType(const uint8_t * value) override;
-	virtual bool SerializeBasicType(const uint16_t * value) override;
-	virtual bool SerializeBasicType(const uint32_t * value) override;
-	virtual bool SerializeBasicType(const uint64_t * value) override;
-	
-	virtual bool SerializeBasicType(bool value) override;
-	virtual bool SerializeBasicType(float value) override;
-	virtual bool SerializeBasicType(double value) override;
-
-	virtual bool SerializeBasicType(const bool * value) override;
-	virtual bool SerializeBasicType(const float * value) override;
-	virtual bool SerializeBasicType(const double * value) override;
-
 	virtual bool SerializeBasicType(const std::string& value) override;
 	virtual bool SerializeBasicType(const std::wstring& value) override;
 
-	virtual bool SerializeBasicType(const std::string* value) override;
-	virtual bool SerializeBasicType(const std::wstring* value) override;
-
-
-	virtual bool SerializeBasicType(char value) override;
-	virtual bool SerializeBasicType(const char* value) override;
-
-	virtual bool SerializeBasicType(wchar_t value) override;
-	virtual bool SerializeBasicType(const wchar_t* value) override;
-
 	virtual bool SerializeObject(const ObjectBase& object) override;
+
+	//virtual bool SerializeBasicType(const bool * value) override;
+	//virtual bool SerializeBasicType(const char* value) override;
+	//virtual bool SerializeBasicType(const wchar_t* value) override;
+	//virtual bool SerializeBasicType(const float * value) override;
+	//virtual bool SerializeBasicType(const double * value) override;
+
+	//virtual bool SerializeBasicType(const int8_t * value) override;
+	//virtual bool SerializeBasicType(const int16_t * value) override;
+	//virtual bool SerializeBasicType(const int32_t * value) override;
+	//virtual bool SerializeBasicType(const int64_t * value) override;
+	//virtual bool SerializeBasicType(const uint8_t * value) override;
+	//virtual bool SerializeBasicType(const uint16_t * value) override;
+	//virtual bool SerializeBasicType(const uint32_t * value) override;
+	//virtual bool SerializeBasicType(const uint64_t * value) override;
+
+	//virtual bool SerializeBasicType(const std::string* value) override;
+	//virtual bool SerializeBasicType(const std::wstring* value) override;
 
 protected:
 
