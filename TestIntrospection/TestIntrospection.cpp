@@ -57,7 +57,6 @@ void PrintTypeInfo()
 	std::wcout << L"\tId: " << typeInfo->GetTypeId() << std::endl;
 	std::wcout << L"\tSize: " << typeInfo->GetTypeSize() << std::endl;
 	std::wcout << L"\tBasic type: " << typeInfo->GetIsBasicType() << std::endl;
-	std::wcout << L"\tPointer: " << typeInfo->GetIsPointer() << std::endl;
 	std::wcout << std::endl;
 }
 

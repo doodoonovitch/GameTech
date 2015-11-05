@@ -39,7 +39,6 @@ public:
 	enum
 	{
 		IsBasicType = TL_Contains<BasicTypeList, T>::value,
-		IsPointer = std::is_pointer<T>::value
 	};
 
 	typedef T SelfClass;
@@ -84,34 +83,17 @@ public:
 
 	TypeInfoTraits(const TypeInfo* parent, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
 	{
-		GetTypeInfo()->Init(parent, RTSerialize, CreateMember, typeId, name, wname, size, IsBasicType, IsPointer);
+		GetTypeInfo()->Init(parent, RTSerialize, CreateMember, typeId, name, wname, size, IsBasicType);
 		RegisterMembers();
 	}
 
 private:
 
-
-	struct SerializeBasicTypePointer
-	{
-		static bool Serialize(ISerializer& serializer, const T value)
-		{
-			return serializer.SerializeBasicType(*value);
-		}
-	};
-
-	struct SerializeBasicTypeValue
-	{
-		static bool Serialize(ISerializer& serializer, const T value)
-		{
-			return serializer.SerializeBasicType(value);
-		}
-	};
-
 	struct SerializeBasicType
 	{
 		static bool Serialize(ISerializer& serializer, const T value)
 		{
-			return std::conditional<IsPointer, SerializeBasicTypePointer, SerializeBasicTypeValue>::type::Serialize(serializer, value);
+			return serializer.SerializeBasicType(value);
 		}
 	};
 
@@ -135,11 +117,11 @@ private:
 	{
 		static bool Serialize(ISerializer& serializer, const T& obj)
 		{
-			return std::conditional<IsPointer, SerializeObjectPointer, SerializeObjectValue>::type::Serialize(serializer, obj);
+			return serializer.SerializeObject(obj);
 		}
 	};
 
-	static bool RTSerialize(ISerializer& serializer, const void* value, bool isPointer)
+	static bool RTSerialize(ISerializer& serializer, uintptr_t value, bool isPointer)
 	{
 		if (isPointer)
 		{

@@ -28,9 +28,9 @@ public:
 
 	bool GetSerializable(void) const { return _serializable; }
 
-	void* GetPtr(const void* obj) const
+	uintptr_t GetPtr(const void* obj) const
 	{
-		return ((void *)(((char *)(obj)) + (_offset)));
+		return (uintptr_t)(((char *)(obj)) + (_offset));
 	}
 
 private:

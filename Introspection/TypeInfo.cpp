@@ -13,7 +13,6 @@ TypeInfo::TypeInfo()
 	, _typeId(-1)
 	, _size(0)
 	, _isBasicType(false)
-	, _isPointer(false)
 {
 }
 
@@ -27,15 +26,8 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer)
+void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType)
 {
-	//static bool firstTime = true;
-	//if (firstTime)
-	//{
-	//	#include "DefineBasicTypeInfo.inl"
-	//	firstTime = false;
-	//}
-	
 	_parent = parent;
 	_serialize = serialize;
 	_create = createFunc;
@@ -44,7 +36,6 @@ void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeFunc serialize, C
 	_wname = wname;
 	_size = size;
 	_isBasicType = isBasicType;
-	_isPointer = isPointer;
 	TypeInfoManager::Add(this);
 }
 
@@ -63,13 +54,13 @@ const MemberInfo* TypeInfo::GetMember(const std::string& name)
 }
 
 
-bool TypeInfo::Serialize(ISerializer* serializer, const void* data, bool isPointer) const
+bool TypeInfo::Serialize(ISerializer* serializer, uintptr_t dataPtr, bool isPointer) const
 {
 	assert(serializer != nullptr);
-	assert(data != nullptr);
+	assert(dataPtr != (uintptr_t)nullptr);
 	assert(_serialize != nullptr);
 
-	return _serialize(*serializer, data, isPointer);
+	return _serialize(*serializer, (uintptr_t)dataPtr, isPointer);
 }
 
 

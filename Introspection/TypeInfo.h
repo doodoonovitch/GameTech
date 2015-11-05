@@ -16,7 +16,7 @@ public:
 
 	typedef std::map<std::string, MemberInfo*> MemberMap;
 	typedef std::vector<MemberInfo*> MemberList;
-	typedef bool (*SerializeFunc)(ISerializer& serializer, const void* value, bool isPointer);
+	typedef bool (*SerializeFunc)(ISerializer& serializer, uintptr_t varptr, bool isPointer);
 	typedef void(*CreateFunc)(void*& var);
 
 public:
@@ -32,7 +32,6 @@ public:
 	size_t GetTypeSize(void) const { return _size; }
 
 	bool GetIsBasicType() const { return _isBasicType; }
-	bool GetIsPointer() const { return _isPointer; }
 
 	bool IsRoot() const { return _parent == nullptr; }
 	bool IsA(uint32_t typeId) const { return _typeId == typeId; }
@@ -48,14 +47,14 @@ public:
 	const MemberList& GetMembers() const { return _members; }
 	const MemberMap& GetMemberMap() const { return _membersByName; }
 
-	bool Serialize(ISerializer* serializer, const void* data, bool isPointer) const;
+	bool Serialize(ISerializer* serializer, uintptr_t dataPtr, bool isPointer) const;
 
 	void Create(void*& var) const;
 
 protected:
 
 	void AddMember(MemberInfo* member);
-	void Init(const TypeInfo* parent, SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType, bool isPointer);
+	void Init(const TypeInfo* parent, SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType);
 
 	TypeInfo();
 	virtual ~TypeInfo();
@@ -72,7 +71,6 @@ private:
 	MemberList _members;
 	MemberMap _membersByName;
 	bool _isBasicType;
-	bool _isPointer;
 };
 
 
