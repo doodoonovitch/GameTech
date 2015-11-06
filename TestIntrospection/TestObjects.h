@@ -1,6 +1,20 @@
 #pragma once
 
 
+class S : public Introspection::ObjectBase
+{
+public:
+	S(const char* src = "");
+	~S();
+
+	DECLARE_TYPEINFO(S, Introspection::ObjectBase::TypeNameAndId::TypeId + 2, Introspection::ObjectBase);
+
+private:
+	/*const*/ char* data;
+	size_t len;
+};
+
+
 class TestObject : public Introspection::ObjectBase
 {
 public:
@@ -30,23 +44,6 @@ private:
 	std::wstring _wstringMember = L"wstring";
 };
 
-
-class S : public Introspection::ObjectBase
-{
-public:
-	S(const char *src = "");
-	~S();
-
-	bool IsEqual(const S& rhs) const;
-	void Concat(const S& rhs);
-	friend std::ostream& operator<<(std::ostream &os, S &rhs);
-
-	DECLARE_TYPEINFO(S, Introspection::ObjectBase::TypeNameAndId::TypeId + 2, Introspection::ObjectBase);
-
-private:
-	const char *data;
-	size_t len;
-};
 class TestObject2 : public TestObject
 {
 public:
@@ -60,8 +57,8 @@ private:
 	S* _ptr_S = new S("object S as member variable (pointer)");
 
 	bool* _ptr_boolMember = new bool(false);
-	char* _ptr_charMember = new char('c');
-	wchar_t* _ptr_wchar_tMember = new wchar_t('W');
+	char* _ptr_charMember = _strdup("char*");
+	wchar_t* _ptr_wchar_tMember = _wcsdup(L"wchar_t*");
 	float* _ptr_floatMember = new float(0.001f);
 	double* _ptr_doubleMember = new double(0.000000001);
 

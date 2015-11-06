@@ -25,6 +25,9 @@
 #include "TypeInfoManager.h"
 #include "TextSerializer.h"
 
-
+namespace Introspection
+{
+	extern void InitializeBasicTypes();
+}
 
 #endif // INTROSPECTION_INTROSPECTION_H

@@ -721,10 +721,11 @@ public:
 
 
 
-typedef TYPELIST_15(
+typedef TYPELIST_19(
 	bool, char, wchar_t, float, double, // 5
 	int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, // 8
-	std::string, std::wstring
+	std::string, std::wstring,
+	char*, wchar_t*, const char*, const wchar_t*
 	) BasicTypeList;
 
 

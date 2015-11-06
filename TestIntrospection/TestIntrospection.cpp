@@ -5,8 +5,6 @@
 
 #include "TestObjects.h"
 
-#include "DefineBasicTypeInfo.inl"
-
 
 //#define PRINT_MEMBERS( TYPE ) \
 //  PrintMembers<TYPE>( #TYPE )
@@ -27,7 +25,7 @@ void PrintMembers(const Introspection::TypeInfo* ti)
 		std::wcout << L"\t\t member name     : '" << (*mi)->GetWName() << L"' ..." << std::endl;
 		std::wcout << L"\t\t offset          : " << (*mi)->GetOffset() << std::endl;
 		std::wcout << L"\t\t serializable    : " << (*mi)->GetSerializable() << std::endl;
-		std::wcout << L"\t\t is a pointer    : " << (*mi)->GetIsPointer() << std::endl;
+		std::wcout << L"\t\t is a pointer    : " << ((*mi)->GetTypeQualifier() == ::Introspection::TypeQualifier::Pointer) << std::endl;
 
 		std::wcout << L"\t\t type name       : " << pTypeInfo->GetTypeWName() << std::endl;
 		std::wcout << L"\t\t type Id         : " << pTypeInfo->GetTypeId() << std::endl;
@@ -63,6 +61,31 @@ void PrintTypeInfo()
 int main()
 {
 	std::wcout << std::boolalpha << std::endl;
+
+	Introspection::InitializeBasicTypes();
+
+	std::wcout << "std::remove_cv(const char*) : " << typeid(std::remove_cv<const char*>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(const wchar_t*) : " << typeid(std::remove_cv<const wchar_t*>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(const char) : " << typeid(std::remove_cv<const char>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(const wchar_t) : " << typeid(std::remove_cv<const wchar_t>::type).name() << std::endl;
+	std::wcout << std::endl;
+	std::wcout << "std::remove_cv(volatile const char*) : " << typeid(std::remove_cv<volatile const char*>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(volatile const wchar_t*) : " << typeid(std::remove_cv<volatile const wchar_t*>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(volatile const char) : " << typeid(std::remove_cv<volatile const char>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(volatile const wchar_t) : " << typeid(std::remove_cv<volatile const wchar_t>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(volatile const int8_t*) : " << typeid(std::remove_cv<volatile const int8_t*>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(volatile const int32_t*) : " << typeid(std::remove_cv<volatile const int32_t*>::type).name() << std::endl;
+	std::wcout << std::endl;
+	std::wcout << "std::remove_cv(const int8_t*) : " << typeid(std::remove_cv<const int8_t*>::type).name() << std::endl;
+	std::wcout << "std::remove_cv(const int32_t*) : " << typeid(std::remove_cv<const int32_t*>::type).name() << std::endl;
+	std::wcout << "std::is_const(const char*) : " << std::is_const<const char*>::value << std::endl;
+	std::wcout << "std::is_const(const int8_t*) : " << std::is_const<const int8_t*>::value << std::endl;
+
+	std::wcout << std::endl;
+	std::wcout << "std::remove_pointer(const char*) : " << typeid(std::remove_pointer<const char*>::type).name() << std::endl;
+	std::wcout << "std::add_pointer(std::remove_cv(std::remove_pointer(const char*))) : " << typeid(std::add_pointer<std::remove_cv<std::remove_pointer<const char*>::type>::type>::type).name() << std::endl;
+	std::wcout << std::endl;
+
 	std::wcout << L"Basic types... :" << std::endl;
 	PrintTypeInfo<bool>();
 	PrintTypeInfo<char>();
@@ -114,7 +137,6 @@ int main()
 	PrintMembers(&obj2);
 
 	S sObject("String within the S wrapper!");
-	std::cout << std::endl << sObject << std::endl;
 	PrintMembers(&sObject);
 
 	PrintMembers<TestDerivedObject::A>();
@@ -136,8 +158,8 @@ int main()
 	std::wostringstream strstream;
 	Introspection::TextSerialization txtSer(strstream);
 
-	strstream << L"Serialization obj1:" << std::endl;
-	obj1.Serialize(txtSer);
+	//strstream << L"Serialization obj1:" << std::endl;
+	//obj1.Serialize(txtSer);
 
 	strstream << L"Serialization obj2:" << std::endl;
 	obj2.Serialize(txtSer);

@@ -24,7 +24,7 @@ public:
 
 	//static TypeInfoTraits<ObjectBase> _typeInfoTraits(nullptr, TypeNameAndId::TypeId, "BaseObject");
 
-	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, const Introspection::TypeInfo* typeInfo, bool isPointer, bool serializable);
+	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, const Introspection::TypeInfo* typeInfo, TypeQualifier typeQualifier, bool serializable);
 	static Introspection::RemoveQualifier<ObjectBase>::type* NullCast(void);
 	static void RegisterMembers(void);
 

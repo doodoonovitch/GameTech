@@ -54,13 +54,13 @@ const MemberInfo* TypeInfo::GetMember(const std::string& name)
 }
 
 
-bool TypeInfo::Serialize(ISerializer* serializer, uintptr_t dataPtr, bool isPointer) const
+bool TypeInfo::Serialize(ISerializer* serializer, uintptr_t dataPtr, TypeQualifier typeQualifier) const
 {
 	assert(serializer != nullptr);
 	assert(dataPtr != (uintptr_t)nullptr);
 	assert(_serialize != nullptr);
 
-	return _serialize(*serializer, (uintptr_t)dataPtr, isPointer);
+	return _serialize(*serializer, (uintptr_t)dataPtr, typeQualifier);
 }
 
 
@@ -86,6 +86,11 @@ void TypeInfo::Create(void*& var) const
 		var = nullptr;
 	else
 		_create(var);
+}
+
+void InitializeBasicTypes()
+{
+#include "DefineBasicTypeInfo.inl"
 }
 
 } // namespace  Introspection

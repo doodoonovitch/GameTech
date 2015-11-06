@@ -133,6 +133,17 @@ bool TextSerialization::SerializeBasicType(const std::wstring& value)
 	return true;
 }
 
+bool TextSerialization::SerializeBasicType(const char* value)
+{
+	_stream << L"\"" << value << L"\"";
+	return true;
+}
+
+bool TextSerialization::SerializeBasicType(const wchar_t* value)
+{
+	_stream << L"\"" << value << L"\"";
+	return true;
+}
 
 
 /*
@@ -142,15 +153,6 @@ bool TextSerialization::SerializeBasicType(const bool * value)
 	return SerializeBasicType(*value);
 }
 
-bool TextSerialization::SerializeBasicType(const char* value)
-{
-	return SerializeBasicType(*value);
-}
-
-bool TextSerialization::SerializeBasicType(const wchar_t* value)
-{
-	return SerializeBasicType(*value);
-}
 
 bool TextSerialization::SerializeBasicType(const float * value)
 {
