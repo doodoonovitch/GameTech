@@ -5,33 +5,33 @@
 #define GENERATE_FILE( _ ) PASTE( __FILE__, _ )
 #define NAME_GENERATOR( ) GENERATE_FILE( __LINE__ )
 
-
-
 //virtual bool IsKindOf(const ObjectBase* parent) const override { return TYPEINFO_TYPE(TYPE)->IsKindOf(parent->GetTypeId()); } 
-#define DECLARE_TYPEINFO( TYPE, TYPEID, PARENT ) \
+#define DECLARE_TYPEINFO( TYPE, TYPEID, PARENT_TYPE ) \
 	template<typename T> friend class TypeInfoTraits; \
-	typedef ::Introspection::TypeInfoTraits<TYPE> SelfTypeTraits; \
-	typedef ::Introspection::TypeAndId<TYPE, (TYPEID)> TypeNameAndId; \
-	typedef PARENT ParentClass; \
-	typedef ::Introspection::Typelist<TYPE, PARENT::ClassHierarchy> ClassHierarchy; \
+	typedef ::Introspection::TypeInfoTraits<TYPE> SelfTypeInfoTraits; \
+	typedef ::Introspection::TypeAndId<TYPE, TYPEID> TypeNameAndId; \
+	typedef ::Introspection::Typelist<TYPE, PARENT_TYPE::ClassHierarchy> ClassHierarchy; \
+	typedef PARENT_TYPE ParentClass; \
+	typedef ParentClass::SelfTypeInfoTraits ParentTypeTraits; \
+	static SelfTypeInfoTraits _typeInfoTraits; \
 	virtual const ::Introspection::TypeInfo* GetTypeInfo() const override; \
 	virtual uint32_t GetTypeId() const override; \
 	virtual bool Serialize(::Introspection::ISerializer& serializer) const override; \
 	static void AddMember( const ::std::string& name, const ::std::wstring& wname, uintptr_t offset, const ::Introspection::TypeInfo *typeInfo, ::Introspection::TypeQualifier typeQualifier, bool serializable ); \
-	static TYPE *NullCast( void ); \
+	static TYPE* NullCast( void ); \
 	static void RegisterMembers( void )
 
 #define DEFINE_TYPEINFO( TYPE ) \
-	DEFINE_TYPEINFO_2( TYPE, TYPE::TypeNameAndId::TypeId, TYPE::ParentClass::SelfTypeTraits::GetTypeInfo() )
+	DEFINE_TYPEINFO_2( TYPE, ParentClass::SelfTypeInfoTraits::GetTypeInfo() )
 
 #define DEFINE_TYPEINFO_OBJECTBASE( TYPE ) \
-	DEFINE_TYPEINFO_2( TYPE, TYPE::TypeNameAndId::TypeId, nullptr )
+	DEFINE_TYPEINFO_2( TYPE, nullptr )
 
-#define DEFINE_TYPEINFO_2( TYPE, TYPEID, PARENT_TYPE_INFO ) \
-	TYPE::SelfTypeTraits NAME_GENERATOR( )( PARENT_TYPE_INFO, (TYPEID), #TYPE, L#TYPE, sizeof( TYPE ) ); \
+#define DEFINE_TYPEINFO_2( TYPE, PARENT_TYPE_INFO ) \
+	TYPE::SelfTypeInfoTraits TYPE::_typeInfoTraits = TYPE::SelfTypeInfoTraits(PARENT_TYPE_INFO, TYPE::TypeNameAndId::TypeId, #TYPE, L#TYPE, sizeof(TYPE)); \
 	const ::Introspection::TypeInfo* TYPE::GetTypeInfo() const \
 	{ \
-		return TYPE::SelfTypeTraits::GetTypeInfo(); \
+		return TYPE::SelfTypeInfoTraits::GetTypeInfo(); \
 	} \
 	uint32_t TYPE::GetTypeId() const \
 	{ \
@@ -39,7 +39,7 @@
 	} \
 	bool TYPE::Serialize(::Introspection::ISerializer& serializer) const \
 	{ \
-		return TYPE::SelfTypeTraits::Serialize(serializer, *this); \
+		return TYPE::SelfTypeInfoTraits::Serialize(serializer, *this); \
 	} \
 	TYPE* TYPE::NullCast( void ) \
 	{ \
@@ -47,7 +47,7 @@
 	} \
 	void TYPE::AddMember( const ::std::string& name, const ::std::wstring& wname, uintptr_t offset, const ::Introspection::TypeInfo *typeInfo, ::Introspection::TypeQualifier typeQualifier, bool serializable ) \
 	{ \
-		return TYPE::SelfTypeTraits::AddMember( name, wname, offset, typeInfo, typeQualifier, serializable ); \
+		return TYPE::SelfTypeInfoTraits::AddMember( name, wname, offset, typeInfo, typeQualifier, serializable ); \
 	} \
 	void TYPE::RegisterMembers( void )
 

@@ -19,26 +19,25 @@ protected:
 
 public:
 
+	typedef TypeInfoTraits<ObjectBase> SelfTypeInfoTraits;
 	typedef TypeAndId<ObjectBase, TL_Length<BasicTypeList>::value> TypeNameAndId;
-	typedef TypeInfoTraits<ObjectBase> SelfTypeTraits;
-
-	//static TypeInfoTraits<ObjectBase> _typeInfoTraits(nullptr, TypeNameAndId::TypeId, "BaseObject");
-
-	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, const Introspection::TypeInfo* typeInfo, TypeQualifier typeQualifier, bool serializable);
-	static Introspection::RemoveQualifier<ObjectBase>::type* NullCast(void);
-	static void RegisterMembers(void);
+	typedef TYPELIST_1(ObjectBase) ClassHierarchy;
+	typedef NullType ParentClass;
+	static TypeInfoTraits<ObjectBase> _typeInfoTraits;
 
 	virtual const TypeInfo* GetTypeInfo() const;
 	virtual uint32_t GetTypeId() const;
-	bool IsKindOf(const ObjectBase* parent) const;
 	virtual bool Serialize(ISerializer& serializer) const;
 
-	bool SerializeMember(ISerializer& serializer, const MemberInfo* mi) const;
-
+	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, const Introspection::TypeInfo* typeInfo, TypeQualifier typeQualifier, bool serializable);
+	static ObjectBase* NullCast(void);
+	static void RegisterMembers(void);
+	
 public:
 
-	typedef Introspection::NullType ParentClass;
-	typedef TYPELIST_1(ObjectBase) ClassHierarchy;
+	bool IsKindOf(const ObjectBase* parent) const;
+	bool SerializeMember(ISerializer& serializer, const MemberInfo* mi) const;
+
 };
 
 } // namespace  Introspection
