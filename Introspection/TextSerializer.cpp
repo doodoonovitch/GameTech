@@ -27,15 +27,15 @@ void TextSerializerHelper::Padding(std::wostream& os)
 }
 
 
-bool TextSerialization::SerializeObject(const ObjectBase& object)
+bool TextSerialization::Serialize(ObjectBase const & object)
 {
 	const TypeInfo* typeInfo = object.GetTypeInfo();
 	assert(typeInfo != nullptr);
 
 	TextSerializerHelper& helper = TextSerializerHelper::Get();
-	helper.Padding(_stream);
-	_stream << L"{" << std::endl;
-	helper.IncrementLevel();
+
+	_stream << L"{ ";
+
 	bool first = true;
 	for (auto mi : typeInfo->GetMembers())
 	{
@@ -45,175 +45,363 @@ bool TextSerialization::SerializeObject(const ObjectBase& object)
 				_stream << L", ";
 			else
 				first = false;
+
 			auto miTypeInfo = mi->GetTypeInfo();
 			_stream << mi->GetWName().c_str() << L" : ";
 			object.SerializeMember(*this, mi);
 		}
 	}
-	helper.DecrementLevel();
-	_stream << std::endl << L"}" << std::endl;
+
+	_stream << L"} ";
 
 	return true;
 }
 
-bool TextSerialization::SerializeBasicType(bool value)
+bool TextSerialization::Serialize(bool value)
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(char value)
+bool TextSerialization::Serialize(char value)
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(wchar_t value)
+bool TextSerialization::Serialize(wchar_t value)
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(float value)
+bool TextSerialization::Serialize(float value)
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(double value)
+bool TextSerialization::Serialize(double value)
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(int8_t value) 
+bool TextSerialization::Serialize(int8_t value) 
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(int16_t value) 
+bool TextSerialization::Serialize(int16_t value) 
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(int32_t value) 
+bool TextSerialization::Serialize(int32_t value) 
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(int64_t value) 
+bool TextSerialization::Serialize(int64_t value) 
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(uint8_t value) 
+bool TextSerialization::Serialize(uint8_t value) 
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(uint16_t value) 
+bool TextSerialization::Serialize(uint16_t value) 
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(uint32_t value) 
+bool TextSerialization::Serialize(uint32_t value) 
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(uint64_t value) 
+bool TextSerialization::Serialize(uint64_t value)
 {
-	return Serialize(value);
+	return InternalSerialize(value);
 }
 
-bool TextSerialization::SerializeBasicType(const std::string& value) 
+bool TextSerialization::Serialize(std::string const & value)
 {
 	_stream << L"\"" << value.c_str() << L"\"";
 	return true;
 }
 
-bool TextSerialization::SerializeBasicType(const std::wstring& value) 
+bool TextSerialization::Serialize(std::wstring const & value)
 {
 	_stream << L"\"" << value.c_str() << L"\"";
 	return true;
 }
 
-bool TextSerialization::SerializeBasicType(const char* value)
+
+bool TextSerialization::Serialize(bool const * const values)
 {
-	_stream << L"\"" << value << L"\"";
+	return InternalSerializePointer(values);
+}
+
+bool TextSerialization::Serialize(char const * const value)
+{
+	if (value == nullptr)
+		return SerializeNull();
+	else
+		_stream << L"\"" << value << L"\"";
 	return true;
 }
 
-bool TextSerialization::SerializeBasicType(const wchar_t* value)
+bool TextSerialization::Serialize(wchar_t const * const value)
 {
-	_stream << L"\"" << value << L"\"";
+	if (value == nullptr)
+		return SerializeNull();
+	else
+		_stream << L"\"" << value << L"\"";
 	return true;
 }
 
-
-/*
-
-bool TextSerialization::SerializeBasicType(const bool * value)
+bool TextSerialization::Serialize(float const * const value)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(double const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(int8_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(int16_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(int32_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(int64_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(uint8_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(uint16_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(uint32_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(uint64_t const * const value)
+{
+	return InternalSerializePointer(value);
+}
+
+bool TextSerialization::Serialize(std::string const * const value)
+{
+	if (value == nullptr)
+		return SerializeNull();
+	else
+		return Serialize(*value);
+}
+
+bool TextSerialization::Serialize(std::wstring const * const value)
+{
+	if (value == nullptr)
+		return SerializeNull();
+	else
+		return Serialize(*value);
+}
+
+bool TextSerialization::Serialize(ObjectBase const * const value)
+{
+	if (value == nullptr)
+		return SerializeNull();
+	else
+		return Serialize(*value);
+}
+
+bool TextSerialization::SerializeArray(bool const * const values, uint32_t itemCount)
+{
+	return InternalSerializeArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(char const * const values, uint32_t itemCount)
+{
+	return InternalSerializeArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(wchar_t const * const values, uint32_t itemCount)
+{
+	return InternalSerializeArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(float const * const values, uint32_t itemCount)
+{
+	return InternalSerializeArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(double const * const values, uint32_t itemCount)
+{
+	return InternalSerializeArray(values, itemCount);
 }
 
 
-bool TextSerialization::SerializeBasicType(const float * value)
+bool TextSerialization::SerializeArray(int8_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const double * value)
+bool TextSerialization::SerializeArray(int16_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const int8_t * value)
+bool TextSerialization::SerializeArray(int32_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const int16_t * value)
+bool TextSerialization::SerializeArray(int64_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const int32_t * value)
+bool TextSerialization::SerializeArray(uint8_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const int64_t * value)
+bool TextSerialization::SerializeArray(uint16_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const uint8_t * value)
+bool TextSerialization::SerializeArray(uint32_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const uint16_t * value)
+bool TextSerialization::SerializeArray(uint64_t const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const uint32_t * value)
+
+bool TextSerialization::SerializeArray(std::string const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const uint64_t * value)
+bool TextSerialization::SerializeArray(std::wstring const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const std::string* value)
+
+bool TextSerialization::SerializeArray(ObjectBase const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-bool TextSerialization::SerializeBasicType(const std::wstring* value)
+
+bool TextSerialization::SerializeArray(char const * const * const values, uint32_t itemCount)
 {
-	return SerializeBasicType(*value);
+	return InternalSerializeArray(values, itemCount);
 }
 
-*/
+bool TextSerialization::SerializeArray(wchar_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializeArray(values, itemCount);
+}
+
+
+bool TextSerialization::SerializeArray(bool const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(float const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(double const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+
+bool TextSerialization::SerializeArray(int8_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(int16_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(int32_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(int64_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(uint8_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(uint16_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(uint32_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(uint64_t const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+
+bool TextSerialization::SerializeArray(std::string const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+bool TextSerialization::SerializeArray(std::wstring const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+
+bool TextSerialization::SerializeArray(ObjectBase const * const * const values, uint32_t itemCount)
+{
+	return InternalSerializePointerArray(values, itemCount);
+}
+
+
+
+
 
 } // namespace  Introspection

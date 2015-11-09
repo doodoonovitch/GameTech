@@ -7,57 +7,46 @@ namespace  Introspection
 {
 
 
-class TypeInfo;
-class MemberInfo;
 
-
-enum class TypeQualifier
-{
-	None,
-	Pointer,
-	Array
-};
 
 template<typename T>
 struct Is_Basic_Type
 {
-	enum
-	{
-		value = TL_Contains<BasicTypeList, T>::value,
-	};
+	static constexpr bool value = TL_Contains<BasicTypeList, T>::value;
 };
 
+
 template<typename TRaw>
-struct GetVarTypeQualifier
+struct Is_Var_Pointer
 {
 private:
 
 	typedef typename Introspection::RemoveQualifier<TRaw>::type T;
 
-	typedef std::integral_constant<TypeQualifier, TypeQualifier::None> TypeQualifier_None;
-	typedef std::integral_constant<TypeQualifier, TypeQualifier::Pointer> TypeQualifier_Pointer;
-	typedef std::integral_constant<TypeQualifier, TypeQualifier::Array> TypeQualifier_Array;
-	
-	struct Conditional3
+	template<typename T1>
+	struct Is_Array_of_Pointer
 	{
-		static constexpr TypeQualifier value = std::conditional<std::is_array<T>::value, TypeQualifier_Array, TypeQualifier_None>::type::value;
+	private:
+		typedef typename std::remove_extent<T1>::type TNoExtent;
+		typedef typename std::remove_cv<TNoExtent>::type TNoExtentNoCV;
+
+	public:
+		typedef typename std::conditional<std::is_pointer<TNoExtentNoCV>::value, std::true_type, std::false_type>::type type;
 	};
 
-	struct PointerOrCString
+	template<typename T1>
+	struct Is_Pointer
 	{
-		static constexpr TypeQualifier value = std::conditional<(std::is_same<T,char*>::value || std::is_same<T, wchar_t*>::value), TypeQualifier_None, TypeQualifier_Pointer>::type::value;
-	};
+	private:
+		typedef typename std::remove_cv<T1>::type TNoCV;
 
-	struct Conditional1
-	{
-		static constexpr TypeQualifier value = std::conditional<std::is_pointer<T>::value, PointerOrCString, Conditional3>::type::value;
+	public:
+		typedef typename std::is_pointer<TNoCV>::type type;
 	};
-
 
 public:
 
-	static constexpr TypeQualifier value = Conditional1::value;
-
+	static constexpr bool value = std::conditional < (std::rank<T>::value > 0), typename Is_Array_of_Pointer<T>::type, typename Is_Pointer<T>::type > ::type::value;
 };
 
 
@@ -66,35 +55,20 @@ struct GetVarType
 {
 private:
 
-	typedef typename Introspection::RemoveQualifier<TRaw>::type T;
-
-	struct Conditional3
-	{
-		typedef typename std::conditional<std::is_array<T>::value, typename std::remove_extent<T>::type, T>::type type;
-	};
-
-	struct PointerOrCString
-	{
-		typedef typename std::conditional<(std::is_same<T, char*>::value || std::is_same<T, wchar_t*>::value), T, typename std::remove_pointer<T>::type>::type type;
-	};
-
-	struct Conditional1
-	{
-		typedef typename std::conditional<std::is_pointer<T>::value, typename PointerOrCString::type, typename Conditional3::type>::type type;
-	};
-
+	typedef typename RemoveQualifier<TRaw>::type T;
 
 public:
 
-	typedef typename Conditional1::type type;
+	typedef typename RemoveQualifier< typename std::remove_pointer < typename RemoveQualifier< typename std::remove_extent<T>::type >::type >::type >::type type;
 		
 };
+
 
 template<typename TType, uint32_t TId>
 struct TypeAndId
 {
 	typedef TType Type;
-	enum { TypeId = TId };
+	static constexpr uint32_t TypeId = TId;
 };
 
 
@@ -115,24 +89,16 @@ class TypeInfoTraits
 
 public:
 
-	enum
-	{
-		IsBasicType = Is_Basic_Type<T>::value,
-	};
+	static constexpr bool IsBasicType = Is_Basic_Type<T>::value;
 
 	typedef T SelfClass;
-	//typedef typename std::conditional<IsBasicType, BasicTypeHierarchy, ObjectTypeHierarchy<T>>::type::ClassHierarchy ClassHierarchy;
+	typedef typename std::conditional<IsBasicType, BasicTypeHierarchy, ObjectTypeHierarchy<T>>::type::ClassHierarchy ClassHierarchy;
 
 	// T is a kind of U
-	//template<typename U>
-	//static bool IsKindOf()
-	//{
-	//	return TL_Contains<ClassHierarchy, U>::value;
-	//}
-
-	static void AddMember(const std::string& memberName, const std::wstring& wMemberName, size_t memberOffset, const TypeInfo* typeinfo, TypeQualifier typeQualifier, bool serializable)
+	template<typename U>
+	static bool IsKindOf()
 	{
-		GetTypeInfo()->AddMember(new MemberInfo(memberName, wMemberName, memberOffset, typeinfo, typeQualifier, serializable));
+		return TL_Contains<ClassHierarchy, U>::value;
 	}
 
 	static T *NullCast(void)
@@ -149,13 +115,30 @@ public:
 	// Ensure a single instance can exist for this class type
 	static TypeInfo *GetTypeInfo(void)
 	{
+		InitializeBasicTypes();
 		static TypeInfo instance;
 		return &instance;
 	}
 
 	static bool Serialize(ISerializer& serializer, const T& data)
 	{
-		return std::conditional<IsBasicType, SerializeBasicType, SerializeObject>::type::Serialize(serializer, data);
+		return serializer.Serialize(data);
+	}
+
+	static bool Serialize(ISerializer& serializer, const T* const data)
+	{
+		return serializer.Serialize(data);
+	}
+
+	static bool SerializeArray(ISerializer& serializer, T const * const  data, uint32_t itemCount)
+	{
+		return serializer.SerializeArray(data, itemCount);
+	}
+
+	static bool SerializeArray(ISerializer& serializer, T const * const * const data, uint32_t itemCount)
+	{
+		return std::conditional<std::is_base_of<ObjectBase, T>::value, SerializeObjectBasePointerArray<T>, SerializeBasicTypePointerArray<T>>::type::Serialize(serializer, data, itemCount);
+		//return serializer.SerializeArray(data, itemCount);
 	}
 
 	TypeInfoTraits(const TypeInfo* parent, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
@@ -181,61 +164,50 @@ private:
 		}
 	};
 
-	struct SerializeBasicType
+	template<typename T1>
+	struct SerializeBasicTypePointerArray
 	{
-		static bool Serialize(ISerializer& serializer, const T value)
+		static bool Serialize(ISerializer& serializer, T1 const * const * const data, uint32_t itemCount)
 		{
-			return serializer.SerializeBasicType(value);
+			return serializer.SerializeArray(data, itemCount);
 		}
 	};
 
-	struct SerializeObjectPointer
+	template<typename T1>
+	struct SerializeObjectBasePointerArray
 	{
-		static bool Serialize(ISerializer& serializer, const T& obj)
+		static bool Serialize(ISerializer& serializer, T1 const * const * const data, uint32_t itemCount)
 		{
-			return serializer.SerializeObject(*obj);
+			return serializer.SerializeArray((ObjectBase const * const * const)data, itemCount);
 		}
 	};
 
-	struct SerializeObjectValue
+	static bool RTSerialize(ISerializer& serializer, uintptr_t value, bool isPointer, uint32_t extent)
 	{
-		static bool Serialize(ISerializer& serializer, const T& obj)
+		if (extent == 0)
 		{
-			return serializer.SerializeObject(obj);
+			if (isPointer)
+			{
+				T const * const ptr = *(T const * const * const)(value);
+				return Serialize(serializer, ptr);
+			}
+			else
+			{
+				return Serialize(serializer, *reinterpret_cast<const T*>(value));
+			}
 		}
-	};
-
-	struct SerializeObject
-	{
-		static bool Serialize(ISerializer& serializer, const T& obj)
+		else
 		{
-			return serializer.SerializeObject(obj);
-		}
-	};
-
-	static bool RTSerialize(ISerializer& serializer, uintptr_t value, TypeQualifier typeQualifier)
-	{
-		switch (typeQualifier)
-		{
-		case TypeQualifier::Pointer:
-		{
-			const T* ptr = *(const T**)(value);
-			return Serialize(serializer, *ptr);
-		}
-		break;
-
-		case TypeQualifier::Array:
-		{
-			return false;
-		}
-		break;
-
-		case TypeQualifier::None:
-		default:
-		{
-			return Serialize(serializer, *reinterpret_cast<const T*>(value));
-		}
-		break;
+			if (isPointer)
+			{
+				T const * const * const ptr = (T const * const * const)(value);
+				return SerializeArray(serializer, ptr, extent);
+			}
+			else
+			{
+				T const * const ptr = (T const * const)(value);
+				return SerializeArray(serializer, ptr, extent);
+			}
 		}
 	}
 

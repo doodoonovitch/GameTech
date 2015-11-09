@@ -17,9 +17,14 @@
 	virtual const ::Introspection::TypeInfo* GetTypeInfo() const override; \
 	virtual uint32_t GetTypeId() const override; \
 	virtual bool Serialize(::Introspection::ISerializer& serializer) const override; \
-	static void AddMember( const ::std::string& name, const ::std::wstring& wname, uintptr_t offset, const ::Introspection::TypeInfo *typeInfo, ::Introspection::TypeQualifier typeQualifier, bool serializable ); \
 	static TYPE* NullCast( void ); \
 	static void RegisterMembers( void )
+
+//template<typename TMemberType> \
+//static void AddMember(const ::std::string& memberName, const ::std::wstring& wMemberName, uintptr_t memberOffset, bool serializable) \
+//{ \
+//SelfTypeInfoTraits::GetTypeInfo()->AddMember<TMemberType>(memberName, wMemberName, memberOffset, serializable); \
+//} \
 
 #define DEFINE_TYPEINFO( TYPE ) \
 	DEFINE_TYPEINFO_2( TYPE, ParentClass::SelfTypeInfoTraits::GetTypeInfo() )
@@ -45,10 +50,6 @@
 	{ \
 		return reinterpret_cast<TYPE*>(NULL); \
 	} \
-	void TYPE::AddMember( const ::std::string& name, const ::std::wstring& wname, uintptr_t offset, const ::Introspection::TypeInfo *typeInfo, ::Introspection::TypeQualifier typeQualifier, bool serializable ) \
-	{ \
-		return TYPE::SelfTypeInfoTraits::AddMember( name, wname, offset, typeInfo, typeQualifier, serializable ); \
-	} \
 	void TYPE::RegisterMembers( void )
 
 
@@ -59,7 +60,7 @@
 	ADD_MEMBER2( MEMBER, decltype( NullCast( )->MEMBER ), SERIALIZABLE )
 
 #define ADD_MEMBER2( MEMBER, MEMBERTYPE, SERIALIZABLE ) \
-	AddMember( #MEMBER, L#MEMBER, (uintptr_t)(&(NullCast( )->MEMBER)), ::Introspection::TypeInfoTraits<::Introspection::GetVarType<MEMBERTYPE>::type>::GetTypeInfo( ), ::Introspection::GetVarTypeQualifier<MEMBERTYPE>::value, SERIALIZABLE)
+	SelfTypeInfoTraits::GetTypeInfo()->AddMember<MEMBERTYPE>( #MEMBER, L#MEMBER, (uintptr_t)(&(NullCast( )->MEMBER)), SERIALIZABLE)
 
 //
 // TYPEINFO_TYPE

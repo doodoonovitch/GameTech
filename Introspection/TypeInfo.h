@@ -5,6 +5,8 @@
 
 namespace  Introspection
 {
+	
+	class MemberInfo;
 
 
 class TypeInfo
@@ -16,7 +18,7 @@ public:
 
 	typedef std::map<std::string, MemberInfo*> MemberMap;
 	typedef std::vector<MemberInfo*> MemberList;
-	typedef bool (*SerializeFunc)(ISerializer& serializer, uintptr_t varptr, TypeQualifier typeQualifier);
+	typedef bool (*SerializeFunc)(ISerializer& serializer, uintptr_t varptr, bool isPointer, uint32_t extent);
 	typedef void(*CreateFunc)(void*& var);
 
 public:
@@ -47,7 +49,17 @@ public:
 	const MemberList& GetMembers() const { return _members; }
 	const MemberMap& GetMemberMap() const { return _membersByName; }
 
-	bool Serialize(ISerializer* serializer, uintptr_t dataPtr, TypeQualifier typeQualifier) const;
+	template<typename TMemberType>
+	void AddMember(const ::std::string& memberName, const ::std::wstring& wMemberName, uintptr_t memberOffset, bool serializable)
+	{
+		auto typeinfo = ::Introspection::TypeInfoTraits<::Introspection::GetVarType<TMemberType>::type>::GetTypeInfo();
+		bool isPointer = ::Introspection::Is_Var_Pointer<TMemberType>::value;
+		uint32_t extent = std::extent<TMemberType>::value;
+		::Introspection::MemberInfo* member = new ::Introspection::MemberInfo(memberName, wMemberName, memberOffset, typeinfo, isPointer, extent, serializable);
+		AddMember(member);
+	}
+
+	bool Serialize(ISerializer* serializer, uintptr_t dataPtr, bool isPointer, uint32_t itemCount) const;
 
 	void Create(void*& var) const;
 

@@ -42,6 +42,8 @@ DEFINE_TYPEINFO(TestObject)
 
 	ADD_MEMBER(_stringMember, true);
 	ADD_MEMBER(_wstringMember, true);
+
+	ADD_MEMBER(_uint32_tArray5, true);
 }
 
 
@@ -82,6 +84,9 @@ DEFINE_TYPEINFO(TestObject2)
 
 	ADD_MEMBER(_ptr_stringMember, true);
 	ADD_MEMBER(_ptr_wstringMember, true);
+
+	ADD_MEMBER(_ptr_uint32_tArray5, true);
+	ADD_MEMBER(_ptr_wchar_tArray, true);
 }
 
 
@@ -94,6 +99,10 @@ DEFINE_TYPEINFO(TestObject2)
 
 TestObject2::TestObject2()
 {
+	for (uint32_t i = 0; i < 5; ++i)
+	{
+		_ptr_uint32_tArray5[i] = new uint32_t(10 + i);
+	}
 }
 
 
@@ -116,6 +125,13 @@ TestObject2::~TestObject2()
 
 	delete _ptr_stringMember;
 	delete _ptr_wstringMember;
+
+	for (uint32_t i = 0; i < 5; ++i)
+		delete _ptr_uint32_tArray5[i];
+
+	for (uint32_t i = 0; i < 3; ++i)
+		delete _ptr_wchar_tArray[i];
+
 }
 
 
@@ -138,6 +154,15 @@ DEFINE_TYPEINFO(TestDerivedObject::C)
 DEFINE_TYPEINFO(X)
 {
 	ADD_MEMBER(_object_X_member, true);
+	ADD_MEMBER(_c_string, true);
+	ADD_MEMBER(_c_wstring, true);
+	ADD_MEMBER(_nullptr_char, true);
+	ADD_MEMBER(_nullptr_wchar, true);
+	ADD_MEMBER(_nullptr_string, true);
+	ADD_MEMBER(_nullptr_wstring, true);
+	ADD_MEMBER(_nullptr_A, true);
+	ADD_MEMBER(_nullptr_A3, true);
+	ADD_MEMBER(_ptr_ABC, true);
 }
 
 DEFINE_TYPEINFO(Y)

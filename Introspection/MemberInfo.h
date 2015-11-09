@@ -6,14 +6,12 @@
 namespace Introspection
 {
 
-	class TypeInfo;
-
 
 class MemberInfo
 {
 public:
 
-	MemberInfo(const std::string& name, const std::wstring& wname, uintptr_t offset, const TypeInfo* typeInfo, TypeQualifier typeQualifier, bool serializable = false);
+	MemberInfo(const std::string& name, const std::wstring& wname, uintptr_t offset, const TypeInfo* typeInfo, bool isPointer, uint32_t extent, bool serializable = false);
 
 	~MemberInfo();
 
@@ -25,7 +23,8 @@ public:
 
 	const TypeInfo *GetTypeInfo(void) const { return _pType; }
 
-	TypeQualifier GetTypeQualifier(void) const { return _typeQualifier; }
+	bool GetIsPointer(void) const { return _isPointer; }
+	uint32_t GetExtent(void) const { return _extent; }
 
 	bool GetSerializable(void) const { return _serializable; }
 
@@ -40,7 +39,8 @@ private:
 	const TypeInfo *_pType;
 	std::string _name;
 	std::wstring _wname;
-	TypeQualifier _typeQualifier;
+	uint32_t _extent;
+	bool _isPointer;
 	bool _serializable;
 
 };

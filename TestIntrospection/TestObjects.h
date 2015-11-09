@@ -42,6 +42,8 @@ private:
 
 	std::string _stringMember = "string";
 	std::wstring _wstringMember = L"wstring";
+
+	uint32_t _uint32_tArray5[5] = { 1, 2, 3, 4, 5 };
 };
 
 class TestObject2 : public TestObject
@@ -73,6 +75,10 @@ private:
 
 	std::string* _ptr_stringMember = new std::string("string");
 	std::wstring* _ptr_wstringMember = new std::wstring(L"wstring");
+
+	uint32_t* _ptr_uint32_tArray5[5];
+
+	wchar_t* _ptr_wchar_tArray[3] = { _wcsdup(L"wchar_t string 1"), _wcsdup(L"wchar_t string 2"), _wcsdup(L"wchar_t string 3") };
 
 };
 
@@ -126,6 +132,19 @@ public:
 
 private:
 	std::wstring _object_X_member = L"Object X member";
+
+	const char* _c_string = "c string";
+	const wchar_t* _c_wstring = L"c wstring";
+
+	char* _nullptr_char = nullptr;
+	wchar_t* _nullptr_wchar = nullptr;
+	std::string * _nullptr_string = nullptr;
+	std::wstring * _nullptr_wstring = nullptr;
+
+	TestDerivedObject::A* _nullptr_A = nullptr;
+	TestDerivedObject::A* _nullptr_A3[3] = { nullptr, nullptr, nullptr };
+
+	TestDerivedObject::A* _ptr_ABC[3] = { new TestDerivedObject::A(), new TestDerivedObject::B(), new TestDerivedObject::C() };
 };
 
 class Y : public::Introspection::ObjectBase

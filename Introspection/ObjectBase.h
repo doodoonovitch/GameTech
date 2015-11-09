@@ -29,7 +29,6 @@ public:
 	virtual uint32_t GetTypeId() const;
 	virtual bool Serialize(ISerializer& serializer) const;
 
-	static void AddMember(const std::string& name, const std::wstring& wname, uintptr_t offset, const Introspection::TypeInfo* typeInfo, TypeQualifier typeQualifier, bool serializable);
 	static ObjectBase* NullCast(void);
 	static void RegisterMembers(void);
 	

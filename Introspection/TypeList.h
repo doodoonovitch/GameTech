@@ -689,23 +689,23 @@ private:
 		typedef typename TList1::Tail Tail;
 
 	public:
-		enum { value = TL_Contains<Tail, T>::value };
+		static constexpr bool value = TL_Contains<Tail, T>::value;
 	};
 
 	template<>
 	struct In< Typelist<T, Tail> >
 	{
-		enum { value = true };
+		static constexpr bool  value = true;
 	};
 
 	template<>
 	struct In<NullType>
 	{
-		enum { value = false };
+		static constexpr bool value = false;
 	};
 
 public:
-	enum { value = In<TList>::value };
+	static constexpr bool value = In<TList>::value;
 };
 
 
@@ -721,11 +721,10 @@ public:
 
 
 
-typedef TYPELIST_19(
+typedef TYPELIST_15(
 	bool, char, wchar_t, float, double, // 5
 	int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, // 8
-	std::string, std::wstring,
-	char*, wchar_t*, const char*, const wchar_t*
+	std::string, std::wstring
 	) BasicTypeList;
 
 
