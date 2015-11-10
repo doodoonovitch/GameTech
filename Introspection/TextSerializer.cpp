@@ -36,23 +36,33 @@ bool TextSerialization::Serialize(ObjectBase const & object)
 
 	_stream << L"{ ";
 
-	bool first = true;
+	size_t memberCount = 0;
+	SerializeObjectMembers(object, typeInfo, memberCount);
+
+	_stream << L"} ";
+
+	return true;
+}
+
+bool TextSerialization::SerializeObjectMembers(ObjectBase const & object, const TypeInfo* typeInfo, size_t& memberCount) 
+{
+	const TypeInfo* parent = typeInfo->GetParent();
+	if (parent != nullptr)
+		SerializeObjectMembers(object, parent, memberCount);
+
 	for (auto mi : typeInfo->GetMembers())
 	{
 		if (mi->GetSerializable())
 		{
-			if (!first)
-				_stream << L", ";
-			else
-				first = false;
-
 			auto miTypeInfo = mi->GetTypeInfo();
 			_stream << mi->GetWName().c_str() << L" : ";
 			object.SerializeMember(*this, mi);
+			if (memberCount == 0)
+				_stream << L", ";
+
+			++memberCount;
 		}
 	}
-
-	_stream << L"} ";
 
 	return true;
 }

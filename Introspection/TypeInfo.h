@@ -44,7 +44,7 @@ public:
 
 	const TypeInfo* GetParent() const { return _parent; }
 
-	const MemberInfo* GetMember(const std::string& name);
+	const MemberInfo* GetMember(const std::string& name, bool includeInherit = false) const;
 
 	const MemberList& GetMembers() const { return _members; }
 	const MemberMap& GetMemberMap() const { return _membersByName; }
@@ -55,6 +55,12 @@ public:
 		auto typeinfo = ::Introspection::TypeInfoTraits<::Introspection::GetVarType<TMemberType>::type>::GetTypeInfo();
 		bool isPointer = ::Introspection::Is_Var_Pointer<TMemberType>::value;
 		uint32_t extent = std::extent<TMemberType>::value;
+
+		const MemberInfo* m = GetMember(memberName, true);
+		assert(m == nullptr && L"Added member is not already defined!");
+		if (m != nullptr)
+			return;
+
 		::Introspection::MemberInfo* member = new ::Introspection::MemberInfo(memberName, wMemberName, memberOffset, typeinfo, isPointer, extent, serializable);
 		AddMember(member);
 	}

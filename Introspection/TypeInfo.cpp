@@ -41,16 +41,24 @@ void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeFunc serialize, C
 
 void TypeInfo::AddMember(MemberInfo *member)
 {
-	assert(_membersByName.find(member->GetName()) == _membersByName.end());
-
 	_members.push_back(member);
 	_membersByName[member->GetName()] = member;
 }
 
-const MemberInfo* TypeInfo::GetMember(const std::string& name)
+const MemberInfo* TypeInfo::GetMember(const std::string& name, bool includeInherit) const
 {
 	auto it = _membersByName.find(name);
-	return it != _membersByName.end() ? it->second : nullptr;
+
+	if (it != _membersByName.end())
+		return it->second;
+
+	if (includeInherit)
+	{
+		if (_parent != nullptr)
+			return _parent->GetMember(name, true);
+	}
+
+	return nullptr;
 }
 
 
@@ -87,6 +95,7 @@ void TypeInfo::Create(void*& var) const
 	else
 		_create(var);
 }
+
 
 void InitializeBasicTypes()
 {

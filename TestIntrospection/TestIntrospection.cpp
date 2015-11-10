@@ -137,10 +137,12 @@ int main()
 		std::wostringstream strstream;
 		Introspection::TextSerialization txtSer(strstream);
 
-		strstream << L"Serialization obj1:" << std::endl;
+		strstream << L"Serialization obj1 (TestObject):" << std::endl;
 		obj1.Serialize(txtSer);
 
-		strstream << L"Serialization obj2:" << std::endl;
+		strstream << std::endl;
+
+		strstream << L"Serialization obj2 (TestObject2):" << std::endl;
 		obj2.Serialize(txtSer);
 
 		std::wcout << std::endl << strstream.str() << std::endl;

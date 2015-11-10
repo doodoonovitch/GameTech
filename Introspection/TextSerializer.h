@@ -184,6 +184,8 @@ protected:
 		return true;
 	}
 
+	bool SerializeObjectMembers(ObjectBase const & object, const TypeInfo* typeInfo, size_t& memberCount) ;
+
 protected:
 
 	std::wostream& _stream;

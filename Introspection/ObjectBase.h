@@ -37,6 +37,35 @@ public:
 	bool IsKindOf(const ObjectBase* parent) const;
 	bool SerializeMember(ISerializer& serializer, const MemberInfo* mi) const;
 
+protected:
+
+	void AddParentMembers(const TypeInfo* parent)
+	{
+	}
+
+	template<typename TClassHierarchy> struct ParseParentMembers;
+
+	template<>	struct ParseParentMembers<NullType>
+	{
+		static void Parse() {}
+	};
+
+	template<typename TClassHierarch> struct ParseParentMembers
+	{
+	private:
+		ASSERT_TYPELIST(TClassHierarch);
+
+		typedef typename TClassHierarch::Head Head;
+		typedef typename TClassHierarch::Tail Tail;
+
+	public:
+		static void Parse()
+		{
+			ParseParentMembers<Tail>::Parse();
+		}
+	};
+
+
 };
 
 } // namespace  Introspection
