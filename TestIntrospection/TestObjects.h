@@ -4,13 +4,17 @@
 class S : public Introspection::ObjectBase
 {
 public:
-	S(const char* src = "");
+	S();
 	~S();
 
 	DECLARE_TYPEINFO(S, Introspection::ObjectBase::TypeNameAndId::TypeId + 2, Introspection::ObjectBase);
 
+	void SetStr(const char* str);
+
+	void InitTestValues();
+
 private:
-	/*const*/ char* data;
+	char* data;
 	size_t len;
 };
 
@@ -23,27 +27,29 @@ public:
 
 	DECLARE_TYPEINFO(TestObject, Introspection::ObjectBase::TypeNameAndId::TypeId + 1, Introspection::ObjectBase);
 
+	void InitTestValues();
+
 private:
 
-	bool _boolMember = true;
-	char _charMember = 'c';
-	wchar_t _wchar_tMember = 'W';
-	float _floatMember = 0.001f;
-	double _doubleMember = 0.000000001;
+	bool _boolMember;
+	char _charMember;
+	wchar_t _wchar_tMember;
+	float _floatMember;
+	double _doubleMember;
 
-	int8_t _int8_tMember = -8;
-	uint8_t _uint8_tMember = 8;
-	int16_t _int16_tMember = -16;
-	uint16_t _uint16_tMember = 16;
-	int32_t _int32_tMember = -32;
-	uint32_t _uint32_tMember = 32;
-	int64_t _int64_tMember = -64;
-	uint64_t _uint64_tMember = 64;
+	int8_t _int8_tMember;
+	uint8_t _uint8_tMember;
+	int16_t _int16_tMember;
+	uint16_t _uint16_tMember;
+	int32_t _int32_tMember;
+	uint32_t _uint32_tMember;
+	int64_t _int64_tMember;
+	uint64_t _uint64_tMember;
 
-	std::string _stringMember = "string";
-	std::wstring _wstringMember = L"wstring";
+	std::string _stringMember;
+	std::wstring _wstringMember;
 
-	uint32_t _uint32_tArray5[5] = { 1, 2, 3, 4, 5 };
+	uint32_t _uint32_tArray5[5];
 };
 
 class TestObject2 : public TestObject
@@ -54,31 +60,33 @@ public:
 
 	DECLARE_TYPEINFO(TestObject2, Introspection::ObjectBase::TypeNameAndId::TypeId + 3, TestObject);
 
+	void InitTestValues();
+
 private:
 
-	S* _ptr_S = new S("object S as member variable (pointer)");
+	S* _ptr_S;
 
-	bool* _ptr_boolMember = new bool(false);
-	char* _ptr_charMember = _strdup("char*");
-	wchar_t* _ptr_wchar_tMember = _wcsdup(L"wchar_t*");
-	float* _ptr_floatMember = new float(0.001f);
-	double* _ptr_doubleMember = new double(0.000000001);
+	bool* _ptr_boolMember;
+	char* _ptr_charMember;
+	wchar_t* _ptr_wchar_tMember;
+	float* _ptr_floatMember;
+	double* _ptr_doubleMember;
 
-	int8_t* _ptr_int8_tMember = new int8_t(-8);
-	uint8_t* _ptr_uint8_tMember = new uint8_t(8);
-	int16_t* _ptr_int16_tMember = new int16_t(-16);
-	uint16_t* _ptr_uint16_tMember = new uint16_t(16);
-	int32_t* _ptr_int32_tMember = new int32_t(-32);
-	uint32_t* _ptr_uint32_tMember = new uint32_t(32);
-	int64_t* _ptr_int64_tMember = new int64_t(-64);
-	uint64_t* _ptr_uint64_tMember = new uint64_t(64);
+	int8_t* _ptr_int8_tMember;
+	uint8_t* _ptr_uint8_tMember;
+	int16_t* _ptr_int16_tMember;
+	uint16_t* _ptr_uint16_tMember;
+	int32_t* _ptr_int32_tMember;
+	uint32_t* _ptr_uint32_tMember;
+	int64_t* _ptr_int64_tMember;
+	uint64_t* _ptr_uint64_tMember;
 
-	std::string* _ptr_stringMember = new std::string("string");
-	std::wstring* _ptr_wstringMember = new std::wstring(L"wstring");
+	std::string* _ptr_stringMember;
+	std::wstring* _ptr_wstringMember;
 
 	uint32_t* _ptr_uint32_tArray5[5];
 
-	wchar_t* _ptr_wchar_tArray[3] = { _wcsdup(L"wchar_t string 1"), _wcsdup(L"wchar_t string 2"), _wcsdup(L"wchar_t string 3") };
+	wchar_t* _ptr_wchar_tArray[3];
 
 };
 

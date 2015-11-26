@@ -16,9 +16,13 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <stack>
 #include <iostream>
 #include <ostream>
 #include <sstream>
 #include <cassert>
 #include <limits>
 #include <codecvt>
+#include <cwchar>
+
+#include "tinyxml2\tinyxml2.h"

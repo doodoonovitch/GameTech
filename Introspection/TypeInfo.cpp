@@ -26,10 +26,11 @@ TypeInfo::~TypeInfo()
 	_membersByName.clear();
 }
 
-void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType)
+void TypeInfo::Init(const TypeInfo* parent, TypeInfo::SerializeFunc serialize, DeserializeFunc deserialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType)
 {
 	_parent = parent;
 	_serialize = serialize;
+	_deserialize = deserialize;
 	_create = createFunc;
 	_typeId = typeId;
 	_name = name;
@@ -43,6 +44,7 @@ void TypeInfo::AddMember(MemberInfo *member)
 {
 	_members.push_back(member);
 	_membersByName[member->GetName()] = member;
+	_membersByWName[member->GetWName()] = member;
 }
 
 const MemberInfo* TypeInfo::GetMember(const std::string& name, bool includeInherit) const
@@ -62,14 +64,22 @@ const MemberInfo* TypeInfo::GetMember(const std::string& name, bool includeInher
 }
 
 
-bool TypeInfo::Serialize(ISerializer* serializer, uintptr_t dataPtr, bool isPointer, uint32_t itemCount) const
+const MemberInfo* TypeInfo::GetMember(const std::wstring& name, bool includeInherit) const
 {
-	assert(serializer != nullptr);
-	assert(dataPtr != (uintptr_t)nullptr);
-	assert(_serialize != nullptr);
+	auto it = _membersByWName.find(name);
 
-	return _serialize(*serializer, (uintptr_t)dataPtr, isPointer, itemCount);
+	if (it != _membersByWName.end())
+		return it->second;
+
+	if (includeInherit)
+	{
+		if (_parent != nullptr)
+			return _parent->GetMember(name, true);
+	}
+
+	return nullptr;
 }
+
 
 
 bool TypeInfo::IsKindOf(uint32_t typeId) const

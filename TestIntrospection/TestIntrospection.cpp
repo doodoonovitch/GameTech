@@ -50,6 +50,7 @@ void PrintMembers(const Introspection::ObjectBase* obj)
 template <typename T>
 void PrintTypeInfo()
 {
+	std::wcout << "Print type info of : '"<< typeid(T).name() << "'" << std::endl;
 	const Introspection::TypeInfo* typeInfo = TYPEINFO_TYPE(T);
 	std::wcout << L"Name: '" << typeInfo->GetTypeWName() << L"'" << std::endl;
 	std::wcout << L"\tId: " << typeInfo->GetTypeId() << std::endl;
@@ -81,6 +82,11 @@ int main()
 	PrintTypeInfo<std::string>();
 	PrintTypeInfo<std::wstring>();
 	std::wcout << std::endl;
+	PrintTypeInfo<int>();
+	PrintTypeInfo<unsigned char>();
+	PrintTypeInfo<size_t>();
+	PrintTypeInfo<intmax_t>();
+	std::wcout << std::endl;
 
 	std::wcout << L"Basic type pointers :" << std::endl;
 	PrintTypeInfo<bool*>();
@@ -109,12 +115,15 @@ int main()
 	std::wcout << std::endl;
 
 	TestObject obj1;
+	obj1.InitTestValues();
 	PrintMembers(&obj1);
 
 	TestObject2 obj2;
+	obj2.InitTestValues();
 	PrintMembers(&obj2);
 
-	S sObject("String within the S wrapper!");
+	S sObject;
+	sObject.InitTestValues();
 	PrintMembers(&sObject);
 
 	PrintMembers<TestDerivedObject::A>();
@@ -156,8 +165,36 @@ int main()
 		objY.Serialize(coutSer);
 	}
 
+	{
+		{
+			tinyxml2::XMLDocument doc;
+			Introspection::XMLSerialization ser(doc);
 
-	std::wcout << std::endl;
+			obj1.Serialize(ser);
+
+			std::wcout << L"XML Serialization obj1 (TestObject):" << std::endl;
+
+			tinyxml2::XMLPrinter printer;
+			doc.Print(&printer);
+
+			std::wcout << printer.CStr() << std::endl << std::endl;
+		}
+
+		{
+			tinyxml2::XMLDocument doc;
+			Introspection::XMLSerialization ser(doc);
+			obj2.Serialize(ser);
+
+			std::wcout << L"XML Serialization obj2 (TestObject2):" << std::endl;
+
+			tinyxml2::XMLPrinter printer;
+			doc.Print(&printer);
+			std::wcout << printer.CStr() << std::endl << std::endl;
+		}
+	}
+
+
+	std::wcout << std::endl << std::endl << std::endl;
 	std::wcout << std::endl << L"obj2 IsKindOf(obj1) : " << obj2.IsKindOf(&obj1);
 	std::wcout << std::endl << L"obj1 IsKindOf(obj2) : " << obj1.IsKindOf(&obj2);
 	std::wcout << std::endl << L"obj2 IsKindOf(S) : " << obj2.IsKindOf(&sObject);
@@ -204,8 +241,12 @@ int main()
 	std::wcout << "Introspection::GetVarType(_ptr_uint32_tArray5) : " << typeid(Introspection::GetVarType<decltype(_ptr_uint32_tArray5)>::type).name() << std::endl;
 	std::wcout << "Introspection::Is_Var_Pointer(_ptr_uint32_tArray5) : " << Introspection::Is_Var_Pointer<decltype(_ptr_uint32_tArray5)>::value << std::endl;
 	
-	
-
+	std::wistringstream wstrstream(L"str1,\t\n str2");
+	wchar_t str[200];
+	wstrstream >> str;
+	std::wcout << L"1-str: " << str << std::endl;
+	wstrstream >> str;
+	std::wcout << L"2-str: " << str << std::endl;
 	getchar();
 
     return 0;

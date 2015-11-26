@@ -120,30 +120,50 @@ public:
 		return &instance;
 	}
 
-	static bool Serialize(ISerializer& serializer, const T& data)
+	static void Serialize(ISerializer& serializer, const T& data)
 	{
 		return serializer.Serialize(data);
 	}
 
-	static bool Serialize(ISerializer& serializer, const T* const data)
+	static void Serialize(ISerializer& serializer, const T* const data)
 	{
 		return serializer.Serialize(data);
 	}
 
-	static bool SerializeArray(ISerializer& serializer, T const * const  data, uint32_t itemCount)
+	static void SerializeArray(ISerializer& serializer, T const * const  data, uint32_t itemCount)
 	{
-		return serializer.SerializeArray(data, itemCount);
+		serializer.SerializeArray(data, itemCount);
 	}
 
-	static bool SerializeArray(ISerializer& serializer, T const * const * const data, uint32_t itemCount)
+	static void SerializeArray(ISerializer& serializer, T const * const * const data, uint32_t itemCount)
 	{
-		return std::conditional<std::is_base_of<ObjectBase, T>::value, SerializeObjectBasePointerArray<T>, SerializeBasicTypePointerArray<T>>::type::Serialize(serializer, data, itemCount);
-		//return serializer.SerializeArray(data, itemCount);
+		std::conditional<std::is_base_of<ObjectBase, T>::value, SerializeObjectBasePointerArray<T>, SerializeBasicTypePointerArray<T>>::type::Serialize(serializer, data, itemCount);
+	}
+
+	static void Deserialize(IDeserializer& serializer, T& data)
+	{
+		return serializer.Deserialize(data);
+	}
+
+	static void Deserialize(IDeserializer& serializer, T*& data)
+	{
+		//return serializer.Deserialize(data);
+		std::conditional<std::is_base_of<ObjectBase, T>::value, DeserializeObjectBasePointer<T>, DeserializeBasicTypePointer<T>>::type::Deserialize(serializer, data);
+	}
+
+	static void DeserializeArray(IDeserializer& serializer, T * data, uint32_t itemCount)
+	{
+		serializer.DeserializeArray(data, itemCount);
+	}
+
+	static void DeserializeArray(IDeserializer& serializer, T * * data, uint32_t itemCount)
+	{
+		std::conditional<std::is_base_of<ObjectBase, T>::value, DeserializeObjectBasePointerArray<T>, DeserializeBasicTypePointerArray<T>>::type::Deserialize(serializer, data, itemCount);
 	}
 
 	TypeInfoTraits(const TypeInfo* parent, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size)
 	{
-		GetTypeInfo()->Init(parent, RTSerialize, CreateMember, typeId, name, wname, size, IsBasicType);
+		GetTypeInfo()->Init(parent, RTSerialize, RTDeserialize, CreateMember, typeId, name, wname, size, IsBasicType);
 		std::conditional<IsBasicType, BasicTypeNoRegisterMembers, RegisterClassMembers>::type::RegisterMembers();
 	}
 
@@ -167,33 +187,33 @@ private:
 	template<typename T1>
 	struct SerializeBasicTypePointerArray
 	{
-		static bool Serialize(ISerializer& serializer, T1 const * const * const data, uint32_t itemCount)
+		static void Serialize(ISerializer& serializer, T1 const * const * const data, uint32_t itemCount)
 		{
-			return serializer.SerializeArray(data, itemCount);
+			serializer.SerializeArray(data, itemCount);
 		}
 	};
 
 	template<typename T1>
 	struct SerializeObjectBasePointerArray
 	{
-		static bool Serialize(ISerializer& serializer, T1 const * const * const data, uint32_t itemCount)
+		static void Serialize(ISerializer& serializer, T1 const * const * const data, uint32_t itemCount)
 		{
-			return serializer.SerializeArray((ObjectBase const * const * const)data, itemCount);
+			serializer.SerializeArray((ObjectBase const * const * const)data, itemCount);
 		}
 	};
 
-	static bool RTSerialize(ISerializer& serializer, uintptr_t value, bool isPointer, uint32_t extent)
+	static void RTSerialize(ISerializer& serializer, uintptr_t value, bool isPointer, uint32_t extent)
 	{
 		if (extent == 0)
 		{
 			if (isPointer)
 			{
 				T const * const ptr = *(T const * const * const)(value);
-				return Serialize(serializer, ptr);
+				Serialize(serializer, ptr);
 			}
 			else
 			{
-				return Serialize(serializer, *reinterpret_cast<const T*>(value));
+				Serialize(serializer, *reinterpret_cast<const T*>(value));
 			}
 		}
 		else
@@ -201,12 +221,88 @@ private:
 			if (isPointer)
 			{
 				T const * const * const ptr = (T const * const * const)(value);
-				return SerializeArray(serializer, ptr, extent);
+				SerializeArray(serializer, ptr, extent);
 			}
 			else
 			{
 				T const * const ptr = (T const * const)(value);
-				return SerializeArray(serializer, ptr, extent);
+				SerializeArray(serializer, ptr, extent);
+			}
+		}
+	}
+
+	template<typename T1>
+	struct DeserializeBasicTypePointer
+	{
+		static void Deserialize(IDeserializer& serializer, T1 * & data)
+		{
+			serializer.Deserialize(data);
+		}
+	};
+
+	template<typename T1>
+	struct DeserializeObjectBasePointer
+	{
+		static void Deserialize(IDeserializer& serializer, T1 *& data)
+		{
+			serializer.Deserialize((ObjectBase *&)data);
+		}
+	};
+
+	template<typename T1>
+	struct DeserializeBasicTypePointerArray
+	{
+		static void Deserialize(IDeserializer& serializer, T1 * * data, uint32_t itemCount)
+		{
+			serializer.DeserializeArray(data, itemCount);
+		}
+	};
+
+	template<typename T1>
+	struct DeserializeObjectBasePointerArray
+	{
+		static void Deserialize(IDeserializer& serializer, T1 * * data, uint32_t itemCount)
+		{
+			serializer.DeserializeArray((ObjectBase * *)data, itemCount);
+		}
+	};
+
+	static void RTDeserialize(IDeserializer& serializer, uintptr_t value, bool isPointer, uint32_t extent)
+	{
+		if (extent == 0)
+		{
+			if (isPointer)
+			{
+				T *& ptr = *(T * *)(value);
+				if (ptr == nullptr)
+				{
+					ptr = new T();
+				}
+				Deserialize(serializer, ptr);
+			}
+			else
+			{
+				Deserialize(serializer, *reinterpret_cast<T *>(value));
+			}
+		}
+		else
+		{
+			if (isPointer)
+			{
+				T * * ptr = (T * *)(value);
+				for (uint32_t i = 0; i < extent; ++i)
+				{
+					if (ptr[i] == nullptr)
+					{
+						ptr[i] = new T();
+					}
+				}
+				DeserializeArray(serializer, ptr, extent);
+			}
+			else
+			{
+				T * ptr = (T *)(value);
+				DeserializeArray(serializer, ptr, extent);
 			}
 		}
 	}

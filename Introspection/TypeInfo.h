@@ -17,8 +17,10 @@ class TypeInfo
 public:
 
 	typedef std::map<std::string, MemberInfo*> MemberMap;
+	typedef std::map<std::wstring, MemberInfo*> WMemberMap;
 	typedef std::vector<MemberInfo*> MemberList;
-	typedef bool (*SerializeFunc)(ISerializer& serializer, uintptr_t varptr, bool isPointer, uint32_t extent);
+	typedef void (*SerializeFunc)(ISerializer& serializer, uintptr_t varptr, bool isPointer, uint32_t extent);
+	typedef void(*DeserializeFunc)(IDeserializer& serializer, uintptr_t varptr, bool isPointer, uint32_t extent);
 	typedef void(*CreateFunc)(void*& var);
 
 public:
@@ -45,6 +47,7 @@ public:
 	const TypeInfo* GetParent() const { return _parent; }
 
 	const MemberInfo* GetMember(const std::string& name, bool includeInherit = false) const;
+	const MemberInfo* GetMember(const std::wstring& name, bool includeInherit = false) const;
 
 	const MemberList& GetMembers() const { return _members; }
 	const MemberMap& GetMemberMap() const { return _membersByName; }
@@ -65,14 +68,30 @@ public:
 		AddMember(member);
 	}
 
-	bool Serialize(ISerializer* serializer, uintptr_t dataPtr, bool isPointer, uint32_t itemCount) const;
+	void Serialize(ISerializer* serializer, uintptr_t dataPtr, bool isPointer, uint32_t itemCount) const
+	{
+		assert(serializer != nullptr);
+		assert(dataPtr != (uintptr_t)nullptr);
+		assert(_serialize != nullptr);
+
+		_serialize(*serializer, dataPtr, isPointer, itemCount);
+	}
+
+	void Deserialize(IDeserializer* serializer, uintptr_t dataPtr, bool isPointer, uint32_t itemCount) const
+	{
+		assert(serializer != nullptr);
+		assert(dataPtr != (uintptr_t)nullptr);
+		assert(_serialize != nullptr);
+
+		_deserialize(*serializer, dataPtr, isPointer, itemCount);
+	}
 
 	void Create(void*& var) const;
 
 protected:
 
 	void AddMember(MemberInfo* member);
-	void Init(const TypeInfo* parent, SerializeFunc serialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType);
+	void Init(const TypeInfo* parent, SerializeFunc serialize, DeserializeFunc deserialize, CreateFunc createFunc, uint32_t typeId, const std::string& name, const std::wstring& wname, size_t size, bool isBasicType);
 
 	TypeInfo();
 	virtual ~TypeInfo();
@@ -81,6 +100,7 @@ private:
 
 	const TypeInfo* _parent;
 	SerializeFunc _serialize;
+	DeserializeFunc _deserialize;
 	CreateFunc _create;
 	uint32_t _typeId;
 	size_t _size;
@@ -88,6 +108,7 @@ private:
 	std::wstring _wname;
 	MemberList _members;
 	MemberMap _membersByName;
+	WMemberMap _membersByWName;
 	bool _isBasicType;
 };
 

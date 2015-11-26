@@ -27,7 +27,7 @@ public:
 
 	virtual const TypeInfo* GetTypeInfo() const;
 	virtual uint32_t GetTypeId() const;
-	virtual bool Serialize(ISerializer& serializer) const;
+	virtual void Serialize(ISerializer& serializer) const;
 
 	static ObjectBase* NullCast(void);
 	static void RegisterMembers(void);
@@ -35,7 +35,8 @@ public:
 public:
 
 	bool IsKindOf(const ObjectBase* parent) const;
-	bool SerializeMember(ISerializer& serializer, const MemberInfo* mi) const;
+	void SerializeMember(ISerializer& serializer, const MemberInfo* mi) const;
+	void DeserializeMember(IDeserializer& serializer, const MemberInfo* mi) const;
 
 protected:
 

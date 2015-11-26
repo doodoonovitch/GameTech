@@ -16,7 +16,7 @@
 	static SelfTypeInfoTraits _typeInfoTraits; \
 	virtual const ::Introspection::TypeInfo* GetTypeInfo() const override; \
 	virtual uint32_t GetTypeId() const override; \
-	virtual bool Serialize(::Introspection::ISerializer& serializer) const override; \
+	virtual void Serialize(::Introspection::ISerializer& serializer) const override; \
 	static TYPE* NullCast( void ); \
 	static void RegisterMembers( void )
 
@@ -42,9 +42,9 @@
 	{ \
 		return TYPE::TypeNameAndId::TypeId; \
 	} \
-	bool TYPE::Serialize(::Introspection::ISerializer& serializer) const \
+	void TYPE::Serialize(::Introspection::ISerializer& serializer) const \
 	{ \
-		return TYPE::SelfTypeInfoTraits::Serialize(serializer, *this); \
+		TYPE::SelfTypeInfoTraits::Serialize(serializer, *this); \
 	} \
 	TYPE* TYPE::NullCast( void ) \
 	{ \
@@ -66,7 +66,7 @@
 // TYPEINFO_TYPE
 // Purpose: Retrieves the proper TypeInfo instance of an object by type.
 //
-#define TYPEINFO_TYPE( TYPE ) (::Introspection::TypeInfoTraits<std::remove_pointer<::Introspection::RemoveQualifier<TYPE>::type>::type>::GetTypeInfo( ))
+#define TYPEINFO_TYPE( TYPE ) (::Introspection::TypeInfoTraits<::Introspection::RemoveQualifier<std::remove_pointer<::Introspection::RemoveQualifier<TYPE>::type>::type>::type>::GetTypeInfo( ))
 
 //
 // TYPEINFO_OBJECT

@@ -1,5 +1,5 @@
-#ifndef INTROSPECTION_TEXTSERIALIZER_H
-#define INTROSPECTION_TEXTSERIALIZER_H
+#ifndef INTROSPECTION_XMLSERIALIZER_H
+#define INTROSPECTION_XMLSERIALIZER_H
 
 #pragma once
 
@@ -7,31 +7,14 @@ namespace  Introspection
 {
 
 
-class TextSerializerHelper
+
+class XMLSerialization : public ISerializer
 {
 public:
 
-	void Padding(std::wostream& os);
-	void IncrementLevel() { if (_level < std::numeric_limits<size_t>::max()) ++_level; }
-	void DecrementLevel() { if (_level > std::numeric_limits<size_t>::min()) --_level; }
+	XMLSerialization(tinyxml2::XMLDocument& xmldoc, tinyxml2::XMLNode* rootNode = nullptr);
 
-	TextSerializerHelper();
-	~TextSerializerHelper();
-
-private:
-
-	size_t _level;
-};
-
-class TextSerialization : public ISerializer
-{
-public:
-
-	TextSerialization(std::wostream& stream) : _stream(stream) 
-	{
-		_stream << std::boolalpha;
-	}
-	~TextSerialization() {}
+	~XMLSerialization();
 
 	virtual void Serialize(bool value) override;
 	virtual void Serialize(char value) override;
@@ -116,15 +99,29 @@ public:
 
 protected:
 
+	void SetClassAttributes(tinyxml2::XMLElement* elem, const TypeInfo* ti);
+	void SetMemberAttributes(tinyxml2::XMLElement* elem, const MemberInfo* mi);
+
+	template<typename T>
+	void SetClassAttribute(tinyxml2::XMLElement* elem)
+	{
+		const TypeInfo* ti = TYPEINFO_TYPE(T);
+		SetClassAttributes(elem, ti);
+	}
+
 	void SerializeNull()
 	{
-		_stream << L"null ";
+		_retElem = _xmldoc.NewElement("Null");
 	}
 
 	template<typename TValue>
 	void InternalSerialize(TValue value)
 	{
-		_stream << value << L" ";
+		std::string s;
+		Converter<TValue>::ToString(s, value);
+		_retElem = _xmldoc.NewElement("Value");
+		_retElem->SetText(s.c_str());
+		SetClassAttribute<TValue>(_retElem);
 	}
 
 	template<typename TValue>
@@ -133,58 +130,75 @@ protected:
 		if (value == nullptr)
 			SerializeNull();
 		else
-			InternalSerialize(*value);
+			Serialize(*value);
 	}
 
 	template<typename TValue>
 	void InternalSerializeArray(TValue const * const values, uint32_t itemCount)
 	{
-		if (values == nullptr)
-		{
-			SerializeNull();
-			return;
-		}
+		assert(values != nullptr);
 
-		_stream << L"[ " ;
+		XMLElement * elem = _xmldoc.NewElement("Array");
+		SetClassAttribute<TValue>(elem);
+		elem->SetAttribute("ItemCount", itemCount);
+
 		for (uint32_t i = 0; i < itemCount; ++i)
 		{
-			if (i > 0)
-				_stream << L", ";
+			_retElem = nullptr;
+
 			Serialize(values[i]);
+
+			if (_retElem != nullptr)
+			{
+				_retElem->SetAttribute("Index", i);
+				_retElem->SetName("Item");
+				elem->InsertEndChild(_retElem);
+			}
 		}
-		_stream << L"] ";
+
+		_retElem = elem;
 	}
 
 	template<typename TValue>
 	void InternalSerializePointerArray(TValue const * const * const values, uint32_t itemCount)
 	{
-		if (values == nullptr)
-		{
-			SerializeNull();
-			return;
-		}
+		assert(values != nullptr);
+		
+		XMLElement * elem = _xmldoc.NewElement("Array");
+		SetClassAttribute<TValue>(elem);
+		elem->SetAttribute("ItemCount", itemCount);
 
-		_stream << L"[ ";
 		for (uint32_t i = 0; i < itemCount; ++i)
 		{
-			if (i > 0)
-				_stream << L", ";
+			_retElem = nullptr;
+
 			auto p = values[i];
 			if (p == nullptr)
 				SerializeNull();
 			else
 				Serialize(*p);
+
+			if (_retElem != nullptr)
+			{
+				_retElem->SetAttribute("Index", i);
+				_retElem->SetName("Item");
+				elem->InsertEndChild(_retElem);
+			}
 		}
-		_stream << L"] ";
+
+		_retElem = elem;
 	}
 
-	void SerializeObjectMembers(ObjectBase const & object, const TypeInfo* typeInfo, size_t& memberCount) ;
+	void SerializeObjectMembers(tinyxml2::XMLElement * node, ObjectBase const & object, const TypeInfo* typeInfo);
 
 protected:
 
-	std::wostream& _stream;
-	TextSerializerHelper _helper;
+	typedef std::stack<tinyxml2::XMLElement*> XMLNodeStack;
+
+	tinyxml2::XMLDocument& _xmldoc;
+	tinyxml2::XMLNode* _rootNode;
+	tinyxml2::XMLElement* _retElem;
 };
 
 } // namespace  Introspection
-#endif // INTROSPECTION_TEXTSERIALIZER_H
+#endif // INTROSPECTION_XMLSERIALIZER_H
