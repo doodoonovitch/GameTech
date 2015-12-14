@@ -75,10 +75,12 @@ void XMLDeserializer::Deserialize(bool & value)
 
 void XMLDeserializer::Deserialize(char & value)
 {
+	BasicTypeDeserialize(value);
 }
 
 void XMLDeserializer::Deserialize(wchar_t & value)
 {
+	BasicTypeDeserialize(value);
 }
 
 void XMLDeserializer::Deserialize(float & value)
@@ -131,17 +133,29 @@ void XMLDeserializer::Deserialize(uint64_t & value)
 
 void XMLDeserializer::Deserialize(std::string & value)
 {
+	if (_stack.empty())
+		return;
+
+	const char* str = _stack.top()->GetText();
+	value = str;
 }
 void XMLDeserializer::Deserialize(std::wstring & value)
 {
+	BasicTypeDeserialize(value);
 }
 
 void XMLDeserializer::Deserialize(char * & value)
 {
+	if (_stack.empty())
+		return;
+
+	const char* str = _stack.top()->GetText();
+	value = _strdup(str);
 }
 
 void XMLDeserializer::Deserialize(wchar_t * & value)
 {
+	BasicTypeDeserialize(value);
 }
 
 
@@ -197,10 +211,12 @@ void XMLDeserializer::Deserialize(uint64_t * & value)
 
 void XMLDeserializer::Deserialize(std::string * & value) 
 {
+	Deserialize(*value);
 }
 
 void XMLDeserializer::Deserialize(std::wstring * & value)
 {
+	Deserialize(*value);
 }
 
 void XMLDeserializer::DeserializeArray(bool * const values, uint32_t itemCount) 

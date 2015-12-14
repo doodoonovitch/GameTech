@@ -1,0 +1,57 @@
+﻿La génération a démarré 22/08/2015 15:49:54.
+     1>Projet "C:\Z\github\VS2015\OpenGL\AppGL\packages\SOIL\projects\VC9\SOIL.vcxproj" sur le nœud 2 (Build cible(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /GL /D WIN32 /D NDEBUG /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"x64\Release\\" /Fd"x64\Release\SOIL.pdb" /Gd /TC /errorReport:prompt ..\..\src\image_DXT.c ..\..\src\image_helper.c ..\..\src\SOIL.c ..\..\src\stb_image_aug.c
+         image_DXT.c
+     1>..\..\src\image_DXT.c(92): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+         image_helper.c
+     1>..\..\src\image_helper.c(325): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
+     1>..\..\src\image_helper.c(366): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+     1>..\..\src\image_helper.c(373): warning C4244: '=' : conversion de 'float' en 'int', perte possible de données
+     1>..\..\src\image_helper.c(415): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+     1>..\..\src\image_helper.c(422): warning C4244: '=' : conversion de 'float' en 'int', perte possible de données
+         SOIL.c
+     1>..\..\src\SOIL.c(1719): warning C4018: '<=' : incompatibilité signed/unsigned
+     1>..\..\src\SOIL.c(1729): warning C4018: '<' : incompatibilité signed/unsigned
+     1>..\..\src\SOIL.c(1867): warning C4267: 'fonction' : conversion de 'size_t' en 'int', perte possible de données
+     1>..\..\src\SOIL.c(1841): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+         stb_image_aug.c
+     1>..\..\src\stb_image_aug.c(177): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(251): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(303): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(1557): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(2394): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(2709): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(2995): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(3209): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(3548): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>..\..\src\stb_image_aug.c(3644): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+     1>c:\z\github\vs2015\opengl\appgl\packages\soil\src\stbi_DDS_aug_c.h(362): warning C4018: '>' : incompatibilité signed/unsigned
+     1>c:\z\github\vs2015\opengl\appgl\packages\soil\src\stbi_DDS_aug_c.h(366): warning C4018: '>' : incompatibilité signed/unsigned
+     1>c:\z\github\vs2015\opengl\appgl\packages\soil\src\stbi_DDS_aug_c.h(390): warning C4018: '<' : incompatibilité signed/unsigned
+     1>c:\z\github\vs2015\opengl\appgl\packages\soil\src\stbi_DDS_aug_c.h(427): warning C4018: '<' : incompatibilité signed/unsigned
+     1>c:\z\github\vs2015\opengl\appgl\packages\soil\src\stbi_DDS_aug_c.h(498): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+         C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt\stdio.h(205): note: voir la déclaration de 'fopen'
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\Lib.exe /OUT:"C:\Z\github\VS2015\OpenGL\AppGL\packages\SOIL\projects\VC9\x64\Release\SOIL.lib" /NOLOGO /MACHINE:X64 /LTCG x64\Release\image_DXT.obj
+         x64\Release\image_helper.obj
+         x64\Release\SOIL.obj
+         x64\Release\stb_image_aug.obj
+         SOIL.vcxproj -> C:\Z\github\VS2015\OpenGL\AppGL\packages\SOIL\projects\VC9\x64\Release\SOIL.lib
+     1>Génération du projet "C:\Z\github\VS2015\OpenGL\AppGL\packages\SOIL\projects\VC9\SOIL.vcxproj" terminée (Build cible(s)).
+
+La génération a réussi.
+
+Temps écoulé 00:00:00.74

@@ -103,17 +103,17 @@ namespace  Introspection
 template<typename T>
 struct Converter
 {
-	static bool ToString(std::string& out, T in)
+	static bool ToString(std::string& /*out*/, T /*in*/)
 	{
 		return false;
 	}
 
-	bool FromString(T& out, const char* in)
+	bool FromString(T& /*out*/, const char* /*in*/)
 	{
 		return false;
 	}
 
-	bool FromString(T& out, const std::string& in)
+	bool FromString(T& /*out*/, const std::string& /*in*/)
 	{
 		return false;
 	}
@@ -229,6 +229,30 @@ struct Converter<wchar_t*>
 	}
 
 	static bool FromString(wchar_t*& out, const std::string& in)
+	{
+		return FromString(out, in.c_str());
+	}
+};
+
+template<>
+struct Converter<std::wstring>
+{
+	static bool ToString(std::string& out, const std::wstring& in)
+	{
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		out = converter.to_bytes(in);
+
+		return true;
+	}
+	static bool FromString(std::wstring& out, const char* in)
+	{
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		out = converter.from_bytes(in);
+
+		return true;
+	}
+
+	static bool FromString(std::wstring& out, const std::string& in)
 	{
 		return FromString(out, in.c_str());
 	}

@@ -40,7 +40,7 @@ public:
 
 protected:
 
-	void AddParentMembers(const TypeInfo* parent)
+	void AddParentMembers(const TypeInfo* /*parent*/)
 	{
 	}
 

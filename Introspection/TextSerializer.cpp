@@ -59,8 +59,6 @@ void TextSerialization::SerializeObjectMembers(ObjectBase const & object, const 
 	{
 		if (mi->GetSerializable())
 		{
-			auto miTypeInfo = mi->GetTypeInfo();
-
 			if (memberCount != 0)
 				_stream << L", " << std::endl;
 			else

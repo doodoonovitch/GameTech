@@ -10,7 +10,7 @@ TypeInfo::TypeInfo()
 	: _parent(nullptr)
 	, _serialize(nullptr)
 	, _create(nullptr)
-	, _typeId(-1)
+	, _typeId((uint32_t)-1)
 	, _size(0)
 	, _isBasicType(false)
 {

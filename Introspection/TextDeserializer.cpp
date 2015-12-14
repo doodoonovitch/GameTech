@@ -569,7 +569,7 @@ void TextDeserializer::Deserialize(std::string & value)
 	if (_current._type == TokenType::String)
 	{
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-		std::swap(value, converter.to_bytes(_current._text));
+		value = converter.to_bytes(_current._text);
 	}
 	else
 	{
