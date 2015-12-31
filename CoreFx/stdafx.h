@@ -27,6 +27,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include <SOIL.h>
+
 #pragma warning(pop)
 
 #include <map>

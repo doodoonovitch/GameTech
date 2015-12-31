@@ -7,8 +7,6 @@
 
 namespace CoreGame
 {
-	namespace Camera
-	{
 
 
 class SimpleCamera
@@ -48,22 +46,22 @@ private:
 	const float MOUSE_FILTER_WEIGHT = 0.75f;
 
 	//camera transformation variables
-	int _state = 0, _oldX = 0, _oldY = 0;
-	float _rX = 0.f, _rY = 135.f, _dist = 0.f;
-	float _dt = 0;
+	int m_state = 0, m_oldX = 0, m_oldY = 0;
+	float m_rX = 0.f, m_rY = 135.f, m_dist = 0.f;
+	float m_dt = 0;
 
-	CoreFx::Renderables::Grid* _grid;
-	CoreFx::TargetCamera _camera;
+	CoreFx::Renderables::Grid* m_grid;
+	CoreFx::Renderables::Cube* m_cube;
+	CoreFx::Camera* m_pCamera;
 
-	glm::vec2 _mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];
+	glm::vec2 m_mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];
 
-	float _mouseX = 0, _mouseY = 0; //filtered mouse values
-	bool useFiltering = true;
+	float m_mouseX = 0, m_mouseY = 0; //filtered mouse values
+	bool m_useFiltering = true;
 
 };
 
 
 
-	} // namespace Camera
 } // namespace CoreGame
 #endif // COREGAME_SIMPLECAMERA_H

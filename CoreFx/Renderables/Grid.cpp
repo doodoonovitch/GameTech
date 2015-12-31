@@ -12,83 +12,76 @@ namespace CoreFx
 Grid::Grid(int width, int depth)
 {
 	//setup shader
-	_shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid_shader.vert");
-	_shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid_shader.frag");
-	_shader.CreateAndLinkProgram();
-	_shader.Use();	
-		_shader.AddAttribute("vVertex");
-		_shader.AddUniform("MVP"); 
-	_shader.UnUse();
+	m_shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid_shader.vert");
+	m_shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid_shader.frag");
+	m_shader.CreateAndLinkProgram();
+	m_shader.Use();
+		m_shader.AddAttribute("vVertex");
+		m_shader.AddUniform("MVP");
+		m_shader.AddUniform("vGridSize");
+		//pass values of constant uniforms at initialization
+		glUniform2f(m_shader("vGridSize"), (float)width, (float)depth);
+	m_shader.UnUse();
 
-	glm::vec3* vertices = new glm::vec3[((width+1)+(depth+1))*2];
-	_totalIndices = width*depth;
-	GLushort* indices = new GLushort[_totalIndices];
+	GL_CHECK_ERRORS;
+
+	m_vertexCount = ((width + 1) + (depth + 1)) * 2;
+	glm::vec3* vertices = new glm::vec3[m_vertexCount];
 	 
 	int count = 0;
 	int width_2 = width/2;
 	int depth_2 = depth/2;
 	int i=0 ;
 
-	for( i=-width_2; i<=width_2;  i++) 
-	{		  
-		vertices[count++] = glm::vec3( i,0,-depth_2);
-		vertices[count++] = glm::vec3( i,0, depth_2);
-
-		vertices[count++] = glm::vec3( -width_2,0,i);
-		vertices[count++] = glm::vec3(  width_2,0,i);
+	for (i = -width_2; i <= width_2; i++)
+	{
+		vertices[count++] = glm::vec3(i, 0, -depth_2);
+		vertices[count++] = glm::vec3(i, 0, depth_2);
 	}
 
-	//fill indices array
-	GLushort* id = &indices[0]; 
-	for (i = 0; i < width*depth; i+=4) 
-	{            
-		*id++ = (GLushort)i;
-		*id++ = (GLushort)(i+1);
-		*id++ = (GLushort)(i+2);
-		*id++ = (GLushort)(i+3);
+	for (i = -depth_2; i <= depth_2; i++)
+	{
+		vertices[count++] = glm::vec3(-width_2, 0, i);
+		vertices[count++] = glm::vec3(width_2, 0, i);
 	}
 
 	//setup vao and vbo stuff
-	glGenVertexArrays(1, &_vaoID);
-	glGenBuffers(1, &_vboVerticesID);
-	glGenBuffers(1, &_vboIndicesID);
+	glGenVertexArrays(1, &m_vaoID);
+	glGenBuffers(m_vboCount, m_vboIDs);
 	 
-	glBindVertexArray(_vaoID);	
+	glBindVertexArray(m_vaoID);
 
-		glBindBuffer (GL_ARRAY_BUFFER, _vboVerticesID);
-		glBufferData (GL_ARRAY_BUFFER, ((width+1)+(depth+1))*2*sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+		glBindBuffer (GL_ARRAY_BUFFER, m_vboIDs[0]);
+		glBufferData(GL_ARRAY_BUFFER, ((width + 1) + (depth + 1)) * 2 * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+		GL_CHECK_ERRORS;
 		 
-		glEnableVertexAttribArray(_shader["vVertex"]);
-		glVertexAttribPointer(_shader["vVertex"], 3, GL_FLOAT, GL_FALSE,0,0);
-		  
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vboIndicesID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * _totalIndices, &indices[0], GL_STATIC_DRAW);
+		glEnableVertexAttribArray(m_shader["vVertex"]);
+		glVertexAttribPointer(m_shader["vVertex"], 3, GL_FLOAT, GL_FALSE, 0, 0);
+		GL_CHECK_ERRORS;
 		 
 	glBindVertexArray(0);
-	delete [] indices;
+
+	GL_CHECK_ERRORS;
+
 	delete [] vertices;	 
 }
 
 
 Grid::~Grid()
 {
-	//Destroy shader
-	_shader.DeleteShaderProgram();
-
-	//Destroy vao and vbo
-	glDeleteBuffers(1, &_vboVerticesID);
-	glDeleteBuffers(1, &_vboIndicesID);
-	glDeleteVertexArrays(1, &_vaoID);
 }
  
-void Grid::Render(const float* MVP) 
+void Grid::Render(glm::mat4 const & VP)
 {
-	_shader.Use();				
-		glUniformMatrix4fv(_shader("MVP"), 1, GL_FALSE, MVP);
-		glBindVertexArray(_vaoID);
-			glDrawElements(GL_LINES, _totalIndices, GL_UNSIGNED_SHORT, 0);
+	glm::mat4 M = GetFrame()->GetMatrix();
+	glm::mat4 MVP = VP * M;
+
+	m_shader.Use();
+		glUniformMatrix4fv(m_shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+		glBindVertexArray(m_vaoID);
+			glDrawArrays(GL_LINES, 0, m_vertexCount);
 		glBindVertexArray(0);
-	_shader.UnUse();
+	m_shader.UnUse();
 }
 
 

@@ -19,6 +19,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include <SOIL.h>
+
 #pragma warning(pop)
 
 
@@ -34,14 +36,14 @@
 }
 
 
-#include "Maths/Quaternion.h"
+#include "Frame.h"
+#include "SceneObject.h"
 
 #include "Shader.h"
-#include "CameraBase.h"
-#include "FreeCamera.h"
-#include "TargetCamera.h"
+#include "Camera.h"
 #include "Renderables\RenderableObject.h"
 #include "Renderables\Grid.h"
+#include "Renderables\Cube.h"
 
 
 

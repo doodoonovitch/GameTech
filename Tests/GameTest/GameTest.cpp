@@ -18,7 +18,7 @@ using namespace CoreGame;
 
 int main(int argc, char **argv)
 {
-	TGameProgram<Camera::SimpleCamera> simpleCameraSample;
+	TGameProgram<SimpleCamera> simpleCameraSample;
 
 	int err = simpleCameraSample.StartEngine(argc, argv, 1280, 960, false, "OpenGL First Window");
 	if (err)

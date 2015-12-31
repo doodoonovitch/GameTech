@@ -44,7 +44,7 @@ public:
 	{
 		glutInit(&argc, argv);
 		glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-		glutInitContextVersion(4, 5);
+		glutInitContextVersion(4, 2);
 		glutInitContextFlags(GLUT_CORE_PROFILE | GLUT_DEBUG);
 		glutInitContextProfile(GLUT_FORWARD_COMPATIBLE);
 		glutInitWindowSize(windowWidth, windowHeight);
@@ -73,7 +73,12 @@ public:
 			std::cout << "\tGLEW 4.5 not supported\n ";
 		}
 
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
+
 		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
 
 		if (fullscreen)
 		{

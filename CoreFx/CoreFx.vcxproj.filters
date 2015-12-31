@@ -8,14 +8,15 @@
     <Filter Include="misc">
       <UniqueIdentifier>{12fee49e-2c02-4d45-9ac4-a6708613eafb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera">
-      <UniqueIdentifier>{130285c2-47ae-4e52-bb9a-477487461a4d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Renderables">
       <UniqueIdentifier>{c3f694d9-55b6-4e61-b7e0-e70160c82de7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Maths">
       <UniqueIdentifier>{d842dc9a-0a00-453a-bde6-4a62d3be72e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{83a918bf-782a-4e91-af21-f33516218c7c}</UniqueIdentifier>
+      <Extensions>vert;frag</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,23 +28,17 @@
     <ClInclude Include="targetver.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="FreeCamera.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraBase.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="TargetCamera.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
     <ClInclude Include="Renderables\RenderableObject.h">
       <Filter>Renderables</Filter>
     </ClInclude>
     <ClInclude Include="Renderables\Grid.h">
       <Filter>Renderables</Filter>
     </ClInclude>
-    <ClInclude Include="Maths\Quaternion.h">
-      <Filter>Maths</Filter>
+    <ClInclude Include="Frame.h" />
+    <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Renderables\Cube.h">
+      <Filter>Renderables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -51,28 +46,79 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>misc</Filter>
     </ClCompile>
-    <ClCompile Include="FreeCamera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraBase.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="TargetCamera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderables\RenderableObject.cpp">
-      <Filter>Renderables</Filter>
-    </ClCompile>
     <ClCompile Include="Renderables\Grid.cpp">
       <Filter>Renderables</Filter>
     </ClCompile>
-    <ClCompile Include="Maths\Quaternion.cpp">
-      <Filter>Maths</Filter>
+    <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Renderables\Cube.cpp">
+      <Filter>Renderables</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
       <Filter>misc</Filter>
+    </None>
+    <None Include="..\Data\Shaders\flat.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\flat.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\LoadImage_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\LoadImage_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\Ripple_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\Ripple_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SimpleTriangle_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SimpleTriangle_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube_shader.vert">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

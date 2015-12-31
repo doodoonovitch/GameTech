@@ -9,23 +9,28 @@ using namespace Renderables;
 
 namespace CoreGame
 {
-	namespace Camera
-	{
 
 
 
 
 void SimpleCamera::OnRender(void)
 {
-	_dt = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	m_dt = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 
-	glm::mat4 MV = _camera.GetViewMatrix();
-	glm::mat4 P = _camera.GetProjectionMatrix();
-	glm::mat4 MVP = P*MV;
 
-	_grid->Render(glm::value_ptr(MVP));
+	m_pCamera->Update();
+	m_grid->Update();
+	m_cube->Update();
+
+	glm::mat4 V = m_pCamera->GetViewMatrix();
+	glm::mat4 P = m_pCamera->GetProjectionMatrix();
+	glm::mat4 VP = P*V;
+
+	m_cube->Render(VP);
+
+	m_grid->Render(VP);
 
 	glutSwapBuffers();
 }
@@ -33,7 +38,8 @@ void SimpleCamera::OnRender(void)
 void SimpleCamera::OnShutdown()
 {
 	//Destroy grid
-	delete _grid;
+	delete m_grid;
+	delete m_cube;
 
 	cout << "Shutdown successfull" << endl;
 }
@@ -43,32 +49,35 @@ void SimpleCamera::OnResize(int w, int h)
 	//set the viewport size
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 	//setup the projection matrix 
-	_camera.SetupProjection(45, (GLfloat)w / h);
+	m_pCamera->SetupProjection(45, (GLfloat)w / h);
 }
 
 void SimpleCamera::OnInit()
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
 	GL_CHECK_ERRORS
 
 		//setup grid
-		_grid = new Grid(10, 10);
+		m_grid = new Grid(10, 10);
+		m_cube = new Cube();
+		m_cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
 
 	//setup camera
-	_camera.SetPosition(glm::vec3(5, 5, 5));
-	_camera.SetTarget(glm::vec3(0, 0, 0));
+	m_pCamera = new Camera();
+	m_pCamera->LookAt(glm::vec3(0, 4.f, 12.f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 
 	cout << "Initialization successfull" << endl;
 }
 
 SimpleCamera::SimpleCamera()
+	: m_pCamera(nullptr)
 {
 }
 
 SimpleCamera::~SimpleCamera()
 {
+	delete m_pCamera;
+	m_pCamera = nullptr;
 }
 
 //mosue click handler
@@ -76,55 +85,55 @@ void SimpleCamera::OnMouseDown(int button, int s, int x, int y)
 {
 	if (s == GLUT_DOWN)
 	{
-		_oldX = x;
-		_oldY = y;
+		m_oldX = x;
+		m_oldY = y;
 	}
 
 	if (button == GLUT_MIDDLE_BUTTON)
-		_state = 0;
+		m_state = 0;
 	else if (button == GLUT_RIGHT_BUTTON)
-		_state = 2;
+		m_state = 2;
 	else
-		_state = 1;
+		m_state = 1;
 }
 
 //mosue move handler
 void SimpleCamera::OnMouseMove(int x, int y)
 {
-	if (_state == 0)
+	if (m_state == 0)
 	{
-		_dist = (y - _oldY) / 60.0f;
-		_camera.Zoom(_dist);
+		m_dist = (y - m_oldY) / 60.0f;
+		//m_pCamera->Zoom(m_dist);
 	}
-	else if (_state == 2)
+	else if (m_state == 2)
 	{
-		float dy = float(y - _oldY) / 100.0f;
-		float dx = float(_oldX - x) / 100.0f;
-		if (useFiltering)
+		float dy = float(y - m_oldY) / 100.0f;
+		float dx = float(m_oldX - x) / 100.0f;
+		if (m_useFiltering)
 			filterMouseMoves(dx, dy);
 		else
 		{
-			_mouseX = dx;
-			_mouseY = dy;
+			m_mouseX = dx;
+			m_mouseY = dy;
 		}
 
-		_camera.Pan(_mouseX, _mouseY);
+		//m_pCamera->Pan(m_mouseX, m_mouseY);
 	}
 	else
 	{
-		_rY = float(y - _oldY);
-		_rX = float(_oldX - x);
-		if (useFiltering)
-			filterMouseMoves(_rX, _rY);
+		m_rY = float(y - m_oldY);
+		m_rX = float(m_oldX - x);
+		if (m_useFiltering)
+			filterMouseMoves(m_rX, m_rY);
 		else
 		{
-			_mouseX = _rX;
-			_mouseY = _rY;
+			m_mouseX = m_rX;
+			m_mouseY = m_rY;
 		}
-		_camera.Rotate(_mouseX, _mouseY, 0);
+		//m_pCamera->Rotate(m_mouseX, m_mouseY, 0);
 	}
-	_oldX = x;
-	_oldY = y;
+	m_oldX = x;
+	m_oldY = y;
 
 	glutPostRedisplay();
 }
@@ -134,7 +143,7 @@ void SimpleCamera::OnKey(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case ' ':
-		useFiltering = !useFiltering;
+		m_useFiltering = !m_useFiltering;
 		break;
 	}
 	glutPostRedisplay();
@@ -144,11 +153,11 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 {
 	for (int i = MOUSE_HISTORY_BUFFER_SIZE - 1; i > 0; --i)
 	{
-		_mouseHistory[i] = _mouseHistory[i - 1];
+		m_mouseHistory[i] = m_mouseHistory[i - 1];
 	}
 
 	// Store current mouse entry at front of array.
-	_mouseHistory[0] = glm::vec2(dx, dy);
+	m_mouseHistory[0] = glm::vec2(dx, dy);
 
 	float averageX = 0.0f;
 	float averageY = 0.0f;
@@ -158,15 +167,15 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 	// Filter the mouse.
 	for (int i = 0; i < MOUSE_HISTORY_BUFFER_SIZE; ++i)
 	{
-		glm::vec2 tmp = _mouseHistory[i];
+		glm::vec2 tmp = m_mouseHistory[i];
 		averageX += tmp.x * currentWeight;
 		averageY += tmp.y * currentWeight;
 		averageTotal += 1.0f * currentWeight;
 		currentWeight *= MOUSE_FILTER_WEIGHT;
 	}
 
-	_mouseX = averageX / averageTotal;
-	_mouseY = averageY / averageTotal;
+	m_mouseX = averageX / averageTotal;
+	m_mouseY = averageY / averageTotal;
 
 }
 
@@ -199,11 +208,10 @@ void SimpleCamera::OnIdle()
 	}
 
 	if (bPressed)
-		_camera.Move(dx, dy);
+		//m_pCamera->Move(dx, dy);
 
 	glutPostRedisplay();
 }
 
 
-	} // namespace Camera
 } // namespace CoreGame

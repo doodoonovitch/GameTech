@@ -132,23 +132,23 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CameraBase.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="CoreFx.h" />
-    <ClInclude Include="FreeCamera.h" />
-    <ClInclude Include="Maths\Quaternion.h" />
+    <ClInclude Include="Frame.h" />
+    <ClInclude Include="Renderables\Cube.h" />
     <ClInclude Include="Renderables\Grid.h" />
     <ClInclude Include="Renderables\RenderableObject.h" />
+    <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="TargetCamera.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CameraBase.cpp" />
-    <ClCompile Include="FreeCamera.cpp" />
-    <ClCompile Include="Maths\Quaternion.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="Renderables\Cube.cpp" />
     <ClCompile Include="Renderables\Grid.cpp" />
-    <ClCompile Include="Renderables\RenderableObject.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -156,9 +156,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TargetCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Data\Shaders\cube_shader.frag" />
+    <None Include="..\Data\Shaders\cube_shader.vert" />
+    <None Include="..\Data\Shaders\flat.frag" />
+    <None Include="..\Data\Shaders\flat.vert" />
+    <None Include="..\Data\Shaders\grid_shader.frag" />
+    <None Include="..\Data\Shaders\grid_shader.vert" />
+    <None Include="..\Data\Shaders\LoadImage_shader.frag" />
+    <None Include="..\Data\Shaders\LoadImage_shader.vert" />
+    <None Include="..\Data\Shaders\mesh_shader.frag" />
+    <None Include="..\Data\Shaders\mesh_shader.vert" />
+    <None Include="..\Data\Shaders\Ripple_shader.frag" />
+    <None Include="..\Data\Shaders\Ripple_shader.vert" />
+    <None Include="..\Data\Shaders\SimpleTriangle_shader.frag" />
+    <None Include="..\Data\Shaders\SimpleTriangle_shader.vert" />
+    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.frag" />
+    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.geom" />
+    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.vert" />
+    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.frag" />
+    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.geom" />
+    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
