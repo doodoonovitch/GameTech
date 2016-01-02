@@ -13,7 +13,7 @@ namespace CoreFx
 class Cube : public RenderableObject<2>
 {
 public:
-	Cube();
+	Cube(std::string const & texture);
 	virtual ~Cube();
 
 	virtual void Render(glm::mat4 const & VP) override;
@@ -38,11 +38,9 @@ private:
 		glm::vec2 uv;
 	};
 
-	//texture image filename
-	const std::string m_filename = "medias/cube.png";
-
 	//texture ID
-	GLuint m_textureID;
+	//GLuint m_textureID;
+	Texture2D const * m_texture;
 };
 
 

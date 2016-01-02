@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <map>
+#include <algorithm>
 
 #define GL_CHECK_ERRORS \
 {\
@@ -34,6 +35,37 @@
 	std::cerr << "Error " << err << " : " << gluErrorString(err) << std::endl;\
 	assert(false);}\
 }
+
+#define SAFE_DELETE(p) \
+	delete p; \
+	p = nullptr
+
+#define SAFE_DELETE_ARRAY(p) \
+	delete [] p; \
+	p = nullptr
+
+
+namespace CoreFx
+{
+
+	template<typename T> void SafeDelete(T*& p)
+	{
+		delete p;
+		p = nullptr;
+	}
+
+	template<typename T> void SafeDeleteArray(T*& p)
+	{
+		delete[] p;
+		p = nullptr;
+	}
+
+}; // namespace CoreFx
+
+#include "Engine.h"
+
+#include "Texture2D.h"
+#include "TextureManager.h"
 
 
 #include "Frame.h"
@@ -44,6 +76,7 @@
 #include "Renderables\RenderableObject.h"
 #include "Renderables\Grid.h"
 #include "Renderables\Cube.h"
+
 
 
 

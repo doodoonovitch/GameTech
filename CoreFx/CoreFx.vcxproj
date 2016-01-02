@@ -134,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CoreFx.h" />
+    <ClInclude Include="Engine.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="Renderables\Cube.h" />
     <ClInclude Include="Renderables\Grid.h" />
@@ -142,9 +143,12 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Renderables\Cube.cpp" />
     <ClCompile Include="Renderables\Grid.cpp" />
@@ -156,6 +160,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Data\Shaders\cube_shader.frag" />

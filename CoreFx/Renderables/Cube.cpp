@@ -9,7 +9,8 @@ namespace CoreFx
 
 
 
-Cube::Cube()
+Cube::Cube(std::string const & texture)
+	: m_texture(nullptr)
 {
 	//setup shader
 	m_shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube_shader.vert");
@@ -26,43 +27,45 @@ Cube::Cube()
 
 	GL_CHECK_ERRORS;
 
+	const float k = 1.f / 1.5f;
+
 	Vertex vertices[24] = 
 	{
 		// Vertex data for face 0
-		{ glm::vec3(-1.0f, -1.0f,  1.0f),	glm::vec2(0.0f, 0.0f) },	// v0
-		{ glm::vec3(1.0f, -1.0f,  1.0f),	glm::vec2(0.33f, 0.0f) },	// v1
-		{ glm::vec3(-1.0f,  1.0f,  1.0f),	glm::vec2(0.0f, 0.5f) },	// v2
-		{ glm::vec3(1.0f,  1.0f,  1.0f),	glm::vec2(0.33f, 0.5f) },	// v3
+		{ glm::vec3(-1.0f, -1.0f,  1.0f),	glm::vec2(0.0f, 0.0f * k) },	// v0
+		{ glm::vec3(1.0f, -1.0f,  1.0f),		glm::vec2(0.33f, 0.0f * k) },	// v1
+		{ glm::vec3(-1.0f,  1.0f,  1.0f),	glm::vec2(0.0f, 0.5f * k) },	// v2
+		{ glm::vec3(1.0f,  1.0f,  1.0f),	glm::vec2(0.33f, 0.5f * k) },	// v3
 
 		// Vertex data for face 1
-		{ glm::vec3(1.0f, -1.0f,  1.0f),	glm::vec2(0.0f, 0.5f) },	// v4
-		{ glm::vec3(1.0f, -1.0f, -1.0f),	glm::vec2(0.33f, 0.5f) },	// v5
-		{ glm::vec3(1.0f,  1.0f,  1.0f),	glm::vec2(0.0f, 1.0f) },	// v6
-		{ glm::vec3(1.0f,  1.0f, -1.0f),	glm::vec2(0.33f, 1.0f) },	// v7
+		{ glm::vec3(1.0f, -1.0f,  1.0f),		glm::vec2(0.0f, 0.5f * k) },	// v4
+		{ glm::vec3(1.0f, -1.0f, -1.0f),		glm::vec2(0.33f, 0.5f * k) },	// v5
+		{ glm::vec3(1.0f,  1.0f,  1.0f),	glm::vec2(0.0f, 1.0f * k) },	// v6
+		{ glm::vec3(1.0f,  1.0f, -1.0f),		glm::vec2(0.33f, 1.0f * k) },	// v7
 
 		// Vertex data for face 2
-		{ glm::vec3(1.0f, -1.0f, -1.0f),	glm::vec2(0.66f, 0.5f) },	// v8
-		{ glm::vec3(-1.0f, -1.0f, -1.0f),	glm::vec2(1.0f, 0.5f) },	// v9
-		{ glm::vec3(1.0f,  1.0f, -1.0f),	glm::vec2(0.66f, 1.0f) },	// v10
-		{ glm::vec3(-1.0f,  1.0f, -1.0f),	glm::vec2(1.0f, 1.0f) },	// v11
+		{ glm::vec3(1.0f, -1.0f, -1.0f),		glm::vec2(0.66f, 0.5f * k) },	// v8
+		{ glm::vec3(-1.0f, -1.0f, -1.0f),	glm::vec2(1.0f, 0.5f * k) },	// v9
+		{ glm::vec3(1.0f,  1.0f, -1.0f),		glm::vec2(0.66f, 1.0f * k) },	// v10
+		{ glm::vec3(-1.0f,  1.0f, -1.0f),	glm::vec2(1.0f, 1.0f * k) },	// v11
 
 		// Vertex data for face 3
-		{ glm::vec3(-1.0f, -1.0f, -1.0f),	glm::vec2(0.66f, 0.0f) },	// v12
-		{ glm::vec3(-1.0f, -1.0f,  1.0f),	glm::vec2(1.0f, 0.0f) },	// v13
-		{ glm::vec3(-1.0f,  1.0f, -1.0f),	glm::vec2(0.66f, 0.5f) },	// v14
-		{ glm::vec3(-1.0f,  1.0f,  1.0f),	glm::vec2(1.0f, 0.5f) },	// v15
+		{ glm::vec3(-1.0f, -1.0f, -1.0f),	glm::vec2(0.66f, 0.0f * k) },	// v12
+		{ glm::vec3(-1.0f, -1.0f,  1.0f),	glm::vec2(1.0f, 0.0f * k) },	// v13
+		{ glm::vec3(-1.0f,  1.0f, -1.0f),	glm::vec2(0.66f, 0.5f * k) },	// v14
+		{ glm::vec3(-1.0f,  1.0f,  1.0f),	glm::vec2(1.0f, 0.5f * k) },	// v15
 
 		// Vertex data for face 4
-		{ glm::vec3(-1.0f, -1.0f, -1.0f),	glm::vec2(0.33f, 0.0f) },	// v16
-		{ glm::vec3(1.0f, -1.0f, -1.0f),	glm::vec2(0.66f, 0.0f) },	// v17
-		{ glm::vec3(-1.0f, -1.0f,  1.0f),	glm::vec2(0.33f, 0.5f) },	// v18
-		{ glm::vec3(1.0f, -1.0f,  1.0f),	glm::vec2(0.66f, 0.5f) },	// v19
+		{ glm::vec3(-1.0f, -1.0f, -1.0f),	glm::vec2(0.33f, 0.0f * k) },	// v16
+		{ glm::vec3(1.0f, -1.0f, -1.0f),		glm::vec2(0.66f, 0.0f * k) },	// v17
+		{ glm::vec3(-1.0f, -1.0f,  1.0f),	glm::vec2(0.33f, 0.5f * k) },	// v18
+		{ glm::vec3(1.0f, -1.0f,  1.0f),		glm::vec2(0.66f, 0.5f * k) },	// v19
 
 		// Vertex data for face 5
-		{ glm::vec3(-1.0f,  1.0f,  1.0f),	glm::vec2(0.33f, 0.5f) },	// v20
-		{ glm::vec3(1.0f,  1.0f,  1.0f),	glm::vec2(0.66f, 0.5f) },	// v21
-		{ glm::vec3(-1.0f,  1.0f, -1.0f),	glm::vec2(0.33f, 1.0f) },	// v22
-		{ glm::vec3(1.0f,  1.0f, -1.0f),	glm::vec2(0.66f, 1.0f) }	// v23
+		{ glm::vec3(-1.0f,  1.0f,  1.0f),	glm::vec2(0.33f, 0.5f * k) },	// v20
+		{ glm::vec3(1.0f,  1.0f,  1.0f),	glm::vec2(0.66f, 0.5f * k) },	// v21
+		{ glm::vec3(-1.0f,  1.0f, -1.0f),	glm::vec2(0.33f, 1.0f * k) },	// v22
+		{ glm::vec3(1.0f,  1.0f, -1.0f),		glm::vec2(0.66f, 1.0f * k) }	// v23
 	};	
 
 	GLushort indices[34] = 
@@ -99,7 +102,7 @@ Cube::Cube()
 		 
 	glBindVertexArray(0);
 
-
+	/*
 	//load the image using SOIL
 	int texture_width = 0, texture_height = 0, channels = 0;
 	GLubyte* pData = SOIL_load_image(m_filename.c_str(), &texture_width, &texture_height, &channels, SOIL_LOAD_AUTO);
@@ -114,26 +117,33 @@ Cube::Cube()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 	//set texture parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
 
 	//allocate texture 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_width, texture_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData);
 
-	//free SOIL image data
-	SOIL_free_image_data(pData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	GL_CHECK_ERRORS;
+
+	//free SOIL image data
+	SOIL_free_image_data(pData);
+	*/
+
+	m_texture = Engine::GetInstance()->GetTextureManager()->LoadTexture2D(texture);
 }
 
 
 Cube::~Cube()
 {
 	//Delete textures
-	glDeleteTextures(1, &m_textureID);
+	//glDeleteTextures(1, &texture);
+	Engine::GetInstance()->GetTextureManager()->ReleaseTexture2D(m_texture);
 
 }
  
@@ -143,6 +153,9 @@ void Cube::Render(glm::mat4 const & VP)
 	glm::mat4 MVP = VP * M;
 
 	m_shader.Use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_texture->GetId());
+
 		glUniformMatrix4fv(m_shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 		glBindVertexArray(m_vaoID);
 			glDrawElements(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0);

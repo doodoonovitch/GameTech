@@ -40,6 +40,9 @@
     <ClInclude Include="Renderables\Cube.h">
       <Filter>Renderables</Filter>
     </ClInclude>
+    <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="Engine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -55,6 +58,9 @@
     <ClCompile Include="Renderables\Cube.cpp">
       <Filter>Renderables</Filter>
     </ClCompile>
+    <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="Engine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

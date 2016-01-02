@@ -41,6 +41,8 @@ void SimpleCamera::OnShutdown()
 	delete m_grid;
 	delete m_cube;
 
+	Engine::Release();
+
 	cout << "Shutdown successfull" << endl;
 }
 
@@ -56,10 +58,12 @@ void SimpleCamera::OnInit()
 {
 	GL_CHECK_ERRORS
 
+		Engine::Initialize();
+
 		//setup grid
 		m_grid = new Grid(10, 10);
-		m_cube = new Cube();
-		m_cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
+		m_cube = new Cube("medias/cube.dds");
+		m_cube->GetFrame()->SetPosition(glm::vec3(-0, 1, -0));
 
 	//setup camera
 	m_pCamera = new Camera();
@@ -117,7 +121,7 @@ void SimpleCamera::OnMouseMove(int x, int y)
 			m_mouseY = dy;
 		}
 
-		//m_pCamera->Pan(m_mouseX, m_mouseY);
+		m_pCamera->Strafe(m_mouseX);
 	}
 	else
 	{
@@ -130,7 +134,8 @@ void SimpleCamera::OnMouseMove(int x, int y)
 			m_mouseX = m_rX;
 			m_mouseY = m_rY;
 		}
-		//m_pCamera->Rotate(m_mouseX, m_mouseY, 0);
+		m_pCamera->Yaw(glm::radians(m_mouseX));
+		m_pCamera->Pitch(glm::radians(m_mouseY));
 	}
 	m_oldX = x;
 	m_oldY = y;
@@ -181,34 +186,42 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 
 void SimpleCamera::OnIdle()
 {
-	bool bPressed = false;
+	bool bWalk = false, bStrafe = false;
 	float dx = 0, dy = 0;
 	if (GetAsyncKeyState(VK_Z) & 0x8000)
 	{
 		dy += (MOVE_SPEED);
-		bPressed = true;
+		bWalk = true;
 	}
 
 	if (GetAsyncKeyState(VK_S) & 0x8000)
 	{
 		dy -= (MOVE_SPEED);
-		bPressed = true;
+		bWalk = true;
 	}
 
 	if (GetAsyncKeyState(VK_Q) & 0x8000)
 	{
 		dx -= (MOVE_SPEED);
-		bPressed = true;
+		bStrafe = true;
 	}
 
 	if (GetAsyncKeyState(VK_D) & 0x8000)
 	{
 		dx += (MOVE_SPEED);
-		bPressed = true;
+		bStrafe = true;
 	}
 
-	if (bPressed)
-		//m_pCamera->Move(dx, dy);
+	if (bWalk)
+	{
+		m_pCamera->Walk(dy);
+	}
+	
+	if (bStrafe)
+	{
+		m_pCamera->Strafe(dx);
+	}
+
 
 	glutPostRedisplay();
 }
