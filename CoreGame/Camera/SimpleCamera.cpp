@@ -22,6 +22,7 @@ void SimpleCamera::OnRender(void)
 
 	m_pCamera->Update();
 	m_grid->Update();
+	m_axis->Update();
 	m_cube->Update();
 
 	glm::mat4 V = m_pCamera->GetViewMatrix();
@@ -29,6 +30,8 @@ void SimpleCamera::OnRender(void)
 	glm::mat4 VP = P*V;
 
 	m_cube->Render(VP);
+
+	m_axis->Render(VP);
 
 	m_grid->Render(VP);
 
@@ -39,6 +42,7 @@ void SimpleCamera::OnShutdown()
 {
 	//Destroy grid
 	delete m_grid;
+	delete m_axis;
 	delete m_cube;
 
 	Engine::Release();
@@ -62,12 +66,13 @@ void SimpleCamera::OnInit()
 
 		//setup grid
 		m_grid = new Grid(10, 10);
+		m_axis = new Axis();
 		m_cube = new Cube("medias/cube.dds");
-		m_cube->GetFrame()->SetPosition(glm::vec3(-0, 1, -0));
+		m_cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
 
 	//setup camera
 	m_pCamera = new Camera();
-	m_pCamera->LookAt(glm::vec3(0, 4.f, 12.f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	m_pCamera->LookAt(glm::vec3(0, 4.f, 12.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
 
 
 	cout << "Initialization successfull" << endl;

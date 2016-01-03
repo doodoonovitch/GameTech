@@ -67,19 +67,19 @@ void Camera::LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::v
  
 void Camera::Pitch(float angle)
 {
-	glm::quat q = GetFrame()->GetRotation() * glm::angleAxis(angle, GetRight());
+	glm::quat q = glm::angleAxis(angle, GetRight()) * GetFrame()->GetRotation();
 	GetFrame()->SetRotation(q);
 }
 
 void Camera::Yaw(float angle)
 {
-	glm::quat q = GetFrame()->GetRotation() * glm::angleAxis(angle, GetUp());
+	glm::quat q = glm::angleAxis(angle, GetUp()) * GetFrame()->GetRotation();
 	GetFrame()->SetRotation(q);
 }
 
 void Camera::Roll(float angle)
 {
-	glm::quat q = GetFrame()->GetRotation() * glm::angleAxis(angle, GetLook());
+	glm::quat q = glm::angleAxis(angle, GetLook()) * GetFrame()->GetRotation();
 	GetFrame()->SetRotation(q);
 }
 

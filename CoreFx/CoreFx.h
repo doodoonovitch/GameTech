@@ -74,6 +74,7 @@ namespace CoreFx
 #include "Shader.h"
 #include "Camera.h"
 #include "Renderables\RenderableObject.h"
+#include "Renderables\Axis.h"
 #include "Renderables\Grid.h"
 #include "Renderables\Cube.h"
 

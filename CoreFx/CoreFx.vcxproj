@@ -136,6 +136,7 @@
     <ClInclude Include="CoreFx.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Frame.h" />
+    <ClInclude Include="Renderables\Axis.h" />
     <ClInclude Include="Renderables\Cube.h" />
     <ClInclude Include="Renderables\Grid.h" />
     <ClInclude Include="Renderables\RenderableObject.h" />
@@ -150,6 +151,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="Renderables\Axis.cpp" />
     <ClCompile Include="Renderables\Cube.cpp" />
     <ClCompile Include="Renderables\Grid.cpp" />
     <ClCompile Include="SceneObject.cpp" />
@@ -164,6 +166,8 @@
     <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Data\Shaders\axis_shader.frag" />
+    <None Include="..\Data\Shaders\axis_shader.vert" />
     <None Include="..\Data\Shaders\cube_shader.frag" />
     <None Include="..\Data\Shaders\cube_shader.vert" />
     <None Include="..\Data\Shaders\flat.frag" />

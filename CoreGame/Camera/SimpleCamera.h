@@ -51,6 +51,7 @@ private:
 	float m_dt = 0;
 
 	CoreFx::Renderables::Grid* m_grid;
+	CoreFx::Renderables::Axis* m_axis;
 	CoreFx::Renderables::Cube* m_cube;
 	CoreFx::Camera* m_pCamera;
 

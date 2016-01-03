@@ -107,17 +107,20 @@ inline glm::mat4 const & Frame::GetMatrixInverse() const
 
 inline glm::vec3 Frame::GetRight() const
 {
-	return glm::vec3(m_invMatrix[0]);
+	return glm::vec3(m_matrix[0]);
+	//return glm::vec3(m_matrix[0].x, m_matrix[1].x, m_matrix[2].x);
 }
 
 inline glm::vec3 Frame::GetUp() const
 {
-	return glm::vec3(m_invMatrix[1]);
+	return glm::vec3(m_matrix[1]);
+	//return glm::vec3(m_matrix[0].y, m_matrix[1].y, m_matrix[2].y);
 }
 
 inline glm::vec3 Frame::GetLook() const
 {
-	return glm::vec3(m_invMatrix[2]);
+	return glm::vec3(m_matrix[2]);
+	//return glm::vec3(m_matrix[0].z, m_matrix[1].z, m_matrix[2].z);
 }
 
 

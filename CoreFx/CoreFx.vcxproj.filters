@@ -43,6 +43,9 @@
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Renderables\Axis.h">
+      <Filter>Renderables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -61,6 +64,9 @@
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Renderables\Axis.cpp">
+      <Filter>Renderables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -124,6 +130,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\cube_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis_shader.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
