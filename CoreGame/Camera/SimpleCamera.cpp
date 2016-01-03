@@ -19,32 +19,16 @@ void SimpleCamera::OnRender(void)
 
 	m_dt = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 
+	Engine* engine = Engine::GetInstance();
 
-	m_pCamera->Update();
-	m_grid->Update();
-	m_axis->Update();
-	m_cube->Update();
-
-	glm::mat4 V = m_pCamera->GetViewMatrix();
-	glm::mat4 P = m_pCamera->GetProjectionMatrix();
-	glm::mat4 VP = P*V;
-
-	m_cube->Render(VP);
-
-	m_axis->Render(VP);
-
-	m_grid->Render(VP);
+	engine->UpdateObjects();
+	engine->RenderObjects();
 
 	glutSwapBuffers();
 }
 
 void SimpleCamera::OnShutdown()
 {
-	//Destroy grid
-	delete m_grid;
-	delete m_axis;
-	delete m_cube;
-
 	Engine::Release();
 
 	cout << "Shutdown successfull" << endl;
@@ -64,15 +48,22 @@ void SimpleCamera::OnInit()
 
 		Engine::Initialize();
 
+		Engine* engine = Engine::GetInstance();
 		//setup grid
-		m_grid = new Grid(10, 10);
-		m_axis = new Axis();
-		m_cube = new Cube("medias/cube.dds");
-		m_cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
+		Grid * grid = new Grid(10, 10);
+		engine->AddSceneObject(grid);
+
+		Axis * axis = new Axis();
+		engine->AddSceneObject(axis);
+
+		Cube * cube = new Cube("medias/cube.dds");
+		cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
+		engine->AddSceneObject(cube);
 
 	//setup camera
 	m_pCamera = new Camera();
 	m_pCamera->LookAt(glm::vec3(0, 4.f, 12.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
+	engine->SetCamera(m_pCamera);
 
 
 	cout << "Initialization successfull" << endl;
@@ -85,7 +76,6 @@ SimpleCamera::SimpleCamera()
 
 SimpleCamera::~SimpleCamera()
 {
-	delete m_pCamera;
 	m_pCamera = nullptr;
 }
 
@@ -109,10 +99,12 @@ void SimpleCamera::OnMouseDown(int button, int s, int x, int y)
 //mosue move handler
 void SimpleCamera::OnMouseMove(int x, int y)
 {
+	bool postRedisplay = false;
 	if (m_state == 0)
 	{
 		m_dist = (y - m_oldY) / 60.0f;
 		//m_pCamera->Zoom(m_dist);
+		postRedisplay = true;
 	}
 	else if (m_state == 2)
 	{
@@ -127,6 +119,7 @@ void SimpleCamera::OnMouseMove(int x, int y)
 		}
 
 		m_pCamera->Strafe(m_mouseX);
+		postRedisplay = true;
 	}
 	else
 	{
@@ -141,11 +134,16 @@ void SimpleCamera::OnMouseMove(int x, int y)
 		}
 		m_pCamera->Yaw(glm::radians(m_mouseX));
 		m_pCamera->Pitch(glm::radians(m_mouseY));
-	}
-	m_oldX = x;
-	m_oldY = y;
 
-	glutPostRedisplay();
+		postRedisplay = true;
+	}
+
+	if (postRedisplay)
+	{
+		m_oldX = x;
+		m_oldY = y;
+		glutPostRedisplay();
+	}
 }
 
 void SimpleCamera::OnKey(unsigned char key, int x, int y)
@@ -156,7 +154,7 @@ void SimpleCamera::OnKey(unsigned char key, int x, int y)
 		m_useFiltering = !m_useFiltering;
 		break;
 	}
-	glutPostRedisplay();
+	//glutPostRedisplay();
 }
 
 void SimpleCamera::filterMouseMoves(float dx, float dy)
@@ -227,8 +225,8 @@ void SimpleCamera::OnIdle()
 		m_pCamera->Strafe(dx);
 	}
 
-
-	glutPostRedisplay();
+	if (bWalk || bStrafe)
+		glutPostRedisplay();
 }
 
 

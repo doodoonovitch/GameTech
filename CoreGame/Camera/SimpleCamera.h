@@ -50,9 +50,6 @@ private:
 	float m_rX = 0.f, m_rY = 135.f, m_dist = 0.f;
 	float m_dt = 0;
 
-	CoreFx::Renderables::Grid* m_grid;
-	CoreFx::Renderables::Axis* m_axis;
-	CoreFx::Renderables::Cube* m_cube;
 	CoreFx::Camera* m_pCamera;
 
 	glm::vec2 m_mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];

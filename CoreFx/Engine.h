@@ -9,6 +9,8 @@ namespace CoreFx
 	// =======================================================================
 
 	class TextureManager;
+	class SceneObject;
+	class Camera;
 
 class Engine
 {
@@ -25,6 +27,21 @@ public:
 		return m_textureManager;
 	}
 
+	void AddSceneObject(SceneObject* obj);
+
+	void UpdateObjects();
+	void RenderObjects();
+
+	Camera* GetCamera() const
+	{
+		return m_camera;
+	}
+
+	void SetCamera(Camera * camera)
+	{
+		m_camera = camera;
+	}
+
 private:
 
 	void InternalInitialize();
@@ -38,7 +55,13 @@ private:
 
 private:
 
+	typedef std::vector<SceneObject*> SceneObjectList;
+
 	TextureManager * m_textureManager;
+	SceneObjectList* m_sceneObjects;
+
+	Camera* m_camera;
+
 	bool m_initialized;
 
 	static Engine* s_instance;

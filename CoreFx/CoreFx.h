@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <algorithm>
 
 #define GL_CHECK_ERRORS \

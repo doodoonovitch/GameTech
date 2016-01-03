@@ -32,6 +32,7 @@
 #pragma warning(pop)
 
 #include <map>
+#include <vector>
 #include <string>
 #include <iostream>
 #include <ostream>
