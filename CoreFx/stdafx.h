@@ -37,6 +37,8 @@
 #include <iostream>
 #include <ostream>
 #include <fstream>
+#include <iterator>
+#include <functional>
 
 //#define _USE_MATH_DEFINES
 //#include <cmath>

@@ -30,10 +30,10 @@ private:
 
 private:
 
-	Texture2D * m_default2D;
+	Texture2D * mDefault2D;
 
 	typedef std::map<std::string, Texture2D*> Tex2DIdMap;
-	Tex2DIdMap m_2DTexMap;
+	Tex2DIdMap m2DTexMap;
 
 	friend class Engine;
 };

@@ -1,2 +1,2 @@
-#TargetFrameworkVersion=v4.0:PlatformToolSet=v140:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit
-Release|x64|C:\Z\github\VS2015\OpenGL\AppGL\packages\SOIL\projects\VC9\|
+#TargetFrameworkVersion=v4.0:PlatformToolSet=v140:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit:WindowsTargetPlatformVersion=8.1
+Release|x64|C:\Users\Bui\OneDrive\Z\GameTech\packages\SOIL\projects\VC9\|

@@ -7,22 +7,22 @@ namespace CoreFx
 
 
 SceneObject::SceneObject(bool hasFrame /*= false*/)
-	: m_pFrame(hasFrame ? new Frame() : nullptr)
+	: mFrame(hasFrame ? new Frame() : nullptr)
 {
 }
 
 
 SceneObject::~SceneObject()
 {
-	delete m_pFrame;
-	m_pFrame = nullptr;
+	delete mFrame;
+	mFrame = nullptr;
 }
 
-void SceneObject::Update()
-{
-	if (m_pFrame != nullptr)
-		m_pFrame->BuildMatrix();
-}
+//void SceneObject::Update()
+//{
+//	if (mFrame != nullptr)
+//		mFrame->BuildMatrix();
+//}
 
 
 } // namespace CoreFx

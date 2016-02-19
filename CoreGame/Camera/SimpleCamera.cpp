@@ -49,16 +49,35 @@ void SimpleCamera::OnInit()
 		Engine::Initialize();
 
 		Engine* engine = Engine::GetInstance();
+
+		int xCount = 20;
+		int yCount = 20;
+		int zCount = 20;
+		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer("medias/cube.dds", xCount * yCount * zCount, 1);
+		engine->AttachRenderer(cubeRenderer);
+
+		for (auto i = 0; i < xCount; ++i)
+		{
+			for (auto j = 0; j < yCount; ++j)
+			{
+				for (auto k = 0; k < zCount; ++k)
+				{
+					Cube * cube = cubeRenderer->CreateCube(0);
+					cube->GetFrame()->SetPosition(glm::vec3(4.f * i, 4.f * k, -4.f * j));
+				}
+			}
+		}
+
 		//setup grid
-		Grid * grid = new Grid(10, 10);
-		engine->AddSceneObject(grid);
+		//Grid * grid = new Grid(10, 10);
+		//engine->AddSceneObject(grid);
 
-		Axis * axis = new Axis();
-		engine->AddSceneObject(axis);
+		//Axis * axis = new Axis();
+		//engine->AddSceneObject(axis);
 
-		Cube * cube = new Cube("medias/cube.dds");
-		cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
-		engine->AddSceneObject(cube);
+		//Cube * cube = new Cube("medias/cube.dds");
+		//cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
+		//engine->AddSceneObject(cube);
 
 	//setup camera
 	m_pCamera = new Camera();

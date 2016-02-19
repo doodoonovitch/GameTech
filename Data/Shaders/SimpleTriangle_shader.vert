@@ -7,7 +7,7 @@ layout(location = 1) in vec3 vColor;	//per-vertex colour
 smooth out vec4 vSmoothColor;		//smooth colour to fragment shader
 
 //uniform
-uniform mat4 MVP;	//combined modelview projection matrix
+uniform mat4 mMVP;	//combined modelview projection matrix
 
 void main()
 {
@@ -16,5 +16,5 @@ void main()
 
    //get the clip space position by multiplying the combined MVP matrix with the object space 
    //vertex position
-   gl_Position = MVP*vec4(vVertex,1);
+   gl_Position = mMVP * vec4(vVertex,1);
 }

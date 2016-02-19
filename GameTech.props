@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(SolutionDir)Output\bin\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir>$(SolutionDir)Output\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Output\temp\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -17,8 +17,8 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)Output\bin\$(Platform)\$(Configuration)\Introspection;$(SolutionDir)Output\bin\$(Platform)\$(Configuration)\CoreGame;$(SolutionDir)Output\bin\$(Platform)\$(Configuration)\CoreFx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Introspection.lib;CoreFx.lib;CoreGame.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\Introspection;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\CoreGame;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\CoreFx;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)-Lib\tinyxml2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Introspection.lib;CoreFx.lib;CoreGame.lib;tinyxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />

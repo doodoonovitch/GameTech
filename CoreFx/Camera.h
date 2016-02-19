@@ -19,8 +19,6 @@ public:
 	Camera();
 	~Camera();
 
-	virtual void Render(glm::mat4 const & /*VP*/) override {}
-
 	// Get/Set world camera position.
 	inline glm::vec3 const & GetPosition() const;
 	inline void SetPosition(glm::vec4 const & v);
@@ -74,20 +72,20 @@ public:
 	
 protected:	 
 
-	float m_NearZ;
-	float m_FarZ;
-	float m_Aspect;
-	float m_FovY;
-	float m_NearWindowHeight;
-	float m_FarWindowHeight;
+	float mNearZ;
+	float mFarZ;
+	float mAspect;
+	float mFovY;
+	float mNearWindowHeight;
+	float mFarWindowHeight;
 
 
 	static glm::vec3 UP;
 
-	glm::mat4 m_P; //projection matrix
+	glm::mat4 mP; //projection matrix
 
 	
-	float m_fov, m_aspectRatio;
+	float mFov, mAspectRatio;
 };
 
 
@@ -132,49 +130,49 @@ inline glm::vec3 Camera::GetLook() const
 
 inline float Camera::GetNearZ() const
 {
-	return m_NearZ;
+	return mNearZ;
 }
 
 inline float Camera::GetFarZ() const
 {
-	return m_FarZ;
+	return mFarZ;
 }
 
 inline float Camera::GetAspect() const
 {
-	return m_Aspect;
+	return mAspect;
 }
 
 inline float Camera::GetFovY() const
 {
-	return m_FovY;
+	return mFovY;
 }
 
 inline float Camera::GetFovX() const
 {
 	float halfWidth = 0.5f * GetNearWindowWidth();
-	return 2.0f * atan(halfWidth / m_NearZ);
+	return 2.0f * atan(halfWidth / mNearZ);
 }
 
 // Get near and far plane dimensions in view space coordinates.
 float Camera::GetNearWindowWidth()const
 {
-	return m_Aspect * m_NearWindowHeight;
+	return mAspect * mNearWindowHeight;
 }
 
 float Camera::GetNearWindowHeight()const
 {
-	return m_NearWindowHeight;
+	return mNearWindowHeight;
 }
 
 float Camera::GetFarWindowWidth()const
 {
-	return m_Aspect * m_FarWindowHeight;
+	return mAspect * mFarWindowHeight;
 }
 
 float Camera::GetFarWindowHeight()const
 {
-	return m_FarWindowHeight;
+	return mFarWindowHeight;
 }
 
 

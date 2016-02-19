@@ -2,16 +2,16 @@
   
 layout(location=0) in vec3 vVertex;  //object space vertex position
 
-uniform mat4 M[4];		//modeling matrix for each instance
-uniform vec4 color[4];	//color for each instance
+uniform mat4 mM[4];		//modeling matrix for each instance
+uniform vec4 vColor[4];	//color for each instance
 
 out VS_OUT {
-    vec4 color;
+    vec4 vColor;
 } vs_out;
 
 void main()
 {    
 	//get the world space position of each instance vertex
-	gl_Position =  M[gl_InstanceID]*vec4(vVertex, 1);
-	vs_out.color = color[gl_InstanceID];
+	gl_Position =  mM[gl_InstanceID] * vec4(vVertex, 1);
+	vs_out.vColor = vColor[gl_InstanceID];
 }

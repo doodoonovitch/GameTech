@@ -10,21 +10,15 @@ namespace CoreFx
 	{
 
 
-class Axis : public RenderableObject<1>
+class Axis : public SceneObject
 {
 public:
 	Axis();
 	virtual ~Axis();
 
-	virtual void Render(glm::mat4 const & VP) override;
 
 private:
 
-	struct Vertex
-	{
-		glm::vec3 pos;
-		glm::vec4 color;
-	};
 };
 
 

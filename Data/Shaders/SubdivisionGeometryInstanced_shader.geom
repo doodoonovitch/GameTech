@@ -3,14 +3,14 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices=256) out; 
 
 in VS_OUT {
-    vec4 color;
+    vec4 vColor;
 } gs_in[];  
 
-out vec4 vertex_color;
+out vec4 vVertexColor;
  
 //uniforms 
-uniform int sub_divisions;	//the number of subdivisions
-uniform mat4 PV;			//combined view porjection matrix
+uniform int subDivisions;	//the number of subdivisions
+uniform mat4 mPV;			//combined view porjection matrix
 
 void main()
 {
@@ -20,42 +20,43 @@ void main()
 	vec4 v2 = gl_in[2].gl_Position; 
 
 	//determine the size of each sub-division 
-	float dx = abs(v0.x-v2.x)/sub_divisions;
-	float dz = abs(v0.z-v1.z)/sub_divisions;
+	float dx = abs(v0.x-v2.x) / subDivisions;
+	float dz = abs(v0.z-v1.z) / subDivisions;
 
-	float x=v0.x;
-	float z=v0.z;
+	float x = v0.x;
+	float z = v0.z;
 
 	//loop through all sub-divisions and emit vertices
 	//after mutiplying the world space vertex positions
 	// with the view projection matrix. We move first in
 	//x axis, once we reach the edge, we reset x to the initial 
 	//x value while incrementing the z value.
-	for(int j=0;j<sub_divisions*sub_divisions;j++) 
+	for(int j = 0; j < subDivisions * subDivisions; j++) 
 	{
-		gl_Position =  PV * vec4(x,0,z,1);
-		vertex_color = gs_in[0].color;
+		gl_Position =  mPV * vec4(x,0,z,1);
+		vVertexColor = gs_in[0].vColor;
 		EmitVertex();
 
-		gl_Position =  PV * vec4(x,0,z+dz,1);
-		vertex_color = gs_in[0].color;
+		gl_Position =  mPV * vec4(x,0,z+dz,1);
+		vVertexColor = gs_in[0].vColor;
 		EmitVertex();
 
-		gl_Position =  PV * vec4(x+dx,0,z,1);
-		vertex_color = gs_in[0].color;
+		gl_Position =  mPV * vec4(x+dx,0,z,1);
+		vVertexColor = gs_in[0].vColor;
 		EmitVertex();
 
-		gl_Position =  PV * vec4(x+dx,0,z+dz,1);
-		vertex_color = gs_in[0].color;
+		gl_Position =  mPV * vec4(x+dx,0,z+dz,1);
+		vVertexColor = gs_in[0].vColor;
 		EmitVertex();
 
 		EndPrimitive();
 
 		x+=dx;
 
-			if((j+1) %sub_divisions == 0) {
-		   x=v0.x;
-		   z+=dz;
+		if((j+1) % subDivisions == 0) 
+		{
+		   x = v0.x;
+		   z += dz;
 		}	
 	}	
 }

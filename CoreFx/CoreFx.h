@@ -28,23 +28,10 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <iterator>
+#include <functional>
 
-#define GL_CHECK_ERRORS \
-{\
-	GLenum err = glGetError();\
-	if (err != GL_NO_ERROR) {\
-	std::cerr << "Error " << err << " : " << gluErrorString(err) << std::endl;\
-	assert(false);}\
-}
-
-#define SAFE_DELETE(p) \
-	delete p; \
-	p = nullptr
-
-#define SAFE_DELETE_ARRAY(p) \
-	delete [] p; \
-	p = nullptr
-
+#include "macros.h"
 
 namespace CoreFx
 {
@@ -63,14 +50,20 @@ namespace CoreFx
 
 }; // namespace CoreFx
 
+#include "InstanceContainer.h"
+#include "Frame.h"
+#include "SceneObject.h"
+#include "Renderer.h"
+
 #include "Engine.h"
 
 #include "Texture2D.h"
 #include "TextureManager.h"
 
+#include "Geometry\VertexData.h"
+#include "Geometry\MaterialData.h"
+#include "Geometry\MeshData.h"
 
-#include "Frame.h"
-#include "SceneObject.h"
 
 #include "Shader.h"
 #include "Camera.h"
@@ -78,8 +71,12 @@ namespace CoreFx
 #include "Renderables\Axis.h"
 #include "Renderables\Grid.h"
 #include "Renderables\Cube.h"
+#include "Renderables\Mesh.h"
 
-
+#include "Renderers\RendererHelper.h"
+#include "Renderers\CubeRenderer.h"
+#include "Renderers\GridRenderer.h"
+#include "Renderers\AxisRenderer.h"
 
 
 #endif // COREFX_COREFX_H

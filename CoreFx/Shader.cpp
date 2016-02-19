@@ -8,27 +8,27 @@ namespace CoreFx
 
 
 Shader::Shader(void)
-	: _program(0)
-	, _totalShaders(0)
+	: mProgram(0)
+	, mTotalShaders(0)
 {
-	_shaders[VERTEX_SHADER] = 0;
-	_shaders[FRAGMENT_SHADER] = 0;
-	_shaders[GEOMETRY_SHADER] = 0;
-	_attributeList.clear();
-	_uniformLocationList.clear();
+	mShaders[VERTEX_SHADER] = 0;
+	mShaders[FRAGMENT_SHADER] = 0;
+	mShaders[GEOMETRY_SHADER] = 0;
+	mAttributeList.clear();
+	mUniformLocationList.clear();
 }
 
 Shader::~Shader(void)
 {
 	DeleteShaderProgram();
-	_attributeList.clear();
-	_uniformLocationList.clear();
+	mAttributeList.clear();
+	mUniformLocationList.clear();
 }
 
 void Shader::DeleteShaderProgram()
 {
-	glDeleteProgram(_program);
-	_program = 0;
+	glDeleteProgram(mProgram);
+	mProgram = 0;
 }
 
 void Shader::LoadFromString(GLenum whichShader, const std::string& source)
@@ -51,26 +51,49 @@ void Shader::LoadFromString(GLenum whichShader, const std::string& source)
 		cerr << "Compile log: " << infoLog << endl;
 		delete[] infoLog;
 	}
-	_shaders[_totalShaders++] = shader;
+	mShaders[mTotalShaders++] = shader;
 }
 
-void Shader::LoadFromFile(GLenum whichShader, const std::string& filename)
+void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, const std::vector<std::string> & includes)
 {
-	ifstream fp(filename, ifstream::in);
-	if (fp.is_open()) 
-	{
-		string line, buffer;
-		while (getline(fp, line)) 
+	string buffer;
+
+	for (auto it : includes)
+	{		
+		if (!MergeFile(buffer, it))
 		{
-			buffer.append(line);
-			buffer.append("\r\n");
+			cerr << "Error loading shader include file : '" << it << "'!" << endl;
+			return;
 		}
-		//copy to source
+	}
+
+	if (MergeFile(buffer, filename))
+	{
 		LoadFromString(whichShader, buffer);
 	}
 	else 
 	{
-		cerr << "Error loading shader: " << filename << endl;
+		cerr << "Error loading shader : '" << filename << "'!" << endl;
+	}
+}
+
+bool Shader::MergeFile(std::string& buffer, const std::string& filename) const
+{
+	ifstream fp(filename, ifstream::in);
+	if (fp.is_open())
+	{
+		string line;
+		while (getline(fp, line))
+		{
+			buffer.append(line);
+			buffer.append("\r\n");
+		}
+
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -78,42 +101,42 @@ void Shader::CreateAndLinkProgram()
 {
 	DeleteShaderProgram();
 
-	_program = glCreateProgram();
-	if (_shaders[VERTEX_SHADER] != 0) 
+	mProgram = glCreateProgram();
+	if (mShaders[VERTEX_SHADER] != 0)
 	{
-		glAttachShader(_program, _shaders[VERTEX_SHADER]);
+		glAttachShader(mProgram, mShaders[VERTEX_SHADER]);
 	}
-	if (_shaders[FRAGMENT_SHADER] != 0) 
+	if (mShaders[FRAGMENT_SHADER] != 0)
 	{
-		glAttachShader(_program, _shaders[FRAGMENT_SHADER]);
+		glAttachShader(mProgram, mShaders[FRAGMENT_SHADER]);
 	}
-	if (_shaders[GEOMETRY_SHADER] != 0) 
+	if (mShaders[GEOMETRY_SHADER] != 0)
 	{
-		glAttachShader(_program, _shaders[GEOMETRY_SHADER]);
+		glAttachShader(mProgram, mShaders[GEOMETRY_SHADER]);
 	}
 
 	//link and check whether the program links fine
 	GLint status;
-	glLinkProgram(_program);
-	glGetProgramiv(_program, GL_LINK_STATUS, &status);
+	glLinkProgram(mProgram);
+	glGetProgramiv(mProgram, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE) {
 		GLint infoLogLength;
 
-		glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
 		GLchar *infoLog = new GLchar[infoLogLength];
-		glGetProgramInfoLog(_program, infoLogLength, NULL, infoLog);
+		glGetProgramInfoLog(mProgram, infoLogLength, NULL, infoLog);
 		cerr << "Link log: " << infoLog << endl;
 		delete[] infoLog;
 	}
 
-	glDeleteShader(_shaders[VERTEX_SHADER]);
-	glDeleteShader(_shaders[FRAGMENT_SHADER]);
-	glDeleteShader(_shaders[GEOMETRY_SHADER]);
+	glDeleteShader(mShaders[VERTEX_SHADER]);
+	glDeleteShader(mShaders[FRAGMENT_SHADER]);
+	glDeleteShader(mShaders[GEOMETRY_SHADER]);
 }
 
 void Shader::Use()
 {
-	glUseProgram(_program);
+	glUseProgram(mProgram);
 }
 
 void Shader::UnUse()
@@ -123,22 +146,22 @@ void Shader::UnUse()
 
 void Shader::AddAttribute(const std::string& attribute)
 {
-	_attributeList[attribute] = glGetAttribLocation(_program, attribute.c_str());
+	mAttributeList[attribute] = glGetAttribLocation(mProgram, attribute.c_str());
 }
 
 void Shader::AddUniform(const std::string& uniform)
 {
-	_uniformLocationList[uniform] = glGetUniformLocation(_program, uniform.c_str());
+	mUniformLocationList[uniform] = glGetUniformLocation(mProgram, uniform.c_str());
 }
 
 GLuint Shader::operator[](const std::string& attribute)
 {
-	return _attributeList[attribute];
+	return mAttributeList[attribute];
 }
 
 GLuint Shader::operator()(const std::string& uniform)
 {
-	return _uniformLocationList[uniform];
+	return mUniformLocationList[uniform];
 }
 
 

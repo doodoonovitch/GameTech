@@ -21,9 +21,9 @@ Camera::~Camera(void)
 
 void Camera::SetupProjection(const float fovy, const float aspRatio)
 {
-	m_P = glm::perspective(fovy, aspRatio, 0.1f, 1000.0f);
-	m_fov = fovy;
-	m_aspectRatio = aspRatio;
+	mP = glm::perspective(fovy, aspRatio, 0.1f, 1000.0f);
+	mFov = fovy;
+	mAspectRatio = aspRatio;
 } 
 
 const glm::mat4 Camera::GetViewMatrix() const
@@ -33,7 +33,7 @@ const glm::mat4 Camera::GetViewMatrix() const
 
 const glm::mat4 Camera::GetProjectionMatrix() const
 {
-	return m_P;
+	return mP;
 }
  
 glm::mat4 Camera::GetMatrixUsingYawPitchRoll(const float yaw, const float pitch, const float roll)
@@ -44,12 +44,12 @@ glm::mat4 Camera::GetMatrixUsingYawPitchRoll(const float yaw, const float pitch,
 
 const float Camera::GetFOV() const
 {
-	return m_fov;
+	return mFov;
 } 
 
 const float Camera::GetAspectRatio() const
 {
-	return m_aspectRatio;
+	return mAspectRatio;
 }
 
 void Camera::LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::vec3 const & up)

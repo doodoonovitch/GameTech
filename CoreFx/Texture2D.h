@@ -14,7 +14,7 @@ public:
 
 	inline GLuint GetId() const
 	{
-		return m_id;
+		return mId;
 	}
 
 private:
@@ -24,12 +24,12 @@ private:
 
 	void SetId(GLuint id)
 	{
-		m_id = id;
+		mId = id;
 	}
 
 private:
 
-	GLuint m_id;
+	GLuint mId;
 
 	friend class TextureManager;
 };

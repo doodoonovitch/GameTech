@@ -6,7 +6,7 @@ namespace CoreFx
 
 
 TextureManager::TextureManager()
-	: m_default2D(nullptr)
+	: mDefault2D(nullptr)
 {
 }
 
@@ -20,24 +20,24 @@ void TextureManager::Release()
 {
 	ReleaseAllTexture2D();
 
-	if (m_default2D != nullptr)
+	if (mDefault2D != nullptr)
 	{
-		glDeleteTextures(1, &m_default2D->m_id);
-		SAFE_DELETE(m_default2D);
+		glDeleteTextures(1, &mDefault2D->mId);
+		SAFE_DELETE(mDefault2D);
 	}
 }
 
 void TextureManager::ReleaseAllTexture2D()
 {
-	if (m_2DTexMap.empty())
+	if (m2DTexMap.empty())
 		return;
 
-	size_t max = m_2DTexMap.size();
+	size_t max = m2DTexMap.size();
 	std::vector<GLuint> ids(max);
 	size_t count = 0;
-	for (Tex2DIdMap::const_iterator it = m_2DTexMap.begin(); it != m_2DTexMap.end(); ++it)
+	for (Tex2DIdMap::const_iterator it = m2DTexMap.begin(); it != m2DTexMap.end(); ++it)
 	{
-		if (it->second->GetId() != m_default2D->GetId())
+		if (it->second->GetId() != mDefault2D->GetId())
 		{
 			ids[count++] = it->second->GetId();
 		}
@@ -45,7 +45,7 @@ void TextureManager::ReleaseAllTexture2D()
 		delete it->second;
 	}
 
-	m_2DTexMap.clear();
+	m2DTexMap.clear();
 
 	glDeleteTextures((GLsizei)count, ids.data());
 }
@@ -96,7 +96,7 @@ void TextureManager::Initialize()
 		free(pData);
 	}
 
-	m_default2D = new Texture2D(id);
+	mDefault2D = new Texture2D(id);
 
 }
 
@@ -106,16 +106,16 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
 	s.resize(filename.size());
 	std::transform(filename.begin(), filename.end(), s.begin(), std::tolower);
 
-	Tex2DIdMap::const_iterator it = m_2DTexMap.find(s);
+	Tex2DIdMap::const_iterator it = m2DTexMap.find(s);
 
-	if (it != m_2DTexMap.end())
+	if (it != m2DTexMap.end())
 	{
 		return it->second;
 	}
 	else
 	{
-		Texture2D* tex = new Texture2D(m_default2D->GetId());
-		m_2DTexMap[s] = tex;
+		Texture2D* tex = new Texture2D(mDefault2D->GetId());
+		m2DTexMap[s] = tex;
 
 		GLuint id = SOIL_load_OGL_texture(s.c_str(), SOIL_LOAD_AUTO, 0, SOIL_FLAG_INVERT_Y);
 		if (id != 0)

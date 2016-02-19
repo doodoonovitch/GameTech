@@ -6,7 +6,7 @@ namespace CoreFx
 
 
 Texture2D::Texture2D(GLuint id)
-	: m_id(id)
+	: mId(id)
 {
 }
 

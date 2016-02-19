@@ -8,13 +8,16 @@ namespace CoreFx
 	// =======================================================================
 
 
-	Engine* Engine::s_instance = nullptr;
+	Engine* Engine::sInstance = nullptr;
 
 Engine::Engine()
-	: m_textureManager(nullptr)
-	, m_sceneObjects(nullptr)
-	, m_initialized(false)
+	: mTextureManager(nullptr)
+	, mSceneObjects(nullptr)
+	, mRenderers(nullptr)
+	, mCamera(nullptr)
+	, mInitialized(false)
 {
+	memset(mBufferIds, 0, sizeof(mBufferIds));
 }
 
 
@@ -25,34 +28,47 @@ Engine::~Engine()
 
 void Engine::InternalInitialize()
 {
-	if (!m_initialized)
+	if (!mInitialized)
 	{
-		m_textureManager = new TextureManager();
-		m_textureManager->Initialize();
+		mTextureManager = new TextureManager();
+		mTextureManager->Initialize();
 
-		m_sceneObjects = new SceneObjectList();
+		mSceneObjects = new SceneObjectList();
 
-		m_initialized = true;
+		mRenderers = new RendererContainer(64, 16);
+
+		glGenBuffers(__BufferId_Count__, mBufferIds);
+		glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(FrameData), nullptr, GL_DYNAMIC_DRAW);
+		GL_CHECK_ERRORS;
+		glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]);
+		GL_CHECK_ERRORS;
+
+		mInitialized = true;
 	}
 }
 
 void Engine::InternalRelease()
 {
-	if (m_initialized)
+	if (mInitialized)
 	{
-		SAFE_DELETE(m_camera);
+		glDeleteBuffers(__BufferId_Count__, mBufferIds);
 
-		for (auto o : *m_sceneObjects)
+		SAFE_DELETE(mCamera);
+
+		SAFE_DELETE(mRenderers);
+
+		for (auto o : *mSceneObjects)
 		{
 			delete o;
 		}
 
-		SAFE_DELETE(m_sceneObjects);
+		SAFE_DELETE(mSceneObjects);
 
-		m_textureManager->Release();
-		SAFE_DELETE(m_textureManager);
+		mTextureManager->Release();
+		SAFE_DELETE(mTextureManager);
 
-		m_initialized = false;
+		mInitialized = false;
 	}
 }
 
@@ -64,30 +80,30 @@ void Engine::Initialize()
 void Engine::Release()
 {
 	GetInstance()->InternalRelease();
-	SAFE_DELETE(s_instance);
+	SAFE_DELETE(sInstance);
 }
 
 Engine* Engine::GetInstance()
 {
-	if (s_instance == nullptr)
+	if (sInstance == nullptr)
 	{
-		s_instance = new Engine();
+		sInstance = new Engine();
 	}
 
-	assert(s_instance != nullptr);
-	return s_instance;
+	assert(sInstance != nullptr);
+	return sInstance;
 }
 
-void Engine::AddSceneObject(SceneObject* obj)
+void Engine::AddUnrenderedSceneObject(SceneObject* obj)
 {
-	assert(m_initialized);
+	assert(mInitialized);
 
-	m_sceneObjects->push_back(obj);
+	mSceneObjects->push_back(obj);
 }
 
 void Engine::UpdateObjects()
 {
-	for (SceneObjectList::const_iterator it = m_sceneObjects->begin(); it != m_sceneObjects->end(); ++it)
+	for (SceneObjectList::const_iterator it = mSceneObjects->begin(); it != mSceneObjects->end(); ++it)
 	{
 		SceneObject* obj = *it;
 		Frame* frame = obj->GetFrame();
@@ -96,23 +112,50 @@ void Engine::UpdateObjects()
 			frame->BuildMatrix();
 		}
 	}
-	assert(m_camera != nullptr);
-	assert(m_camera->GetFrame() != nullptr);
-	m_camera->GetFrame()->BuildMatrix();
+
+	mRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->BeginFrame();
+	});
+
+	assert(mCamera != nullptr);
+	assert(mCamera->GetFrame() != nullptr);
+	mCamera->GetFrame()->BuildMatrix();
 }
 
 void Engine::RenderObjects()
 {
-	glm::mat4 V = m_camera->GetViewMatrix();
-	glm::mat4 P = m_camera->GetProjectionMatrix();
-	glm::mat4 VP = P*V;
+	//mFrameData.mProj = mCamera->GetProjectionMatrix();
+	//mFrameData.mView = mCamera->GetViewMatrix();
 
-	for (SceneObjectList::const_iterator it = m_sceneObjects->begin(); it != m_sceneObjects->end(); ++it)
+	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
+	FrameData* buffer = (FrameData*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(FrameData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+	memcpy(glm::value_ptr(buffer->mView), glm::value_ptr(mCamera->GetViewMatrix()), sizeof(glm::mat4));
+	memcpy(glm::value_ptr(buffer->mProj), glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
+	//buffer->mView = mCamera->GetViewMatrix();
+	//buffer->mProj = mCamera->GetProjectionMatrix();
+
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+
+
+	mRenderers->ForEach([](Renderer * renderer)
 	{
-		SceneObject* obj = *it;
-		obj->Render(VP);
-	}
+		renderer->Render();
+	});
+
+	//for (SceneObjectList::const_iterator it = m_sceneObjects->begin(); it != m_sceneObjects->end(); ++it)
+	//{
+	//	SceneObject* obj = *it;
+	//	obj->Render(VP);
+	//}
+
+	mRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->EndFrame();
+	});
+
 }
+
 
 
 	// =======================================================================

@@ -10,9 +10,10 @@ namespace CoreFx
 	// =======================================================================
 	// =======================================================================
 
+	class SceneObject;
+	typedef InstanceContainer<SceneObject> SceneObjectContainer;
 
-
-class SceneObject
+class SceneObject : public ObjectInstance
 {
 public:
 
@@ -24,9 +25,6 @@ public:
 	inline void SetFrame(Frame* frame);
 	inline void SwapFrame(Frame*& frame);
 
-	virtual void Update();
-	virtual void Render(glm::mat4 const & VP) = 0;
-
 private:
 
 	SceneObject(const SceneObject& rhs) = delete;
@@ -35,7 +33,7 @@ private:
 
 protected:
 
-	Frame* m_pFrame;
+	Frame* mFrame;
 
 };
 
@@ -46,19 +44,19 @@ protected:
 
 inline Frame* SceneObject::GetFrame() const
 {
-	return m_pFrame;
+	return mFrame;
 }
 
 
 inline void SceneObject::SetFrame(Frame* frame)
 {
-	delete m_pFrame;
-	m_pFrame = frame;
+	delete mFrame;
+	mFrame = frame;
 }
 
 inline void SceneObject::SwapFrame(Frame*& frame)
 {
-	std::swap(m_pFrame, frame);
+	std::swap(mFrame, frame);
 }
 
 

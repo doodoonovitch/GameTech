@@ -39,6 +39,8 @@ public:
 
 	void BuildMatrix();
 
+	inline bool HasNewValue() const;
+	inline void ClearHasNewValue();
 
 private:
 
@@ -47,11 +49,14 @@ private:
 
 private:
 
-	glm::mat4 m_matrix;
-	glm::mat4 m_invMatrix;
-	glm::quat m_rotation;
-	glm::vec3 m_position;
-	glm::vec3 m_scale;
+	glm::mat4 mMatrix;
+	glm::mat4 mInvMatrix;
+	glm::quat mRotation;
+	glm::vec3 mPosition;
+	glm::vec3 mScale;
+
+	bool mHasNewValue;
+	bool mIsDirty;
 };
 
 
@@ -63,64 +68,78 @@ private:
 
 inline void Frame::SetRotation(const glm::quat& q)
 {
-	m_rotation = q;
+	mRotation = q;
+	mIsDirty = true;
 }
 
 inline void Frame::SetPosition(glm::vec4 const & v)
 {
-	m_position.x = v.x;
-	m_position.y = v.y;
-	m_position.z = v.z;
+	mPosition.x = v.x;
+	mPosition.y = v.y;
+	mPosition.z = v.z;
+	mIsDirty = true;
 }
 
 inline void Frame::SetPosition(float x, float y, float z)
 {
-	m_position.x = x;
-	m_position.y = y;
-	m_position.z = z;
+	mPosition.x = x;
+	mPosition.y = y;
+	mPosition.z = z;
+	mIsDirty = true;
 }
 
 inline void Frame::SetPosition(glm::vec3 const & p)
 {
-	m_position = p;
+	mPosition = p;
+	mIsDirty = true;
 }
 
 inline glm::vec3 const & Frame::GetPosition() const
 {
-	return m_position;
+	return mPosition;
 }
 
 inline glm::quat const & Frame::GetRotation() const
 {
-	return m_rotation;
+	return mRotation;
 }
 
 inline glm::mat4 const & Frame::GetMatrix() const
 {
-	return m_matrix;
+	return mMatrix;
 }
 
 inline glm::mat4 const & Frame::GetMatrixInverse() const
 {
-	return m_invMatrix;
+	return mInvMatrix;
 }
 
 inline glm::vec3 Frame::GetRight() const
 {
-	return glm::vec3(m_matrix[0]);
-	//return glm::vec3(m_matrix[0].x, m_matrix[1].x, m_matrix[2].x);
+	return glm::vec3(mMatrix[0]);
+	//return glm::vec3(mMatrix[0].x, mMatrix[1].x, mMatrix[2].x);
 }
 
 inline glm::vec3 Frame::GetUp() const
 {
-	return glm::vec3(m_matrix[1]);
-	//return glm::vec3(m_matrix[0].y, m_matrix[1].y, m_matrix[2].y);
+	return glm::vec3(mMatrix[1]);
+	//return glm::vec3(mMatrix[0].y, mMatrix[1].y, mMatrix[2].y);
 }
 
 inline glm::vec3 Frame::GetLook() const
 {
-	return glm::vec3(m_matrix[2]);
-	//return glm::vec3(m_matrix[0].z, m_matrix[1].z, m_matrix[2].z);
+	return glm::vec3(mMatrix[2]);
+	//return glm::vec3(mMatrix[0].z, mMatrix[1].z, mMatrix[2].z);
+}
+
+inline bool Frame::HasNewValue() const
+{
+	return mHasNewValue;
+}
+
+inline void Frame::ClearHasNewValue()
+{
+	mHasNewValue = false;
 }
 
 

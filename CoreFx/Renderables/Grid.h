@@ -10,13 +10,11 @@ namespace CoreFx
 	{
 
 
-class Grid : public RenderableObject<1>
+class Grid : public SceneObject
 {
 public:
-	Grid(int width=10, int depth=10);
+	Grid();
 	virtual ~Grid();
-
-	virtual void Render(glm::mat4 const & VP) override;
 
 private:
 

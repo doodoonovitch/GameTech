@@ -58,23 +58,27 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\GameTechBase.props" />
     <Import Project="..\OpenGL.Win32.props" />
+    <Import Project="..\GameTechLibs.props" />
+    <Import Project="..\Debug.x86.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\GameTechBase.props" />
     <Import Project="..\OpenGL.Win32.props" />
+    <Import Project="..\GameTechLibs.props" />
+    <Import Project="..\Release.x86.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\GameTechBase.props" />
     <Import Project="..\OpenGL.x64.props" />
+    <Import Project="..\GameTechLibs.props" />
+    <Import Project="..\Debug.x64.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\GameTechBase.props" />
     <Import Project="..\OpenGL.x64.props" />
+    <Import Project="..\GameTechLibs.props" />
+    <Import Project="..\Release.x64.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -136,10 +140,21 @@
     <ClInclude Include="CoreFx.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Frame.h" />
+    <ClInclude Include="Geometry\MaterialData.h" />
+    <ClInclude Include="Geometry\VertexData.h" />
+    <ClInclude Include="Geometry\MeshData.h" />
+    <ClInclude Include="InstanceContainer.h" />
+    <ClInclude Include="Macros.h" />
     <ClInclude Include="Renderables\Axis.h" />
     <ClInclude Include="Renderables\Cube.h" />
     <ClInclude Include="Renderables\Grid.h" />
+    <ClInclude Include="Renderables\Mesh.h" />
     <ClInclude Include="Renderables\RenderableObject.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Renderers\AxisRenderer.h" />
+    <ClInclude Include="Renderers\CubeRenderer.h" />
+    <ClInclude Include="Renderers\GridRenderer.h" />
+    <ClInclude Include="Renderers\RendererHelper.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
@@ -151,9 +166,16 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="Geometry\MaterialData.cpp" />
+    <ClCompile Include="Geometry\MeshData.cpp" />
     <ClCompile Include="Renderables\Axis.cpp" />
     <ClCompile Include="Renderables\Cube.cpp" />
     <ClCompile Include="Renderables\Grid.cpp" />
+    <ClCompile Include="Renderables\Mesh.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Renderers\AxisRenderer.cpp" />
+    <ClCompile Include="Renderers\CubeRenderer.cpp" />
+    <ClCompile Include="Renderers\GridRenderer.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -168,6 +190,7 @@
   <ItemGroup>
     <None Include="..\Data\Shaders\axis_shader.frag" />
     <None Include="..\Data\Shaders\axis_shader.vert" />
+    <None Include="..\Data\Shaders\common.inc" />
     <None Include="..\Data\Shaders\cube_shader.frag" />
     <None Include="..\Data\Shaders\cube_shader.vert" />
     <None Include="..\Data\Shaders\flat.frag" />
@@ -176,8 +199,11 @@
     <None Include="..\Data\Shaders\grid_shader.vert" />
     <None Include="..\Data\Shaders\LoadImage_shader.frag" />
     <None Include="..\Data\Shaders\LoadImage_shader.vert" />
+    <None Include="..\Data\Shaders\mesh_material_def.inc" />
     <None Include="..\Data\Shaders\mesh_shader.frag" />
     <None Include="..\Data\Shaders\mesh_shader.vert" />
+    <None Include="..\Data\Shaders\mesh_shader_NUV.frag" />
+    <None Include="..\Data\Shaders\mesh_shader_NUV.vert" />
     <None Include="..\Data\Shaders\Ripple_shader.frag" />
     <None Include="..\Data\Shaders\Ripple_shader.vert" />
     <None Include="..\Data\Shaders\SimpleTriangle_shader.frag" />
