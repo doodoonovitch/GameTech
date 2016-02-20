@@ -202,6 +202,9 @@
     <None Include="..\Data\Shaders\common.inc">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\cube_shader.geom">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

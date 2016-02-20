@@ -13,9 +13,8 @@ GridRenderer::GridRenderer(int width, int depth, size_t capacity, size_t pageSiz
 	: SceneObjectRenderer<Renderables::Grid, 1>(capacity, pageSize)
 {
 	//setup shader
-	std::vector<std::string> vertexIncludes, fragmentIncludes;
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid_shader.vert", vertexIncludes);
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid_shader.frag", fragmentIncludes);
+	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid_shader.vert");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid_shader.frag");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddAttribute("vVertex");

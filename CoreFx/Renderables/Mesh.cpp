@@ -19,51 +19,54 @@ Mesh::Mesh(const Geometry::MeshData& meshData)
 	meshData.GetVertexComponentOffsets(baseptr, position, normal, tangent, binormal, uv, vertexDataSize);
 
 	//setup shader
-	std::vector<std::string> vertexIncludes, fragmentIncludes;
-	vertexIncludes.push_back("shader/mesh_material_def.inc");
+	std::vector<std::string> vertexShaderFiles, fragmentShaderFiles;
+	vertexShaderFiles.push_back("shader/mesh_material_def.inc");
 
 	switch (meshData.GetVertexType())
 	{
 	case Geometry::VertexType::Position:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormal:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader_N.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader_N.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader_N.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader_N.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangent:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader_NT.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader_NT.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader_NT.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader_NT.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangentBinormal:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader_NTB.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader_NTB.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader_NTB.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader_NTB.frag");
 		break;
 
 	case Geometry::VertexType::PositionUV:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader_UV.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader_UV.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader_UV.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader_UV.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalUV:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader_NUV.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader_NUV.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader_NUV.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader_NUV.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangentUV:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader_NTUV.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader_NTUV.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader_NTUV.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader_NTUV.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangentBinormalUV:
-		mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/mesh_shader_NTBUV.vert", vertexIncludes);
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh_shader_NTBUV.frag", fragmentIncludes);
+		vertexShaderFiles.push_back("shaders/mesh_shader_NTBUV.vert");
+		fragmentShaderFiles.push_back("shaders/mesh_shader_NTBUV.frag");
 		break;
 	}
+
+	mShader.LoadFromFile(GL_VERTEX_SHADER, vertexShaderFiles);
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, fragmentShaderFiles);
 
 	mShader.CreateAndLinkProgram();
 	mShader.Use();

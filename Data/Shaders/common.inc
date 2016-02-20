@@ -1,6 +1,6 @@
-#version 430
+#version 330
 
-layout (binding = 0, std140, shared) uniform FrameData
+layout (std140, shared) uniform FrameData
 {
 	mat4 mView;
 	mat4 mProj;

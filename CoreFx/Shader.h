@@ -36,8 +36,9 @@ public:
 public:
 	Shader(void);
 	~Shader(void);
-	void LoadFromString(GLenum whichShader, const std::string& source);
-	void LoadFromFile(GLenum whichShader, const std::string& filename, const std::vector<std::string> & includes);
+	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources);
+	void LoadFromFile(GLenum whichShader, const std::string& filename);
+	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames);
 	void CreateAndLinkProgram();
 	void Use();
 	void UnUse();
@@ -48,14 +49,19 @@ public:
 	void DeleteShaderProgram();
 	GLuint GetProgram() const { return mProgram; }
 
+	void SetupFrameDataBlockBinding() const;
+
+	static const char* ShaderName(GLenum shaderType);
+
 private:
 	bool MergeFile(std::string& buffer, const std::string& filename) const;
 
 private:
-	enum ShaderType { VERTEX_SHADER, FRAGMENT_SHADER, GEOMETRY_SHADER };
+
+	static std::string sCommonInclude;
+
 	GLuint mProgram;
-	int mTotalShaders;
-	GLuint mShaders[3];
+	std::vector<GLuint> mShaders;
 	std::map<std::string, GLuint> mAttributeList;
 	std::map<std::string, GLuint> mUniformLocationList;
 };

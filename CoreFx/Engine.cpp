@@ -39,7 +39,7 @@ void Engine::InternalInitialize()
 
 		glGenBuffers(__BufferId_Count__, mBufferIds);
 		glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(FrameData), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(FrameData), nullptr, GL_STATIC_DRAW);
 		GL_CHECK_ERRORS;
 		glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]);
 		GL_CHECK_ERRORS;

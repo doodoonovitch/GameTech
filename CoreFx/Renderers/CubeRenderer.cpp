@@ -12,15 +12,14 @@ CubeRenderer::CubeRenderer(std::string const & texture, size_t capacity, size_t 
 	, mTexture(nullptr)
 {
 	//setup shader
-	std::vector<std::string> vertexIncludes, fragmentIncludes;
-	vertexIncludes.push_back("shaders/common.inc");
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube_shader.vert", vertexIncludes);
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube_shader.frag", fragmentIncludes);
+	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube_shader.vert");
+	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/cube_shader.geom");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube_shader.frag");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
-		mShader.AddAttribute("vVertex");
-		mShader.AddAttribute("vUV");
-		mShader.AddAttribute("mModel");
+		mShader.AddAttribute("vPos");
+		mShader.AddAttribute("vTexUV");
+		mShader.AddAttribute("mPerInstanceModel");
 
 		mShader.AddUniform("texSampler1");
 
@@ -30,13 +29,15 @@ CubeRenderer::CubeRenderer(std::string const & texture, size_t capacity, size_t 
 
 	GL_CHECK_ERRORS;
 
+	mShader.SetupFrameDataBlockBinding();
+
 
 	std::cout << std::endl;
 	std::cout << "Cube info..." << std::endl;
 	std::cout << "Vertex attribute index : " << std::endl;
-	std::cout << "\tvVertex : " << mShader["vVertex"] << std::endl;
-	std::cout << "\tvUV : " << mShader["vUV"] << std::endl;
-	std::cout << "\tmModel : " << mShader["mModel"] << std::endl;
+	std::cout << "\tvPos : " << mShader["vPos"] << std::endl;
+	std::cout << "\tvTexUV : " << mShader["vTexUV"] << std::endl;
+	std::cout << "\tmPerInstanceModel : " << mShader["mPerInstanceModel"] << std::endl;
 	std::cout << std::endl;
 	std::cout << "Uniform attribute index : " << std::endl;
 	std::cout << "\ttexSampler1 : " << mShader("texSampler1") << std::endl;
@@ -116,7 +117,7 @@ CubeRenderer::CubeRenderer(std::string const & texture, size_t capacity, size_t 
 	GL_CHECK_ERRORS;
 
 	glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[VBO_PerInstanceData]);
-	GLuint mvpLoc = mShader["mModel"];
+	GLuint mvpLoc = mShader["mPerInstanceModel"];
 	// Loop over each column of the matrix...
 	for (int i = 0; i < 4; i++)
 	{
@@ -132,11 +133,6 @@ CubeRenderer::CubeRenderer(std::string const & texture, size_t capacity, size_t 
 	GL_CHECK_ERRORS;
 
 	glBindVertexArray(0);
-
-	//GLuint blockIndex = glGetUniformBlockIndex(mShader.GetProgram(), "FrameData");
-	//glUniformBlockBinding(mShader.GetProgram(), blockIndex, Engine::FrameDataBuffer_BindingIndex);
-	//GL_CHECK_ERRORS;
-
 
 	mTexture = Engine::GetInstance()->GetTextureManager()->LoadTexture2D(texture);
 }
