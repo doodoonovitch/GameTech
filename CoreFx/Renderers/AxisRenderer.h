@@ -10,11 +10,14 @@ namespace CoreFx
 	{
 
 
-class AxisRenderer : public SceneObjectRenderer<Renderables::Axis, 1>
+class AxisRenderer : public RendererHelper<Renderables::Axis, 1>
 {
 public:
-	AxisRenderer(size_t capacity = 2, size_t pageSize = 2);
+	AxisRenderer();
 	virtual ~AxisRenderer();
+
+	virtual void BeginFrame() override {}
+	virtual void EndFrame() override {}
 
 	virtual void Render() override;
 

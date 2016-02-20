@@ -9,8 +9,8 @@ namespace CoreFx
 
 
 
-GridRenderer::GridRenderer(int width, int depth, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Grid, 1>(capacity, pageSize)
+GridRenderer::GridRenderer(int width, int depth)
+	: RendererHelper<Renderables::Grid, 1>()
 {
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid_shader.vert");
@@ -18,20 +18,23 @@ GridRenderer::GridRenderer(int width, int depth, size_t capacity, size_t pageSiz
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddAttribute("vVertex");
-		mShader.AddUniform("mMVP");
+
 		mShader.AddUniform("vGridSize");
+
 		//pass values of constant uniforms at initialization
 		glUniform2f(mShader("vGridSize"), (float)width, (float)depth);
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
 
+	mShader.SetupFrameDataBlockBinding();
+
+
 	std::cout << std::endl;
 	std::cout << "Grid info..." << std::endl;
 	std::cout << "Vertex attribute index : " << std::endl;
 	std::cout << "vVertex : " << mShader["vVertex"] << std::endl;
 	std::cout << "Uniform attribute index : " << std::endl;
-	std::cout << "mMVP : " << mShader("mMVP") << std::endl;
 	std::cout << "vGridSize : " << mShader("vGridSize") << std::endl;
 
 
@@ -45,14 +48,14 @@ GridRenderer::GridRenderer(int width, int depth, size_t capacity, size_t pageSiz
 
 	for (i = -width_2; i <= width_2; i++)
 	{
-		vertices[count++] = glm::vec3(i, 0, -depth_2);
-		vertices[count++] = glm::vec3(i, 0, depth_2);
+		vertices[count++] = glm::vec3(i, -0.1f, -depth_2);
+		vertices[count++] = glm::vec3(i, -0.1f, depth_2);
 	}
 
 	for (i = -depth_2; i <= depth_2; i++)
 	{
-		vertices[count++] = glm::vec3(-width_2, 0, i);
-		vertices[count++] = glm::vec3(width_2, 0, i);
+		vertices[count++] = glm::vec3(-width_2, -0.1f, i);
+		vertices[count++] = glm::vec3(width_2, -0.1f, i);
 	}
 
 	//setup vao and vbo stuff
@@ -84,7 +87,6 @@ GridRenderer::~GridRenderer()
 void GridRenderer::Render()
 {
 	mShader.Use();
-		//glUniformMatrix4fv(mShader("mMVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 		glBindVertexArray(mVaoID);
 			glDrawArrays(GL_LINES, 0, m_vertexCount);
 		glBindVertexArray(0);

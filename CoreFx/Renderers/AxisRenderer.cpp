@@ -9,8 +9,8 @@ namespace CoreFx
 
 
 
-AxisRenderer::AxisRenderer(size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Axis, 1>(capacity, pageSize)
+AxisRenderer::AxisRenderer()
+	: RendererHelper<Renderables::Axis, 1>()
 {
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis_shader.vert");
@@ -19,11 +19,12 @@ AxisRenderer::AxisRenderer(size_t capacity, size_t pageSize)
 	mShader.Use();
 		mShader.AddAttribute("vVertex");
 		mShader.AddAttribute("vColor");
-		mShader.AddUniform("mMVP");
 		//pass values of constant uniforms at initialization
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
+
+	mShader.SetupFrameDataBlockBinding();
 
 	Vertex vertices[] =
 	{
@@ -70,7 +71,6 @@ AxisRenderer::~AxisRenderer()
 void AxisRenderer::Render()
 {
 	mShader.Use();
-		//glUniformMatrix4fv(mShader("mMVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 		glBindVertexArray(mVaoID);
 			glDrawArrays(GL_LINES, 0, 6);
 		glBindVertexArray(0);

@@ -10,11 +10,14 @@ namespace CoreFx
 	{
 
 
-class GridRenderer : public SceneObjectRenderer<Renderables::Grid, 1>
+class GridRenderer : public RendererHelper<Renderables::Grid, 1>
 {
 public:
-	GridRenderer(int width=10, int depth=10, size_t capacity = 4, size_t pageSize = 2);
+	GridRenderer(int width=10, int depth=10);
 	virtual ~GridRenderer();
+
+	virtual void BeginFrame() override {}
+	virtual void EndFrame() override {}
 
 	virtual void Render() override;
 

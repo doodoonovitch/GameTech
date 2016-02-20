@@ -50,6 +50,12 @@ void SimpleCamera::OnInit()
 
 		Engine* engine = Engine::GetInstance();
 
+		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
+		engine->AttachRenderer(gridRenderer);
+
+		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
+		engine->AttachRenderer(axisRenderer);
+		
 		int xCount = 30;
 		int yCount = 30;
 		int zCount = 30;
@@ -63,21 +69,12 @@ void SimpleCamera::OnInit()
 				for (auto k = 0; k < zCount; ++k)
 				{
 					Cube * cube = cubeRenderer->CreateCube(0);
-					cube->GetFrame()->SetPosition(glm::vec3(4.f * i, 4.f * k, -4.f * j));
+					cube->GetFrame()->SetPosition(glm::vec3(1.5f + 5.f * i, 1.f + 5.f * k, -1.5f + -5.f * j));
 				}
 			}
 		}
+		
 
-		//setup grid
-		//Grid * grid = new Grid(10, 10);
-		//engine->AddSceneObject(grid);
-
-		//Axis * axis = new Axis();
-		//engine->AddSceneObject(axis);
-
-		//Cube * cube = new Cube("medias/cube.dds");
-		//cube->GetFrame()->SetPosition(glm::vec3(-6, 1, -6));
-		//engine->AddSceneObject(cube);
 
 	//setup camera
 	m_pCamera = new Camera();
@@ -210,6 +207,14 @@ void SimpleCamera::OnIdle()
 {
 	bool bWalk = false, bStrafe = false;
 	float dx = 0, dy = 0;
+
+
+	if (GetAsyncKeyState(VK_ESC) & 0x8000)
+	{
+		glutLeaveMainLoop();
+		return;
+	}
+
 	if (GetAsyncKeyState(VK_Z) & 0x8000)
 	{
 		dy += (MOVE_SPEED);
