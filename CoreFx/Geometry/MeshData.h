@@ -50,7 +50,7 @@ public:
 
 public:
 
-	MeshData(VertexType vertexType, int vertexCount, int subMeshCount);
+	MeshData(VertexType vertexType, int vertexCount, int polygonCount, int subMeshCount);
 	~MeshData();
 
 	MeshData(const MeshData &) = delete;
@@ -64,6 +64,11 @@ public:
 	int GetVertexCount() const
 	{
 		return mVertexCount;
+	}
+
+	int GetPolygonCount() const
+	{
+		return mPolygonCount;
 	}
 
 	const std::vector<SubMeshDesc>& GetSubMeshDescList() const
@@ -147,6 +152,7 @@ private:
 
 
 	int mVertexCount;
+	int mPolygonCount;
 	VertexType mVertexType;
 
 	std::vector<SubMeshDesc> mSubMeshDescList;

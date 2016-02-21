@@ -74,7 +74,19 @@ void SimpleCamera::OnInit()
 			}
 		}
 		
-
+		std::vector<Geometry::MeshData*> meshDataList;
+		int loadFailedCount = 0;
+		Geometry::MeshData::Load("Medias/test/Girl.xml", meshDataList, loadFailedCount);
+		if (!meshDataList.empty())
+		{
+			Renderers::MeshRenderer * meshRenderer = new Renderers::MeshRenderer(*meshDataList.front());
+			engine->AttachRenderer(meshRenderer);
+		}
+		for (auto it : meshDataList)
+		{
+			delete it;
+		}
+		meshDataList.clear();
 
 	//setup camera
 	m_pCamera = new Camera();

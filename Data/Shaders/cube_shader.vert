@@ -1,7 +1,7 @@
 
-layout (location = 0) in vec3 vPos;
-layout (location = 1) in vec2 vTexUV;
-layout (location = 2) in mat4 mPerInstanceModel;
+layout (location = POSITION_ATTRIBUTE) in vec3 vPos;
+layout (location = UV_ATTRIBUTE) in vec2 vTexUV;
+layout (location = MODEL_MATRIX_ATTRIBUTE) in mat4 mPerInstanceModel;
 
 out VS_OUT
 {

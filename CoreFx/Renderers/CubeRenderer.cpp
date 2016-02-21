@@ -104,8 +104,8 @@ CubeRenderer::CubeRenderer(std::string const & texture, size_t capacity, size_t 
 	glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(Vertex), &vertices[0].pos.x, GL_STATIC_DRAW);
 	GL_CHECK_ERRORS;
 
-	glEnableVertexAttribArray(Shader::VERTEX_ATTRIBUTE);
-	glVertexAttribPointer(Shader::VERTEX_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
+	glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	GL_CHECK_ERRORS;
 
 	glEnableVertexAttribArray(Shader::UV_ATTRIBUTE);

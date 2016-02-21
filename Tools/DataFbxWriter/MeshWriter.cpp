@@ -350,7 +350,8 @@ tinyxml2::XMLElement * MeshWriter::ExportNodeRecursive(tinyxml2::XMLElement * pa
 
 tinyxml2::XMLElement * MeshWriter::ExportNode(tinyxml2::XMLElement * parentNode, const FbxNode* fbxNode)
 {
-	tinyxml2::XMLElement * node = mXmlDoc.NewElement(fbxNode->GetName());
+	tinyxml2::XMLElement * node = mXmlDoc.NewElement("Node");
+	node->SetAttribute("Name", fbxNode->GetName());
 
 	const FbxNodeAttribute *fbxNodeAttribute = fbxNode->GetNodeAttribute();
 	if (fbxNodeAttribute != nullptr)

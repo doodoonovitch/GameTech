@@ -59,7 +59,6 @@ public:
 		return mRenderers->Detach(renderer);
 	}
 
-
 private:
 
 	void InternalInitialize();

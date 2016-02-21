@@ -79,6 +79,9 @@
     <ClInclude Include="Renderers\AxisRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\MeshRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -117,6 +120,9 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\AxisRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\MeshRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
   </ItemGroup>

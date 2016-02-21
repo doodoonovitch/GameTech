@@ -14,12 +14,13 @@ public:
 
 	enum
 	{
-		VERTEX_ATTRIBUTE			= 0,
+		POSITION_ATTRIBUTE			= 0,
 		UV_ATTRIBUTE				= 1,
 		NORMAL_ATTRIBUTE			= 2,
 		TANGENT_ATTRIBUTE			= 3,
 		BINORMAL_ATTRIBUTE			= 4,
 		MATERIALID_ATTRIBUTE		= 5,
+		MODEL_MATRIX_ATTRIBUTE		= 6,
 
 		USER_FIRST_ATTRIBUTE,
 	};
@@ -36,9 +37,9 @@ public:
 public:
 	Shader(void);
 	~Shader(void);
-	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources);
-	void LoadFromFile(GLenum whichShader, const std::string& filename);
-	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames);
+	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, bool includeCommon = true);
+	void LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon = true);
+	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, bool includeCommon = true);
 	void CreateAndLinkProgram();
 	void Use();
 	void UnUse();

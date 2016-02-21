@@ -68,8 +68,8 @@ GridRenderer::GridRenderer(int width, int depth)
 		glBufferData(GL_ARRAY_BUFFER, ((width + 1) + (depth + 1)) * 2 * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 		GL_CHECK_ERRORS;
 		 
-		glEnableVertexAttribArray(Shader::VERTEX_ATTRIBUTE);
-		glVertexAttribPointer(Shader::VERTEX_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
+		glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		GL_CHECK_ERRORS;
 		 
 	glBindVertexArray(0);

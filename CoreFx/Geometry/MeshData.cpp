@@ -16,8 +16,9 @@ const char* const MeshData::cRGBA[4] = { "R", "G", "B", "A" };
 const char* const MeshData::cUV[2] = { "U", "V" };
 
 
-MeshData::MeshData(VertexType vertexType, int vertexCount, int subMeshCount)
+MeshData::MeshData(VertexType vertexType, int vertexCount, int polygonCount, int subMeshCount)
 	: mVertexCount(vertexCount)
+	, mPolygonCount(polygonCount)
 	, mVertexType(vertexType)
 	, mSubMeshDescList(subMeshCount)
 {
@@ -105,7 +106,7 @@ void MeshData::ReleaseAll()
 bool MeshData::Load(const std::wstring & filename, std::vector<MeshData*> & meshList, int & loadFailedMeshCount)
 {
 	FILE* file;
-	errno_t errn = _wfopen_s(&file, filename.c_str(), L"r");
+	errno_t errn = _wfopen_s(&file, filename.c_str(), L"rb");
 	if (errn != 0)
 	{
 		char buffer[80];
@@ -124,7 +125,7 @@ bool MeshData::Load(const std::wstring & filename, std::vector<MeshData*> & mesh
 bool MeshData::Load(const std::string& filename, std::vector<MeshData*> & meshList, int & loadFailedMeshCount)
 {
 	FILE* file;
-	errno_t errn = fopen_s(&file, filename.c_str(), "r");
+	errno_t errn = fopen_s(&file, filename.c_str(), "rb");
 	if (errn != 0)
 	{
 		char buffer[80];
@@ -143,9 +144,11 @@ bool MeshData::Load(const std::string& filename, std::vector<MeshData*> & meshLi
 bool MeshData::Load(FILE* file, std::vector<MeshData*> & meshList, int & loadFailedMeshCount)
 {
 	tinyxml2::XMLDocument xmlDoc;
-
-	if (!xmlDoc.LoadFile(file))
+	tinyxml2::XMLError err = xmlDoc.LoadFile(file);
+	if (err != tinyxml2::XML_SUCCESS)
 	{
+		std::cerr << "Load mesh failed! (Could not load the xml document : Error [" << err << "] '"<< xmlDoc.ErrorName() << "' )" << std::endl;
+		xmlDoc.PrintError();
 		return false;
 	}
 
@@ -204,6 +207,7 @@ bool MeshData::InternalLoad(tinyxml2::XMLDocument & xmlDoc, std::vector<MeshData
 #define MESH_ISNORMALSCCW "IsNormalsCCW"
 #define MESH_FORMAT "Format"
 #define MESH_SUBMESHCOUNT "SubmeshCount"
+#define MESH_POLYGONCOUNT "PolygonCount"
 #define MESH_VERTEXCOUNT "VertexCount"
 #define MESH_VERTEX_INDEX "Index"
 
@@ -259,6 +263,14 @@ MeshData* MeshData::LoadMesh(tinyxml2::XMLElement * meshElem)
 		goto LoadFailed;
 	}
 
+	int polygonCount;
+	xmlErr = meshElem->QueryIntAttribute(MESH_POLYGONCOUNT, &polygonCount);
+	if (XML_FAILED(xmlErr))
+	{
+		std::cerr << "The mesh '" << meshName << "' is ignored : couldnot get the 'PolygonCount' attribute!" << std::endl;
+		goto LoadFailed;
+	}
+
 	int vertexCount;
 	xmlErr = meshElem->QueryIntAttribute(MESH_VERTEXCOUNT, &vertexCount);
 	if (XML_FAILED(xmlErr))
@@ -273,13 +285,13 @@ MeshData* MeshData::LoadMesh(tinyxml2::XMLElement * meshElem)
 		goto LoadFailed;
 	}
 
-	if (vertexCount != (subMeshCount * 3))
+	if (vertexCount != (polygonCount * 3))
 	{
-		std::cerr << "The mesh '" << meshName << "' is ignored : 'VertexCount' must be equal 3 * 'SubmeshCount' !" << std::endl;
+		std::cerr << "The mesh '" << meshName << "' is ignored : 'VertexCount' must be equal 3 * 'PolygonCount' !" << std::endl;
 		goto LoadFailed;
 	}
 
-	meshData = new MeshData(vertexType, vertexCount, subMeshCount);
+	meshData = new MeshData(vertexType, vertexCount, polygonCount, subMeshCount);
 	
 	tinyxml2::XMLElement * submeshesElem = meshElem->FirstChildElement(MESH_SUBMESHES);
 	if (submeshesElem == nullptr)
@@ -327,7 +339,7 @@ MeshData* MeshData::LoadMesh(tinyxml2::XMLElement * meshElem)
 		}
 
 		int subMeshVertexIndex = 0;
-		tinyxml2::XMLElement * vertexElem = meshElem->FirstChildElement(MESH_VERTEX);
+		tinyxml2::XMLElement * vertexElem = submeshElem->FirstChildElement(MESH_VERTEX);
 		while (vertexElem != nullptr && subMeshVertexIndex < subMeshDesc.mCount)
 		{
 			if (!MeshData::LoadVertexAttributes<glm::vec3, 3>(*positionPtr, vertexElem, MeshData::cXYZW))
@@ -378,7 +390,7 @@ MeshData* MeshData::LoadMesh(tinyxml2::XMLElement * meshElem)
 			}
 
 			++vertexIndex;
-			GET_NEXT_ELEM(submeshElem, MESH_VERTEX);
+			GET_NEXT_ELEM(vertexElem, MESH_VERTEX);
 		}
 
 		++polygonGroupIndex;
@@ -399,17 +411,15 @@ MeshData* MeshData::LoadMesh(tinyxml2::XMLElement * meshElem)
 	}
 
 	tinyxml2::XMLElement * texturesElem = meshElem->FirstChildElement(MESH_TEXTURES);
-	if (texturesElem == nullptr)
+	if (texturesElem != nullptr)
 	{
-		std::cerr << "The mesh '" << meshName << "' is ignored : Couldnot get the 'Textures' element node !" << std::endl;
-		goto LoadFailed;
+		if (!LoadTextures(meshData->mTextureDescList, meshData->mSamplerDescList, texturesElem, meshName))
+		{
+			std::cerr << "The mesh '" << meshName << "' is ignored : Couldnot load textures !" << std::endl;
+			goto LoadFailed;
+		}
 	}
 
-	if (!LoadTextures(meshData->mTextureDescList, meshData->mSamplerDescList, texturesElem, meshName))
-	{
-		std::cerr << "The mesh '" << meshName << "' is ignored : Couldnot load textures !" << std::endl;
-		goto LoadFailed;
-	}
 
 	return meshData;
 
@@ -651,7 +661,7 @@ void MeshData::GetVertexComponentOffsets(void*& baseptr, ptrdiff_t& position, pt
 	}
 }
 
-#define MESH_MATERIAL "Materials"
+#define MESH_MATERIAL "Material"
 
 #define MATERIAL_AMBIENT "Ambient"
 #define MATERIAL_DIFFUSE "Diffuse"
@@ -712,7 +722,7 @@ bool MeshData::LoadMaterials(std::vector<MaterialData> & materials, tinyxml2::XM
 	{
 		MaterialData & mat = materials[matIndex];
 
-		if (XML_FAILED(materialsElem->QueryAttribute(MATERIAL_SHININESS, &mat.mShininess)))
+		if (XML_FAILED(matElem->QueryAttribute(MATERIAL_SHININESS, &mat.mShininess)))
 		{
 			std::cerr << "The mesh '" << meshName << "' is ignored : couldnot get the material 'Shininess' attribute!" << std::endl;
 			goto LoadMaterialsFailed;
@@ -742,7 +752,7 @@ bool MeshData::LoadMaterials(std::vector<MaterialData> & materials, tinyxml2::XM
 		int tempTextureIndex;
 		if (!MeshData::LoadMaterialProperty(transparency, tempTextureIndex, propertyElem, MATERIAL_TRANSPARENT, matElem, meshName))
 			goto LoadMaterialsFailed;
-		if (propertyElem == nullptr || XML_FAILED(materialsElem->QueryAttribute(MATERIAL_TRANSPARENT_FACTOR, &transparency.a)))
+		if (propertyElem == nullptr || XML_FAILED(propertyElem->QueryAttribute(MATERIAL_TRANSPARENT_FACTOR, &transparency.a)))
 		{
 			std::cerr << "The mesh '" << meshName << "' is ignored : couldnot get the material transparency 'Factor' attribute!" << std::endl;
 			goto LoadMaterialsFailed;
@@ -827,7 +837,7 @@ bool MeshData::LoadTextures(std::vector<TextureDesc> & textures, std::map<int, S
 	{
 		int index;
 
-		if (XML_FAILED(texturesElem->QueryAttribute(TEXTURE_INDEX, &index)))
+		if (XML_FAILED(texElem->QueryAttribute(TEXTURE_INDEX, &index)))
 		{
 			std::cerr << "The mesh '" << meshName << "' is ignored : couldnot get the texture 'Index' attribute!" << std::endl;
 			goto LoadTexturesFailed;
@@ -911,13 +921,13 @@ LoadTexturesFailed:
 
 bool MeshData::TryParseWrapUV(const char * text, int & value)
 {
-	if (std::strcmp(text, "Repeat"))
+	if (std::strcmp(text, "Repeat") == 0)
 	{
 		value = GL_REPEAT;
 		return true;
 	}
 
-	if (std::strcmp(text, "Clamp"))
+	if (std::strcmp(text, "Clamp") == 0)
 	{
 		value = GL_CLAMP_TO_EDGE;
 		return true;

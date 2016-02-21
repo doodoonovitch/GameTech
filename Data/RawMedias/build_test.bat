@@ -7,7 +7,7 @@ SET trgDir=Test
 FOR %%F IN (Bind_Before_Switch Camera humanoid JointHierarchy Normals Sadface StereoCamera apple girl Sonya WonderWoman AlanTree Anna_Summer treeplan1 katana Talia oak-a Sword) DO (
 	echo Building %%F.fbx ...
 	%buildData% %srcDir%\%%F.fbx %trgDir%\%%F.xml
-	echo ... end (%%F.fbx)
+	echo ... end (%%F.fbx) 
 )
 
 PAUSE

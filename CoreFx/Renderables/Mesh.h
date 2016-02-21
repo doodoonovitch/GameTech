@@ -6,22 +6,28 @@
 
 namespace CoreFx
 {
+	namespace Renderers
+	{
+		class MeshRenderer;
+	}
 	namespace Renderables
 	{
 
 
-class Mesh : public RenderableObject<1>
-{
-public:
-	Mesh(const Geometry::MeshData& meshData);
-	virtual ~Mesh();
+		class Mesh : public SceneObject
+		{
 
-private:
+			template<typename T_Object, int T_vbo_count> friend class Renderers::SceneObjectRenderer;
+			friend class Renderers::MeshRenderer;
 
-	std::vector<Geometry::SubMeshDesc> mSubMeshDescList;
-	std::vector<Geometry::MaterialData> mMaterialList;
+		protected:
 
-};
+			Mesh();
+			virtual ~Mesh();
+
+		private:
+
+		};
 
 
 

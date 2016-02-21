@@ -1,6 +1,4 @@
-#version 430 core
-
-layout(location = 0, std140) uniform MESH_MATERIAL
+layout (std140) uniform MESH_MATERIAL
 {
 	vec4 mAmbient;
 	vec4 mDiffuse;

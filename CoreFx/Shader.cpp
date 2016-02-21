@@ -56,9 +56,9 @@ const char* Shader::ShaderName(GLenum shaderType)
 	}
 }
 
-void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> & sources)
+void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, bool includeCommon)
 {
-	if (sCommonInclude.empty())
+	if (includeCommon && sCommonInclude.empty())
 	{
 		if (!MergeFile(sCommonInclude, "shaders/common.inc"))
 		{
@@ -69,10 +69,15 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 
 	GLuint shader = glCreateShader(whichShader);
 
-	std::vector<const char *> tmp(sources.size() + 1);
 
-	tmp[0] = sCommonInclude.c_str();
-	int i = 1;
+	std::vector<const char *> tmp(sources.size() + (includeCommon ? 1 : 0));
+
+	int i = 0;
+	if (includeCommon)
+	{
+		tmp[i++] = sCommonInclude.c_str();
+	}
+
 	for (auto it = sources.begin(); it != sources.end(); ++it)
 	{
 		tmp[i++] = it->c_str();
@@ -98,14 +103,14 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 	mShaders.push_back(shader);
 }
 
-void Shader::LoadFromFile(GLenum whichShader, const std::string& filename)
+void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon)
 {
 	std::vector<string> buffers(1);
 	string & buffer = buffers.back();
 
 	if (MergeFile(buffer, filename))
 	{
-		LoadFromString(whichShader, buffers);
+		LoadFromString(whichShader, buffers, includeCommon);
 	}
 	else
 	{
@@ -113,7 +118,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::string& filename)
 	}
 }
 
-void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames)
+void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, bool includeCommon)
 {
 	std::vector<string> buffers(filenames.size());
 
@@ -128,7 +133,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & f
 		}
 	}
 
-	LoadFromString(whichShader, buffers);
+	LoadFromString(whichShader, buffers, includeCommon);
 }
 
 bool Shader::MergeFile(std::string& buffer, const std::string& filename) const
@@ -179,10 +184,7 @@ void Shader::CreateAndLinkProgram()
 	{
 		glDeleteShader(shader);
 	}
-
-	//glDeleteShader(mShaders[VERTEX_SHADER]);
-	//glDeleteShader(mShaders[FRAGMENT_SHADER]);
-	//glDeleteShader(mShaders[GEOMETRY_SHADER]);
+	mShaders.clear();
 }
 
 void Shader::Use()
@@ -198,11 +200,13 @@ void Shader::UnUse()
 void Shader::AddAttribute(const std::string& attribute)
 {
 	mAttributeList[attribute] = glGetAttribLocation(mProgram, attribute.c_str());
+	GL_CHECK_ERRORS;
 }
 
 void Shader::AddUniform(const std::string& uniform)
 {
 	mUniformLocationList[uniform] = glGetUniformLocation(mProgram, uniform.c_str());
+	GL_CHECK_ERRORS;
 }
 
 GLuint Shader::operator[](const std::string& attribute)
