@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 
-class CubeRenderer : public SceneObjectRenderer<Renderables::Cube, 3>
+class CubeRenderer : public SceneObjectRenderer<Renderables::Cube, 2>
 {
 public:
 	CubeRenderer(std::string const & texture, size_t capacity = 64, size_t pageSize = 10);
@@ -19,7 +19,25 @@ public:
 	virtual void Render() override;
 
 	Renderables::Cube * CreateCube(GLuint textureIndex);
-	void DeleteCube(Renderables::Cube * cube);
+	void DeleteCube(Renderables::Cube *& cube);
+
+	GLfloat GetDrawVertexNormalMagnitude() const { return mDrawVertexNormalMagnitude; }
+
+	void SetDrawVertexNormalMagnitude(GLfloat value)
+	{
+		mDrawVertexNormalMagnitude = value;
+	}
+
+	const glm::vec4 & GetDrawVertexNormalColor() const { return mDrawVertexNormalColor; }
+
+	void SetDrawVertexNormalColor(const glm::vec4 & value)
+	{
+		mDrawVertexNormalColor = value;
+	}
+
+private:
+
+	void InitializeDrawVertexNormalShader();
 
 private:
 
@@ -27,19 +45,6 @@ private:
 	{
 		VBO_Vertex = 0,
 		VBO_Index = 1,
-		VBO_PerInstanceData = 2
-	};
-
-	struct Vertex
-	{
-		Vertex() {}
-		Vertex(glm::vec3 const & _pos, glm::vec2 const & _uv)
-			: pos(_pos)
-			, uv(_uv)
-		{}
-
-		glm::vec3 pos;
-		glm::vec2 uv;
 	};
 
 	struct PerInstanceData
@@ -50,6 +55,10 @@ private:
 private:
 	
 	Texture2D const * mTexture;
+	glm::vec4 mDrawVertexNormalColor;
+	GLfloat mDrawVertexNormalMagnitude;
+	GLuint mModelMatrixBuffer;
+	Shader mDrawVertexNormalShader;
 };
 
 

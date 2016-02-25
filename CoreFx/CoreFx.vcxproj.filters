@@ -24,6 +24,9 @@
     <Filter Include="Renderers">
       <UniqueIdentifier>{514bd27b-42db-451c-a7f6-9c1fd8bc6a3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lights">
+      <UniqueIdentifier>{abcd24eb-1b80-4b65-8479-406fe5eb4f22}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -82,6 +85,15 @@
     <ClInclude Include="Renderers\MeshRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="Lights\Light.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Lights\PointLight.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Lights\DirectionalLight.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -125,6 +137,15 @@
     <ClCompile Include="Renderers\MeshRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
+    <ClCompile Include="Lights\Light.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Lights\PointLight.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Lights\DirectionalLight.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -140,48 +161,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\grid_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\LoadImage_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\LoadImage_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\mesh_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\mesh_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\Ripple_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\Ripple_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SimpleTriangle_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SimpleTriangle_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SubdivisionGeometry_Shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\SubdivisionGeometryInstanced_shader.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\cube_shader.frag">
@@ -209,6 +188,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\cube_shader.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh_shader_NUV.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\draw_vertex_normal_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\draw_vertex_normal_shader.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\draw_vertex_normal_shader.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

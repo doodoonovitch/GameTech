@@ -8,5 +8,5 @@ void main()
 {  
 	vUVOut = (vVertex.xz / vGridSize) + vec2(0.5, 0.5);
 
-	gl_Position = mProj * mView * vec4(vVertex.xyz,1);
+	gl_Position = u_ProjMatrix * (u_ViewMatrix * vec4(vVertex.xyz,1));
 }

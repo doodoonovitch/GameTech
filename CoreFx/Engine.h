@@ -12,6 +12,15 @@ namespace CoreFx
 	class SceneObject;
 	class Camera;
 
+
+
+	namespace Lights
+	{
+		class Light;
+		class PointLight;
+		class DirectionalLight;
+	}
+
 class Engine
 {
 public:
@@ -34,8 +43,6 @@ public:
 		return mTextureManager;
 	}
 
-	void AddUnrenderedSceneObject(SceneObject* obj);
-
 	void UpdateObjects();
 	void RenderObjects();
 
@@ -49,6 +56,19 @@ public:
 		mCamera = camera;
 	}
 
+	bool IsDrawVertexNormalEnabled() const
+	{
+		return mIsDrawVertexNormalEnabled;
+	}
+
+	void EnableDrawVertexNormal(bool isEnabled)
+	{
+		mIsDrawVertexNormalEnabled = isEnabled;
+	}
+
+	// Renderers
+public:
+
 	bool AttachRenderer(Renderer* renderer)
 	{
 		return mRenderers->Attach(renderer);
@@ -59,27 +79,28 @@ public:
 		return mRenderers->Detach(renderer);
 	}
 
-private:
 
-	void InternalInitialize();
-	void InternalRelease();
+	// Lights
+public:
 
-	Engine();
-	~Engine();
+	const glm::vec4 & GetAmbientLight() const
+	{
+		return mAmbientLight;
+	}
 
-	Engine(Engine const &) = delete;
-	Engine & operator=(Engine const &) = delete;
+	void SetAmbientLight(const glm::vec4 & value)
+	{
+		mAmbientLight = value;
+	}
+
+	Lights::PointLight * CreatePointLight(const glm::vec4 & color, const glm::vec3 & position);
+	Lights::DirectionalLight * CreateDirectionalLight(const glm::vec4 & color, const glm::vec3 & direction);
+	void DeleteLight(Lights::Light * & light);
 
 private:
 
 	typedef InstanceContainer<Renderer> RendererContainer;
-	typedef std::vector<SceneObject*> SceneObjectList;
-
-	TextureManager * mTextureManager;
-	SceneObjectList* mSceneObjects;
-	RendererContainer* mRenderers;
-
-	Camera* mCamera;
+	typedef InstanceContainer<Lights::Light> LightContainer;
 
 	enum BufferIdIndex
 	{
@@ -88,17 +109,61 @@ private:
 		__BufferId_Count__
 	};
 
+	enum
+	{
+		MAX_LIGHT_COUNT = 16,
+		MAX_LIGHT_DATA_COUNT = 64
+	};
+
 	struct FrameData
 	{
-		glm::mat4 mView;
-		glm::mat4 mProj;
+		FrameData()
+			: vAmbientLight(0.f, 0.f, 0.f, 0.f)
+		{
+
+		}
+
+		__declspec(align(16)) glm::mat4 mView;
+		__declspec(align(16)) glm::mat4 mProj;
+		__declspec(align(16)) glm::vec4 vAmbientLight;
+		__declspec(align(16)) GLuint uLightDesc[MAX_LIGHT_COUNT];
+		__declspec(align(16)) glm::vec4 vLightData[MAX_LIGHT_DATA_COUNT];
+		__declspec(align(4)) GLuint uLightCount;
 	};
+
+
+private:
+
+	void InternalInitialize();
+	void InternalRelease();
+
+	void InternalCreateFrameDataBuffer();
+
+
+	Engine();
+	~Engine();
+
+	Engine(Engine const &) = delete;
+	Engine & operator=(Engine const &) = delete;
+
+
+private:
+	
+	TextureManager * mTextureManager;
+	RendererContainer * mRenderers;
+	LightContainer * mLights;
+
+	Camera* mCamera;
+
+	glm::vec4 mAmbientLight;
+
+	GLuint mLightDataIndex;
 
 	GLuint mBufferIds[__BufferId_Count__];
 
-	FrameData mFrameData;
 
 	bool mInitialized;
+	bool mIsDrawVertexNormalEnabled;
 
 	static Engine* sInstance;
 };

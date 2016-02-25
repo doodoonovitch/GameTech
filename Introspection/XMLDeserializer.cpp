@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Introspection.h"
 
+#pragma warning(push)
+#pragma warning( disable : 4100)
 
 namespace  Introspection
 {
@@ -272,3 +274,5 @@ void XMLDeserializer::DeserializeArray(ObjectBase * const values, uint32_t itemC
 }
 
 } // namespace  Introspection
+
+#pragma warning(pop)

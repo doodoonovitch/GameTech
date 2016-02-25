@@ -12,6 +12,9 @@ namespace CoreFx
 AxisRenderer::AxisRenderer()
 	: RendererHelper<Renderables::Axis, 1>()
 {
+	std::cout << std::endl;
+	std::cout << "Initialize AxisRenderer...." << std::endl;
+
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis_shader.vert");
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis_shader.frag");
@@ -20,11 +23,11 @@ AxisRenderer::AxisRenderer()
 		mShader.AddAttribute("vVertex");
 		mShader.AddAttribute("vColor");
 		//pass values of constant uniforms at initialization
+
+		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
-
-	mShader.SetupFrameDataBlockBinding();
 
 	Vertex vertices[] =
 	{
@@ -61,6 +64,10 @@ AxisRenderer::AxisRenderer()
 	glBindVertexArray(0);
 
 	GL_CHECK_ERRORS;
+
+	std::cout << "\t mVaoID : " << mVaoID << std::endl;
+	std::cout << "\t mVboID[0] : " << mVboIDs[0] << std::endl;
+	std::cout << "... AxisRenderer initialized!" << std::endl << std::endl;
 }
 
 
@@ -75,7 +82,6 @@ void AxisRenderer::Render()
 			glDrawArrays(GL_LINES, 0, 6);
 		glBindVertexArray(0);
 	mShader.UnUse();
-
 }
 
 

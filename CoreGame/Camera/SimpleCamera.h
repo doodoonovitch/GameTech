@@ -43,7 +43,7 @@ private:
 	static const int VK_ESC = 0x1B;
 	static const int MOUSE_HISTORY_BUFFER_SIZE = 10;
 
-	const float MOVE_SPEED = 0.125f;
+	const float MOVE_SPEED = 0.250f;
 	const float MOUSE_FILTER_WEIGHT = 0.75f;
 
 	//camera transformation variables

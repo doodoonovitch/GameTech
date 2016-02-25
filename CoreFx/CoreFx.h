@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <iterator>
 #include <functional>
+#include <cstdint>
 
 #include "macros.h"
 
@@ -58,6 +59,10 @@ namespace CoreFx
 #include "Renderers\RendererHelper.h"
 
 #include "Engine.h"
+
+#include "Lights\Light.h"
+#include "Lights\PointLight.h"
+#include "Lights\DirectionalLight.h"
 
 #include "Texture2D.h"
 #include "TextureManager.h"

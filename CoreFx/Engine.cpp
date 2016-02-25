@@ -12,10 +12,13 @@ namespace CoreFx
 
 Engine::Engine()
 	: mTextureManager(nullptr)
-	, mSceneObjects(nullptr)
 	, mRenderers(nullptr)
+	, mLights(nullptr)
 	, mCamera(nullptr)
+	, mAmbientLight(0.2f, 0.2f, 0.2f, 0.f)
+	, mLightDataIndex(0)
 	, mInitialized(false)
+	, mIsDrawVertexNormalEnabled(false)
 {
 	memset(mBufferIds, 0, sizeof(mBufferIds));
 }
@@ -33,16 +36,11 @@ void Engine::InternalInitialize()
 		mTextureManager = new TextureManager();
 		mTextureManager->Initialize();
 
-		mSceneObjects = new SceneObjectList();
-
 		mRenderers = new RendererContainer(64, 16);
 
-		glGenBuffers(__BufferId_Count__, mBufferIds);
-		glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(FrameData), nullptr, GL_STATIC_DRAW);
-		GL_CHECK_ERRORS;
-		glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]);
-		GL_CHECK_ERRORS;
+		mLights = new LightContainer(MAX_LIGHT_COUNT, 1);
+
+		InternalCreateFrameDataBuffer();
 
 		mInitialized = true;
 	}
@@ -58,18 +56,29 @@ void Engine::InternalRelease()
 
 		SAFE_DELETE(mRenderers);
 
-		for (auto o : *mSceneObjects)
+		mLights->ForEach([](Lights::Light* obj)
 		{
-			delete o;
-		}
-
-		SAFE_DELETE(mSceneObjects);
+			delete obj;
+		});
+		SAFE_DELETE(mLights);
+		mLightDataIndex = 0;
 
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
 
 		mInitialized = false;
+		mIsDrawVertexNormalEnabled = false;
 	}
+}
+
+void Engine::InternalCreateFrameDataBuffer()
+{
+	glGenBuffers(__BufferId_Count__, mBufferIds);
+	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(FrameData), nullptr, GL_STATIC_DRAW);
+	GL_CHECK_ERRORS;
+	glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]);
+	GL_CHECK_ERRORS;
 }
 
 void Engine::Initialize()
@@ -94,25 +103,8 @@ Engine* Engine::GetInstance()
 	return sInstance;
 }
 
-void Engine::AddUnrenderedSceneObject(SceneObject* obj)
-{
-	assert(mInitialized);
-
-	mSceneObjects->push_back(obj);
-}
-
 void Engine::UpdateObjects()
 {
-	for (SceneObjectList::const_iterator it = mSceneObjects->begin(); it != mSceneObjects->end(); ++it)
-	{
-		SceneObject* obj = *it;
-		Frame* frame = obj->GetFrame();
-		if (frame != nullptr)
-		{
-			frame->BuildMatrix();
-		}
-	}
-
 	mRenderers->ForEach([](Renderer * renderer)
 	{
 		renderer->BeginFrame();
@@ -121,19 +113,41 @@ void Engine::UpdateObjects()
 	assert(mCamera != nullptr);
 	assert(mCamera->GetFrame() != nullptr);
 	mCamera->GetFrame()->BuildMatrix();
+
+	mLights->ForEach([this](Lights::Light * light)
+	{
+		light->TransformInViewCoords(mCamera->GetViewMatrix());
+	});
 }
 
 void Engine::RenderObjects()
 {
-	//mFrameData.mProj = mCamera->GetProjectionMatrix();
-	//mFrameData.mView = mCamera->GetViewMatrix();
-
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
 	FrameData* buffer = (FrameData*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(FrameData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+
+	GL_CHECK_ERRORS;
+	assert(buffer != nullptr);
+
 	memcpy(glm::value_ptr(buffer->mView), glm::value_ptr(mCamera->GetViewMatrix()), sizeof(glm::mat4));
 	memcpy(glm::value_ptr(buffer->mProj), glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
-	//buffer->mView = mCamera->GetViewMatrix();
-	//buffer->mProj = mCamera->GetProjectionMatrix();
+	memcpy(glm::value_ptr(buffer->vAmbientLight), glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
+	buffer->uLightCount = (GLuint)mLights->GetCount();
+
+	{
+		buffer->uLightCount = (GLuint)mLights->GetCount();
+
+		std::uint8_t * lightDataBuffer = (std::uint8_t *) &buffer->vLightData[0];
+		GLuint * lightDescBuffer = &buffer->uLightDesc[0];
+
+		mLights->ForEach([&lightDataBuffer, &lightDescBuffer](Lights::Light * light)
+		{
+			lightDescBuffer[light->GetInstanceId()] = light->mLightDesc;
+
+			GLsizei dataSize = light->GetDataSize();
+			memcpy(lightDataBuffer, light->GetData(), dataSize);
+			lightDataBuffer += dataSize;
+		});
+	}
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
@@ -143,18 +157,53 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
-	//for (SceneObjectList::const_iterator it = m_sceneObjects->begin(); it != m_sceneObjects->end(); ++it)
-	//{
-	//	SceneObject* obj = *it;
-	//	obj->Render(VP);
-	//}
-
 	mRenderers->ForEach([](Renderer * renderer)
 	{
 		renderer->EndFrame();
 	});
 
 }
+
+Lights::PointLight * Engine::CreatePointLight(const glm::vec4 & color, const glm::vec3 & position)
+{
+	if (mLights->GetCount() < MAX_LIGHT_COUNT)
+	{
+		Lights::PointLight *light = new Lights::PointLight(color, position);
+		mLights->Attach(light);
+		return light;
+	}
+	else
+	{
+		std::cerr << "Cannot create a Point Light : max lights reached!" << std::endl;
+		return nullptr;
+	}
+}
+
+Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec4 & color, const glm::vec3 & direction)
+{
+	if (mLights->GetCount() < MAX_LIGHT_COUNT)
+	{
+		Lights::DirectionalLight *light = new Lights::DirectionalLight(color, direction);
+		light->SetDataIndex(mLightDataIndex);
+		mLightDataIndex += light->GetPropertyCount();
+		mLights->Attach(light);
+		return light;
+	}
+	else
+	{
+		std::cerr << "Cannot create a Directional Light : max lights reached!" << std::endl;
+		return nullptr;
+	}
+}
+
+void Engine::DeleteLight(Lights::Light * & light)
+{
+	if (light == nullptr)
+		return;
+	mLights->Detach(light);
+	SAFE_DELETE(light);
+}
+
 
 
 

@@ -12,6 +12,9 @@ namespace CoreFx
 GridRenderer::GridRenderer(int width, int depth)
 	: RendererHelper<Renderables::Grid, 1>()
 {
+	std::cout << std::endl;
+	std::cout << "Initialize GridRenderer...." << std::endl;
+
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid_shader.vert");
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid_shader.frag");
@@ -23,19 +26,19 @@ GridRenderer::GridRenderer(int width, int depth)
 
 		//pass values of constant uniforms at initialization
 		glUniform2f(mShader("vGridSize"), (float)width, (float)depth);
+
+		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
 
-	mShader.SetupFrameDataBlockBinding();
 
 
 	std::cout << std::endl;
-	std::cout << "Grid info..." << std::endl;
 	std::cout << "Vertex attribute index : " << std::endl;
-	std::cout << "vVertex : " << mShader["vVertex"] << std::endl;
+	std::cout << "\t vVertex : " << mShader["vVertex"] << std::endl;
 	std::cout << "Uniform attribute index : " << std::endl;
-	std::cout << "vGridSize : " << mShader("vGridSize") << std::endl;
+	std::cout << "\t vGridSize : " << mShader("vGridSize") << std::endl;
 
 
 	m_vertexCount = ((width + 1) + (depth + 1)) * 2;
@@ -75,6 +78,10 @@ GridRenderer::GridRenderer(int width, int depth)
 	glBindVertexArray(0);
 
 	GL_CHECK_ERRORS;
+
+	std::cout << "\t mVaoID : " << mVaoID << std::endl;
+	std::cout << "\t mVboID[0] : " << mVboIDs[0] << std::endl;
+	std::cout << "... GridRenderer initialized!" << std::endl << std::endl;
 
 	delete [] vertices;	 
 }

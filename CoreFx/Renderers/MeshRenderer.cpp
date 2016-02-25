@@ -13,6 +13,9 @@ namespace CoreFx
 MeshRenderer::MeshRenderer(const Geometry::MeshData& meshData, size_t capacity, size_t pageSize)
 	: SceneObjectRenderer<Renderables::Mesh, 1>(capacity, pageSize)
 {
+	std::cout << std::endl;
+	std::cout << "Initialize MeshRenderer...." << std::endl;
+
 	void* baseptr;
 	ptrdiff_t position, normal, tangent, binormal, uv;
 	int vertexDataSize;
@@ -20,70 +23,72 @@ MeshRenderer::MeshRenderer(const Geometry::MeshData& meshData, size_t capacity, 
 	meshData.GetVertexComponentOffsets(baseptr, position, normal, tangent, binormal, uv, vertexDataSize);
 
 	//setup shader
-	std::vector<std::string> vertexShaderFiles, fragmentShaderFiles;
+	std::vector<std::string> vertexShaderFiles, fragmentShaderFiles, geometryShaderFiles;
 	//vertexShaderFiles.push_back("shader/mesh_material_def.inc");
 
 	switch (meshData.GetVertexType())
 	{
 	case Geometry::VertexType::Position:
 		vertexShaderFiles.push_back("shaders/mesh_shader.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormal:
 		vertexShaderFiles.push_back("shaders/mesh_shader_N.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader_N.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader_N.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangent:
 		vertexShaderFiles.push_back("shaders/mesh_shader_NT.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader_NT.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader_NT.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangentBinormal:
 		vertexShaderFiles.push_back("shaders/mesh_shader_NTB.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader_NTB.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader_NTB.frag");
 		break;
 
 	case Geometry::VertexType::PositionUV:
 		vertexShaderFiles.push_back("shaders/mesh_shader_UV.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader_UV.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader_UV.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalUV:
 		vertexShaderFiles.push_back("shaders/mesh_shader_NUV.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader_NUV.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader_NUV.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangentUV:
 		vertexShaderFiles.push_back("shaders/mesh_shader_NTUV.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader_NTUV.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader_NTUV.frag");
 		break;
 
 	case Geometry::VertexType::PositionNormalTangentBinormalUV:
 		vertexShaderFiles.push_back("shaders/mesh_shader_NTBUV.vert");
+		geometryShaderFiles.push_back("shaders/mesh_shader_NTBUV.geom");
 		fragmentShaderFiles.push_back("shaders/mesh_shader_NTBUV.frag");
 		break;
 	}
 
 	mShader.LoadFromFile(GL_VERTEX_SHADER, vertexShaderFiles);
+	mShader.LoadFromFile(GL_GEOMETRY_SHADER, geometryShaderFiles);
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, fragmentShaderFiles);
 
 	mShader.CreateAndLinkProgram();
-	//mShader.Use();
-		//mShader.AddAttribute("vPosition");
-		//if (normal != -1)
-		//	mShader.AddAttribute("vNormal");
-		//if (tangent != -1)
-		//	mShader.AddAttribute("vTangent");
-		//if (binormal != -1)
-		//	mShader.AddAttribute("vBinormal");
-		//if (uv != -1)
-		//	mShader.AddAttribute("vUV");
-		//pass values of constant uniforms at initialization
-	//mShader.UnUse();
+
+	mShader.Use();
+		mShader.SetupFrameDataBlockBinding();
+	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
+
 
 	//setup vao and vbo stuff
 	glGenVertexArrays(1, &mVaoID);
@@ -101,7 +106,7 @@ MeshRenderer::MeshRenderer(const Geometry::MeshData& meshData, size_t capacity, 
 
 		if (normal != -1)
 		{
-			glEnableVertexAttribArray(Shader::NORMAL_ATTRIBUTE); // mShader["vNormal"]
+			glEnableVertexAttribArray(Shader::NORMAL_ATTRIBUTE); 
 			glVertexAttribPointer(Shader::NORMAL_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, vertexDataSize, (const GLvoid*)normal);
 			GL_CHECK_ERRORS;
 		}
@@ -134,6 +139,10 @@ MeshRenderer::MeshRenderer(const Geometry::MeshData& meshData, size_t capacity, 
 
 	meshData.CopySubMeshDescList(mSubMeshDescList);
 	meshData.CopyMaterialList(mMaterialList);
+
+	std::cout << "\t mVaoID : " << mVaoID << std::endl;
+	std::cout << "\t mVboID[0] : " << mVboIDs[0] << std::endl;
+	std::cout << "... MeshRenderer initialized!" << std::endl << std::endl;
 }
 
 

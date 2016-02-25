@@ -108,6 +108,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, bool 
 	std::vector<string> buffers(1);
 	string & buffer = buffers.back();
 
+	cout << "Loading shader file : " << filename.c_str() << endl;
 	if (MergeFile(buffer, filename))
 	{
 		LoadFromString(whichShader, buffers, includeCommon);
@@ -125,6 +126,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & f
 	int i = 0;
 	for (auto it : filenames)
 	{		
+		cout << "Loading shader file : " << it.c_str() << endl;
 		string & buffer = buffers[i++];
 		if (!MergeFile(buffer, it))
 		{

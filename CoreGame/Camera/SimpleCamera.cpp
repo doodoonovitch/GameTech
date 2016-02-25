@@ -55,7 +55,7 @@ void SimpleCamera::OnInit()
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
-		
+
 		int xCount = 30;
 		int yCount = 30;
 		int zCount = 30;
@@ -73,7 +73,8 @@ void SimpleCamera::OnInit()
 				}
 			}
 		}
-		
+
+		/*
 		std::vector<Geometry::MeshData*> meshDataList;
 		int loadFailedCount = 0;
 		Geometry::MeshData::Load("Medias/test/Girl.xml", meshDataList, loadFailedCount);
@@ -87,6 +88,11 @@ void SimpleCamera::OnInit()
 			delete it;
 		}
 		meshDataList.clear();
+		*/
+
+	// Setup Lights
+	Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec4(1.f, 1.f, 1.f, 0.f), glm::vec3(0.f, 5.f, 10.f));
+	Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::vec4(1.f, 1.f, 1.f, 0.f), glm::normalize(glm::vec3(1.f, -1.f, -1.f)));
 
 	//setup camera
 	m_pCamera = new Camera();
@@ -180,6 +186,12 @@ void SimpleCamera::OnKey(unsigned char key, int x, int y)
 	{
 	case ' ':
 		m_useFiltering = !m_useFiltering;
+		break;
+
+	case 'N':
+	case 'n':
+		Engine::GetInstance()->EnableDrawVertexNormal(!Engine::GetInstance()->IsDrawVertexNormalEnabled());
+		glutPostRedisplay();
 		break;
 	}
 	//glutPostRedisplay();
