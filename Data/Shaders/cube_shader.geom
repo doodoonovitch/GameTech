@@ -34,7 +34,7 @@ void main()
 		gs_out.Position = modelViewMatrix * gl_in[i].gl_Position;
 		gl_Position = u_ProjMatrix * gs_out.Position;
 
-		vec4 normal = modelViewMatrix * vec4(gs_in[i].Normal.xyz, 1);
+		vec4 normal = modelViewMatrix * vec4(gs_in[i].Normal.xyz, 0);
 		gs_out.Normal = normal.xyz;
 
 		gs_out.TexUV = gs_in[i].TexUV;

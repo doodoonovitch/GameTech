@@ -1,8 +1,11 @@
 layout(location = 0) out vec4 vFragColor;
 
-uniform vec4 u_VertexNormalColor;
+in GS_OUT
+{
+	vec4 Color;
+} fs_in;
 
 void main(void)
 {
-	vFragColor = u_VertexNormalColor;
+	vFragColor = fs_in.Color;
 }

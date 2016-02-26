@@ -17,24 +17,24 @@ void main(void)
 
 	vec3 normal = normalize(fs_in.Normal);
 
-	for(int i = 0; i < u_LightCount; ++i)
+	for(int lightIndex = 0; lightIndex < u_LightCount; ++lightIndex)
 	{
-		uint lightDesc = u_LightDesc[i];
-		uint lightType = GetLightType(lightDesc);
+		int lightDesc = GetLightDesc(lightIndex);
+		int lightType = GetLightType(lightDesc);
 		int dataIndex = GetLightDataIndex(lightDesc);
 
 		if (lightType == POINT_LIGHT_TYPE)
 		{
-			vec4 lightColor = u_LightData[dataIndex];
-			vec4 lightPosition = u_LightData[dataIndex + 1];
+			vec4 lightColor = u_LightData[dataIndex + POINT_LIGHT_COLOR_INDEX];
+			vec4 lightPosition = u_LightData[dataIndex + POINT_LIGHT_POSITION_INDEX];
 			vec3 lightDirection = normalize(lightPosition.xyz - fs_in.Position.xyz);
-			diffuse += max(0, dot(normal, lightDirection)) * lightColor * diffuseMaterial;
+			diffuse = diffuse + max(0, dot(normal, lightDirection)) * lightColor * diffuseMaterial;
 		}
 		else if (lightType == DIRECTIONAL_LIGHT_TYPE)
 		{
-			vec4 lightColor = u_LightData[dataIndex];
-			vec3 lightDirection = u_LightData[dataIndex + 1].xyz;
-			diffuse += max(0, dot(normal, lightDirection)) * lightColor * diffuseMaterial;
+			vec4 lightColor = u_LightData[dataIndex + DIRECTIONAL_LIGHT_COLOR_INDEX];
+			vec3 lightDirection = u_LightData[dataIndex + DIRECTIONAL_LIGHT_DIRECTION_INDEX].xyz;
+			diffuse += max(0, dot(normal, -lightDirection)) * lightColor * diffuseMaterial;
 		}
 		else
 		{

@@ -10,8 +10,6 @@ namespace CoreFx
 CubeRenderer::CubeRenderer(std::string const & texture, size_t capacity, size_t pageSize)
 	: SceneObjectRenderer<Renderables::Cube, 2>(capacity, pageSize)
 	, mTexture(nullptr)
-	, mDrawVertexNormalColor(1.f, 0.41f, 0.f, 0.f)
-	, mDrawVertexNormalMagnitude(0.4f)
 	, mModelMatrixBuffer(0)
 {
 	std::cout << std::endl;
@@ -146,53 +144,9 @@ CubeRenderer::CubeRenderer(std::string const & texture, size_t capacity, size_t 
 	std::cout << "\t mVboID[VBO_Vertex] : " << mVboIDs[VBO_Vertex] << std::endl;
 	std::cout << "\t mVboID[VBO_Index] : " << mVboIDs[VBO_Index] << std::endl;
 
-	InitializeDrawVertexNormalShader();
+	mDrawVertexNormalShader.LoadShaders();
 
 	std::cout << "... CubeRenderer initialized!" << std::endl << std::endl;
-}
-
-void CubeRenderer::InitializeDrawVertexNormalShader()
-{
-	std::cout << std::endl;
-	std::cout << "Load 'draw vertex normal' shader..." << std::endl;
-
-	//setup shader
-	mDrawVertexNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/draw_vertex_normal_shader.vert");
-	mDrawVertexNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/draw_vertex_normal_shader.geom");
-	mDrawVertexNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/draw_vertex_normal_shader.frag");
-
-	mDrawVertexNormalShader.CreateAndLinkProgram();
-
-	mDrawVertexNormalShader.Use();
-		mDrawVertexNormalShader.AddAttribute("in_Position");
-		mDrawVertexNormalShader.AddAttribute("in_Normal");
-		mDrawVertexNormalShader.AddAttribute("in_TexUV");
-
-		mDrawVertexNormalShader.AddUniform("u_Magnitude");
-		mDrawVertexNormalShader.AddUniform("u_VertexNormalColor");
-		mDrawVertexNormalShader.AddUniform("perInstanceDataSampler");
-
-		//pass values of constant uniforms at initialization
-		glUniform1i(mDrawVertexNormalShader("perInstanceDataSampler"), 0);
-
-		mDrawVertexNormalShader.SetupFrameDataBlockBinding();
-	mDrawVertexNormalShader.UnUse();
-
-	GL_CHECK_ERRORS;
-
-	std::cout << std::endl;
-	std::cout << "Vertex attribute index : " << std::endl;
-	std::cout << "\t in_Position : " << mShader["in_Position"] << std::endl;
-	std::cout << "\t in_Normal : " << mShader["in_Normal"] << std::endl;
-	std::cout << "\t in_TexUV : " << mShader["in_TexUV"] << std::endl;
-	std::cout << std::endl;
-	std::cout << "Uniform attribute index : " << std::endl;
-	std::cout << "\t perInstanceDataSampler : " << mShader("perInstanceDataSampler") << std::endl;
-	std::cout << "\t u_VertexNormalColor : " << mShader("u_VertexNormalColor") << std::endl;
-	std::cout << "\t u_Magnitude : " << mShader("u_Magnitude") << std::endl;
-	
-	std::cout << std::endl;
-
 }
 
 
@@ -234,9 +188,8 @@ void CubeRenderer::Render()
 	if (Engine::GetInstance()->IsDrawVertexNormalEnabled())
 	{
 		mDrawVertexNormalShader.Use();
-			
-			glUniform1f(mDrawVertexNormalShader("u_Magnitude"), mDrawVertexNormalMagnitude);
-			glUniform4fv(mDrawVertexNormalShader("u_VertexNormalColor"), 1, glm::value_ptr(mDrawVertexNormalColor));
+
+			mDrawVertexNormalShader.SetUniformValues();
 
 			glBindVertexArray(mVaoID);
 

@@ -17,6 +17,11 @@ Engine::Engine()
 	, mCamera(nullptr)
 	, mAmbientLight(0.2f, 0.2f, 0.2f, 0.f)
 	, mLightDataIndex(0)
+	, mDrawVertexNormalColor(1.f, 0.41f, 0.f, 0.f)
+	, mDrawPointLightColor(1.f, 1.f, 0.f, 0.f)
+	, mDrawDirectionalLightColor(1.f, 0.f, 0.f, 0.f)
+	, mDrawVertexNormalMagnitude(0.2f)
+	, mDrawLightMagnitude(0.6f)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
 {
@@ -137,11 +142,13 @@ void Engine::RenderObjects()
 		buffer->uLightCount = (GLuint)mLights->GetCount();
 
 		std::uint8_t * lightDataBuffer = (std::uint8_t *) &buffer->vLightData[0];
-		GLuint * lightDescBuffer = &buffer->uLightDesc[0];
+		glm::ivec4 * lightDescBuffer = &buffer->uLightDesc[0];
 
 		mLights->ForEach([&lightDataBuffer, &lightDescBuffer](Lights::Light * light)
 		{
-			lightDescBuffer[light->GetInstanceId()] = light->mLightDesc;
+			int compIndex = light->GetInstanceId() & 3;
+			int arrayIndex = light->GetInstanceId() >> 2;
+			lightDescBuffer[arrayIndex][compIndex] = light->mLightDesc;
 
 			GLsizei dataSize = light->GetDataSize();
 			memcpy(lightDataBuffer, light->GetData(), dataSize);
@@ -169,6 +176,8 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec4 & color, const glm
 	if (mLights->GetCount() < MAX_LIGHT_COUNT)
 	{
 		Lights::PointLight *light = new Lights::PointLight(color, position);
+		light->SetDataIndex(mLightDataIndex);
+		mLightDataIndex += light->GetPropertyCount();
 		mLights->Attach(light);
 		return light;
 	}

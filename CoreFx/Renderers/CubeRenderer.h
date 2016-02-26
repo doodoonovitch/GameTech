@@ -21,23 +21,6 @@ public:
 	Renderables::Cube * CreateCube(GLuint textureIndex);
 	void DeleteCube(Renderables::Cube *& cube);
 
-	GLfloat GetDrawVertexNormalMagnitude() const { return mDrawVertexNormalMagnitude; }
-
-	void SetDrawVertexNormalMagnitude(GLfloat value)
-	{
-		mDrawVertexNormalMagnitude = value;
-	}
-
-	const glm::vec4 & GetDrawVertexNormalColor() const { return mDrawVertexNormalColor; }
-
-	void SetDrawVertexNormalColor(const glm::vec4 & value)
-	{
-		mDrawVertexNormalColor = value;
-	}
-
-private:
-
-	void InitializeDrawVertexNormalShader();
 
 private:
 
@@ -55,10 +38,10 @@ private:
 private:
 	
 	Texture2D const * mTexture;
-	glm::vec4 mDrawVertexNormalColor;
-	GLfloat mDrawVertexNormalMagnitude;
+
 	GLuint mModelMatrixBuffer;
-	Shader mDrawVertexNormalShader;
+
+	DrawNormalShader mDrawVertexNormalShader;
 };
 
 

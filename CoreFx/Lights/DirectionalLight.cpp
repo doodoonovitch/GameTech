@@ -25,7 +25,6 @@ void DirectionalLight::TransformInViewCoords(const glm::mat4 & viewMatrix)
 {
 	glm::vec4 dir = viewMatrix * mWorldDirection;
 	SetProperty(dir, Direction_Property);
-
 }
 
 

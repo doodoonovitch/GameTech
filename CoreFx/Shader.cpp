@@ -211,14 +211,24 @@ void Shader::AddUniform(const std::string& uniform)
 	GL_CHECK_ERRORS;
 }
 
-GLuint Shader::operator[](const std::string& attribute)
+GLuint Shader::GetAttribute(const std::string& attribute)
 {
 	return mAttributeList[attribute];
 }
 
-GLuint Shader::operator()(const std::string& uniform)
+GLuint Shader::GetUniform(const std::string& uniform)
 {
 	return mUniformLocationList[uniform];
+}
+
+GLuint Shader::operator[](const std::string& attribute)
+{
+	return GetAttribute(attribute);
+}
+
+GLuint Shader::operator()(const std::string& uniform)
+{
+	return GetUniform(uniform);
 }
 
 void Shader::SetupFrameDataBlockBinding() const

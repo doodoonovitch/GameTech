@@ -156,6 +156,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Renderers\AxisRenderer.h" />
     <ClInclude Include="Renderers\CubeRenderer.h" />
+    <ClInclude Include="Renderers\DrawNormalShader.h" />
     <ClInclude Include="Renderers\GridRenderer.h" />
     <ClInclude Include="Renderers\MeshRenderer.h" />
     <ClInclude Include="Renderers\RendererHelper.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Renderers\AxisRenderer.cpp" />
     <ClCompile Include="Renderers\CubeRenderer.cpp" />
+    <ClCompile Include="Renderers\DrawNormalShader.cpp" />
     <ClCompile Include="Renderers\GridRenderer.cpp" />
     <ClCompile Include="Renderers\MeshRenderer.cpp" />
     <ClCompile Include="SceneObject.cpp" />
