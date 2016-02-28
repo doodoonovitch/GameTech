@@ -9,9 +9,9 @@ namespace CoreFx
 
 
 
-Cube::Cube(GLuint textureIndex)
+Cube::Cube(std::uint8_t materialIndex)
 	: SceneObject(true)
-	, mTextureIndex(textureIndex)
+	, mMaterialIndex(materialIndex)
 {
 }
 

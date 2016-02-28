@@ -97,6 +97,7 @@
     <ClInclude Include="Renderers\DrawNormalShader.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="TextureBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="Renderers\DrawNormalShader.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
+    <ClCompile Include="TextureBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

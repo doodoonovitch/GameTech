@@ -59,7 +59,7 @@ void SimpleCamera::OnInit()
 		int xCount = 30;
 		int yCount = 30;
 		int zCount = 30;
-		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer("medias/cube.dds", xCount * yCount * zCount, 1);
+		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer("medias/cube.dds", 4, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
 
 		for (auto i = 0; i < xCount; ++i)

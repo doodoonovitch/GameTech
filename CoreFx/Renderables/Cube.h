@@ -23,12 +23,17 @@ class Cube : public SceneObject
 
 protected:
 
-	Cube(GLuint textureIndex);
+	Cube(std::uint8_t materialIndex);
 	virtual ~Cube();
+
+	std::uint8_t GetMaterialIndex() const 
+	{
+		return mMaterialIndex;
+	}
 
 private:
 
-	GLuint mTextureIndex;
+	std::uint8_t mMaterialIndex;
 
 };
 

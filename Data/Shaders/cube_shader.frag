@@ -13,7 +13,7 @@ uniform sampler2D texSampler1;
 void main(void)
 {
 	vec4 diffuseMaterial = texture(texSampler1, fs_in.TexUV);
-	vec4 diffuse = vec4(0, 0, 0, 0);
+	vec4 diffuseColor = vec4(0, 0, 0, 0);
 
 	vec3 normal = normalize(fs_in.Normal);
 
@@ -28,13 +28,13 @@ void main(void)
 			vec4 lightColor = u_LightData[dataIndex + POINT_LIGHT_COLOR_INDEX];
 			vec4 lightPosition = u_LightData[dataIndex + POINT_LIGHT_POSITION_INDEX];
 			vec3 lightDirection = normalize(lightPosition.xyz - fs_in.Position.xyz);
-			diffuse = diffuse + max(0, dot(normal, lightDirection)) * lightColor * diffuseMaterial;
+			diffuseColor += max(0, dot(normal, lightDirection)) * lightColor * diffuseMaterial;
 		}
 		else if (lightType == DIRECTIONAL_LIGHT_TYPE)
 		{
 			vec4 lightColor = u_LightData[dataIndex + DIRECTIONAL_LIGHT_COLOR_INDEX];
 			vec3 lightDirection = u_LightData[dataIndex + DIRECTIONAL_LIGHT_DIRECTION_INDEX].xyz;
-			diffuse += max(0, dot(normal, -lightDirection)) * lightColor * diffuseMaterial;
+			diffuseColor += max(0, dot(normal, -lightDirection)) * lightColor * diffuseMaterial;
 		}
 		else
 		{
@@ -42,5 +42,5 @@ void main(void)
 	}
 	
 
-	vFragColor = clamp(diffuseMaterial * u_AmbientLight + diffuse, 0, 1);
+	vFragColor = clamp(diffuseMaterial * u_AmbientLight + diffuseColor, 0, 1);
 }
