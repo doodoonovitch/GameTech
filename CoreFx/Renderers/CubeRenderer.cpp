@@ -10,12 +10,9 @@ namespace CoreFx
 CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCount, size_t capacity, size_t pageSize)
 	: SceneObjectRenderer<Renderables::Cube, 2>(capacity, pageSize)
 	, mTexture(nullptr)
-	, mMaterialDataBuffer(0)
-	, mMaterialDataTex(0)
-	, mMaterialIndexBuffer(0)
-	, mMaterialIndexTex(0)
 	, mMaterials(materialCount)
 	, mIsMaterialIndexBufferSet(false)
+	, mIsMaterialDataBufferSet(false)
 {
 	memset(mMaterials.data(), 0, sizeof(MaterialData) * mMaterials.size());
 
@@ -36,10 +33,15 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 
 		mShader.AddUniform("texSampler1");
 		mShader.AddUniform("perInstanceDataSampler");
+		mShader.AddUniform("materialIndexSampler");
+		mShader.AddUniform("materialDataSampler");
+		
 		
 		//pass values of constant uniforms at initialization
 		glUniform1i(mShader("texSampler1"), 0);
 		glUniform1i(mShader("perInstanceDataSampler"), 1);
+		glUniform1i(mShader("materialIndexSampler"), 2);
+		glUniform1i(mShader("materialDataSampler"), 3);
 
 		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -140,32 +142,12 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 	
 	mTexture = Engine::GetInstance()->GetTextureManager()->LoadTexture2D(texture);
 
-	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GLsizei) (GetCapacity() * sizeof(PerInstanceData)), nullptr);
+	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
 	
-	{
-		glGenBuffers(1, &mMaterialDataBuffer);
-		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialDataBuffer);
-		glBufferData(GL_TEXTURE_BUFFER, mMaterials.size() * sizeof(MaterialData), nullptr, GL_STATIC_DRAW);
-		GL_CHECK_ERRORS;
+	mMaterialDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, mMaterials.size() * sizeof(MaterialData), nullptr);
 
-		glGenTextures(1, &mMaterialDataTex);
-		glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataTex);
-		glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, mMaterialDataBuffer);
-		GL_CHECK_ERRORS;
-	}
+	mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R8UI, GetCapacity() * sizeof(std::uint8_t), nullptr);
 
-	{
-		glGenBuffers(1, &mMaterialIndexBuffer);
-		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer);
-		glBufferData(GL_TEXTURE_BUFFER, GetCapacity() * sizeof(std::uint8_t), nullptr, GL_STATIC_DRAW);
-		GL_CHECK_ERRORS;
-
-		glGenTextures(1, &mMaterialIndexTex);
-		glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexTex);
-		glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, mMaterialIndexBuffer);
-		GL_CHECK_ERRORS;
-	}
-	
 	std::cout << "\t mVaoID : " << mVaoID << std::endl;
 	std::cout << "\t mVboID[VBO_Vertex] : " << mVboIDs[VBO_Vertex] << std::endl;
 	std::cout << "\t mVboID[VBO_Index] : " << mVboIDs[VBO_Index] << std::endl;
@@ -179,21 +161,33 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 CubeRenderer::~CubeRenderer()
 {
 	mModelMatrixBuffer.ReleaseResource();
-
-	glDeleteTextures(1, &mMaterialDataTex);
-	glDeleteTextures(1, &mMaterialIndexTex);
-
-	glDeleteBuffers(1, &mMaterialDataBuffer);
-	glDeleteBuffers(1, &mMaterialIndexBuffer);
+	mMaterialDataBuffer.ReleaseResource();
+	mMaterialIndexBuffer.ReleaseResource();
 
 	Engine::GetInstance()->GetTextureManager()->ReleaseTexture2D(mTexture);
 }
 
 void CubeRenderer::Render()
 {
+	if (!mIsMaterialDataBufferSet)
+	{
+		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetBufferId());
+
+		GLintptr offset = 0;
+		for (std::vector<MaterialData>::const_iterator it = mMaterials.begin(); it != mMaterials.end(); ++it)
+		{
+			MaterialData * matDataBuffer = (MaterialData *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, sizeof(MaterialData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+			const MaterialData & mat = *it;
+			memcpy(matDataBuffer, &mat, sizeof(MaterialData));
+			glUnmapBuffer(GL_TEXTURE_BUFFER);
+			offset += sizeof(MaterialData);
+		}
+		mIsMaterialDataBufferSet = true;
+	}
+
 	if (!mIsMaterialIndexBufferSet)
 	{
-		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer);
+		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetBufferId());
 
 		std::uint8_t * matIndexBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 		assert(matIndexBuffer != nullptr);
@@ -231,6 +225,12 @@ void CubeRenderer::Render()
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetTextureId());
+
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetTextureId());
+
 			glDrawElementsInstanced(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 		glBindVertexArray(0);
 	mShader.UnUse();
@@ -259,6 +259,7 @@ Renderables::Cube * CubeRenderer::CreateCube(std::uint8_t materialIndex)
 	{
 		Renderables::Cube *cube = new Renderables::Cube(materialIndex);
 		mObjs.Attach(cube);
+		mIsMaterialIndexBufferSet = false;
 		return cube;
 	}
 	else
@@ -271,24 +272,30 @@ void CubeRenderer::DeleteCube(Renderables::Cube *& cube)
 		return;
 	mObjs.Detach(cube);
 	SAFE_DELETE(cube);
+	mIsMaterialIndexBufferSet = false;
 }
 
-void CubeRenderer::SetMaterial(std::uint8_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, std::uint8_t shininess, std::int8_t diffuseTextureIndex, std::int8_t specularTextureIndex, std::int8_t normalTextureIndex)
+void CubeRenderer::SetMaterial(std::uint8_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, std::int8_t ambientTextureIndex, std::int8_t diffuseTextureIndex, std::int8_t specularTextureIndex, std::int8_t normalTextureIndex)
 {
 	assert(materialIndex < mMaterials.size());
 
 	if (materialIndex < mMaterials.size())
 	{
+		mIsMaterialIndexBufferSet = false;
+		mIsMaterialDataBufferSet = false;
+
 		MaterialData & mat = mMaterials[materialIndex];
 		memcpy(mat.mAmbient, glm::value_ptr(ambient), sizeof(GLfloat) * 3);
 		memcpy(mat.mDiffuse, glm::value_ptr(diffuse), sizeof(GLfloat) * 3);
 		memcpy(mat.mSpecular, glm::value_ptr(specular), sizeof(GLfloat) * 3);
 
-		mat.mTextureIndexAndShininess =
+		mat.mTextureIndexes =
 			(diffuseTextureIndex >= 0 ? (diffuseTextureIndex << 24) : 0xFF000000) |
-			(specularTextureIndex >= 0 ? (specularTextureIndex << 16) : 0xFF000000) |
-			(normalTextureIndex >= 0 ? (normalTextureIndex << 8) : 0xFF000000) |
-			shininess;
+			(specularTextureIndex >= 0 ? (specularTextureIndex << 16) : 0x00FF0000) |
+			(normalTextureIndex >= 0 ? (normalTextureIndex << 8) : 0x0000FF00) |
+			(ambientTextureIndex >= 0 ? ambientTextureIndex : 0x000000FF);
+
+		mat.mShininess = shininess;
 	}
 }
 

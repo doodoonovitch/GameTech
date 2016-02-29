@@ -21,7 +21,7 @@ public:
 	Renderables::Cube * CreateCube(std::uint8_t materialIndex);
 	void DeleteCube(Renderables::Cube *& cube);
 
-	void SetMaterial(std::uint8_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, std::uint8_t shininess, std::int8_t diffuseTextureIndex, std::int8_t specularTextureIndex, std::int8_t normalTextureIndex);
+	void SetMaterial(std::uint8_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, std::int8_t ambientTextureIndex, std::int8_t diffuseTextureIndex, std::int8_t specularTextureIndex, std::int8_t normalTextureIndex);
 
 private:
 
@@ -39,28 +39,27 @@ private:
 	struct MaterialData
 	{
 		__declspec(align(4)) GLfloat mAmbient[3];
-		__declspec(align(4)) GLbitfield _mUnused1;
+		__declspec(align(4)) GLbitfield mTextureIndexes; // diffuse, specular, normal texture index
 		__declspec(align(4)) GLfloat mDiffuse[3];
-		__declspec(align(4)) GLbitfield _mUnused2;
+		__declspec(align(4)) GLbitfield _mUnused1;
 		__declspec(align(4)) GLfloat mSpecular[3];
-		__declspec(align(4)) GLbitfield mTextureIndexAndShininess; // diffuse, specular, normal texture index + shininess
+		__declspec(align(4)) float mShininess;
 	};
 
 private:
 	
 	Texture2D const * mTexture;
 
-	GLuint mMaterialDataBuffer;
-	GLuint mMaterialDataTex;
-	GLuint mMaterialIndexBuffer;
-	GLuint mMaterialIndexTex;
-
 	std::vector<MaterialData> mMaterials;
 
 	TextureBuffer mModelMatrixBuffer;
+	TextureBuffer mMaterialDataBuffer;
+	TextureBuffer mMaterialIndexBuffer;
+
 	DrawNormalShader mDrawVertexNormalShader;
 
 	bool mIsMaterialIndexBufferSet;
+	bool mIsMaterialDataBufferSet;
 };
 
 

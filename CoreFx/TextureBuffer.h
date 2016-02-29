@@ -24,7 +24,7 @@ public:
 		return mBufferId;
 	}
 
-	void CreateResource(GLenum usage, GLenum internalformat, GLsizei size, const void * data = nullptr);
+	void CreateResource(GLenum usage, GLenum internalformat, GLsizeiptr size, const void * data = nullptr);
 
 	void ReleaseResource();
 

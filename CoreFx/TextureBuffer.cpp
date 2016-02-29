@@ -18,7 +18,7 @@ TextureBuffer::~TextureBuffer()
 }
 
 
-void TextureBuffer::CreateResource(GLenum usage, GLenum internalformat, GLsizei size, const void * data)
+void TextureBuffer::CreateResource(GLenum usage, GLenum internalformat, GLsizeiptr size, const void * data)
 {
 	assert(mBufferId == 0 && mTextureId == 0);
 
