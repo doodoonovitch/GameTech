@@ -26,8 +26,8 @@ public:
 	inline void SetPosition(float x, float y, float z);
 	inline void SetPosition(glm::vec3 const & p);
 
-	inline glm::vec3 const & GetPosition() const;
-	inline glm::quat const & GetRotation() const;
+	inline glm::vec3 GetPosition() const;
+	inline glm::quat GetRotation() const;
 
 	inline glm::mat4 const & GetMatrix() const;
 	inline glm::mat4 const & GetMatrixInverse() const;
@@ -51,9 +51,10 @@ private:
 
 	glm::mat4 mMatrix;
 	glm::mat4 mInvMatrix;
-	glm::quat mRotation;
-	glm::vec3 mPosition;
-	glm::vec3 mScale;
+	//glm::quat mRotation;
+	//glm::vec3 mPosition;
+	//glm::vec3 mScale;
+	Maths::DualQuaternion mDQ;
 
 	bool mHasNewValue;
 	bool mIsDirty;
@@ -68,40 +69,46 @@ private:
 
 inline void Frame::SetRotation(const glm::quat& q)
 {
-	mRotation = q;
+	//mRotation = q;
+	mDQ.SetRotation(q);
 	mIsDirty = true;
 }
 
 inline void Frame::SetPosition(glm::vec4 const & v)
 {
-	mPosition.x = v.x;
-	mPosition.y = v.y;
-	mPosition.z = v.z;
+	//mPosition.x = v.x;
+	//mPosition.y = v.y;
+	//mPosition.z = v.z;
+	mDQ.SetTranslation(glm::vec3(v));
 	mIsDirty = true;
 }
 
 inline void Frame::SetPosition(float x, float y, float z)
 {
-	mPosition.x = x;
-	mPosition.y = y;
-	mPosition.z = z;
+	//mPosition.x = x;
+	//mPosition.y = y;
+	//mPosition.z = z;
+	mDQ.SetTranslation(glm::vec3(x, y, z));
 	mIsDirty = true;
 }
 
 inline void Frame::SetPosition(glm::vec3 const & p)
 {
-	mPosition = p;
+	//mPosition = p;
+	mDQ.SetTranslation(p);
 	mIsDirty = true;
 }
 
-inline glm::vec3 const & Frame::GetPosition() const
+inline glm::vec3 Frame::GetPosition() const
 {
-	return mPosition;
+	//return mPosition;
+	return mDQ.GetTranslation();
 }
 
-inline glm::quat const & Frame::GetRotation() const
+inline glm::quat Frame::GetRotation() const
 {
-	return mRotation;
+	//return mRotation;
+	return mDQ.GetRotation();
 }
 
 inline glm::mat4 const & Frame::GetMatrix() const

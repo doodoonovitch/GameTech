@@ -68,14 +68,31 @@ void SimpleCamera::OnInit()
 		cubeRenderer->SetMaterial(3, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 0, -1, -1, -1);
 		cubeRenderer->SetMaterial(4, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, -1, -1, -1);
 
+
+		const glm::vec3 XAxis(1.f, 0.f, 0.f);
+		const glm::vec3 YAxis(0.f, 1.f, 0.f);
+		const glm::vec3 ZAxis(0.f, 0.f, 1.f);
+
 		for (auto i = 0; i < xCount; ++i)
 		{
+			float xAngle = (glm::two_pi<float>() * (float)i) / (float)xCount;
+			glm::quat qX = glm::angleAxis(xAngle, XAxis);
+
 			for (auto j = 0; j < yCount; ++j)
 			{
+				float yAngle = (glm::two_pi<float>() * (float)j) / (float)yCount;
+				glm::quat qY = glm::angleAxis(yAngle, YAxis);
+
 				for (auto k = 0; k < zCount; ++k)
 				{
+					float zAngle = (glm::two_pi<float>() * (float)k) / (float)zCount;
+					glm::quat qZ = glm::angleAxis(zAngle, ZAxis);
+
 					Cube * cube = cubeRenderer->CreateCube(i % 5);
 					cube->GetFrame()->SetPosition(glm::vec3(1.5f + 5.f * i, 1.f + 5.f * k, -1.5f + -5.f * j));
+
+					glm::quat qRot = qX * qY * qZ;
+					cube->GetFrame()->SetRotation(qRot);
 				}
 			}
 		}

@@ -20,7 +20,7 @@ public:
 	~Camera();
 
 	// Get/Set world camera position.
-	inline glm::vec3 const & GetPosition() const;
+	inline glm::vec3 GetPosition() const;
 	inline void SetPosition(glm::vec4 const & v);
 	inline void SetPosition(float x, float y, float z);
 	inline void SetPosition(glm::vec3 const & p);
@@ -93,7 +93,7 @@ protected:
 // =======================================================================
 
 
-inline glm::vec3 const & Camera::GetPosition() const
+inline glm::vec3 Camera::GetPosition() const
 {
 	return GetFrame()->GetPosition();
 }

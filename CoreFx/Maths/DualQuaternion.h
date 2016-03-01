@@ -5,6 +5,8 @@
 
 namespace CoreFx
 {
+	namespace Maths
+	{
 	// =======================================================================
 	// =======================================================================
 
@@ -16,20 +18,20 @@ class DualQuaternion
 public:
 
 	DualQuaternion()
-		: m_qReal()
-		, m_qDual(0.f, 0.f, 0.f, 0.f)
+		: mQr(0.f, 0.f, 0.f, 1.f)
+		, mQd(0.f, 0.f, 0.f, 0.f)
 	{
 	}
 
-	DualQuaternion(Quaternion const & qReal, Quaternion const & qDual)
-		: m_qReal(glm::normalize(qReal.m_q))
-		, m_qDual(qDual)
+	DualQuaternion(glm::quat const & qReal, glm::quat const & qDual)
+		: mQr(glm::normalize(qReal))
+		, mQd(qDual)
 	{
 	}
 
-	DualQuaternion(Quaternion const & q, glm::vec3 t)
+	DualQuaternion(glm::quat const & q, glm::vec3 t)
 	{
-		FromRotTrans(q.m_q, t);
+		Set(q, t);
 	}
 
 	~DualQuaternion()
@@ -37,117 +39,162 @@ public:
 	}
 
 	DualQuaternion(const DualQuaternion& rhs)
-		: m_qReal(rhs.m_qReal)
-		, m_qDual(rhs.m_qDual)
+		: mQr(rhs.mQr)
+		, mQd(rhs.mQd)
 	{
+	}
+
+	void Set(glm::quat const & rotation, glm::vec3 const & translation)
+	{
+		mQr = rotation;
+		mQd = (0.5f * glm::quat(0, translation)) * rotation;
+	}
+
+	void SetRotation(glm::quat const & q)
+	{
+		glm::vec3 t = GetTranslation();
+		Set(q, t);
+	}
+
+	void SetTranslation(glm::vec3 const & translation)
+	{
+		mQd = (0.5f * glm::quat(0, translation)) * mQr;
+	}
+
+	glm::quat GetRotation() const
+	{
+		return mQr;
+	}
+
+	glm::vec3 GetTranslation() const
+	{
+		glm::quat t = (mQd * 2.0f) * glm::conjugate(mQr);
+		return glm::vec3(t.x, t.y, t.z);
 	}
 
 	DualQuaternion& operator=(DualQuaternion const & rhs)
 	{
 		if (this != &rhs)
 		{
-			m_qReal = rhs.m_qReal;
-			m_qDual = rhs.m_qDual;
+			mQr = rhs.mQr;
+			mQd = rhs.mQd;
 		}
 		return *this;
 	}
 
 	DualQuaternion& operator+=(DualQuaternion const & rhs)
 	{
-		m_qReal.m_q += rhs.m_qReal.m_q;
-		m_qDual.m_q += rhs.m_qDual.m_q;
+		mQr += rhs.mQr;
+		mQd += rhs.mQd;
 		return *this;
 	}
 
 	DualQuaternion& operator*=(DualQuaternion const & rhs)
 	{
-		Quaternion qReal(m_qReal);
-		m_qReal.m_q = m_qReal.m_q * rhs.m_qReal.m_q;
-		m_qDual.m_q = qReal.m_q * rhs.m_qDual.m_q + m_qDual.m_q * rhs.m_qReal.m_q;
+		glm::quat qr(mQr);
+		mQr = mQr * rhs.mQr;
+		mQd = qr * rhs.mQd + mQd * rhs.mQr;
 		return *this;
 	}
 
 	DualQuaternion& operator*=(float s)
 	{
-		m_qReal.m_q *= s;
-		m_qDual.m_q *= s;
+		mQr *= s;
+		mQd *= s;
 		return *this;
 	}
 
 	DualQuaternion& operator/=(float s)
 	{
-		m_qReal.m_q /= s;
-		m_qDual.m_q /= s;
+		mQr /= s;
+		mQd /= s;
 		return *this;
 	}
 
 	DualQuaternion& Normalize()
 	{
-		float mag = Dot(m_qReal, m_qReal);
+		float mag = glm::dot(mQr, mQr);
 		assert(mag > 0.000001f);
-		m_qReal.m_q *= 1.0f / mag;
-		m_qDual.m_q *= 1.0f / mag;
+		mQr /= mag;
+		mQd /= mag;
 		return *this;
+	}
+
+	glm::mat4 GetMatrix() const
+	{
+		return ToMatrix(*this);
+	}
+
+	glm::mat4 GetInverseMatrix() const
+	{
+		return ToInverseMatrix(*this);
 	}
 
 public:
 
+	friend DualQuaternion Conjugate(DualQuaternion const & a)
+	{
+		return DualQuaternion(glm::conjugate(a.mQr), glm::conjugate(a.mQd));
+	}
+
 	friend float Dot(DualQuaternion const & a, DualQuaternion const & b)
 	{
-		return Dot(a.m_qReal, b.m_qReal);
+		return glm::dot(a.mQr, b.mQr);
 	}
 
 	friend DualQuaternion Normalize(DualQuaternion const & q)
 	{
-		float mag = Dot(q.m_qReal, q.m_qReal);
+		float mag = glm::dot(q.mQr, q.mQr);
 		assert(mag > 0.000001f);
-		DualQuaternion ret = q;
-		ret.m_qReal *= 1.0f / mag;
-		ret.m_qDual *= 1.0f / mag;
+		DualQuaternion ret;
+		ret.mQr = q.mQr / mag;
+		ret.mQd = q.mQd / mag;
 		return ret;
-	}
-
-	friend DualQuaternion operator*(DualQuaternion const & lhs, DualQuaternion const & rhs) 
-	{
-		return DualQuaternion(lhs.m_qReal.m_q * rhs.m_qReal.m_q, lhs.m_qReal.m_q * rhs.m_qDual.m_q + lhs.m_qDual.m_q * rhs.m_qReal.m_q);
 	}
 
 	friend DualQuaternion operator*(float scale, DualQuaternion const & q)
 	{
-		return DualQuaternion(scale * q.m_qReal.m_q, scale * q.m_qDual.m_q);
+		return DualQuaternion(scale * q.mQr, scale * q.mQd);
 	}
 
 	friend DualQuaternion operator*(DualQuaternion const & q, float scale)
 	{
-		return DualQuaternion(scale * q.m_qReal.m_q, scale * q.m_qDual.m_q);
+		return DualQuaternion(scale * q.mQr, scale * q.mQd);
+	}
+
+	friend DualQuaternion operator*(DualQuaternion const & lhs, DualQuaternion const & rhs)
+	{
+		return DualQuaternion(lhs.mQr * rhs.mQr, lhs.mQr * rhs.mQd + lhs.mQd * rhs.mQr);
 	}
 
 	friend DualQuaternion operator+(DualQuaternion const & lhs, DualQuaternion const & rhs) 
 	{
-		return DualQuaternion(lhs.m_qReal.m_q + rhs.m_qReal.m_q, lhs.m_qDual.m_q + rhs.m_qDual.m_q);
+		return DualQuaternion(lhs.mQr + rhs.mQr, lhs.mQd + rhs.mQd);
 	}
 
-protected:
 
-	DualQuaternion(glm::quat const & qReal, glm::quat const &qDual)
-		: m_qReal(qReal)
-		, m_qDual(qDual)
-	{}
-
-	void FromRotTrans(glm::quat const & q, glm::vec3 t)
+	friend glm::mat4 ToMatrix(DualQuaternion const & q)
 	{
-		m_qReal.m_q = q;
+		glm::mat4 m = glm::mat4_cast(q.mQr);
+		glm::vec3 t = q.GetTranslation();
+		m[3].x = t.x;
+		m[3].y = t.y;
+		m[3].z = t.z;
+		return m;
+	}
 
-		m_qDual.m_q.w = -0.5f * ( t.x * q.x + t.y * q.y + t.z * q.z);
-		m_qDual.m_q.x =  0.5f * ( t.x * q.w + t.y * q.z - t.z * q.y);
-		m_qDual.m_q.y =  0.5f * (-t.x * q.z + t.y * q.w + t.z * q.x);
-		m_qDual.m_q.z =  0.5f * ( t.x * q.y - t.y * q.x + t.z * q.w);
+	friend glm::mat4 ToInverseMatrix(DualQuaternion const & q)
+	{
+		glm::mat4 m = glm::transpose(glm::mat4_cast(q.mQr));
+		glm::mat4 t = glm::translate(-q.GetTranslation());
+		glm::mat4 inv = m * t;
+		return inv;
 	}
 
 private:
 
-	Quaternion m_qReal;
-	Quaternion m_qDual;
+	glm::quat mQr;
+	glm::quat mQd;
 
 };
 
@@ -158,5 +205,6 @@ private:
 
 	// =======================================================================
 	// =======================================================================
+	} // namespace Maths
 } // namespace CoreFx
 #endif // COREFX_MATHS_DUALQUATERNION_H

@@ -51,6 +51,8 @@ namespace CoreFx
 
 }; // namespace CoreFx
 
+#include "Maths\DualQuaternion.h"
+
 #include "InstanceContainer.h"
 #include "Shader.h"
 #include "Frame.h"
