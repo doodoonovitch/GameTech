@@ -59,6 +59,7 @@ namespace CoreFx
 #include "SceneObject.h"
 #include "Renderer.h"
 #include "Renderers\RendererHelper.h"
+#include "Renderers\DrawNormalShader.h"
 
 #include "Engine.h"
 
@@ -82,7 +83,6 @@ namespace CoreFx
 #include "Renderables\Cube.h"
 #include "Renderables\Mesh.h"
 
-#include "Renderers\DrawNormalShader.h"
 #include "Renderers\CubeRenderer.h"
 #include "Renderers\GridRenderer.h"
 #include "Renderers\AxisRenderer.h"

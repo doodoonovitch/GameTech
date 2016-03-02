@@ -60,7 +60,7 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 {
 	if (includeCommon && sCommonInclude.empty())
 	{
-		if (!MergeFile(sCommonInclude, "shaders/common.inc"))
+		if (!MergeFile(sCommonInclude, "shaders/common.glsl"))
 		{
 			cerr << "Error loading common include file : 'shaders/common.inc' !" << endl;
 			return;

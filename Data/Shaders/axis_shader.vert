@@ -7,5 +7,5 @@ void main()
 {  
 	vColorOut = vColor;
 
-	gl_Position = u_ProjMatrix * (u_ViewMatrix * vec4(vVertex.xyz,1));
+	gl_Position = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, vVertex.xyz), 1);
 }

@@ -207,11 +207,13 @@ void CubeRenderer::Render()
 	GLintptr offset = 0;
 	mObjs.ForEach([this, &offset](Renderables::Cube* obj)
 	{
-		if (obj->GetFrame()->HasNewValue())
+		if (obj->GetFrame()->IsModified())
 		{
-			void * buffer = glMapBufferRange(GL_TEXTURE_BUFFER, offset, sizeof(PerInstanceData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+			std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, sizeof(PerInstanceData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 			GL_CHECK_ERRORS;
-			memcpy(buffer, glm::value_ptr(obj->GetFrame()->GetMatrix()), sizeof(glm::mat4));
+			//memcpy(buffer, glm::value_ptr(obj->GetFrame()->GetMatrix()), sizeof(glm::mat4));
+			memcpy(buffer, glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetRealPart()), sizeof(glm::quat));
+			memcpy(buffer + sizeof(glm::quat), glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetDualPart()), sizeof(glm::quat));
 			glUnmapBuffer(GL_TEXTURE_BUFFER);
 		}
 		offset += sizeof(PerInstanceData);

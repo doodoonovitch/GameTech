@@ -12,26 +12,45 @@ namespace CoreFx
 
 
 
+		struct DualQuat
+		{
+			DualQuat()
+				: mQr(0.f, 0.f, 0.f, 1.f)
+				, mQd(0.f, 0.f, 0.f, 0.f)
+			{}
 
-class DualQuaternion 
+			DualQuat(glm::quat const & qReal, glm::quat const & qDual)
+				: mQr(glm::normalize(qReal))
+				, mQd(qDual)
+			{}
+
+			DualQuat(const DualQuat & rhs)
+				: mQr(rhs.mQr)
+				, mQd(rhs.mQd)
+			{}
+
+			glm::quat mQr;
+			glm::quat mQd;
+		};
+
+class DualQuaternion : public DualQuat
 {
+
 public:
 
 	DualQuaternion()
-		: mQr(0.f, 0.f, 0.f, 1.f)
-		, mQd(0.f, 0.f, 0.f, 0.f)
+		: DualQuat()
 	{
 	}
 
 	DualQuaternion(glm::quat const & qReal, glm::quat const & qDual)
-		: mQr(glm::normalize(qReal))
-		, mQd(qDual)
+		: DualQuat(qReal, qDual)
 	{
 	}
 
 	DualQuaternion(glm::quat const & q, glm::vec3 t)
 	{
-		Set(q, t);
+		SetRotationTranslation(q, t);
 	}
 
 	~DualQuaternion()
@@ -39,12 +58,27 @@ public:
 	}
 
 	DualQuaternion(const DualQuaternion& rhs)
-		: mQr(rhs.mQr)
-		, mQd(rhs.mQd)
+		: DualQuat(rhs)
 	{
 	}
 
-	void Set(glm::quat const & rotation, glm::vec3 const & translation)
+	glm::quat const & GetRealPart() const
+	{
+		return mQr;
+	}
+
+	glm::quat const & GetDualPart() const
+	{
+		return mQd;
+	}
+
+	void Set(glm::quat const & realPart, glm::quat const & dualPart)
+	{
+		mQr = realPart;
+		mQd = dualPart;
+	}
+
+	void SetRotationTranslation(glm::quat const & rotation, glm::vec3 const & translation)
 	{
 		mQr = rotation;
 		mQd = (0.5f * glm::quat(0, translation)) * rotation;
@@ -53,7 +87,7 @@ public:
 	void SetRotation(glm::quat const & q)
 	{
 		glm::vec3 t = GetTranslation();
-		Set(q, t);
+		SetRotationTranslation(q, t);
 	}
 
 	void SetTranslation(glm::vec3 const & translation)
@@ -130,6 +164,12 @@ public:
 		return ToInverseMatrix(*this);
 	}
 
+	DualQuaternion GetConjugate() const
+	{
+		return Conjugate(*this);
+	}
+
+
 public:
 
 	friend DualQuaternion Conjugate(DualQuaternion const & a)
@@ -192,9 +232,6 @@ public:
 	}
 
 private:
-
-	glm::quat mQr;
-	glm::quat mQd;
 
 };
 

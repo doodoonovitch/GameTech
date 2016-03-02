@@ -19,37 +19,34 @@ Camera::~Camera(void)
 {
 }
 
+void Camera::Update()
+{
+	if (GetFrame()->IsModified())
+	{
+		mViewDQ =  GetFrame()->GetDualQuaternion().GetConjugate();
+		glm::mat4 m = GetFrame()->GetDualQuaternion().GetMatrix();
+		mRight = glm::vec3(m[0]);
+		mUp = glm::vec3(m[1]);
+		mLook = glm::vec3(m[2]);
+		GetFrame()->SetIsModified(false);
+	}
+}
+
 void Camera::SetupProjection(const float fovy, const float aspRatio)
 {
-	mP = glm::perspective(fovy, aspRatio, 0.1f, 1000.0f);
+	mProj = glm::perspective(fovy, aspRatio, 0.1f, 1000.0f);
 	mFov = fovy;
 	mAspectRatio = aspRatio;
 } 
 
 const glm::mat4 Camera::GetViewMatrix() const
 {
-	return GetFrame()->GetMatrixInverse();
+	return mViewDQ.GetMatrix();
 }
 
-const glm::mat4 Camera::GetProjectionMatrix() const
-{
-	return mP;
-}
- 
 glm::mat4 Camera::GetMatrixUsingYawPitchRoll(const float yaw, const float pitch, const float roll)
-{
-	 
+{	 
 	return glm::yawPitchRoll(yaw, pitch, roll);  
-}
-
-const float Camera::GetFOV() const
-{
-	return mFov;
-} 
-
-const float Camera::GetAspectRatio() const
-{
-	return mAspectRatio;
 }
 
 void Camera::LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::vec3 const & up)
@@ -97,6 +94,7 @@ void Camera::Walk(float d)
 	glm::vec3 p = v + GetPosition();
 	GetFrame()->SetPosition(p);
 }
+
 
 
 } // namespace Core

@@ -115,7 +115,8 @@ void SimpleCamera::OnInit()
 		*/
 
 	// Setup Lights
-		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec4(0.4f, 0.4f, 0.4f, 0.4f), glm::vec3(0.f, 0.f, 0.f));
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec4(0.4f, 0.4f, 0.0f, 0.0f), glm::vec3(10.f, 0.f, 0.f));
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec4(0.4f, 0.4f, 0.4f, 0.0f), glm::vec3(0.f, 0.f, 0.f));
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::vec4(0.4f, 0.4f, 0.4f, 0.f), glm::normalize(glm::vec3(0.2f, -1.f, 0.f)));
 
 	//setup camera
@@ -123,30 +124,6 @@ void SimpleCamera::OnInit()
 	m_pCamera->LookAt(glm::vec3(10, 6.f, 12.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
 	engine->SetCamera(m_pCamera);
 
-	glm::mat4 view1 = glm::lookAt(glm::vec3(10, 6.f, 12.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
-	m_pCamera->GetFrame()->BuildMatrix();
-	glm::mat4 view2 = m_pCamera->GetViewMatrix();
-	glm::mat4 view3 = m_pCamera->GetFrame()->GetMatrix();
-
-	for (int i = 0; i < 4; ++i)
-	{
-		glm::vec4 & v = view1[i];
-		printf("%f %f %f %f\n", v.x, v.y, v.z, v.w);
-	}
-
-	printf("\n");
-	for (int i = 0; i < 4; ++i)
-	{
-		glm::vec4 & v = view2[i];
-		printf("%f %f %f %f\n", v.x, v.y, v.z, v.w);
-	}
-
-	printf("\n");
-	for (int i = 0; i < 4; ++i)
-	{
-		glm::vec4 & v = view3[i];
-		printf("%f %f %f %f\n", v.x, v.y, v.z, v.w);
-	}
 
 	cout << "Initialization successfull" << endl;
 }

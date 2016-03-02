@@ -19,6 +19,8 @@ public:
 	Camera();
 	~Camera();
 
+	void Update();
+
 	// Get/Set world camera position.
 	inline glm::vec3 GetPosition() const;
 	inline void SetPosition(glm::vec4 const & v);
@@ -26,9 +28,9 @@ public:
 	inline void SetPosition(glm::vec3 const & p);
 
 	// Get camera basis vectors.
-	inline glm::vec3 GetRight() const;
-	inline glm::vec3 GetUp() const;
-	inline glm::vec3 GetLook() const;
+	inline const glm::vec3 & GetRight() const;
+	inline const glm::vec3 & GetUp() const;
+	inline const glm::vec3 & GetLook() const;
 
 	// Get frustum properties.
 	inline float GetNearZ() const;
@@ -50,8 +52,12 @@ public:
 
 	void LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::vec3 const & up);
 
+	inline const glm::mat4 & GetProjectionMatrix() const;
+
+	inline const Maths::DualQuaternion & GetViewDQ() const;
+
 	const glm::mat4 GetViewMatrix() const;
-	const glm::mat4 GetProjectionMatrix() const;
+
 
 public:
 
@@ -82,7 +88,11 @@ protected:
 
 	static glm::vec3 UP;
 
-	glm::mat4 mP; //projection matrix
+	glm::mat4 mProj; //projection matrix
+	Maths::DualQuaternion mViewDQ;
+	glm::vec3 mRight;
+	glm::vec3 mUp;
+	glm::vec3 mLook;
 
 	
 	float mFov, mAspectRatio;
@@ -113,19 +123,19 @@ inline void Camera::SetPosition(glm::vec3 const & p)
 	GetFrame()->SetPosition(p);
 }
 
-inline glm::vec3 Camera::GetRight() const
+inline const glm::vec3 & Camera::GetRight() const
 {
-	return GetFrame()->GetRight();
+	return mRight;
 }
 
-inline glm::vec3 Camera::GetUp() const
+inline const glm::vec3 & Camera::GetUp() const
 {
-	return GetFrame()->GetUp();
+	return mUp;
 }
 
-inline glm::vec3 Camera::GetLook() const
+inline const glm::vec3 & Camera::GetLook() const
 {
-	return GetFrame()->GetLook();
+	return mLook;
 }
 
 inline float Camera::GetNearZ() const
@@ -155,25 +165,46 @@ inline float Camera::GetFovX() const
 }
 
 // Get near and far plane dimensions in view space coordinates.
-float Camera::GetNearWindowWidth()const
+inline float Camera::GetNearWindowWidth()const
 {
 	return mAspect * mNearWindowHeight;
 }
 
-float Camera::GetNearWindowHeight()const
+inline float Camera::GetNearWindowHeight()const
 {
 	return mNearWindowHeight;
 }
 
-float Camera::GetFarWindowWidth()const
+inline float Camera::GetFarWindowWidth()const
 {
 	return mAspect * mFarWindowHeight;
 }
 
-float Camera::GetFarWindowHeight()const
+inline float Camera::GetFarWindowHeight()const
 {
 	return mFarWindowHeight;
 }
+
+inline const Maths::DualQuaternion & Camera::GetViewDQ() const
+{
+	return mViewDQ;
+}
+
+inline const float Camera::GetFOV() const
+{
+	return mFov;
+}
+
+inline const float Camera::GetAspectRatio() const
+{
+	return mAspectRatio;
+}
+
+inline const glm::mat4 & Camera::GetProjectionMatrix() const
+{
+	return mProj;
+}
+
 
 
 } // namespace Core

@@ -72,27 +72,18 @@ public:
 		ReleaseObjects();
 	}
 
-	void UpdateObjectMatrix()
-	{
-		mObjs.ForEach([](T_Object* obj)
-		{
-			if (obj->GetFrame() != nullptr)
-				obj->GetFrame()->BuildMatrix();
-		});
-	}
-
 	void ClearObjectState()
 	{
 		mObjs.ForEach([](T_Object* obj)
 		{
 			if (obj->GetFrame() != nullptr)
-				obj->GetFrame()->ClearHasNewValue();
+				obj->GetFrame()->SetIsModified(false);
 		});
 	}
 
 	virtual void BeginFrame() override
 	{
-		UpdateObjectMatrix();
+		
 	}
 
 	virtual void EndFrame() override

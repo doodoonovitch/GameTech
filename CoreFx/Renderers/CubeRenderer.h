@@ -33,7 +33,9 @@ private:
 
 	struct PerInstanceData
 	{
-		glm::mat4 mModel;
+		//glm::mat4 mModel;
+		glm::quat mQreal;
+		glm::quat mQdual;
 	};
 
 	struct MaterialData

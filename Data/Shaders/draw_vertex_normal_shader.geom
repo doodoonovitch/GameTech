@@ -21,26 +21,33 @@ out GS_OUT
 
 void main()
 {  
-	int index = gs_in[0].InstanceId * 4;
-	vec4 col1 = texelFetch(perInstanceDataSampler, index);
-	vec4 col2 = texelFetch(perInstanceDataSampler, index + 1);
-	vec4 col3 = texelFetch(perInstanceDataSampler, index + 2);
-	vec4 col4 = texelFetch(perInstanceDataSampler, index + 3);
-	
-	mat4 modelMatrix = mat4(col1, col2, col3, col4);
+	//int index = gs_in[0].InstanceId * 4;
+	//vec4 col1 = texelFetch(perInstanceDataSampler, index);
+	//vec4 col2 = texelFetch(perInstanceDataSampler, index + 1);
+	//vec4 col3 = texelFetch(perInstanceDataSampler, index + 2);
+	//vec4 col4 = texelFetch(perInstanceDataSampler, index + 3);	
+	//mat4 modelMatrix = mat4(col1, col2, col3, col4);
+	//mat4 modelViewMatrix = u_ViewMatrix * modelMatrix;
 
-	mat4 modelViewMatrix = u_ViewMatrix * modelMatrix;
+	DualQuat modelDQ;
+	int index = gs_in[0].InstanceId * 2;
+	modelDQ.Qr = texelFetch(perInstanceDataSampler, index);
+	modelDQ.Qd = texelFetch(perInstanceDataSampler, index + 1);
+
+	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{
-		vec4 position = modelViewMatrix * gl_in[i].gl_Position;
+		//vec4 position = modelViewMatrix * gl_in[i].gl_Position;
+		vec4 position = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
 		vec4 projPos = u_ProjMatrix * position;
 
 		gl_Position = projPos;
 		gs_out.Color = u_VertexNormalColor;
 		EmitVertex();
 
-		vec4 normal = modelViewMatrix * vec4(gs_in[i].Normal.xyz, 0);
+		//vec4 normal = modelViewMatrix * vec4(gs_in[i].Normal.xyz, 0);
+		vec4 normal = vec4(dqTransformNormal(gs_in[i].Normal.xyz, viewModelDQ), 0);
 		gl_Position = u_ProjMatrix * (position + (normal * u_NormalMagnitude));
 		gs_out.Color = u_VertexNormalColor;
 		EmitVertex();
@@ -74,7 +81,7 @@ void main()
 				gs_out.Color = u_DirectionalLightColor;
 				EmitVertex();
 
-				vec4 lightDirection = normalize(u_LightData[dataIndex + DIRECTIONAL_LIGHT_DIRECTION_INDEX]);
+				vec4 lightDirection = -normalize(u_LightData[dataIndex + DIRECTIONAL_LIGHT_DIRECTION_INDEX]);
 				gl_Position = u_ProjMatrix * (position + (lightDirection * u_LightMagnitude));
 
 				gs_out.Color = u_DirectionalLightColor;

@@ -159,22 +159,6 @@ private:
 		MAX_LIGHT_DATA_COUNT = 64
 	};
 
-	struct FrameData
-	{
-		FrameData()
-			: vAmbientLight(0.f, 0.f, 0.f, 0.f)
-		{
-
-		}
-
-		__declspec(align(16)) glm::mat4 mView;
-		__declspec(align(16)) glm::mat4 mProj;
-		__declspec(align(16)) glm::vec4 vAmbientLight;
-		__declspec(align(16)) glm::ivec4 uLightDesc[MAX_LIGHT_COUNT / 4];
-		__declspec(align(16)) glm::vec4 vLightData[MAX_LIGHT_DATA_COUNT];
-		__declspec(align(4)) GLuint uLightCount;
-	};
-
 
 private:
 
@@ -210,9 +194,39 @@ private:
 	glm::vec4 mDrawDirectionalLightColor;
 	GLfloat mDrawVertexNormalMagnitude;
 	GLfloat mDrawLightMagnitude;
+	Renderers::DrawNormalShader mDrawVertexNormalShader;
 
 	bool mInitialized;
 	bool mIsDrawVertexNormalEnabled;
+
+
+	enum FrameDataUniforms
+	{
+		u_ProjMatrix,
+		u_ViewDQ,
+		u_AmbientLight,
+		u_LightDesc,
+		u_LightData,
+		u_LightCount,
+
+		__uniforms_count__
+	};
+
+	GLsizei mFrameDataSize;
+
+	GLuint mFrameDataUniformIndices[__uniforms_count__];
+	GLint mFrameDataUniformSizes[__uniforms_count__];
+	GLint mFrameDataUniformOffsets[__uniforms_count__];
+	const char * mFrameDataUniformNames[__uniforms_count__] =
+	{
+		"u_ProjMatrix",
+		"u_ViewDQ.Qr",
+		"u_AmbientLight",
+		"u_LightDesc",
+		"u_LightData",
+		"u_LightCount",
+	};
+
 
 	static Engine* sInstance;
 };

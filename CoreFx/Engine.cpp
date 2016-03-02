@@ -45,6 +45,8 @@ void Engine::InternalInitialize()
 
 		mLights = new LightContainer(MAX_LIGHT_COUNT, 1);
 
+		mDrawVertexNormalShader.LoadShaders();
+
 		InternalCreateFrameDataBuffer();
 
 		mInitialized = true;
@@ -78,9 +80,31 @@ void Engine::InternalRelease()
 
 void Engine::InternalCreateFrameDataBuffer()
 {
+	GLuint program = mDrawVertexNormalShader.GetProgram();
+
+	printf("Getting FrameData uniform block information...\n");
+	glGetUniformIndices(program, __uniforms_count__, mFrameDataUniformNames, mFrameDataUniformIndices);
+	GL_CHECK_ERRORS;
+	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_OFFSET, mFrameDataUniformOffsets);
+	GL_CHECK_ERRORS;
+	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_SIZE, mFrameDataUniformSizes);
+	GL_CHECK_ERRORS;
+
+	int lastItem = __uniforms_count__ - 1;
+	mFrameDataSize = mFrameDataUniformOffsets[lastItem] + mFrameDataUniformSizes[lastItem];
+
+	printf("\n");
+	printf("FrameData uniform block : \n");
+	printf(" \t size : %i\n", mFrameDataSize);
+	for (int i = 0; i < __uniforms_count__; ++i)
+	{
+		printf(" \t - %s : offset = %i, size = %i\n", mFrameDataUniformNames[i], mFrameDataUniformOffsets[i], mFrameDataUniformSizes[i]);
+	}
+	printf("\n");
+
 	glGenBuffers(__BufferId_Count__, mBufferIds);
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(FrameData), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, mFrameDataSize, nullptr, GL_STATIC_DRAW);
 	GL_CHECK_ERRORS;
 	glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]);
 	GL_CHECK_ERRORS;
@@ -117,7 +141,7 @@ void Engine::UpdateObjects()
 
 	assert(mCamera != nullptr);
 	assert(mCamera->GetFrame() != nullptr);
-	mCamera->GetFrame()->BuildMatrix();
+	mCamera->Update();
 
 	mLights->ForEach([this](Lights::Light * light)
 	{
@@ -128,21 +152,19 @@ void Engine::UpdateObjects()
 void Engine::RenderObjects()
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
-	FrameData* buffer = (FrameData*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, sizeof(FrameData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 
 	GL_CHECK_ERRORS;
 	assert(buffer != nullptr);
 
-	memcpy(glm::value_ptr(buffer->mView), glm::value_ptr(mCamera->GetViewMatrix()), sizeof(glm::mat4));
-	memcpy(glm::value_ptr(buffer->mProj), glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
-	memcpy(glm::value_ptr(buffer->vAmbientLight), glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
-	buffer->uLightCount = (GLuint)mLights->GetCount();
+	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
+	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
+	*((GLint*)(buffer + mFrameDataUniformOffsets[u_LightCount])) = (GLint)mLights->GetCount();
 
 	{
-		buffer->uLightCount = (GLuint)mLights->GetCount();
-
-		std::uint8_t * lightDataBuffer = (std::uint8_t *) &buffer->vLightData[0];
-		glm::ivec4 * lightDescBuffer = &buffer->uLightDesc[0];
+		std::uint8_t * lightDataBuffer = buffer + mFrameDataUniformOffsets[u_LightData];
+		glm::ivec4 * lightDescBuffer = (glm::ivec4*)(buffer + mFrameDataUniformOffsets[u_LightDesc]);
 
 		mLights->ForEach([&lightDataBuffer, &lightDescBuffer](Lights::Light * light)
 		{

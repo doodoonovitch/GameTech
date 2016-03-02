@@ -198,9 +198,6 @@
     <None Include="..\Data\Shaders\mesh_material_def.inc">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\common.inc">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Data\Shaders\cube_shader.geom">
       <Filter>Shaders</Filter>
     </None>
@@ -214,6 +211,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\draw_vertex_normal_shader.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\common.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

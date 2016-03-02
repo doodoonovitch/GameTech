@@ -204,7 +204,7 @@
   <ItemGroup>
     <None Include="..\Data\Shaders\axis_shader.frag" />
     <None Include="..\Data\Shaders\axis_shader.vert" />
-    <None Include="..\Data\Shaders\common.inc" />
+    <None Include="..\Data\Shaders\common.glsl" />
     <None Include="..\Data\Shaders\cube_shader.frag" />
     <None Include="..\Data\Shaders\cube_shader.geom" />
     <None Include="..\Data\Shaders\cube_shader.vert" />

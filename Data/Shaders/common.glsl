@@ -22,7 +22,7 @@
 
 #define PI											3.14159265
 
-#define GetLightDesc(index)							u_LightDesc[index >> 2][index & 3]
+#define GetLightDesc(index)							u_LightDesc[index / 4][index & 3]
 #define GetLightType(lightDesc)						(lightDesc & 15)
 #define GetLightDataIndex(lightDesc)				(lightDesc >> 16)
 
@@ -39,17 +39,24 @@
 #define GetNormalTextureIndex(bitfieldValue)		((bitfieldValue & uint(255 << 8)) >> 8)
 
 
+struct DualQuat
+{
+	vec4 Qr;
+	vec4 Qd;
+};
+
 
 layout (std140, shared) uniform FrameData
 {
-	mat4 u_ViewMatrix;
 	mat4 u_ProjMatrix;
 
+	DualQuat u_ViewDQ;
+
 	vec4 u_AmbientLight;
+
 		// bits 16 - 31 (16 bits) : index in the light data texture buffer
 		// bits 0 - 3 (4 bits) : light type
 		// bits 4 - 15 : reserved 
-
 	ivec4 u_LightDesc[MAX_LIGHT_COUNT / 4]; 
 	vec4 u_LightData[64];
 	int u_LightCount; 
@@ -89,12 +96,6 @@ vec4 qAngleAxis(float angle, vec3 axis)
 	vec4 result = vec4(axis.xyz * s, cos(halfAngle));
 	return result;
 }
-
-struct DualQuat
-{
-	vec4 Qr;
-	vec4 Qd;
-};
 
 DualQuat dqFromRotation(in vec4 qRotation)
 {
@@ -168,4 +169,14 @@ float dqDot(in DualQuat a, in DualQuat b)
 
 #define dqGetRotation(q)						q.Qr
 #define dqGetTranslation(q)						qMul(q.Qd * 2.0f, qConjugate(q.Qr)).xyz
-#define dqTransform(q, inv_q, point)			dqMul(dqMul(q, vec4(p.xyz, 0)), inv_q)
+
+vec3 dqTransformPoint(DualQuat dq, vec3 pt )
+{
+	return pt + 2 * cross( dq.Qr.xyz, cross( dq.Qr.xyz, pt ) + dq.Qr.w * pt )
+		+ 2 * ( dq.Qr.w * dq.Qd.xyz - dq.Qd.w * dq.Qr.xyz + cross( dq.Qr.xyz, dq.Qd.xyz ) );
+}
+
+vec3 dqTransformNormal(vec3 normal, DualQuat dq)
+{
+    return normal + 2.0 * cross( dq.Qr.xyz, cross( dq.Qr.xyz, normal ) + dq.Qr.w * normal );
+}
