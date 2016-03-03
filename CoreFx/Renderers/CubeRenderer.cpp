@@ -35,13 +35,17 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 		mShader.AddUniform("perInstanceDataSampler");
 		mShader.AddUniform("materialIndexSampler");
 		mShader.AddUniform("materialDataSampler");
-		
+		mShader.AddUniform("lightDescSampler");
+		mShader.AddUniform("lightDataSampler");
+
 		
 		//pass values of constant uniforms at initialization
-		glUniform1i(mShader("texSampler1"), 0);
-		glUniform1i(mShader("perInstanceDataSampler"), 1);
-		glUniform1i(mShader("materialIndexSampler"), 2);
-		glUniform1i(mShader("materialDataSampler"), 3);
+		glUniform1i(mShader.GetUniform("texSampler1"), 0);
+		glUniform1i(mShader.GetUniform("perInstanceDataSampler"), 1);
+		glUniform1i(mShader.GetUniform("materialIndexSampler"), 2);
+		glUniform1i(mShader.GetUniform("materialDataSampler"), 3);
+		glUniform1i(mShader.GetUniform("lightDescSampler"), 4);
+		glUniform1i(mShader.GetUniform("lightDataSampler"), 5);
 
 		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -51,13 +55,13 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 
 	std::cout << std::endl;
 	std::cout << "Vertex attribute index : " << std::endl;
-	std::cout << "\t in_Position : " << mShader["in_Position"] << std::endl;
-	std::cout << "\t in_Normal : " << mShader["in_Normal"] << std::endl;
-	std::cout << "\t in_TexUV : " << mShader["in_TexUV"] << std::endl;
+	std::cout << "\t in_Position : " << mShader.GetAttribute("in_Position") << std::endl;
+	std::cout << "\t in_Normal : " << mShader.GetAttribute("in_Normal") << std::endl;
+	std::cout << "\t in_TexUV : " << mShader.GetAttribute("in_TexUV") << std::endl;
 	std::cout << std::endl;
 	std::cout << "Uniform attribute index : " << std::endl;
-	std::cout << "\t texSampler1 : " << mShader("texSampler1") << std::endl;
-	std::cout << "\t perInstanceDataSampler : " << mShader("perInstanceDataSampler") << std::endl;
+	std::cout << "\t texSampler1 : " << mShader.GetUniform("texSampler1") << std::endl;
+	std::cout << "\t perInstanceDataSampler : " << mShader.GetUniform("perInstanceDataSampler") << std::endl;
 	std::cout << std::endl;
 
 	const float k = 1.f / 1.5f;
@@ -152,8 +156,6 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 	std::cout << "\t mVboID[VBO_Vertex] : " << mVboIDs[VBO_Vertex] << std::endl;
 	std::cout << "\t mVboID[VBO_Index] : " << mVboIDs[VBO_Index] << std::endl;
 
-	mDrawVertexNormalShader.LoadShaders();
-
 	std::cout << "... CubeRenderer initialized!" << std::endl << std::endl;
 }
 
@@ -169,6 +171,8 @@ CubeRenderer::~CubeRenderer()
 
 void CubeRenderer::Render()
 {
+	Engine * engine = Engine::GetInstance();
+
 	if (!mIsMaterialDataBufferSet)
 	{
 		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetBufferId());
@@ -233,24 +237,37 @@ void CubeRenderer::Render()
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetTextureId());
 
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDescBuffer().GetTextureId());
+
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDataBuffer().GetTextureId());
+
 			glDrawElementsInstanced(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 		glBindVertexArray(0);
 	mShader.UnUse();
 
-	if (Engine::GetInstance()->IsDrawVertexNormalEnabled())
+	if (engine->IsDrawVertexNormalEnabled())
 	{
-		mDrawVertexNormalShader.Use();
+		const DrawNormalShader & drawVertexNormalShader = engine->GetDrawVertexNormal();
+		drawVertexNormalShader.Use();
 
-			mDrawVertexNormalShader.SetUniformValues();
+		drawVertexNormalShader.SetUniformValues();
 
 			glBindVertexArray(mVaoID);
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDescBuffer().GetTextureId());
+
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDataBuffer().GetTextureId());
+
 				glDrawElementsInstanced(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 			glBindVertexArray(0);
-		mDrawVertexNormalShader.UnUse();
+		drawVertexNormalShader.UnUse();
 	}
 }
 

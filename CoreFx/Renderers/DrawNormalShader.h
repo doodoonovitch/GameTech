@@ -18,7 +18,7 @@ public:
 
 	void LoadShaders();
 
-	void SetUniformValues();
+	void SetUniformValues() const;
 
 private:
 

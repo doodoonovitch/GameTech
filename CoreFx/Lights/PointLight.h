@@ -12,26 +12,34 @@ namespace CoreFx
 	{
 
 
-class PointLight : public Light
+		namespace PointLightEnums
+		{
+			enum PropertyIndex
+			{
+				Color_Property,
+				Position_Property,
+				Attenuation_Property,
+
+				__property_count__
+			};
+		}
+
+
+class PointLight : public LightWithAttenuation<PointLightEnums::Attenuation_Property>
 {
 	template<typename T_Object, int T_vbo_count> friend class Renderers::SceneObjectRenderer;
 	friend class Engine;
 
-	enum PropertyIndex
-	{
-		Color_Property,
-		Position_Property
-	};
 
 public:
 
 	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
 
-	const glm::vec4 & GetColor() const { return *(const glm::vec4*)GetProperty(Color_Property); }
+	const glm::vec4 & GetColor() const { return *(const glm::vec4*)GetProperty(PointLightEnums::Color_Property); }
 
 	void SetColor(const glm::vec4 & color)
 	{
-		SetProperty(color, Color_Property);
+		SetProperty(color, PointLightEnums::Color_Property);
 	}
 
 	const glm::vec4 & GetPosition() const
@@ -50,7 +58,7 @@ public:
 protected:
 
 
-	PointLight(const glm::vec4 & color, const glm::vec3 & position);
+	PointLight(const glm::vec4 & color, const glm::vec3 & position, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
 	virtual ~PointLight();
 
 protected:

@@ -95,6 +95,12 @@ void Camera::Walk(float d)
 	GetFrame()->SetPosition(p);
 }
 
+void Camera::SlideUp(float d)
+{
+	glm::vec3 v = GetUp() * d;
+	glm::vec3 p = v + GetPosition();
+	GetFrame()->SetPosition(p);
+}
 
 
 } // namespace Core

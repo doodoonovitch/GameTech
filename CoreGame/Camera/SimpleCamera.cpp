@@ -115,9 +115,9 @@ void SimpleCamera::OnInit()
 		*/
 
 	// Setup Lights
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec4(0.4f, 0.4f, 0.0f, 0.0f), glm::vec3(10.f, 0.f, 0.f));
-		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec4(0.4f, 0.4f, 0.4f, 0.0f), glm::vec3(0.f, 0.f, 0.f));
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec4(0.4f, 0.4f, 0.4f, 0.0f), glm::vec3(0.f, 0.f, 0.f), 0.1f, 0.05f, 0.01f);
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::vec4(0.4f, 0.4f, 0.4f, 0.f), glm::normalize(glm::vec3(0.2f, -1.f, 0.f)));
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec4(0.4f, 0.4f, 0.0f, 0.0f), glm::vec3(10.f, 0.f, 0.f));
 
 	//setup camera
 	m_pCamera = new Camera();
@@ -178,6 +178,7 @@ void SimpleCamera::OnMouseMove(int x, int y)
 		}
 
 		m_pCamera->Strafe(m_mouseX);
+		m_pCamera->SlideUp(m_mouseY);
 		postRedisplay = true;
 	}
 	else
@@ -191,8 +192,15 @@ void SimpleCamera::OnMouseMove(int x, int y)
 			m_mouseX = m_rX;
 			m_mouseY = m_rY;
 		}
-		m_pCamera->Yaw(glm::radians(m_mouseX));
-		m_pCamera->Pitch(glm::radians(m_mouseY));
+
+		if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) == 0)
+		{
+			m_pCamera->Yaw(glm::radians(m_mouseX));
+		}
+		if ((GetAsyncKeyState(VK_LSHIFT) & 0x8000) == 0)
+		{
+			m_pCamera->Pitch(glm::radians(m_mouseY));
+		}
 
 		postRedisplay = true;
 	}
@@ -258,7 +266,7 @@ void SimpleCamera::OnIdle()
 	float dx = 0, dy = 0;
 
 
-	if (GetAsyncKeyState(VK_ESC) & 0x8000)
+	if (GetAsyncKeyState(VK_ESCAPE) & 0x8000)
 	{
 		glutLeaveMainLoop();
 		return;

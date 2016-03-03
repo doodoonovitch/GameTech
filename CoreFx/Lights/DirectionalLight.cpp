@@ -9,10 +9,10 @@ namespace CoreFx
 
 
 DirectionalLight::DirectionalLight(const glm::vec4 & color, const glm::vec3 & direction)
-	: Light(Light::Directional_Light, 2)
+	: Light(Light::Directional_Light, DirectionalLightEnums::__property_count__)
 	, mWorldDirection(direction, 0.f)
 {
-	SetProperty(color, Color_Property);
+	SetProperty(color, DirectionalLightEnums::Color_Property);
 }
 
 
@@ -24,7 +24,7 @@ DirectionalLight::~DirectionalLight()
 void DirectionalLight::TransformInViewCoords(const glm::mat4 & viewMatrix)
 {
 	glm::vec4 dir = viewMatrix * mWorldDirection;
-	SetProperty(dir, Direction_Property);
+	SetProperty(dir, DirectionalLightEnums::Direction_Property);
 }
 
 

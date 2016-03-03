@@ -146,6 +146,7 @@
     <ClInclude Include="InstanceContainer.h" />
     <ClInclude Include="Lights\DirectionalLight.h" />
     <ClInclude Include="Lights\Light.h" />
+    <ClInclude Include="Lights\LightWithAttenuation.h" />
     <ClInclude Include="Lights\PointLight.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Maths\DualQuaternion.h" />

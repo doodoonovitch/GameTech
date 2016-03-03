@@ -39,10 +39,17 @@ void DrawNormalShader::LoadShaders()
 		AddUniform("u_VertexNormalColor");
 		AddUniform("u_PointLightColor");
 		AddUniform("u_DirectionalLightColor");
+		AddUniform("u_FirstLightIndex");
+		AddUniform("u_DrawLightCount");		
+
 		AddUniform("perInstanceDataSampler");
+		AddUniform("lightDescSampler");
+		AddUniform("lightDataSampler");
 
 		//pass values of constant uniforms at initialization
 		glUniform1i(GetUniform("perInstanceDataSampler"), 0);
+		glUniform1i(GetUniform("lightDescSampler"), 1);
+		glUniform1i(GetUniform("lightDataSampler"), 2);
 
 		SetupFrameDataBlockBinding();
 	UnUse();
@@ -62,12 +69,15 @@ void DrawNormalShader::LoadShaders()
 	std::cout << "\t u_VertexNormalColor : " << GetUniform("u_VertexNormalColor") << std::endl;
 	std::cout << "\t u_PointLightColor : " << GetUniform("u_PointLightColor") << std::endl;
 	std::cout << "\t u_DirectionalLightColor : " << GetUniform("u_DirectionalLightColor") << std::endl;
+	std::cout << "\t u_FirstLightIndex : " << GetUniform("u_FirstLightIndex") << std::endl;
+	std::cout << "\t u_DrawLightCount : " << GetUniform("u_DrawLightCount") << std::endl;
 
+	
 	std::cout << std::endl;
 
 }
 
-void DrawNormalShader::SetUniformValues()
+void DrawNormalShader::SetUniformValues() const
 {
 	Engine * engine = Engine::GetInstance();
 
@@ -76,6 +86,8 @@ void DrawNormalShader::SetUniformValues()
 	glUniform4fv(GetUniform("u_VertexNormalColor"), 1, glm::value_ptr(engine->GetDrawVertexNormalColor()));
 	glUniform4fv(GetUniform("u_PointLightColor"), 1, glm::value_ptr(engine->GetDrawPointLightColor()));
 	glUniform4fv(GetUniform("u_DirectionalLightColor"), 1, glm::value_ptr(engine->GetDrawDirectionalLightColor()));
+	glUniform1i(GetUniform("u_FirstLightIndex"), engine->GetFirstLightIndexToDraw());	
+	glUniform1i(GetUniform("u_DrawLightCount"), engine->GetLightToDrawCount());
 }
 
 	} // namespace Renderers

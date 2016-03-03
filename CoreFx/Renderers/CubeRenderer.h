@@ -58,8 +58,6 @@ private:
 	TextureBuffer mMaterialDataBuffer;
 	TextureBuffer mMaterialIndexBuffer;
 
-	DrawNormalShader mDrawVertexNormalShader;
-
 	bool mIsMaterialIndexBufferSet;
 	bool mIsMaterialDataBufferSet;
 };

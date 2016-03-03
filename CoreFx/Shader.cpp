@@ -189,12 +189,12 @@ void Shader::CreateAndLinkProgram()
 	mShaders.clear();
 }
 
-void Shader::Use()
+void Shader::Use() const
 {
 	glUseProgram(mProgram);
 }
 
-void Shader::UnUse()
+void Shader::UnUse() const
 {
 	glUseProgram(0);
 }
@@ -211,24 +211,22 @@ void Shader::AddUniform(const std::string& uniform)
 	GL_CHECK_ERRORS;
 }
 
-GLuint Shader::GetAttribute(const std::string& attribute)
+GLuint Shader::GetAttribute(const std::string& attribute) const
 {
-	return mAttributeList[attribute];
+	auto it = mAttributeList.find(attribute);
+	if (it == mAttributeList.end())
+		return 0xFFFFFFFF;
+	else
+		return it->second;
 }
 
-GLuint Shader::GetUniform(const std::string& uniform)
+GLuint Shader::GetUniform(const std::string& uniform) const
 {
-	return mUniformLocationList[uniform];
-}
-
-GLuint Shader::operator[](const std::string& attribute)
-{
-	return GetAttribute(attribute);
-}
-
-GLuint Shader::operator()(const std::string& uniform)
-{
-	return GetUniform(uniform);
+	auto it = mUniformLocationList.find(uniform);
+	if (it == mUniformLocationList.end())
+		return 0xFFFFFFFF;
+	else
+		return it->second;
 }
 
 void Shader::SetupFrameDataBlockBinding() const

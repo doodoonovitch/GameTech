@@ -14,6 +14,10 @@ public:
 	TextureBuffer();
 	~TextureBuffer();
 
+	inline bool IsCreated() const
+	{
+		return mTextureId != 0 && mBufferId != 0;
+	}
 	inline GLuint GetTextureId() const
 	{
 		return mTextureId;

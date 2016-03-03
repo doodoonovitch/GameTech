@@ -52,12 +52,12 @@ AxisRenderer::AxisRenderer()
 		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 		GL_CHECK_ERRORS;
 		 
-		glEnableVertexAttribArray(mShader["vVertex"]);
-		glVertexAttribPointer(mShader["vVertex"], 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+		glEnableVertexAttribArray(mShader.GetAttribute("vVertex"));
+		glVertexAttribPointer(mShader.GetAttribute("vVertex"), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 		GL_CHECK_ERRORS;
 
-		glEnableVertexAttribArray(mShader["vColor"]);
-		glVertexAttribPointer(mShader["vColor"], 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(offsetof(Vertex, color)));
+		glEnableVertexAttribArray(mShader.GetAttribute("vColor"));
+		glVertexAttribPointer(mShader.GetAttribute("vColor"), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(offsetof(Vertex, color)));
 		GL_CHECK_ERRORS;
 
 		 

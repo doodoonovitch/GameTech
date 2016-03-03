@@ -25,7 +25,7 @@ GridRenderer::GridRenderer(int width, int depth)
 		mShader.AddUniform("vGridSize");
 
 		//pass values of constant uniforms at initialization
-		glUniform2f(mShader("vGridSize"), (float)width, (float)depth);
+		glUniform2f(mShader.GetUniform("vGridSize"), (float)width, (float)depth);
 
 		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -36,9 +36,9 @@ GridRenderer::GridRenderer(int width, int depth)
 
 	std::cout << std::endl;
 	std::cout << "Vertex attribute index : " << std::endl;
-	std::cout << "\t vVertex : " << mShader["vVertex"] << std::endl;
+	std::cout << "\t vVertex : " << mShader.GetAttribute("vVertex") << std::endl;
 	std::cout << "Uniform attribute index : " << std::endl;
-	std::cout << "\t vGridSize : " << mShader("vGridSize") << std::endl;
+	std::cout << "\t vGridSize : " << mShader.GetUniform("vGridSize") << std::endl;
 
 
 	m_vertexCount = ((width + 1) + (depth + 1)) * 2;

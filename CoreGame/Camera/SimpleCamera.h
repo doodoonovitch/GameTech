@@ -40,7 +40,7 @@ private:
 	static const int VK_D = 0x44;
 	static const int VK_Q = 0x51;
 	static const int VK_Z = 0x5a;
-	static const int VK_ESC = 0x1B;
+
 	static const int MOUSE_HISTORY_BUFFER_SIZE = 10;
 
 	const float MOVE_SPEED = 0.250f;

@@ -61,13 +61,15 @@ namespace CoreFx
 #include "Renderers\RendererHelper.h"
 #include "Renderers\DrawNormalShader.h"
 
-#include "Engine.h"
+#include "TextureBuffer.h"
 
 #include "Lights\Light.h"
+#include "Lights\LightWithAttenuation.h"
 #include "Lights\PointLight.h"
 #include "Lights\DirectionalLight.h"
 
-#include "TextureBuffer.h"
+#include "Engine.h"
+
 #include "Texture2D.h"
 #include "TextureManager.h"
 

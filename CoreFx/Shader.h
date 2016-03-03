@@ -40,15 +40,14 @@ public:
 	void LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon = true);
 	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, bool includeCommon = true);
 	void CreateAndLinkProgram();
-	void Use();
-	void UnUse();
+	void DeleteShaderProgram();
+
+	void Use() const;
+	void UnUse() const;
 	void AddAttribute(const std::string& attribute);
 	void AddUniform(const std::string& uniform);
-	GLuint GetAttribute(const std::string& attribute);
-	GLuint GetUniform(const std::string& uniform);
-	GLuint operator[](const std::string& attribute);
-	GLuint operator()(const std::string& uniform);
-	void DeleteShaderProgram();
+	GLuint GetAttribute(const std::string& attribute) const;
+	GLuint GetUniform(const std::string& uniform) const;
 	GLuint GetProgram() const { return mProgram; }
 
 	void SetupFrameDataBlockBinding() const;

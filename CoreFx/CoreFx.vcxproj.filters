@@ -101,6 +101,9 @@
     <ClInclude Include="Maths\DualQuaternion.h">
       <Filter>Maths</Filter>
     </ClInclude>
+    <ClInclude Include="Lights\LightWithAttenuation.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />

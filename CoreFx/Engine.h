@@ -93,16 +93,30 @@ public:
 		mAmbientLight = value;
 	}
 
-	Lights::PointLight * CreatePointLight(const glm::vec4 & color, const glm::vec3 & position);
+	Lights::PointLight * CreatePointLight(const glm::vec4 & color, const glm::vec3 & position, GLfloat constantAttenuation = 1.f, GLfloat linearAttenuation = 0.f, GLfloat quadraticAttenuation = 0.f);
 	Lights::DirectionalLight * CreateDirectionalLight(const glm::vec4 & color, const glm::vec3 & direction);
 	void DeleteLight(Lights::Light * & light);
 
+	const TextureBuffer & GetLightDescBuffer() const
+	{
+		return mLightDescBuffer;
+	}
+
+	const TextureBuffer & GetLightDataBuffer() const
+	{
+		return mLightDataBuffer;
+	}
 
 	// ---------------------------------------------------------------------------
 	// Debug Tools
 	//
 	// Draw normals and light direction 
 public:
+
+	const Renderers::DrawNormalShader & GetDrawVertexNormal()
+	{
+		return mDrawVertexNormalShader;
+	}
 	
 	GLfloat GetDrawVertexNormalMagnitude() const { return mDrawVertexNormalMagnitude; }
 
@@ -138,6 +152,21 @@ public:
 	{
 		mDrawDirectionalLightColor = value;
 	}
+
+	GLint GetFirstLightIndexToDraw() const	{ return mFirstLightIndexToDraw; }
+
+	void SetFirstLightIndexToDraw(GLint value)
+	{
+		mFirstLightIndexToDraw = value;
+	}
+
+	GLint GetLightToDrawCount() const { return mLightToDrawCount; }
+
+	void SetLightToDrawCount(GLint value)
+	{
+		mLightToDrawCount = value;
+	}
+	
 	// ---------------------------------------------------------------------------
 
 
@@ -151,12 +180,6 @@ private:
 		FrameData_BufferId,
 
 		__BufferId_Count__
-	};
-
-	enum
-	{
-		MAX_LIGHT_COUNT = 16,
-		MAX_LIGHT_DATA_COUNT = 64
 	};
 
 
@@ -194,19 +217,23 @@ private:
 	glm::vec4 mDrawDirectionalLightColor;
 	GLfloat mDrawVertexNormalMagnitude;
 	GLfloat mDrawLightMagnitude;
+	GLint mFirstLightIndexToDraw;
+	GLint mLightToDrawCount;
 	Renderers::DrawNormalShader mDrawVertexNormalShader;
 
 	bool mInitialized;
 	bool mIsDrawVertexNormalEnabled;
 
+	enum
+	{
+		MAX_LIGHT_COUNT = 16,
+	};
 
 	enum FrameDataUniforms
 	{
 		u_ProjMatrix,
 		u_ViewDQ,
 		u_AmbientLight,
-		u_LightDesc,
-		u_LightData,
 		u_LightCount,
 
 		__uniforms_count__
@@ -222,10 +249,17 @@ private:
 		"u_ProjMatrix",
 		"u_ViewDQ.Qr",
 		"u_AmbientLight",
-		"u_LightDesc",
-		"u_LightData",
 		"u_LightCount",
 	};
+
+	// Light description buffer : 
+	//	- index 0 : light count (same value with u_LightCount)
+	//  - index 1 - n : light description with the following incoding
+	//		bits 16 - 31 (16 bits) : index in the light data texture buffer
+	//		bits 0 - 3 (4 bits) : light type
+	//		bits 4 - 15 : reserved 
+	TextureBuffer mLightDescBuffer;
+	TextureBuffer mLightDataBuffer;
 
 
 	static Engine* sInstance;

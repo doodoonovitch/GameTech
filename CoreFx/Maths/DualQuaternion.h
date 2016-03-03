@@ -159,11 +159,6 @@ public:
 		return ToMatrix(*this);
 	}
 
-	glm::mat4 GetInverseMatrix() const
-	{
-		return ToInverseMatrix(*this);
-	}
-
 	DualQuaternion GetConjugate() const
 	{
 		return Conjugate(*this);
@@ -221,14 +216,6 @@ public:
 		m[3].y = t.y;
 		m[3].z = t.z;
 		return m;
-	}
-
-	friend glm::mat4 ToInverseMatrix(DualQuaternion const & q)
-	{
-		glm::mat4 m = glm::transpose(glm::mat4_cast(q.mQr));
-		glm::mat4 t = glm::translate(-q.GetTranslation());
-		glm::mat4 inv = m * t;
-		return inv;
 	}
 
 private:

@@ -73,6 +73,12 @@ protected:
 	Light(LightType lightType, GLuint propertyCount);
 	virtual ~Light();
 
+	GLfloat * GetProperty(GLuint propertyIndex) 
+	{
+		assert(propertyIndex < mPropertyCount);
+		return &mData[4 * propertyIndex];
+	}
+
 	void SetIsModified(bool isModified)
 	{
 		mIsModified = isModified;

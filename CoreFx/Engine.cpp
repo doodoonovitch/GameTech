@@ -17,11 +17,13 @@ Engine::Engine()
 	, mCamera(nullptr)
 	, mAmbientLight(0.2f, 0.2f, 0.2f, 0.f)
 	, mLightDataIndex(0)
-	, mDrawVertexNormalColor(1.f, 0.41f, 0.f, 0.f)
+	, mDrawVertexNormalColor(0.41f, 0.f, 1.f, 0.f)
 	, mDrawPointLightColor(1.f, 1.f, 0.f, 0.f)
 	, mDrawDirectionalLightColor(1.f, 0.f, 0.f, 0.f)
 	, mDrawVertexNormalMagnitude(0.2f)
 	, mDrawLightMagnitude(0.6f)
+	, mFirstLightIndexToDraw(0)
+	, mLightToDrawCount(16)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
 {
@@ -69,6 +71,8 @@ void Engine::InternalRelease()
 		});
 		SAFE_DELETE(mLights);
 		mLightDataIndex = 0;
+		mLightDescBuffer.ReleaseResource();
+		mLightDataBuffer.ReleaseResource();
 
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
@@ -151,6 +155,49 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
+	if (!mLightDescBuffer.IsCreated())
+	{
+		GLsizeiptr bufferSize = (mLights->GetCount() + 1) * sizeof(GLuint);
+		mLightDescBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, bufferSize, nullptr);
+
+		glBindBuffer(GL_TEXTURE_BUFFER, mLightDescBuffer.GetBufferId());
+		GLuint * lightDescBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+		GL_CHECK_ERRORS;
+		lightDescBuffer[0] = (GLuint)mLights->GetCount();
+
+		mLights->ForEach([&lightDescBuffer](Lights::Light * light)
+		{
+			int index = light->GetInstanceId() + 1;
+			lightDescBuffer[index] = light->mLightDesc;
+		});
+
+		glUnmapBuffer(GL_TEXTURE_BUFFER);
+	}
+
+	if (!mLightDataBuffer.IsCreated())
+	{
+		GLsizeiptr bufferSize = 0;
+		mLights->ForEach([&bufferSize](Lights::Light * light)
+		{
+			bufferSize += light->GetDataSize();
+		});
+
+		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+	}
+
+	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId());
+	GLsizeiptr offset = 0;
+	mLights->ForEach([&offset](Lights::Light * light)
+	{
+		GLsizei dataSize = light->GetDataSize();
+		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+		GL_CHECK_ERRORS;
+		memcpy(lightDataBuffer, light->GetData(), dataSize);
+		offset += dataSize;
+		glUnmapBuffer(GL_TEXTURE_BUFFER);
+	});
+
+
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
 	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 
@@ -161,22 +208,6 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
 	*((GLint*)(buffer + mFrameDataUniformOffsets[u_LightCount])) = (GLint)mLights->GetCount();
-
-	{
-		std::uint8_t * lightDataBuffer = buffer + mFrameDataUniformOffsets[u_LightData];
-		glm::ivec4 * lightDescBuffer = (glm::ivec4*)(buffer + mFrameDataUniformOffsets[u_LightDesc]);
-
-		mLights->ForEach([&lightDataBuffer, &lightDescBuffer](Lights::Light * light)
-		{
-			int compIndex = light->GetInstanceId() & 3;
-			int arrayIndex = light->GetInstanceId() >> 2;
-			lightDescBuffer[arrayIndex][compIndex] = light->mLightDesc;
-
-			GLsizei dataSize = light->GetDataSize();
-			memcpy(lightDataBuffer, light->GetData(), dataSize);
-			lightDataBuffer += dataSize;
-		});
-	}
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
@@ -193,11 +224,11 @@ void Engine::RenderObjects()
 
 }
 
-Lights::PointLight * Engine::CreatePointLight(const glm::vec4 & color, const glm::vec3 & position)
+Lights::PointLight * Engine::CreatePointLight(const glm::vec4 & color, const glm::vec3 & position, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
 {
 	if (mLights->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::PointLight *light = new Lights::PointLight(color, position);
+		Lights::PointLight *light = new Lights::PointLight(color, position, constantAttenuation, linearAttenuation, quadraticAttenuation);
 		light->SetDataIndex(mLightDataIndex);
 		mLightDataIndex += light->GetPropertyCount();
 		mLights->Attach(light);
