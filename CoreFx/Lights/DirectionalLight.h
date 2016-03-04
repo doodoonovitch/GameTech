@@ -10,17 +10,6 @@ namespace CoreFx
 
 	namespace Lights
 	{
-		namespace DirectionalLightEnums
-		{
-			enum PropertyIndex
-			{
-				Color_Property,
-				Direction_Property,
-
-				__property_count__
-			};
-
-		};
 
 class DirectionalLight : public Light
 {
@@ -29,15 +18,14 @@ class DirectionalLight : public Light
 
 
 public:
+	enum PropertyIndex
+	{
+		Direction_Property = Light::__Ambient_Diffuse_Specular_Color_Property_Count__,
+
+		__property_count__
+	};
 
 	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
-
-	const glm::vec4 & GetColor() const { return *(const glm::vec4*)GetProperty(DirectionalLightEnums::Color_Property); }
-
-	void SetColor(const glm::vec4 & color)
-	{
-		SetProperty(color, DirectionalLightEnums::Color_Property);
-	}
 
 	const glm::vec4 & GetDirection() const
 	{
@@ -55,7 +43,7 @@ public:
 
 protected:
 	
-	DirectionalLight(const glm::vec4 & color, const glm::vec3 & direction);
+	DirectionalLight(const glm::vec3 & direction, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular);
 	virtual ~DirectionalLight();
 
 private:

@@ -32,7 +32,6 @@ void main(void)
 	vec4 materialSpecular = vec4(v.xyz, 1);
 
 	float materialShininess = v.w;
-	//float energyConservation = ( 2.0 + materialShininess ) / ( 2.0 * PI ); 
 
 	if (ambientTextureIndex != 0x000000FF)
 	{
@@ -49,54 +48,61 @@ void main(void)
 		materialSpecular = materialSpecular * texture(texSampler1, fs_in.TexUV);
 	}
 	
-	vec4 diffuseColor = vec4(0, 0, 0, 0);
-	vec4 specularColor = vec4(0, 0, 0, 0);
+	vec3 ambientColor = u_AmbientLight.xyz;
+	vec3 specularColor = vec3(0, 0, 0);
+	vec3 diffuseColor = vec3(0, 0, 0);
 
 	vec3 normal = normalize(fs_in.Normal);
 	vec3 viewDirection = normalize(-fs_in.Position.xyz);
 
-	int lightCount = texelFetch(lightDescSampler, 0).r;
+	int lightCount = texelFetch(lightDescSampler, 0).x;
 	for(int lightIndex = 0; lightIndex < lightCount; ++lightIndex)
 	{
-		int lightDesc = texelFetch(lightDescSampler, lightIndex + 1).r;
+		int lightDesc = texelFetch(lightDescSampler, lightIndex + 1).x;
 		int lightType = GetLightType(lightDesc);
 		int dataIndex = GetLightDataIndex(lightDesc);
 
+		vec3 lightAmbient = texelFetch(lightDataSampler, dataIndex + LIGHT_AMBIENT_PROPERTY).xyz;
+		vec3 lightDiffuse = texelFetch(lightDataSampler, dataIndex + LIGHT_DIFFUSE_PROPERTY).xyz;
+		vec3 lightSpecular = texelFetch(lightDataSampler, dataIndex + LIGHT_SPECULAR_PROPERTY).xyz;
+
+		float attenuation = 1.0;
+		vec3 lightDirection;
+		vec3 reflectionDirection;
 
 		if (lightType == POINT_LIGHT_TYPE)
 		{
-			vec4 lightColor = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_COLOR_INDEX);
-			vec4 lightPosition = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_POSITION_INDEX);
-			vec4 lightAttenuation = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_INDEX);
+			vec4 lightPosition = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
+			vec4 attenuationCoef = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
 
-			vec3 lightDirection = lightPosition.xyz - fs_in.Position.xyz;
+			lightDirection = lightPosition.xyz - fs_in.Position.xyz;
 			float lightDistance = length(lightDirection);
 			lightDirection = lightDirection / lightDistance;
 
-			lightAttenuation.w = 1.0 / (lightAttenuation.x + lightAttenuation.y * lightDistance + lightAttenuation.z * lightDistance * lightDistance);
+			attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
 
-			float diffuseFactor = max(0, dot(normal, lightDirection)) * lightAttenuation.w;
-			diffuseColor += diffuseFactor * lightColor;
-
-			vec3 reflectionDirection = reflect(-lightDirection, normal);
-			specularColor += (pow(max(dot(viewDirection, reflectionDirection), 0.0), materialShininess) * when_gt(diffuseFactor, 0)) * lightColor  * lightAttenuation.w;
+			reflectionDirection = reflect(-lightDirection, normal);
 		}
 		else if (lightType == DIRECTIONAL_LIGHT_TYPE)
 		{
-			vec4 lightColor = texelFetch(lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_COLOR_INDEX);
-			vec3 lightDirection = texelFetch(lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_INDEX).xyz;
+			lightDirection = -texelFetch(lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
 
-			float diffuseFactor = max(0, dot(normal, -lightDirection));
-			diffuseColor += diffuseFactor * lightColor;
-
-			vec3 reflectionDirection = reflect(lightDirection, normal);
-			specularColor += (pow(max(dot(viewDirection, reflectionDirection), 0.0), materialShininess) * when_gt(diffuseFactor, 0)) * lightColor;
+			reflectionDirection = reflect(lightDirection, normal);
 		}
 		else
 		{
+			continue;
 		}
+
+		ambientColor += lightAmbient * attenuation;
+
+		float diffuseFactor = max(0, dot(normal, lightDirection)) * attenuation;
+		diffuseColor += diffuseFactor * lightDiffuse;
+
+		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), materialShininess) * attenuation;
+		specularColor += specularFactor * lightSpecular;
+
 	}
 	
-
-	vFragColor = clamp(materialAmbient * u_AmbientLight + materialDiffuse * diffuseColor + specularColor * materialSpecular, 0, 1);
+	vFragColor = clamp(materialAmbient * vec4(ambientColor, 1) + materialDiffuse * vec4(diffuseColor,1) + materialSpecular * vec4(specularColor, 1), 0, 1);
 }

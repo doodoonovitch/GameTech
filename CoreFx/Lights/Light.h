@@ -28,6 +28,16 @@ protected:
 
 public:
 
+	enum BasicLightPropertyIndex
+	{
+
+		Ambient_Color_Property,
+		Diffuse_Color_Property,
+		Specular_Color_Property,
+
+		__Ambient_Diffuse_Specular_Color_Property_Count__
+	};
+
 	enum LightType
 	{
 		Point_Light,
@@ -60,17 +70,45 @@ public:
 	}
 
 	void SetProperty(const glm::vec4 & value, GLuint propertyIndex);
+	void SetProperty(const glm::vec3 & value, GLuint propertyIndex);
 	const GLfloat * GetProperty(GLuint propertyIndex) const
 	{
 		assert(propertyIndex < mPropertyCount);
 		return &mData[4 * propertyIndex];
 	}
 
+	void SetAmbient(const glm::vec3 & value)
+	{
+		SetProperty(value, Ambient_Color_Property);
+	}
+	const glm::vec3 & GetAmbient() const
+	{
+		return *(glm::vec3 *)GetProperty(Ambient_Color_Property);
+	}
+
+	void SetDiffuse(const glm::vec3 & value)
+	{
+		SetProperty(value, Diffuse_Color_Property);
+	}
+	const glm::vec3 & GetDiffuse() const
+	{
+		return *(glm::vec3 *)GetProperty(Diffuse_Color_Property);
+	}
+
+	void SetSpecular(const glm::vec3 & value)
+	{
+		SetProperty(value, Specular_Color_Property);
+	}
+	const glm::vec3 & GetSpecular() const
+	{
+		return *(glm::vec3 *)GetProperty(Specular_Color_Property);
+	}
+
 
 protected:
 
 	
-	Light(LightType lightType, GLuint propertyCount);
+	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular);
 	virtual ~Light();
 
 	GLfloat * GetProperty(GLuint propertyIndex) 

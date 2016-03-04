@@ -66,7 +66,7 @@ void main()
 				gs_out.Color = u_PointLightColor;
 				EmitVertex();
 
-				vec4 lightPosition = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_POSITION_INDEX);
+				vec4 lightPosition = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
 				vec4 lightDirection = normalize(lightPosition - position);
 				gl_Position = u_ProjMatrix * (position + (lightDirection * u_LightMagnitude));
 
@@ -81,7 +81,7 @@ void main()
 				gs_out.Color = u_DirectionalLightColor;
 				EmitVertex();
 
-				vec4 lightDirection = -texelFetch(lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_INDEX);
+				vec4 lightDirection = -texelFetch(lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY);
 				gl_Position = u_ProjMatrix * (position + (lightDirection * u_LightMagnitude));
 
 				gs_out.Color = u_DirectionalLightColor;

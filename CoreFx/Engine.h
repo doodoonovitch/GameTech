@@ -93,8 +93,8 @@ public:
 		mAmbientLight = value;
 	}
 
-	Lights::PointLight * CreatePointLight(const glm::vec4 & color, const glm::vec3 & position, GLfloat constantAttenuation = 1.f, GLfloat linearAttenuation = 0.f, GLfloat quadraticAttenuation = 0.f);
-	Lights::DirectionalLight * CreateDirectionalLight(const glm::vec4 & color, const glm::vec3 & direction);
+	Lights::PointLight * CreatePointLight(const glm::vec3 & position, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular, GLfloat constantAttenuation = 1.f, GLfloat linearAttenuation = 0.f, GLfloat quadraticAttenuation = 0.f);
+	Lights::DirectionalLight * CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular);
 	void DeleteLight(Lights::Light * & light);
 
 	const TextureBuffer & GetLightDescBuffer() const

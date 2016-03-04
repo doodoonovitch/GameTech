@@ -12,35 +12,24 @@ namespace CoreFx
 	{
 
 
-		namespace PointLightEnums
-		{
-			enum PropertyIndex
-			{
-				Color_Property,
-				Position_Property,
-				Attenuation_Property,
 
-				__property_count__
-			};
-		}
-
-
-class PointLight : public LightWithAttenuation<PointLightEnums::Attenuation_Property>
+class PointLight : public Light
 {
 	template<typename T_Object, int T_vbo_count> friend class Renderers::SceneObjectRenderer;
 	friend class Engine;
 
-
 public:
 
-	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
-
-	const glm::vec4 & GetColor() const { return *(const glm::vec4*)GetProperty(PointLightEnums::Color_Property); }
-
-	void SetColor(const glm::vec4 & color)
+	enum PropertyIndex
 	{
-		SetProperty(color, PointLightEnums::Color_Property);
-	}
+		Position_Property = Light::__Ambient_Diffuse_Specular_Color_Property_Count__,
+		Attenuation_Property,
+
+		__property_count__
+	};
+
+
+	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
 
 	const glm::vec4 & GetPosition() const
 	{
@@ -55,10 +44,45 @@ public:
 		SetIsModified(true);
 	}
 
+	GLfloat GetConstantAttenuation() const
+	{
+		return GetProperty(Attenuation_Property)[0];
+	}
+
+	GLfloat GetLinearAttenuation() const
+	{
+		return GetProperty(Attenuation_Property)[1];
+	}
+
+	GLfloat GetQuadraticAttenuation() const
+	{
+		return GetProperty(Attenuation_Property)[2];
+	}
+
+
+	void SetConstantAttenuation(GLfloat value)
+	{
+		GetProperty(Attenuation_Property)[0] = value;
+		SetIsModified(true);
+	}
+
+	void SetLinearAttenuation(GLfloat value)
+	{
+		GetProperty(Attenuation_Property)[1] = value;
+		SetIsModified(true);
+	}
+
+	void SetQuadraticAttenuation(GLfloat value) 
+	{
+		GetProperty(Attenuation_Property)[2] = value;
+		SetIsModified(true);
+	}
+
+
 protected:
 
 
-	PointLight(const glm::vec4 & color, const glm::vec3 & position, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
+	PointLight(const glm::vec3 & position, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
 	virtual ~PointLight();
 
 protected:
