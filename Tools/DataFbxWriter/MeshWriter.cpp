@@ -1010,7 +1010,7 @@ void MeshWriter::BuildMaterialMapping(MaterialMapping& matMap, bool & isAllSame,
 
 		if (matId >= 0)
 		{
-			if (matMap.mMatMapping.size() <= matId)
+			if ((int)matMap.mMatMapping.size() <= matId)
 			{
 				matMap.mMatMapping.resize(matId + 1);
 			}
