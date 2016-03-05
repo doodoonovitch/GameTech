@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Introspection", "Introspection\Introspection.vcxproj", "{61BEAE13-5634-48D3-8C84-0AE42AB06A56}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -17,6 +17,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestIntrospection", "Tests\TestIntrospection\TestIntrospection.vcxproj", "{7545A96C-586A-41D4-BECE-2B1208F0AA8B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{61BEAE13-5634-48D3-8C84-0AE42AB06A56} = {61BEAE13-5634-48D3-8C84-0AE42AB06A56}
+		{D01800E3-2EF9-4232-A4E1-4EF2AA5CD8B0} = {D01800E3-2EF9-4232-A4E1-4EF2AA5CD8B0}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreFx", "CoreFx\CoreFx.vcxproj", "{D01800E3-2EF9-4232-A4E1-4EF2AA5CD8B0}"
@@ -42,7 +43,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataBuilder", "Tools\DataBu
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{567A770D-752D-4F3C-AD2A-EDAC939A1341}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataFbxWriter", "Tools\DataFbxWriter\DataFbxWriter.vcxproj", "{24DDDBBA-D9A6-484D-B9E2-EA2442C7C2F4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gtMeshWriter", "Tools\DataFbxWriter\DataFbxWriter.vcxproj", "{24DDDBBA-D9A6-484D-B9E2-EA2442C7C2F4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{61BEAE13-5634-48D3-8C84-0AE42AB06A56} = {61BEAE13-5634-48D3-8C84-0AE42AB06A56}
 		{7D6115A3-D319-46BF-B3FA-3DF7AD8C31FA} = {7D6115A3-D319-46BF-B3FA-3DF7AD8C31FA}

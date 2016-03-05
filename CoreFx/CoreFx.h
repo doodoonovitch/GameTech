@@ -64,7 +64,6 @@ namespace CoreFx
 #include "TextureBuffer.h"
 
 #include "Lights\Light.h"
-#include "Lights\LightWithAttenuation.h"
 #include "Lights\PointLight.h"
 #include "Lights\DirectionalLight.h"
 
