@@ -4,9 +4,6 @@
 #include "stdafx.h"
 #include <iostream>
 
-#include "GL\glew.h"
-#include "GL\freeglut.h"
-
 #include "Introspection.h"
 #include "CoreFx.h"
 
@@ -20,14 +17,11 @@ int main(int argc, char **argv)
 {
 	TGameProgram<SimpleCamera> simpleCameraSample;
 
-	int err = simpleCameraSample.StartEngine(argc, argv, 1280, 960, false, "OpenGL First Window");
+	int err = simpleCameraSample.Initialize("OpenGL First Window");
 	if (err)
 		return err;
 
-	simpleCameraSample.Activate();
-
-	glutMainLoop();
-
+	simpleCameraSample.GameLoop();
 
 	return 0;
 }
