@@ -59,7 +59,7 @@ void SimpleCamera::OnInit()
 		int xCount = 30;
 		int yCount = 30;
 		int zCount = 30;
-		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer("medias/cube.dds", 5, xCount * yCount * zCount, 1);
+		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer("medias/cube.ktx", 5, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
 
 		cubeRenderer->SetMaterial(0, glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, -1, -1, -1);

@@ -19,7 +19,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include <SOIL.h>
+#include <ktx.h>
 
 #pragma warning(pop)
 
