@@ -12,16 +12,15 @@ namespace CoreGame
 
 
 
-void SimpleCamera::OnRender(GLFWwindow * window, double deltaTime)
+void SimpleCamera::OnRender(GLFWwindow * /*window*/, double deltaTime)
 {
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Engine* engine = Engine::GetInstance();
 
 	engine->UpdateObjects();
 	engine->RenderObjects();
-
-	glfwSwapBuffers(window);
 }
 
 void SimpleCamera::OnShutdown()
@@ -34,7 +33,7 @@ void SimpleCamera::OnShutdown()
 
 void SimpleCamera::OnInit()
 {
-	GL_CHECK_ERRORS
+	//GL_CHECK_ERRORS
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -239,10 +238,9 @@ void SimpleCamera::OnWindowClose(GLFWwindow* window)
 
 void SimpleCamera::OnWindowRefresh(GLFWwindow* window)
 {
-
-	glfwMakeContextCurrent(window);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glfwSwapBuffers(window);
+	//glfwMakeContextCurrent(window);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	//glfwSwapBuffers(window);
 }
 
 void SimpleCamera::OnWindowFocus(GLFWwindow* /*window*/, int /*focused*/)

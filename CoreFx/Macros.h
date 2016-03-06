@@ -4,11 +4,12 @@
 
 
 #define GL_CHECK_ERRORS \
-{\
-	GLenum err = glGetError();\
-	if (err != GL_NO_ERROR) {\
-	std::cerr << "Error " << err << " : " << gluErrorString(err) << std::endl;\
-	assert(false);}\
+{ \
+	GLenum err = glGetError(); \
+	if (err != GL_NO_ERROR) \
+	{ \
+		std::cerr << "Error " << err << std::endl; \
+	} \
 }
 
 #define SAFE_DELETE(p) \

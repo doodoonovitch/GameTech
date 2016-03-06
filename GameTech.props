@@ -17,7 +17,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\Introspection;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\CoreGame;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\CoreFx;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)-Lib\tinyxml2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\Introspection;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\CoreGame;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\CoreFx;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)\glad;$(SolutionDir)Output\lib\$(Platform)\$(Configuration)-Lib\tinyxml2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Introspection.lib;CoreFx.lib;CoreGame.lib;tinyxml2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

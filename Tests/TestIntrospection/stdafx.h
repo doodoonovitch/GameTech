@@ -7,11 +7,6 @@
 
 #include "targetver.h"
 
-#include <stdio.h>
-#include <tchar.h>
-
-
-
 // TODO: faites référence ici aux en-têtes supplémentaires nécessaires au programme
 #include <string>
 #include <vector>
@@ -22,5 +17,8 @@
 #include <cassert>
 #include <limits>
 #include <codecvt>
+
+#include <stdio.h>
+#include <tchar.h>
 
 #include "Introspection.h"

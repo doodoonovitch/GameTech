@@ -3,7 +3,6 @@
 #define COREFX_GEOMETRY_MESHDATA_H
 
 #include <glm\glm.hpp>
-#include <GL\glew.h>
 #include "VertexData.h"
 
 #define GET_NEXT_ELEM(meshElem, nodeName) meshElem = meshElem->NextSiblingElement(nodeName)

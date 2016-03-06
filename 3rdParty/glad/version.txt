@@ -1,0 +1,2 @@
+glad version 0.1.10a0
+OpenGl Core profile 4.2 (GL_ARB_compute_shader extension)

@@ -3,7 +3,6 @@
 #define COREFX_GEOMETRY_VERTEXDATA_H
 
 #include <glm\glm.hpp>
-#include <GL\glew.h>
 
 namespace CoreFx
 {

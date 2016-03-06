@@ -17,9 +17,13 @@ int main(int argc, char **argv)
 {
 	TGameProgram<SimpleCamera> simpleCameraSample;
 
-	int err = simpleCameraSample.Initialize("OpenGL First Window");
+	int err = simpleCameraSample.Initialize("Game Test");
 	if (err)
+	{
+		char c;
+		scanf_s("%c", &c, 1);
 		return err;
+	}
 
 	simpleCameraSample.GameLoop();
 

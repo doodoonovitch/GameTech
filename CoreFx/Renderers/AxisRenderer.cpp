@@ -44,9 +44,10 @@ AxisRenderer::AxisRenderer()
 
 	//setup vao and vbo stuff
 	glGenVertexArrays(1, &mVaoID);
-	glGenBuffers(mVboCount, mVboIDs);
 	 
 	glBindVertexArray(mVaoID);
+		
+		glGenBuffers(mVboCount, mVboIDs);
 
 		glBindBuffer (GL_ARRAY_BUFFER, mVboIDs[0]);
 		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);

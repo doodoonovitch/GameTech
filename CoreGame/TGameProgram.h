@@ -50,12 +50,15 @@ public:
 
 		glfwSetErrorCallback(error_callback);
 
+		printf("GLFW Library initialization... ");
+
 		if (!glfwInit())
 		{
-			exit(-1);
+			printf("Failed !\n\n");
+			return -1;
 		}
 
-		printf("Library initialized.\n");
+		printf("Successful.\n\n");
 
 		int windowWidth = 1280, windowHeight = 960;
 		GLFWmonitor* monitor = nullptr; 
@@ -63,7 +66,7 @@ public:
 
 		if (!mGameEngine.SelectScreenResolution(windowWidth, windowHeight, fullscreen, monitor))
 		{
-			exit(-1);
+			return -1;
 		}
 
 		glfwSetMonitorCallback(monitor_callback);
@@ -86,52 +89,61 @@ public:
 			windowWidth = mode->width;
 			windowHeight = mode->height;
 
-			printf("Creating fullscreen window (%i x %i on %s)\n", windowWidth, windowHeight, glfwGetMonitorName(monitor));
+			printf("Creating fullscreen window (%i x %i on %s)... ", windowWidth, windowHeight, glfwGetMonitorName(monitor));
 		}
 		else
 		{
-			printf("Creating windowed mode window (%i x %i)\n", windowWidth, windowHeight);
+			printf("Creating windowed mode window (%i x %i)... ", windowWidth, windowHeight);
 		}
+
+		glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		//glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 		mWindow = glfwCreateWindow(windowWidth, windowHeight, title, monitor, NULL);
 		if (mWindow == nullptr)
 		{
+			printf("Failed !");
 			glfwTerminate();
-			exit(-1);
+			return -1;
 		}
+		printf("Successful.\n\n");
 
 		glfwMakeContextCurrent(mWindow);
 
-		glfwSwapInterval(1);
 
-		glewExperimental = GL_TRUE;
-		GLenum err = glewInit();
-		if (GLEW_OK != err)
+
+		printf("GLAD Library initialization... ");
+
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
-			std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
-			return (int)err;
+			printf("Failed !\n\n");
+			glfwTerminate();
+			return -1;
 		}
 
-		std::cout << "\tUsing glew " << glewGetString(GLEW_VERSION) << std::endl;
-		std::cout << "\tVendor: " << glGetString(GL_VENDOR) << std::endl;
-		std::cout << "\tRenderer: " << glGetString(GL_RENDERER) << std::endl;
-		std::cout << "\tVersion: " << glGetString(GL_VERSION) << std::endl;
-		std::cout << "\tGLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+		printf("Successful.\n\n");
 
-		if (glewIsSupported("GL_VERSION_4_5"))
-		{
-			std::cout << "\tGLEW Version is 4.5\n ";
-		}
-		else
-		{
-			std::cout << "\tGLEW 4.5 not supported\n ";
-		}
+		int iOpenGLMajor = glfwGetWindowAttrib(mWindow, GLFW_CONTEXT_VERSION_MAJOR);
+		int iOpenGLMinor = glfwGetWindowAttrib(mWindow, GLFW_CONTEXT_VERSION_MINOR);
+		int iOpenGLRevision = glfwGetWindowAttrib(mWindow, GLFW_CONTEXT_REVISION);
+		printf("\tStatus: GLFW Version: %s\n", glfwGetVersionString());
+		printf("\tStatus: OpenGL Version: %i.%i, Revision: %i\n", iOpenGLMajor, iOpenGLMinor, iOpenGLRevision);
+		printf("\tStatus: Vendor: %s\n", glGetString(GL_VENDOR));
+		printf("\tStatus: Renderer: %s\n", glGetString(GL_RENDERER));
+		printf("\tStatus: GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+		printf("\tStatus: Driver: %s\n", glGetString(GL_VERSION));
 
-		GL_CHECK_ERRORS
+		//glfwSwapInterval(1);
 
 		glViewport(0, 0, windowWidth, windowHeight);
 
-		GL_CHECK_ERRORS
+		GL_CHECK_ERRORS;
 
 		return 0;
 	}
@@ -158,6 +170,8 @@ public:
 				mLastTime = oldTime;
 			}
 
+
+			glfwSwapBuffers(mWindow);
 			glfwPollEvents();
 		}
 

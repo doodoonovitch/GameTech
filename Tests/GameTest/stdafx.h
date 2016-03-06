@@ -7,13 +7,15 @@
 
 #include "targetver.h"
 
-#include <stdio.h>
-#include <tchar.h>
 #include <iostream>
+
+#include "Introspection.h"
 
 
 
 // TODO: faites référence ici aux en-têtes supplémentaires nécessaires au programme
 
-#include "Introspection.h"
+#include <stdio.h>
+#include <tchar.h>
+
 #include "CoreFx.h"
