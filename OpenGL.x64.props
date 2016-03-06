@@ -7,11 +7,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdParty\SOIL\src;$(SolutionDir)packages\glm.0.9.7.1\build\native\include;$(SolutionDir)3rdParty\glew-1.13.0\include;$(SolutionDir)packages\glfw.3.1.2\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdParty\ktx\include;$(SolutionDir)packages\glm.0.9.7.1\build\native\include;$(SolutionDir)3rdParty\glew-1.13.0\include;$(SolutionDir)packages\glfw.3.1.2\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>KTX_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;glew32.lib;glfw3dll.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)3rdParty\SOIL\Lib\x64;$(SolutionDir)packages\glfw.3.1.2\build\native\lib\v140\x64\dynamic;$(SolutionDir)3rdParty\glew-1.13.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;glew32.lib;glfw3dll.lib;libktx.gl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rdParty\ktx\lib\$(Platform)\$(Configuration);$(SolutionDir)packages\glfw.3.1.2\build\native\lib\v140\x64\dynamic;$(SolutionDir)3rdParty\glew-1.13.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />

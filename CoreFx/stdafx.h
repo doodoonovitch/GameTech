@@ -17,6 +17,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include <ktx.h>
+
+
 #include <GL/glew.h>
 #include <GLFW\glfw3.h>
 
@@ -26,8 +29,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-
-#include <SOIL.h>
 
 #pragma warning(pop)
 

@@ -61,11 +61,20 @@ struct RGBA
 
 void TextureManager::Initialize()
 {
-	const std::string filename("medias/uvtemplate.dds");
-	GLuint id = SOIL_load_OGL_texture(filename.c_str(), SOIL_LOAD_AUTO, 0, SOIL_FLAG_INVERT_Y);
+	const std::string filename("medias/uvtemplate.ktx");
 
-	if (id == 0)
+	GLuint id;
+	GLenum target;
+	KTX_dimensions dimensions;
+	GLboolean isMipmapped;
+	GLenum glerr;
+
+	KTX_error_code err = ktxLoadTextureN(filename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+
+	if (err != KTX_SUCCESS)
 	{
+		printf("Cannot load the texture '%s' : %s.", filename.c_str(), ktxErrorString(err));
+
 		GLsizei w = 128, h = 128;
 		GLubyte* pData = (GLubyte*)malloc(w * h * 4);
 
@@ -117,10 +126,21 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
 		Texture2D* tex = new Texture2D(mDefault2D->GetId());
 		m2DTexMap[s] = tex;
 
-		GLuint id = SOIL_load_OGL_texture(s.c_str(), SOIL_LOAD_AUTO, 0, SOIL_FLAG_INVERT_Y);
+		GLuint id;
+		GLenum target;
+		KTX_dimensions dimensions;
+		GLboolean isMipmapped;
+		GLenum glerr;
+
+		KTX_error_code err = ktxLoadTextureN(filename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+
 		if (id != 0)
 		{
 			tex->SetId(id);
+		}
+		else
+		{
+			printf("Cannot load the texture '%s' : %s.", filename.c_str(), ktxErrorString(err));
 		}
 
 		return tex;

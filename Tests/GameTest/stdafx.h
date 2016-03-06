@@ -14,8 +14,6 @@
 
 
 // TODO: faites référence ici aux en-têtes supplémentaires nécessaires au programme
-#include "GL\glew.h"
-#include <GLFW\glfw3.h>
 
 #include "Introspection.h"
 #include "CoreFx.h"
