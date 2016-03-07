@@ -9,20 +9,19 @@
 
 #define WIN32_LEAN_AND_MEAN             // Exclure les en-têtes Windows rarement utilisés
 
-
-
 // TODO: faites référence ici aux en-têtes supplémentaires nécessaires au programme
 #pragma warning ( disable:4505 )
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+//#include <GL/freeglut.h>
 
 
 #pragma warning( push )
 #pragma warning ( disable:4201 4310 )
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -31,19 +30,18 @@
 
 #pragma warning(pop)
 
-#include <map>
-#include <vector>
 #include <string>
+#include <vector>
+#include <map>
+#include <stack>
 #include <iostream>
 #include <ostream>
-#include <fstream>
+#include <sstream>
+#include <cassert>
+#include <codecvt>
+#include <cwchar>
 #include <iterator>
 #include <functional>
-
-//#define _USE_MATH_DEFINES
-//#include <cmath>
-//#undef _USE_MATH_DEFINES
-
 #include <algorithm>
 
 #include "Introspection.h"

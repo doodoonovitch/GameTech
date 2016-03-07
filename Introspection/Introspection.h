@@ -11,9 +11,9 @@
 #include <ostream>
 #include <sstream>
 #include <cassert>
-#include <limits>
 #include <codecvt>
 #include <cwchar>
+#include <limits>
 
 #include "tinyxml2\tinyxml2.h"
 

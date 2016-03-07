@@ -12,29 +12,17 @@ namespace CoreGame
 
 
 
-class GameProgram
-{
-public:
-
-	GameProgram() {}
-	virtual ~GameProgram() {}
-
-	virtual int StartProgram(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const char* title) = 0;
-
-protected:
-
-	virtual void Activate() = 0;
-	virtual void Unactivate() = 0;
-
-};
 
 
-template<typename TGame>
+
+
+template<typename TGameEngine>
 class TGameProgram : public GameProgram
 {
 public:
 
 	TGameProgram()
+		: mGameEngine(*this)
 	{
 		sGameEngineInstance = &mGameEngine;
 	}
@@ -44,24 +32,25 @@ public:
 
 	}
 
-	virtual int RunProgram(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const char* title) override
+	virtual int RunProgram(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const wchar_t* title) override
 	{
 		MSG		msg;									// Windows Message Structure
 		BOOL	done = FALSE;								// Bool Variable To Exit Loop
 
 															// Ask The User Which Screen Mode They Prefer
-		if (MessageBox(NULL, "Would You Like To Run In Fullscreen Mode?", "Start FullScreen?", MB_YESNO | MB_ICONQUESTION) == IDNO)
+		if (MessageBox(NULL, L"Would You Like To Run In Fullscreen Mode?", L"Start FullScreen?", MB_YESNO | MB_ICONQUESTION) == IDNO)
 		{
 			fullscreen = FALSE;							// Windowed Mode
 		}
 
+		BYTE bits = (BYTE)GetDeviceCaps(mHDC, BITSPIXEL);
 		// Create Our OpenGL Window
-		if (!CreateGLWindow(title, windowWidth, windowHeight, 32, fullscreen))
+		if (!CreateGLWindow(title, windowWidth, windowHeight, bits, fullscreen))
 		{
-			return -;									// Quit If Window Was Not Created
+			return -1;									// Quit If Window Was Not Created
 		}
 
-		Activate();
+		OnInit();
 
 		while (!done)									// Loop That Runs While done=FALSE
 		{
@@ -79,43 +68,17 @@ public:
 			}
 			else										// If There Are No Messages
 			{
+				mGameEngine.OnUpdate(0.016);
+				mGameEngine.OnRender(0.016);
+				SwapBuffers(mHDC);
 			}
 		}
 
-		Unactivate();
+		OnShutdown();
 
 		// Shutdown
 		KillGLWindow();									// Kill The Window
 		return (msg.wParam);							// Exit The Program
-	}
-
-protected:
-
-	virtual void Activate()
-	{
-		TGameProgram<TGame>::OnInit();
-
-		// register callbacks
-		glutCloseFunc(TGameProgram<TGame>::OnShutdown);
-		glutDisplayFunc(TGameProgram<TGame>::OnRender);
-		glutReshapeFunc(TGameProgram<TGame>::OnResize);
-		glutKeyboardFunc(TGameProgram<TGame>::OnKey);
-		glutMouseFunc(TGameProgram<TGame>::OnMouseDown);
-		glutMotionFunc(TGameProgram<TGame>::OnMouseMove);
-		glutIdleFunc(TGameProgram<TGame>::OnIdle);
-	}
-
-	virtual void Unactivate()
-	{
-		glutCloseFunc(nullptr);
-		glutDisplayFunc(nullptr);
-		glutReshapeFunc(nullptr);
-		glutKeyboardFunc(nullptr);
-		glutMouseFunc(nullptr);
-		glutMotionFunc(nullptr);
-		glutIdleFunc(nullptr);
-
-		TGameProgram<TGame>::OnShutdown();
 	}
 
 protected:
@@ -127,7 +90,7 @@ protected:
 	*	bits			- Number Of Bits To Use For Color (8/16/24/32)			*
 	*	fullscreenflag	- Use Fullscreen Mode (TRUE) Or Windowed Mode (FALSE)	*/
 	// Code from Nehe Productions
-	bool CreateGLWindow(const char* title, int width, int height, int bits, bool fullscreenflag)
+	bool CreateGLWindow(const wchar_t* title, int width, int height, uint8_t bits, bool fullscreenflag)
 	{
 		GLuint		PixelFormat;				// Holds The Results After Searching For A Match
 		WNDCLASS	wc;							// Windows Class Structure
@@ -139,14 +102,14 @@ protected:
 		WindowRect.top = (long)0;				// Set Top Value To 0
 		WindowRect.bottom = (long)height;		// Set Bottom Value To Requested Height
 
-		fullscreen = fullscreenflag;			// Set The Global Fullscreen Flag
+		mFullscreen = fullscreenflag;			// Set The Global Fullscreen Flag
 
-		hInstance = GetModuleHandle(NULL);					// Grab An Instance For Our Window
+		mHInstance = GetModuleHandle(NULL);					// Grab An Instance For Our Window
 		wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;		// Redraw On Size, And Own DC For Window.
 		wc.lpfnWndProc = (WNDPROC)WndProc;					// WndProc Handles Messages
 		wc.cbClsExtra = 0;									// No Extra Window Data
 		wc.cbWndExtra = 0;									// No Extra Window Data
-		wc.hInstance = hInstance;							// Set The Instance
+		wc.hInstance = mHInstance;							// Set The Instance
 		wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);				// Load The Default Icon
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);			// Load The Arrow Pointer
 		wc.hbrBackground = NULL;							// No Background Required For GL
@@ -155,11 +118,11 @@ protected:
 
 		if (!RegisterClass(&wc))									// Attempt To Register The Window Class
 		{
-			MessageBox(NULL, "Failed To Register The Window Class.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Failed To Register The Window Class.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		if (fullscreen)												// Attempt Fullscreen Mode?
+		if (mFullscreen)												// Attempt Fullscreen Mode?
 		{
 			DEVMODE dmScreenSettings;								// Device Mode
 			memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));	// Makes Sure Memory's Cleared
@@ -173,22 +136,22 @@ protected:
 			if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 			{
 				// If The Mode Fails, Offer Two Options.  Quit Or Use Windowed Mode.
-				if (MessageBox(NULL, "The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", "NeHe GL", MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+				if (MessageBox(NULL, L"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", L"GameTech", MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 				{
-					fullscreen = FALSE;		// Windowed Mode Selected.  Fullscreen = FALSE
+					mFullscreen = FALSE;		// Windowed Mode Selected.  Fullscreen = FALSE
 				}
 				else
 				{
 					// Pop Up A Message Box Letting User Know The Program Is Closing.
-					MessageBox(NULL, "Program Will Now Close.", "ERROR", MB_OK | MB_ICONSTOP);
+					MessageBox(NULL, L"Program Will Now Close.", L"ERROR", MB_OK | MB_ICONSTOP);
 					return false;
 				}
 			}
 		}
 
-		if (fullscreen)												// Are We Still In Fullscreen Mode?
+		if (mFullscreen)											// Are We Still In Fullscreen Mode?
 		{
-			dwExStyle = WS_EX_APPWINDOW;								// Window Extended Style
+			dwExStyle = WS_EX_APPWINDOW;							// Window Extended Style
 			dwStyle = WS_POPUP;										// Windows Style
 			ShowCursor(FALSE);										// Hide Mouse Pointer
 		}
@@ -201,7 +164,7 @@ protected:
 		AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
 
 																		// Create The Window
-		if (!(hWnd = CreateWindowEx(dwExStyle,							// Extended Style For The Window
+		if (!(mHWnd = CreateWindowEx(dwExStyle,							// Extended Style For The Window
 			sWindowClassName,					// Class Name
 			title,								// Window Title
 			dwStyle |							// Defined Window Style
@@ -212,81 +175,83 @@ protected:
 			WindowRect.bottom - WindowRect.top,	// Calculate Window Height
 			NULL,								// No Parent Window
 			NULL,								// No Menu
-			hInstance,							// Instance
+			mHInstance,							// Instance
 			NULL)))								// Dont Pass Anything To WM_CREATE
 		{
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, "Window Creation Error.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Window Creation Error.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		static	PIXELFORMATDESCRIPTOR pfd =				// pfd Tells Windows How We Want Things To Be
 		{
-			sizeof(PIXELFORMATDESCRIPTOR),				// Size Of This Pixel Format Descriptor
-			1,											// Version Number
-			PFD_DRAW_TO_WINDOW |						// Format Must Support Window
-			PFD_SUPPORT_OPENGL |						// Format Must Support OpenGL
-			PFD_DOUBLEBUFFER,							// Must Support Double Buffering
-			PFD_TYPE_RGBA,								// Request An RGBA Format
-			bits,										// Select Our Color Depth
-			0, 0, 0, 0, 0, 0,							// Color Bits Ignored
-			0,											// No Alpha Buffer
-			0,											// Shift Bit Ignored
-			0,											// No Accumulation Buffer
-			0, 0, 0, 0,									// Accumulation Bits Ignored
-			16,											// 16Bit Z-Buffer (Depth Buffer)  
-			0,											// No Stencil Buffer
-			0,											// No Auxiliary Buffer
-			PFD_MAIN_PLANE,								// Main Drawing Layer
-			0,											// Reserved
-			0, 0, 0										// Layer Masks Ignored
+			sizeof(PIXELFORMATDESCRIPTOR),				// nSize : Size Of This Pixel Format Descriptor
+			1,											// nVersion : Version Number
+			PFD_DRAW_TO_WINDOW |						// dwFlags :	Format Must Support Window
+			PFD_SUPPORT_OPENGL |						//				Format Must Support OpenGL
+			PFD_DOUBLEBUFFER,							//				Must Support Double Buffering
+			PFD_TYPE_RGBA,								// iPixelType : Request An RGBA Format
+			bits,										// cColorBits : Select Our Color Depth
+			8, 0,										// cRedBits & cRedShift : Red color bits
+			8, 0,										// cGreenBits & cGreenShift : Green color bits
+			8, 0,										// cBlueBits & cBlueShift : Blue color bits
+			0,											// cAlphaBits : Alpha Bits
+			0,											// cAlphaShift : Shift Bit Ignored
+			0,											// cAccumBits : No Accumulation Buffer
+			0, 0, 0, 0,									// cAccumRedBits, cAccumGreenBits, cAccumBlueBits, cAccumAlphaBits : Accumulation Bits Ignored
+			24,											// cDepthBits: 24Bit Z-Buffer (Depth Buffer)  
+			8,											// cStencilBits : 8bits Stencil Buffer
+			0,											// cAuxBuffers : No Auxiliary Buffer
+			PFD_MAIN_PLANE,								// iLayerType : Main Drawing Layer
+			0,											// bReserved
+			0, 0, 0										// dwLayerMask, dwVisibleMask, dwDamageMask : Layer Masks Ignored
 		};
 
-		if (!(hDC = GetDC(hWnd)))							// Did We Get A Device Context?
+		if (!(mHDC = GetDC(mHWnd)))							// Did We Get A Device Context?
 		{
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, "Can't Create A GL Device Context.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Can't Create A GL Device Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		if (!(PixelFormat = ChoosePixelFormat(hDC, &pfd)))	// Did Windows Find A Matching Pixel Format?
+		if (!(PixelFormat = ChoosePixelFormat(mHDC, &pfd)))	// Did Windows Find A Matching Pixel Format?
 		{
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, "Can't Find A Suitable PixelFormat.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Can't Find A Suitable PixelFormat.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		if (!SetPixelFormat(hDC, PixelFormat, &pfd))		// Are We Able To Set The Pixel Format?
+		if (!SetPixelFormat(mHDC, PixelFormat, &pfd))		// Are We Able To Set The Pixel Format?
 		{
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, "Can't Set The PixelFormat.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Can't Set The PixelFormat.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		if (!(hRC = wglCreateContext(hDC)))				// Are We Able To Get A Rendering Context?
+		if (!(mHRC = wglCreateContext(mHDC)))				// Are We Able To Get A Rendering Context?
 		{
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, "Can't Create A GL Rendering Context.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Can't Create A GL Rendering Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		if (!wglMakeCurrent(hDC, hRC))					// Try To Activate The Rendering Context
+		if (!wglMakeCurrent(mHDC, mHRC))					// Try To Activate The Rendering Context
 		{
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Can't Activate The GL Rendering Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!InitGL())									// Initialize GL Library (GLEW...)
 		{
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, "Initialization Failed.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, L"Initialization Failed.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		ShowWindow(hWnd, SW_SHOW);						// Show The Window
-		SetForegroundWindow(hWnd);						// Slightly Higher Priority
-		SetFocus(hWnd);									// Sets Keyboard Focus To The Window
+		ShowWindow(mHWnd, SW_SHOW);						// Show The Window
+		SetForegroundWindow(mHWnd);						// Slightly Higher Priority
+		SetFocus(mHWnd);								// Sets Keyboard Focus To The Window
 
 		return true;									// Success
 	}
@@ -298,7 +263,7 @@ protected:
 		if (GLEW_OK != err)
 		{
 			std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
-			return (int)err;
+			return false;
 		}
 
 		std::cout << "\tUsing glew " << glewGetString(GLEW_VERSION) << std::endl;
@@ -315,47 +280,49 @@ protected:
 		{
 			std::cout << "\tGLEW 4.5 not supported\n ";
 		}
+
+		return true;
 	}
 
 	// Code from Nehe Productions
 	GLvoid KillGLWindow(GLvoid)								// Properly Kill The Window
 	{
-		if (fullscreen)										// Are We In Fullscreen Mode?
+		if (mFullscreen)									// Are We In Fullscreen Mode?
 		{
 			ChangeDisplaySettings(NULL, 0);					// If So Switch Back To The Desktop
 			ShowCursor(TRUE);								// Show Mouse Pointer
 		}
 
-		if (hRC)											// Do We Have A Rendering Context?
+		if (mHRC)											// Do We Have A Rendering Context?
 		{
 			if (!wglMakeCurrent(NULL, NULL))					// Are We Able To Release The DC And RC Contexts?
 			{
-				MessageBox(NULL, "Release Of DC And RC Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+				MessageBox(NULL, L"Release Of DC And RC Failed.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
 			}
 
-			if (!wglDeleteContext(hRC))						// Are We Able To Delete The RC?
+			if (!wglDeleteContext(mHRC))						// Are We Able To Delete The RC?
 			{
-				MessageBox(NULL, "Release Rendering Context Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+				MessageBox(NULL, L"Release Rendering Context Failed.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
 			}
-			hRC = NULL;										// Set RC To NULL
+			mHRC = NULL;										// Set RC To NULL
 		}
 
-		if (hDC && !ReleaseDC(hWnd, hDC))					// Are We Able To Release The DC
+		if (mHDC && !ReleaseDC(mHWnd, mHDC))					// Are We Able To Release The DC
 		{
-			MessageBox(NULL, "Release Device Context Failed.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
-			hDC = NULL;										// Set DC To NULL
+			MessageBox(NULL, L"Release Device Context Failed.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			mHDC = NULL;										// Set DC To NULL
 		}
 
-		if (hWnd && !DestroyWindow(hWnd))					// Are We Able To Destroy The Window?
+		if (mHWnd && !DestroyWindow(mHWnd))					// Are We Able To Destroy The Window?
 		{
-			MessageBox(NULL, "Could Not Release hWnd.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
-			hWnd = NULL;										// Set hWnd To NULL
+			MessageBox(NULL, L"Could Not Release hWnd.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			mHWnd = NULL;										// Set mHWnd To NULL
 		}
 
-		if (!UnregisterClass(sWindowClassName, hInstance))			// Are We Able To Unregister Class
+		if (!UnregisterClass(sWindowClassName, mHInstance))			// Are We Able To Unregister Class
 		{
-			MessageBox(NULL, "Could Not Unregister Class.", "SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
-			hInstance = NULL;									// Set hInstance To NULL
+			MessageBox(NULL, L"Could Not Unregister Class.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			mHInstance = NULL;									// Set mHInstance To NULL
 		}
 	}
 
@@ -372,11 +339,11 @@ protected:
 			{
 				if (!HIWORD(wParam))					// Check Minimization State
 				{
-					sGameEngineInstance->Activate();
+					OnWindowActivate();
 				}
 				else
 				{
-					sGameEngineInstance->UnActivate();
+					OnWindowUnactivate();
 				}
 
 				return 0;								// Return To The Message Loop
@@ -401,8 +368,55 @@ protected:
 
 			case WM_SIZE:								// Resize The OpenGL Window
 			{
-				OnResize(LOWORD(lParam), HIWORD(lParam));	// LoWord=Width, HiWord=Height
+				OnWindowResize(LOWORD(lParam), HIWORD(lParam));	// LoWord=Width, HiWord=Height
 				return 0;									// Jump Back
+			}
+
+			case WM_LBUTTONDOWN:
+			{
+				OnMouseDown(MouseButton::Left, ButtonState::Pressed, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_LBUTTONUP:
+			{
+				OnMouseDown(MouseButton::Left, ButtonState::Released, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_RBUTTONDOWN:
+			{
+				OnMouseDown(MouseButton::Right, ButtonState::Pressed, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_RBUTTONUP:
+			{
+				OnMouseDown(MouseButton::Right, ButtonState::Released, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_MBUTTONDOWN:
+			{
+				OnMouseDown(MouseButton::Middle, ButtonState::Pressed, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_MBUTTONUP:
+			{
+				OnMouseDown(MouseButton::Middle, ButtonState::Released, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_MOUSEMOVE:
+			{
+				OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_CHAR:
+			{
+				OnKeyDown(wParam);
 			}
 		}
 
@@ -413,9 +427,9 @@ protected:
 
 private:
 
-	static void OnRender()
+	static void OnInit()
 	{
-		sGameEngineInstance->OnRender();
+		sGameEngineInstance->OnInit();
 	}
 
 	static void OnShutdown()
@@ -423,14 +437,29 @@ private:
 		sGameEngineInstance->OnShutdown();
 	}
 
-	static void OnResize(int w, int h)
+	static void OnUpdate()
 	{
-		sGameEngineInstance->OnResize(w, h);
+		sGameEngineInstance->OnUpdate();
 	}
 
-	static void OnInit()
+	static void OnRender()
 	{
-		sGameEngineInstance->OnInit();
+		sGameEngineInstance->OnRender();
+	}
+
+	static void OnWindowActivate()
+	{
+		sGameEngineInstance->OnWindowActivate();
+	}
+
+	static void OnWindowUnactivate()
+	{
+		sGameEngineInstance->OnWindowUnactivate();
+	}
+
+	static void OnWindowResize(int w, int h)
+	{
+		sGameEngineInstance->OnWindowResize(w, h);
 	}
 
 	static void OnIdle()
@@ -438,9 +467,9 @@ private:
 		sGameEngineInstance->OnIdle();
 	}
 
-	static void OnMouseDown(int button, int s, int x, int y)
+	static void OnMouseDown(MouseButton button, ButtonState state, int x, int y)
 	{
-		sGameEngineInstance->OnMouseDown(button, s, x, y);
+		sGameEngineInstance->OnMouseDown(button, state, x, y);
 	}
 
 	static void OnMouseMove(int x, int y)
@@ -448,21 +477,21 @@ private:
 		sGameEngineInstance->OnMouseMove(x, y);
 	}
 
-	static void OnKey(unsigned char key, int x, int y)
+	static void OnKeyDown(wchar_t key)
 	{
-		sGameEngineInstance->OnKey(key, x, y);
+		sGameEngineInstance->OnKeyDown(key);
 	}
 
 private:
 
-	TGame mGameEngine;
+	TGameEngine mGameEngine;
 
-	static TGame* sGameEngineInstance;
-	static const char * sWindowClassName;
+	static TGameEngine* sGameEngineInstance;
+	static const wchar_t * sWindowClassName;
 };
 
-template <typename TGame> TGame* TGameProgram<TGame>::sGameEngineInstance = nullptr;
-template <typename TGame> const char * TGameProgram<TGame>::sWindowClassName = "GameTechProgram";
+template <typename TGameEngine> TGameEngine* TGameProgram<TGameEngine>::sGameEngineInstance = nullptr;
+template <typename TGameEngine> const wchar_t * TGameProgram<TGameEngine>::sWindowClassName = L"GameTechProgram";
 
 } // namespace CoreGame
 

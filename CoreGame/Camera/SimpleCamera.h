@@ -2,33 +2,34 @@
 #ifndef COREGAME_SIMPLECAMERA_H
 #define COREGAME_SIMPLECAMERA_H
 
-#include "CoreFx.h" 
 
 
 namespace CoreGame
 {
 
 
-class SimpleCamera
+class SimpleCamera : public GameEngine
 {
 public:
 
-	SimpleCamera();
+	SimpleCamera(GameProgram & gameProgram);
 	~SimpleCamera();
 
-	void OnRender();
-
-	void OnShutdown();
-
-	void OnResize(int nw, int nh);
 
 	void OnInit();
+	void OnShutdown();
 
-	void OnIdle();
+	void OnUpdate(double elapsedTime);
+	void OnRender(double elapsedTime);
 
-	void OnMouseDown(int button, int s, int x, int y);
+	void OnWindowResize(int nw, int nh);
+
+	void OnMouseDown(MouseButton button, ButtonState s, int x, int y);
 	void OnMouseMove(int x, int y);
-	void OnKey(unsigned char key, int x, int y);
+	void OnKeyDown(wchar_t key);
+
+	void OnWindowActivate() {}
+	void OnWindowUnactivate() {}
 
 private:
 

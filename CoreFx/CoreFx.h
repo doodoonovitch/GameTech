@@ -10,7 +10,7 @@
 
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+//#include <GL/freeglut.h>
 
 
 #pragma warning( push )
@@ -25,6 +25,7 @@
 
 
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <vector>
 #include <algorithm>

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "SimpleCamera.h"
+#include "CoreGame.h"
 #include <iostream>
 
 using namespace std;
@@ -13,18 +13,19 @@ namespace CoreGame
 
 
 
-void SimpleCamera::OnRender(void)
+void SimpleCamera::OnRender(double elapsedTime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_dt = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+	//m_dt = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+	m_dt = (float)elapsedTime;
 
 	Engine* engine = Engine::GetInstance();
 
 	engine->UpdateObjects();
 	engine->RenderObjects();
 
-	glutSwapBuffers();
+	//glutSwapBuffers();
 }
 
 void SimpleCamera::OnShutdown()
@@ -34,7 +35,7 @@ void SimpleCamera::OnShutdown()
 	cout << "Shutdown successfull" << endl;
 }
 
-void SimpleCamera::OnResize(int w, int h)
+void SimpleCamera::OnWindowResize(int w, int h)
 {
 	mWindowWidth = (GLsizei)w;
 	mWindowHeight = (GLsizei)h;
@@ -43,11 +44,14 @@ void SimpleCamera::OnResize(int w, int h)
 
 void SimpleCamera::SetupViewportAndProjection()
 {
-	//set the viewport size
-	glViewport(0, 0, mWindowWidth, mWindowHeight);
-	//setup the projection matrix 
-	assert(m_pCamera != nullptr);
-	m_pCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight);
+	if (m_pCamera != nullptr)
+	{
+		//set the viewport size
+		glViewport(0, 0, mWindowWidth, mWindowHeight);
+		//setup the projection matrix 
+		assert(m_pCamera != nullptr);
+		m_pCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight);
+	}
 }
 
 void SimpleCamera::OnInit()
@@ -136,8 +140,9 @@ void SimpleCamera::OnInit()
 	cout << "Initialization successfull" << endl;
 }
 
-SimpleCamera::SimpleCamera()
-	: m_pCamera(nullptr)
+SimpleCamera::SimpleCamera(GameProgram & gameProgram)
+	: GameEngine(gameProgram)
+	, m_pCamera(nullptr)
 {
 }
 
@@ -147,17 +152,17 @@ SimpleCamera::~SimpleCamera()
 }
 
 //mosue click handler
-void SimpleCamera::OnMouseDown(int button, int s, int x, int y)
+void SimpleCamera::OnMouseDown(MouseButton button, ButtonState s, int x, int y)
 {
-	if (s == GLUT_DOWN)
+	if (s == ButtonState::Pressed)
 	{
 		m_oldX = x;
 		m_oldY = y;
 	}
 
-	if (button == GLUT_MIDDLE_BUTTON)
+	if (button == MouseButton::Middle)
 		m_state = 0;
-	else if (button == GLUT_RIGHT_BUTTON)
+	else if (button == MouseButton::Right)
 		m_state = 2;
 	else
 		m_state = 1;
@@ -217,22 +222,22 @@ void SimpleCamera::OnMouseMove(int x, int y)
 	{
 		m_oldX = x;
 		m_oldY = y;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 	}
 }
 
-void SimpleCamera::OnKey(unsigned char key, int x, int y)
+void SimpleCamera::OnKeyDown(wchar_t key)
 {
 	switch (key)
 	{
-	case ' ':
+	case L' ':
 		m_useFiltering = !m_useFiltering;
 		break;
 
-	case 'N':
-	case 'n':
+	case L'N':
+	case L'n':
 		Engine::GetInstance()->EnableDrawVertexNormal(!Engine::GetInstance()->IsDrawVertexNormalEnabled());
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	}
 	//glutPostRedisplay();
@@ -268,7 +273,7 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 
 }
 
-void SimpleCamera::OnIdle()
+void SimpleCamera::OnUpdate(double elapsedTime)
 {
 	bool bWalk = false, bStrafe = false;
 	float dx = 0, dy = 0;
@@ -276,7 +281,7 @@ void SimpleCamera::OnIdle()
 
 	if (GetAsyncKeyState(VK_ESCAPE) & 0x8000)
 	{
-		glutLeaveMainLoop();
+		PostExitGame(0);
 		return;
 	}
 
@@ -314,8 +319,8 @@ void SimpleCamera::OnIdle()
 		m_pCamera->Strafe(dx);
 	}
 
-	if (bWalk || bStrafe)
-		glutPostRedisplay();
+	//if (bWalk || bStrafe)
+	//	glutPostRedisplay();
 }
 
 

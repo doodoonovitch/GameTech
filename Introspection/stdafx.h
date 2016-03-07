@@ -21,7 +21,6 @@
 #include <ostream>
 #include <sstream>
 #include <cassert>
-#include <limits>
 #include <codecvt>
 #include <cwchar>
 

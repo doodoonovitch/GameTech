@@ -9,6 +9,7 @@
 
 #include "Introspection.h"
 #include "CoreFx.h"
+#include "CoreGame.h"
 
 #include "TGameProgram.h"
 #include "Camera\SimpleCamera.h"
@@ -20,15 +21,6 @@ int main(int argc, char **argv)
 {
 	TGameProgram<SimpleCamera> simpleCameraSample;
 
-	int err = simpleCameraSample.StartProgram(argc, argv, 1280, 960, false, "OpenGL First Window");
-	if (err)
-		return err;
-
-	simpleCameraSample.Activate();
-
-	glutMainLoop();
-
-
-	return 0;
+	return simpleCameraSample.RunProgram(argc, argv, 1280, 960, false, L"GameTech (first test)");
 }
 

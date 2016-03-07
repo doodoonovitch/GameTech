@@ -12,8 +12,8 @@ class TextSerializerHelper
 public:
 
 	void Padding(std::wostream& os);
-	void IncrementLevel() { if (_level < std::numeric_limits<size_t>::max()) ++_level; }
-	void DecrementLevel() { if (_level > std::numeric_limits<size_t>::min()) --_level; }
+	void IncrementLevel() { ++_level; }
+	void DecrementLevel() { --_level; }
 
 	TextSerializerHelper();
 	~TextSerializerHelper();

@@ -19,3 +19,4 @@
 
 #include "Introspection.h"
 #include "CoreFx.h"
+#include "CoreGame.h"

@@ -22,6 +22,9 @@
       <Filter>Camera</Filter>
     </ClInclude>
     <ClInclude Include="TGameProgram.h" />
+    <ClInclude Include="CoreGame.h" />
+    <ClInclude Include="GameProgram.h" />
+    <ClInclude Include="GameEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -30,5 +33,7 @@
     <ClCompile Include="Camera\SimpleCamera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
+    <ClCompile Include="GameProgram.cpp" />
+    <ClCompile Include="GameEngine.cpp" />
   </ItemGroup>
 </Project>
