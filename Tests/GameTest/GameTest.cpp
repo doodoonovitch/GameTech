@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 {
 	TGameProgram<SimpleCamera> simpleCameraSample;
 
-	int err = simpleCameraSample.StartEngine(argc, argv, 1280, 960, false, "OpenGL First Window");
+	int err = simpleCameraSample.StartProgram(argc, argv, 1280, 960, false, "OpenGL First Window");
 	if (err)
 		return err;
 

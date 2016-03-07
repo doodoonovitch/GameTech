@@ -19,6 +19,7 @@ public:
 	GameProgram() {}
 	virtual ~GameProgram() {}
 
+	virtual int StartProgram(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const char* title) = 0;
 	virtual void Activate() = 0;
 	virtual void Unactivate() = 0;
 
@@ -32,7 +33,7 @@ public:
 
 	TGameProgram()
 	{
-		_sampleInstance = &_sample;
+		mGameEngineInstance = &mGameEngine;
 	}
 
 	~TGameProgram()
@@ -40,7 +41,7 @@ public:
 
 	}
 
-	int StartEngine(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const char* title)
+	virtual int StartProgram(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const char* title) override
 	{
 		glutInit(&argc, argv);
 		glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -118,52 +119,52 @@ public:
 
 	static void OnRender()
 	{
-		_sampleInstance->OnRender();
+		mGameEngineInstance->OnRender();
 	}
 
 	static void OnShutdown()
 	{
-		_sampleInstance->OnShutdown();
+		mGameEngineInstance->OnShutdown();
 	}
 
 	static void OnResize(int w, int h)
 	{
-		_sampleInstance->OnResize(w, h);
+		mGameEngineInstance->OnResize(w, h);
 	}
 
 	static void OnInit()
 	{
-		_sampleInstance->OnInit();
+		mGameEngineInstance->OnInit();
 	}
 
 	static void OnIdle()
 	{
-		_sampleInstance->OnIdle();
+		mGameEngineInstance->OnIdle();
 	}
 
 	static void OnMouseDown(int button, int s, int x, int y)
 	{
-		_sampleInstance->OnMouseDown(button, s, x, y);
+		mGameEngineInstance->OnMouseDown(button, s, x, y);
 	}
 
 	static void OnMouseMove(int x, int y)
 	{
-		_sampleInstance->OnMouseMove(x, y);
+		mGameEngineInstance->OnMouseMove(x, y);
 	}
 
 	static void OnKey(unsigned char key, int x, int y)
 	{
-		_sampleInstance->OnKey(key, x, y);
+		mGameEngineInstance->OnKey(key, x, y);
 	}
 
 private:
 
-	TGame _sample;
+	TGame mGameEngine;
 
-	static TGame* _sampleInstance;
+	static TGame* mGameEngineInstance;
 };
 
-template <typename TGame> TGame* TGameProgram<TGame>::_sampleInstance = nullptr;
+template <typename TGame> TGame* TGameProgram<TGame>::mGameEngineInstance = nullptr;
 
 } // namespace CoreGame
 

@@ -34,6 +34,8 @@ private:
 
 	void filterMouseMoves(float dx, float dy);
 
+	void SetupViewportAndProjection();
+
 	static const int VK_W = 0x57;
 	static const int VK_S = 0x53;
 	static const int VK_A = 0x41;
@@ -45,6 +47,9 @@ private:
 
 	const float MOVE_SPEED = 0.250f;
 	const float MOUSE_FILTER_WEIGHT = 0.75f;
+
+	GLsizei mWindowWidth = 1280;
+	GLsizei mWindowHeight = 960;
 
 	//camera transformation variables
 	int m_state = 0, m_oldX = 0, m_oldY = 0;

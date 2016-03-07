@@ -36,10 +36,18 @@ void SimpleCamera::OnShutdown()
 
 void SimpleCamera::OnResize(int w, int h)
 {
+	mWindowWidth = (GLsizei)w;
+	mWindowHeight = (GLsizei)h;
+	SetupViewportAndProjection();
+}
+
+void SimpleCamera::SetupViewportAndProjection()
+{
 	//set the viewport size
-	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	glViewport(0, 0, mWindowWidth, mWindowHeight);
 	//setup the projection matrix 
-	m_pCamera->SetupProjection(45, (GLfloat)w / h);
+	assert(m_pCamera != nullptr);
+	m_pCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight);
 }
 
 void SimpleCamera::OnInit()
