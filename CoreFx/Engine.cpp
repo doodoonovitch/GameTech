@@ -40,6 +40,13 @@ void Engine::InternalInitialize()
 {
 	if (!mInitialized)
 	{
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		//glFrontFace(GL_CCW);
+
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+
 		mTextureManager = new TextureManager();
 		mTextureManager->Initialize();
 
