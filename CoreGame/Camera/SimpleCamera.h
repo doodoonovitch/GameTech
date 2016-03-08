@@ -24,7 +24,7 @@ public:
 
 	void OnWindowResize(int nw, int nh);
 
-	void OnMouseDown(MouseButton button, ButtonState s, int x, int y);
+	void OnMouseButton(MouseState mouseState, int x, int y);
 	void OnMouseMove(int x, int y);
 	void OnKeyDown(wchar_t key);
 
@@ -53,16 +53,16 @@ private:
 	GLsizei mWindowHeight = 960;
 
 	//camera transformation variables
-	int m_state = 0, m_oldX = 0, m_oldY = 0;
-	float m_rX = 0.f, m_rY = 135.f, m_dist = 0.f;
-	float m_dt = 0;
+	int mState = 0, mOldX = 0, mOldY = 0;
+	float mRotX = 0.f, mRotY = 135.f, mDist = 0.f;
+	float mDeltaTime = 0;
 
-	CoreFx::Camera* m_pCamera;
+	CoreFx::Camera* mCamera;
 
 	glm::vec2 m_mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];
 
-	float m_mouseX = 0, m_mouseY = 0; //filtered mouse values
-	bool m_useFiltering = true;
+	float mMouseX = 0, mMouseY = 0; //filtered mouse values
+	bool mUseFiltering = true;
 
 };
 

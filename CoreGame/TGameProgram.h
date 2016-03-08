@@ -24,7 +24,7 @@ public:
 	TGameProgram()
 		: mGameEngine(*this)
 	{
-		sGameEngineInstance = &mGameEngine;
+		sGameProgram = this;
 	}
 
 	~TGameProgram()
@@ -50,6 +50,14 @@ public:
 			return -1;									// Quit If Window Was Not Created
 		}
 
+		{
+			POINT pt;
+			if (GetCursorPos(&pt))
+			{
+				mMouseX = (int)pt.x;
+				mMouseY = (int)pt.y;
+			}
+		}
 		OnInit();
 
 		while (!done)									// Loop That Runs While done=FALSE
@@ -78,7 +86,7 @@ public:
 
 		// Shutdown
 		KillGLWindow();									// Kill The Window
-		return (msg.wParam);							// Exit The Program
+		return ((int)msg.wParam);							// Exit The Program
 	}
 
 protected:
@@ -373,38 +381,15 @@ protected:
 			}
 
 			case WM_LBUTTONDOWN:
-			{
-				OnMouseDown(MouseButton::Left, ButtonState::Pressed, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-				return 0;
-			}
-
 			case WM_LBUTTONUP:
-			{
-				OnMouseDown(MouseButton::Left, ButtonState::Released, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-				return 0;
-			}
-
 			case WM_RBUTTONDOWN:
-			{
-				OnMouseDown(MouseButton::Right, ButtonState::Pressed, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-				return 0;
-			}
-
 			case WM_RBUTTONUP:
-			{
-				OnMouseDown(MouseButton::Right, ButtonState::Released, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-				return 0;
-			}
-
 			case WM_MBUTTONDOWN:
-			{
-				OnMouseDown(MouseButton::Middle, ButtonState::Pressed, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-				return 0;
-			}
-
 			case WM_MBUTTONUP:
+			case WM_XBUTTONDOWN:
+			case WM_XBUTTONUP:
 			{
-				OnMouseDown(MouseButton::Middle, ButtonState::Released, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				OnMouseButton(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 				return 0;
 			}
 
@@ -416,7 +401,8 @@ protected:
 
 			case WM_CHAR:
 			{
-				OnKeyDown(wParam);
+				OnKeyDown((wchar_t)wParam);
+				return 0;
 			}
 		}
 
@@ -429,68 +415,73 @@ private:
 
 	static void OnInit()
 	{
-		sGameEngineInstance->OnInit();
+		sGameProgram->mGameEngine.OnInit();
 	}
 
 	static void OnShutdown()
 	{
-		sGameEngineInstance->OnShutdown();
+		sGameProgram->mGameEngine.OnShutdown();
 	}
 
 	static void OnUpdate()
 	{
-		sGameEngineInstance->OnUpdate();
+		sGameProgram->mGameEngine.OnUpdate();
 	}
 
 	static void OnRender()
 	{
-		sGameEngineInstance->OnRender();
+		sGameProgram->mGameEngine.OnRender();
 	}
 
 	static void OnWindowActivate()
 	{
-		sGameEngineInstance->OnWindowActivate();
+		sGameProgram->mGameEngine.OnWindowActivate();
 	}
 
 	static void OnWindowUnactivate()
 	{
-		sGameEngineInstance->OnWindowUnactivate();
+		sGameProgram->mGameEngine.OnWindowUnactivate();
 	}
 
 	static void OnWindowResize(int w, int h)
 	{
-		sGameEngineInstance->OnWindowResize(w, h);
+		sGameProgram->mGameEngine.OnWindowResize(w, h);
 	}
 
 	static void OnIdle()
 	{
-		sGameEngineInstance->OnIdle();
+		sGameProgram->mGameEngine.OnIdle();
 	}
 
-	static void OnMouseDown(MouseButton button, ButtonState state, int x, int y)
+	static void OnMouseButton(WPARAM button, int x, int y)
 	{
-		sGameEngineInstance->OnMouseDown(button, state, x, y);
+		sGameProgram->mMouseX = x;
+		sGameProgram->mMouseY = y;
+		sGameProgram->mMouseState.mFlags = (int)button;
+		sGameProgram->mGameEngine.OnMouseButton(sGameProgram->mMouseState, x, y);
 	}
 
 	static void OnMouseMove(int x, int y)
 	{
-		sGameEngineInstance->OnMouseMove(x, y);
+		sGameProgram->mMouseX = x;
+		sGameProgram->mMouseY = y;
+		sGameProgram->mGameEngine.OnMouseMove(x, y);
 	}
 
 	static void OnKeyDown(wchar_t key)
 	{
-		sGameEngineInstance->OnKeyDown(key);
+		sGameProgram->mGameEngine.OnKeyDown(key);
 	}
 
 private:
 
 	TGameEngine mGameEngine;
 
-	static TGameEngine* sGameEngineInstance;
+	static TGameProgram<TGameEngine>* sGameProgram;
 	static const wchar_t * sWindowClassName;
 };
 
-template <typename TGameEngine> TGameEngine* TGameProgram<TGameEngine>::sGameEngineInstance = nullptr;
+template <typename TGameEngine> TGameProgram<TGameEngine>* TGameProgram<TGameEngine>::sGameProgram = nullptr;
 template <typename TGameEngine> const wchar_t * TGameProgram<TGameEngine>::sWindowClassName = L"GameTechProgram";
 
 } // namespace CoreGame

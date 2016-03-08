@@ -17,8 +17,8 @@ void SimpleCamera::OnRender(double elapsedTime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//m_dt = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-	m_dt = (float)elapsedTime;
+	//mDeltaTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+	mDeltaTime = (float)elapsedTime;
 
 	Engine* engine = Engine::GetInstance();
 
@@ -44,13 +44,13 @@ void SimpleCamera::OnWindowResize(int w, int h)
 
 void SimpleCamera::SetupViewportAndProjection()
 {
-	if (m_pCamera != nullptr)
+	if (mCamera != nullptr)
 	{
 		//set the viewport size
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		//setup the projection matrix 
-		assert(m_pCamera != nullptr);
-		m_pCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight);
+		assert(mCamera != nullptr);
+		mCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight);
 	}
 }
 
@@ -132,96 +132,102 @@ void SimpleCamera::OnInit()
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 0.7f, 1.8f);
 
 	//setup camera
-	m_pCamera = new Camera();
-	m_pCamera->LookAt(glm::vec3(10, 6.f, 12.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
-	engine->SetCamera(m_pCamera);
+	mCamera = new Camera();
+	mCamera->LookAt(glm::vec3(10, 6.f, 12.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
+	engine->SetCamera(mCamera);
 
+	SetupViewportAndProjection();
 
 	cout << "Initialization successfull" << endl;
 }
 
 SimpleCamera::SimpleCamera(GameProgram & gameProgram)
 	: GameEngine(gameProgram)
-	, m_pCamera(nullptr)
+	, mCamera(nullptr)
 {
 }
 
 SimpleCamera::~SimpleCamera()
 {
-	m_pCamera = nullptr;
+	mCamera = nullptr;
 }
 
 //mosue click handler
-void SimpleCamera::OnMouseDown(MouseButton button, ButtonState s, int x, int y)
+void SimpleCamera::OnMouseButton(MouseState mouseState, int x, int y)
 {
-	if (s == ButtonState::Pressed)
+	if (mouseState.HasAButtonPressed())
 	{
-		m_oldX = x;
-		m_oldY = y;
+		mOldX = x;
+		mOldY = y;
 	}
 
-	if (button == MouseButton::Middle)
-		m_state = 0;
-	else if (button == MouseButton::Right)
-		m_state = 2;
+	if (mouseState.IsLeftPressed())
+		mState = 1;
+	else if (mouseState.IsRightPressed())
+		mState = 2;
+	else if (mouseState.IsMiddlePressed())
+		mState = 3;
 	else
-		m_state = 1;
+		mState = 0;
 }
 
 //mosue move handler
 void SimpleCamera::OnMouseMove(int x, int y)
 {
-	bool postRedisplay = false;
-	if (m_state == 0)
+	if (mState == 0)
+		return;
+
+	bool hasMoved = false;
+	if (mState == 3)
 	{
-		m_dist = (y - m_oldY) / 60.0f;
-		//m_pCamera->Zoom(m_dist);
-		postRedisplay = true;
+		mDist = (y - mOldY) / 60.0f;
+		//mCamera->Zoom(mDist);
+		hasMoved = true;
 	}
-	else if (m_state == 2)
+	else if (mState == 2)
 	{
-		float dy = float(y - m_oldY) / 100.0f;
-		float dx = float(m_oldX - x) / 100.0f;
-		if (m_useFiltering)
+		float dy = float(y - mOldY) / 100.0f;
+		float dx = float(mOldX - x) / 100.0f;
+		if (mUseFiltering)
 			filterMouseMoves(dx, dy);
 		else
 		{
-			m_mouseX = dx;
-			m_mouseY = dy;
+			mMouseX = dx;
+			mMouseY = dy;
 		}
 
-		m_pCamera->Strafe(m_mouseX);
-		m_pCamera->SlideUp(m_mouseY);
-		postRedisplay = true;
+		mCamera->Strafe(mMouseX);
+		mCamera->SlideUp(mMouseY);
+		hasMoved = true;
 	}
-	else
+	else 
 	{
-		m_rY = float(y - m_oldY);
-		m_rX = float(m_oldX - x);
-		if (m_useFiltering)
-			filterMouseMoves(m_rX, m_rY);
+		mRotY = float(y - mOldY);
+		mRotX = float(mOldX - x);
+		if (mUseFiltering)
+			filterMouseMoves(mRotX, mRotY);
 		else
 		{
-			m_mouseX = m_rX;
-			m_mouseY = m_rY;
+			mMouseX = mRotX;
+			mMouseY = mRotY;
 		}
 
 		if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) == 0)
 		{
-			m_pCamera->Yaw(glm::radians(m_mouseX));
+			mCamera->Yaw(glm::radians(mMouseX));
 		}
 		if ((GetAsyncKeyState(VK_LSHIFT) & 0x8000) == 0)
 		{
-			m_pCamera->Pitch(glm::radians(m_mouseY));
+			mCamera->Pitch(glm::radians(mMouseY));
 		}
 
-		postRedisplay = true;
+		hasMoved = true;
 	}
 
-	if (postRedisplay)
+	if (hasMoved)
 	{
-		m_oldX = x;
-		m_oldY = y;
+		mOldX = x;
+		mOldY = y;
 		//glutPostRedisplay();
 	}
 }
@@ -231,7 +237,7 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 	switch (key)
 	{
 	case L' ':
-		m_useFiltering = !m_useFiltering;
+		mUseFiltering = !mUseFiltering;
 		break;
 
 	case L'N':
@@ -268,8 +274,8 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 		currentWeight *= MOUSE_FILTER_WEIGHT;
 	}
 
-	m_mouseX = averageX / averageTotal;
-	m_mouseY = averageY / averageTotal;
+	mMouseX = averageX / averageTotal;
+	mMouseY = averageY / averageTotal;
 
 }
 
@@ -311,12 +317,12 @@ void SimpleCamera::OnUpdate(double elapsedTime)
 
 	if (bWalk)
 	{
-		m_pCamera->Walk(dy);
+		mCamera->Walk(dy);
 	}
 	
 	if (bStrafe)
 	{
-		m_pCamera->Strafe(dx);
+		mCamera->Strafe(dx);
 	}
 
 	//if (bWalk || bStrafe)

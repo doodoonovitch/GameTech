@@ -30,6 +30,9 @@ protected:
 	HGLRC		mHRC = NULL;	// Permanent Rendering Context
 	HWND		mHWnd = NULL;	// Holds Our Window Handle
 	HINSTANCE	mHInstance = NULL;		// Holds The Instance Of The Application
+	int			mMouseX = 0;
+	int			mMouseY = 0;
+	MouseState	mMouseState;
 	bool		mFullscreen = false;
 };
 

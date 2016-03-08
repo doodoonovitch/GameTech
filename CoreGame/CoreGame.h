@@ -11,17 +11,79 @@
 namespace CoreGame
 {
 
-	enum class MouseButton : int
+	class MouseState
 	{
-		Left = 1,
-		Right = 2,
-		Middle = 4,
-	};
+	public:
 
-	enum class ButtonState : int
-	{
-		Released = 0,
-		Pressed
+		enum ButtonId : int
+		{
+			Left		= 0x0001,
+			Right		= 0x0002,
+			Middle		= 0x0010,
+
+			XButton1	= 0x0020,
+			XButton2	= 0x0040,
+			ControlKey	= 0x0008,
+			ShiftKEY	= 0x0004,
+		};
+		
+		MouseState()
+			: mFlags(0)
+		{
+		}
+
+		MouseState(int flags)
+			: mFlags((int)flags)
+		{
+		}
+
+		bool IsPressed(ButtonId button)
+		{
+			return (mFlags & ((int)button) )== (int)button;
+		}
+
+		bool IsLeftPressed()
+		{
+			return IsPressed(Left);
+		}
+
+		bool IsRightPressed()
+		{
+			return IsPressed(Right);
+		}
+
+		bool IsMiddlePressed()
+		{
+			return IsPressed(Middle);
+		}
+
+		bool IsXButton1Pressed()
+		{
+			return IsPressed(XButton1);
+		}
+
+		bool IsXButton2Pressed()
+		{
+			return IsPressed(XButton2);
+		}
+
+		bool IsControlKeyPressed()
+		{
+			return IsPressed(ControlKey);
+		}
+
+		bool IsShiftKeyPressed()
+		{
+			return IsPressed(ShiftKEY);
+		}
+
+		bool HasAButtonPressed()
+		{
+			return (mFlags & (Left | Right | Middle | XButton1 | XButton2)) != 0;
+		}
+
+
+		int mFlags;
 	};
 
 } // namespace CoreGame
