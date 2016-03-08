@@ -89,6 +89,7 @@ namespace CoreGame
 } // namespace CoreGame
 
 
+#include "Sys\DisplayMonitorHelper.h"
 #include "GameProgram.h"
 #include "GameEngine.h"
 #include "TGameProgram.h"

@@ -17,7 +17,7 @@ public:
 	GameProgram();
 	virtual ~GameProgram();
 
-	virtual int RunProgram(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const wchar_t* title) = 0;
+	virtual int RunProgram(int argc, char **argv, const RECT & winCoord, bool fullscreen, const wchar_t* title) = 0;
 
 	void PostExitGame(int exitCode)
 	{

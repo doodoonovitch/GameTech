@@ -7,6 +7,9 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{b6b116f7-d9db-427a-b2ae-1fe5669e683f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sys">
+      <UniqueIdentifier>{0fffe05f-0da5-4ca0-86af-a17a2c903bc0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -25,6 +28,9 @@
     <ClInclude Include="CoreGame.h" />
     <ClInclude Include="GameProgram.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="Sys\DisplayMonitorHelper.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -35,5 +41,8 @@
     </ClCompile>
     <ClCompile Include="GameProgram.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="Sys\DisplayMonitorHelper.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

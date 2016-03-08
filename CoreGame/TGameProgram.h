@@ -32,20 +32,13 @@ public:
 
 	}
 
-	virtual int RunProgram(int argc, char **argv, int windowWidth, int windowHeight, bool fullscreen, const wchar_t* title) override
+	virtual int RunProgram(int argc, char **argv, const RECT & winCoord, bool fullscreen, const wchar_t* title) override
 	{
 		MSG		msg;									// Windows Message Structure
 		BOOL	done = FALSE;								// Bool Variable To Exit Loop
 
-															// Ask The User Which Screen Mode They Prefer
-		if (MessageBox(NULL, L"Would You Like To Run In Fullscreen Mode?", L"Start FullScreen?", MB_YESNO | MB_ICONQUESTION) == IDNO)
-		{
-			fullscreen = FALSE;							// Windowed Mode
-		}
-
-		BYTE bits = (BYTE)GetDeviceCaps(mHDC, BITSPIXEL);
 		// Create Our OpenGL Window
-		if (!CreateGLWindow(title, windowWidth, windowHeight, bits, fullscreen))
+		if (!CreateGLWindow(title, winCoord, fullscreen))
 		{
 			return -1;									// Quit If Window Was Not Created
 		}
@@ -86,7 +79,7 @@ public:
 
 		// Shutdown
 		KillGLWindow();									// Kill The Window
-		return ((int)msg.wParam);							// Exit The Program
+		return ((int)msg.wParam);						// Exit The Program
 	}
 
 protected:
@@ -98,17 +91,14 @@ protected:
 	*	bits			- Number Of Bits To Use For Color (8/16/24/32)			*
 	*	fullscreenflag	- Use Fullscreen Mode (TRUE) Or Windowed Mode (FALSE)	*/
 	// Code from Nehe Productions
-	bool CreateGLWindow(const wchar_t* title, int width, int height, uint8_t bits, bool fullscreenflag)
+	bool CreateGLWindow(const wchar_t* title, const RECT & winCoord, bool fullscreenflag)
 	{
 		GLuint		PixelFormat;				// Holds The Results After Searching For A Match
 		WNDCLASS	wc;							// Windows Class Structure
 		DWORD		dwExStyle;					// Window Extended Style
 		DWORD		dwStyle;					// Window Style
 		RECT		WindowRect;					// Grabs Rectangle Upper Left / Lower Right Values
-		WindowRect.left = (long)0;				// Set Left Value To 0
-		WindowRect.right = (long)width;			// Set Right Value To Requested Width
-		WindowRect.top = (long)0;				// Set Top Value To 0
-		WindowRect.bottom = (long)height;		// Set Bottom Value To Requested Height
+		WindowRect = winCoord;
 
 		mFullscreen = fullscreenflag;			// Set The Global Fullscreen Flag
 
@@ -130,6 +120,7 @@ protected:
 			return false;
 		}
 
+		BYTE bits = (BYTE)GetDeviceCaps(mHDC, BITSPIXEL);
 		if (mFullscreen)												// Attempt Fullscreen Mode?
 		{
 			DEVMODE dmScreenSettings;								// Device Mode
@@ -215,7 +206,7 @@ protected:
 			0, 0, 0										// dwLayerMask, dwVisibleMask, dwDamageMask : Layer Masks Ignored
 		};
 
-		if (!(mHDC = GetDC(mHWnd)))							// Did We Get A Device Context?
+		if (!(mHDC = GetDC(mHWnd)))						// Did We Get A Device Context?
 		{
 			KillGLWindow();								// Reset The Display
 			MessageBox(NULL, L"Can't Create A GL Device Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
