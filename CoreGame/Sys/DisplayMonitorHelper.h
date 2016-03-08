@@ -13,6 +13,7 @@ struct DisplayMonitorInfo
 {
 	HMONITOR mHMonitor;
 	RECT mVirtualScreen;
+	std::wstring mName;
 
 	DisplayMonitorInfo()
 		: mHMonitor(0)
@@ -36,24 +37,14 @@ public:
 		return mDispInfoList;
 	}
 
-	const DisplayMonitorInfo & GetPrimaryMonitorInfo() const
+	int GetPrimaryMonitorIndex() const
 	{
-		return mDispInfoList[mPrimaryMonitorIndex];
+		return mPrimaryMonitorIndex;
 	}
 
 private:
 
-	void AddMonitorInfo(HMONITOR hMonitor, HDC hdcMonitor, const RECT & rcMonitor)
-	{
-		mDispInfoList.push_back(DisplayMonitorInfo());
-		DisplayMonitorInfo & info = mDispInfoList.back();
-		info.mHMonitor = hMonitor;
-		info.mVirtualScreen = rcMonitor;
-		if (mPrimaryHMonitor == hMonitor)
-		{
-			mPrimaryMonitorIndex = (int)(mDispInfoList.size() - 1);
-		}
-	}
+	void AddMonitorInfo(HMONITOR hMonitor, HDC hdcMonitor, const RECT & rcMonitor);
 
 	static BOOL CALLBACK MonitorEnumCallback(
 		_In_ HMONITOR hMonitor,
@@ -70,7 +61,6 @@ private:
 private:
 
 	DisplayMonitorInfoList mDispInfoList;
-	HMONITOR mPrimaryHMonitor;
 	int mPrimaryMonitorIndex;
 };
 

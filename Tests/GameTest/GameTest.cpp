@@ -19,37 +19,47 @@ using namespace CoreGame;
 
 int main(int argc, char **argv)
 {
+	TGameProgram<SimpleCamera> simpleCameraSample;
+
 	RECT win;
 	bool fullscreen;
+	int monitorIndex;
 
 	{
-		int choice = 1;
-		int i = 1;
-		printf("\t%i - Window Mode\n", i++);
-
-		Sys::DisplayMonitorHelper helper;
-
+		int choice = 0;
+		const Sys::DisplayMonitorHelper & helper = simpleCameraSample.GetDisplayMonitorHelper();
 		const Sys::DisplayMonitorInfoList & infoList = helper.GetDisplayMonitorList();
-		Sys::DisplayMonitorInfoList::const_iterator it;
-		for (it = infoList.begin(); it != infoList.end(); ++it, ++i)
+
+		do
 		{
-			const Sys::DisplayMonitorInfo & info = *it;
-			printf("\t%i - Fullscreen on monitor %i (%i, %i - %i x %i)\n", i, i, info.mVirtualScreen.left, info.mVirtualScreen.top, std::abs(info.mVirtualScreen.right - info.mVirtualScreen.left), std::abs(info.mVirtualScreen.bottom - info.mVirtualScreen.top));
-		}
+			int i = 1;
 
-		printf("\t0 - Exit\n");
+			wprintf(L"\t%i - Window Mode\n", i++);
 
-		printf("Please, enter your choice : ");
-		scanf_s("%i", &choice);
+			Sys::DisplayMonitorInfoList::const_iterator it;
+			for (it = infoList.begin(); it != infoList.end(); ++it, ++i)
+			{
+				const Sys::DisplayMonitorInfo & info = *it;
+				wprintf(L"\t%i - Fullscreen on monitor '%s' (%i, %i - %i x %i)\n", i, info.mName.c_str(), info.mVirtualScreen.left, info.mVirtualScreen.top, std::abs(info.mVirtualScreen.right - info.mVirtualScreen.left), std::abs(info.mVirtualScreen.bottom - info.mVirtualScreen.top));
+			}
 
-		if (choice == 0 || (choice-1) >= (int)infoList.size() )
+			wprintf(L"\t0 - Exit\n");
+
+			wprintf(L"Please, enter your choice : ");
+			wscanf_s(L"%i", &choice);
+			wprintf(L"\n\n");
+
+		} while (!(choice >= 0 && (choice - 1) <= (int)infoList.size()));
+
+		if (choice == 0)
 		{
 			return 0;
 		}
 
 		if (choice == 1)
 		{
-			const Sys::DisplayMonitorInfo & info = helper.GetPrimaryMonitorInfo();
+			monitorIndex = helper.GetPrimaryMonitorIndex();
+			const Sys::DisplayMonitorInfo & info = infoList[monitorIndex];
 			win = info.mVirtualScreen;
 			win.right = 1280;
 			win.bottom = 960;
@@ -57,14 +67,14 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			const Sys::DisplayMonitorInfo & info = infoList[choice - 1];
+			monitorIndex = choice - 2;
+			const Sys::DisplayMonitorInfo & info = infoList[monitorIndex];
 			win = info.mVirtualScreen;
 			fullscreen = true;
 		}
 	}
 
 
-	TGameProgram<SimpleCamera> simpleCameraSample;
-	return simpleCameraSample.RunProgram(argc, argv, win, fullscreen, L"GameTech (first test)");
+	return simpleCameraSample.RunProgram(argc, argv, L"GameTech (first test)", monitorIndex, win, fullscreen);
 }
 

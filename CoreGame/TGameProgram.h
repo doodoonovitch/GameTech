@@ -32,15 +32,15 @@ public:
 
 	}
 
-	virtual int RunProgram(int argc, char **argv, const RECT & winCoord, bool fullscreen, const wchar_t* title) override
+	virtual int RunProgram(int argc, char **argv, const wchar_t* title, int monitorIndex, const RECT & winCoord, bool fullscreen, uint8_t bitsPerPixel = 32) override
 	{
-		MSG		msg;									// Windows Message Structure
-		BOOL	done = FALSE;								// Bool Variable To Exit Loop
+		MSG		msg;
+		BOOL	done = FALSE;
 
 		// Create Our OpenGL Window
-		if (!CreateGLWindow(title, winCoord, fullscreen))
+		if (!CreateGLWindow(title, monitorIndex, winCoord, fullscreen, bitsPerPixel))
 		{
-			return -1;									// Quit If Window Was Not Created
+			return -1;
 		}
 
 		{
@@ -51,23 +51,24 @@ public:
 				mMouseY = (int)pt.y;
 			}
 		}
+
 		OnInit();
 
-		while (!done)									// Loop That Runs While done=FALSE
+		while (!done)
 		{
-			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))	// Is There A Message Waiting?
+			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
-				if (msg.message == WM_QUIT)				// Have We Received A Quit Message?
+				if (msg.message == WM_QUIT)
 				{
-					done = TRUE;							// If So done=TRUE
+					done = TRUE;
 				}
-				else									// If Not, Deal With Window Messages
+				else
 				{
-					TranslateMessage(&msg);				// Translate The Message
-					DispatchMessage(&msg);				// Dispatch The Message
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
 				}
 			}
-			else										// If There Are No Messages
+			else
 			{
 				mGameEngine.OnUpdate(0.016);
 				mGameEngine.OnRender(0.016);
@@ -77,28 +78,18 @@ public:
 
 		OnShutdown();
 
-		// Shutdown
-		KillGLWindow();									// Kill The Window
-		return ((int)msg.wParam);						// Exit The Program
+		KillGLWindow();
+		return ((int)msg.wParam);
 	}
 
 protected:
 
-	/*	This Code Creates Our OpenGL Window.  Parameters Are:					*
-	*	title			- Title To Appear At The Top Of The Window				*
-	*	width			- Width Of The GL Window Or Fullscreen Mode				*
-	*	height			- Height Of The GL Window Or Fullscreen Mode			*
-	*	bits			- Number Of Bits To Use For Color (8/16/24/32)			*
-	*	fullscreenflag	- Use Fullscreen Mode (TRUE) Or Windowed Mode (FALSE)	*/
-	// Code from Nehe Productions
-	bool CreateGLWindow(const wchar_t* title, const RECT & winCoord, bool fullscreenflag)
+	bool CreateGLWindow(const wchar_t* title, int monitorIndex, const RECT & winRect, bool fullscreenflag, BYTE bitsPerPixel)
 	{
 		GLuint		PixelFormat;				// Holds The Results After Searching For A Match
 		WNDCLASS	wc;							// Windows Class Structure
 		DWORD		dwExStyle;					// Window Extended Style
 		DWORD		dwStyle;					// Window Style
-		RECT		WindowRect;					// Grabs Rectangle Upper Left / Lower Right Values
-		WindowRect = winCoord;
 
 		mFullscreen = fullscreenflag;			// Set The Global Fullscreen Flag
 
@@ -120,31 +111,17 @@ protected:
 			return false;
 		}
 
-		BYTE bits = (BYTE)GetDeviceCaps(mHDC, BITSPIXEL);
-		if (mFullscreen)												// Attempt Fullscreen Mode?
+		if (mFullscreen)
 		{
-			DEVMODE dmScreenSettings;								// Device Mode
-			memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));	// Makes Sure Memory's Cleared
-			dmScreenSettings.dmSize = sizeof(dmScreenSettings);		// Size Of The Devmode Structure
-			dmScreenSettings.dmPelsWidth = width;				// Selected Screen Width
-			dmScreenSettings.dmPelsHeight = height;				// Selected Screen Height
-			dmScreenSettings.dmBitsPerPel = bits;					// Selected Bits Per Pixel
-			dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+			DEVMODE dmScreenSettings;
+			memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));	
+			dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+			dmScreenSettings.dmBitsPerPel = bitsPerPixel;
+			dmScreenSettings.dmFields = DM_BITSPERPEL;
 
-			// Try To Set Selected Mode And Get Results.  NOTE: CDS_FULLSCREEN Gets Rid Of Start Bar.
 			if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 			{
-				// If The Mode Fails, Offer Two Options.  Quit Or Use Windowed Mode.
-				if (MessageBox(NULL, L"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", L"GameTech", MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
-				{
-					mFullscreen = FALSE;		// Windowed Mode Selected.  Fullscreen = FALSE
-				}
-				else
-				{
-					// Pop Up A Message Box Letting User Know The Program Is Closing.
-					MessageBox(NULL, L"Program Will Now Close.", L"ERROR", MB_OK | MB_ICONSTOP);
-					return false;
-				}
+				mFullscreen = false;
 			}
 		}
 
@@ -160,18 +137,15 @@ protected:
 			dwStyle = WS_OVERLAPPEDWINDOW;							// Windows Style
 		}
 
-		AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
-
-																		// Create The Window
-		if (!(mHWnd = CreateWindowEx(dwExStyle,							// Extended Style For The Window
+		if (!(mHWnd = CreateWindowEx(dwExStyle,	// Extended Style For The Window
 			sWindowClassName,					// Class Name
 			title,								// Window Title
 			dwStyle |							// Defined Window Style
 			WS_CLIPSIBLINGS |					// Required Window Style
 			WS_CLIPCHILDREN,					// Required Window Style
 			0, 0,								// Window Position
-			WindowRect.right - WindowRect.left,	// Calculate Window Width
-			WindowRect.bottom - WindowRect.top,	// Calculate Window Height
+			winRect.right - winRect.left,		// Calculate Window Width
+			winRect.bottom - winRect.top,		// Calculate Window Height
 			NULL,								// No Parent Window
 			NULL,								// No Menu
 			mHInstance,							// Instance
@@ -182,6 +156,8 @@ protected:
 			return false;
 		}
 
+		SetWindowPos(mHWnd, NULL, winRect.left, winRect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+
 		static	PIXELFORMATDESCRIPTOR pfd =				// pfd Tells Windows How We Want Things To Be
 		{
 			sizeof(PIXELFORMATDESCRIPTOR),				// nSize : Size Of This Pixel Format Descriptor
@@ -190,7 +166,7 @@ protected:
 			PFD_SUPPORT_OPENGL |						//				Format Must Support OpenGL
 			PFD_DOUBLEBUFFER,							//				Must Support Double Buffering
 			PFD_TYPE_RGBA,								// iPixelType : Request An RGBA Format
-			bits,										// cColorBits : Select Our Color Depth
+			bitsPerPixel,								// cColorBits : Select Our Color Depth
 			8, 0,										// cRedBits & cRedShift : Red color bits
 			8, 0,										// cGreenBits & cGreenShift : Green color bits
 			8, 0,										// cBlueBits & cBlueShift : Blue color bits
@@ -206,53 +182,53 @@ protected:
 			0, 0, 0										// dwLayerMask, dwVisibleMask, dwDamageMask : Layer Masks Ignored
 		};
 
-		if (!(mHDC = GetDC(mHWnd)))						// Did We Get A Device Context?
+		if (!(mHDC = GetDC(mHWnd)))
 		{
-			KillGLWindow();								// Reset The Display
+			KillGLWindow();
 			MessageBox(NULL, L"Can't Create A GL Device Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!(PixelFormat = ChoosePixelFormat(mHDC, &pfd)))	// Did Windows Find A Matching Pixel Format?
 		{
-			KillGLWindow();								// Reset The Display
+			KillGLWindow();
 			MessageBox(NULL, L"Can't Find A Suitable PixelFormat.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		if (!SetPixelFormat(mHDC, PixelFormat, &pfd))		// Are We Able To Set The Pixel Format?
+		if (!SetPixelFormat(mHDC, PixelFormat, &pfd))
 		{
-			KillGLWindow();								// Reset The Display
+			KillGLWindow();
 			MessageBox(NULL, L"Can't Set The PixelFormat.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!(mHRC = wglCreateContext(mHDC)))				// Are We Able To Get A Rendering Context?
 		{
-			KillGLWindow();								// Reset The Display
+			KillGLWindow();
 			MessageBox(NULL, L"Can't Create A GL Rendering Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!wglMakeCurrent(mHDC, mHRC))					// Try To Activate The Rendering Context
 		{
-			KillGLWindow();								// Reset The Display
+			KillGLWindow();	
 			MessageBox(NULL, L"Can't Activate The GL Rendering Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!InitGL())									// Initialize GL Library (GLEW...)
 		{
-			KillGLWindow();								// Reset The Display
+			KillGLWindow();
 			MessageBox(NULL, L"Initialization Failed.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
-		ShowWindow(mHWnd, SW_SHOW);						// Show The Window
-		SetForegroundWindow(mHWnd);						// Slightly Higher Priority
-		SetFocus(mHWnd);								// Sets Keyboard Focus To The Window
+		ShowWindow(mHWnd, SW_SHOW);	
+		SetForegroundWindow(mHWnd);
+		SetFocus(mHWnd);
 
-		return true;									// Success
+		return true;
 	}
 
 	bool InitGL()

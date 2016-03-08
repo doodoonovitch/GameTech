@@ -17,11 +17,16 @@ public:
 	GameProgram();
 	virtual ~GameProgram();
 
-	virtual int RunProgram(int argc, char **argv, const RECT & winCoord, bool fullscreen, const wchar_t* title) = 0;
+	virtual int RunProgram(int argc, char **argv, const wchar_t* title, int monitorIndex, const RECT & winCoord, bool fullscreenflag, uint8_t bitsPerPixel = 32) = 0;
 
 	void PostExitGame(int exitCode)
 	{
 		PostQuitMessage(exitCode);
+	}
+
+	const Sys::DisplayMonitorHelper GetDisplayMonitorHelper() const
+	{
+		return mMonitorHelper;
 	}
 
 protected:
@@ -33,6 +38,8 @@ protected:
 	int			mMouseX = 0;
 	int			mMouseY = 0;
 	MouseState	mMouseState;
+
+	Sys::DisplayMonitorHelper mMonitorHelper;
 	bool		mFullscreen = false;
 };
 
