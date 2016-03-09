@@ -32,7 +32,7 @@ public:
 
 public:
 
-	static void Initialize();
+	static void Initialize(GLsizei gBufferWidth, GLsizei gBufferHeight);
 	static void Release();
 
 	static Engine* GetInstance();
@@ -185,11 +185,12 @@ private:
 
 private:
 
-	void InternalInitialize();
+	void InternalInitialize(GLsizei gBufferWidth, GLsizei gBufferHeight);
 	void InternalRelease();
 
 	void InternalCreateFrameDataBuffer();
 
+	void CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
 
 	Engine();
 	~Engine();
@@ -199,12 +200,28 @@ private:
 
 
 private:
-	
+
+	static Engine* sInstance;
+
 	TextureManager * mTextureManager;
 	RendererContainer * mRenderers;
 	LightContainer * mLights;
 
 	Camera* mCamera;
+
+	enum GBufferType
+	{
+		gBuffer_DepthBuffer,
+		gBuffer_ColorBuffer_1,
+		gBuffer_ColorBuffer_2,
+
+		__gBuffer_count__
+	};
+
+	GLuint mGBuffer;
+	GLuint mGBufferTex[__gBuffer_count__];
+	GLsizei mGBufferWidth;
+	GLsizei mGBufferHeight;
 
 	glm::vec4 mAmbientLight;
 
@@ -262,7 +279,6 @@ private:
 	TextureBuffer mLightDataBuffer;
 
 
-	static Engine* sInstance;
 };
 
 
