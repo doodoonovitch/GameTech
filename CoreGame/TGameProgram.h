@@ -129,7 +129,7 @@ protected:
 		{
 			dwExStyle = WS_EX_APPWINDOW;							// Window Extended Style
 			dwStyle = WS_POPUP;										// Windows Style
-			ShowCursor(FALSE);										// Hide Mouse Pointer
+			//ShowCursor(FALSE);									// Hide Mouse Pointer
 		}
 		else
 		{
@@ -265,7 +265,7 @@ protected:
 		if (mFullscreen)									// Are We In Fullscreen Mode?
 		{
 			ChangeDisplaySettings(NULL, 0);					// If So Switch Back To The Desktop
-			ShowCursor(TRUE);								// Show Mouse Pointer
+			//ShowCursor(TRUE);								// Show Mouse Pointer
 		}
 
 		if (mHRC)											// Do We Have A Rendering Context?
