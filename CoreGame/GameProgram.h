@@ -29,6 +29,11 @@ public:
 		return mMonitorHelper;
 	}
 
+	const Sys::StepTimer & GetTimer() const
+	{
+		return mTimer;
+	}
+
 protected:
 
 	HDC			mHDC = NULL;	// Private GDI Device Context
@@ -39,6 +44,7 @@ protected:
 	int			mMouseY = 0;
 	MouseState	mMouseState;
 
+	Sys::StepTimer mTimer;
 	Sys::DisplayMonitorHelper mMonitorHelper;
 	bool		mFullscreen = false;
 };

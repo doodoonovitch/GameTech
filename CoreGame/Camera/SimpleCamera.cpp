@@ -317,12 +317,12 @@ void SimpleCamera::OnUpdate(double elapsedTime)
 
 	if (bWalk)
 	{
-		mCamera->Walk(dy);
+		mCamera->Walk(dy * mDeltaTime);
 	}
 	
 	if (bStrafe)
 	{
-		mCamera->Strafe(dx);
+		mCamera->Strafe(dx * mDeltaTime);
 	}
 
 	//if (bWalk || bStrafe)

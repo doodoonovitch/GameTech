@@ -46,7 +46,7 @@ private:
 
 	static const int MOUSE_HISTORY_BUFFER_SIZE = 10;
 
-	const float MOVE_SPEED = 0.250f;
+	const float MOVE_SPEED = 5.0f;
 	const float MOUSE_FILTER_WEIGHT = 0.75f;
 
 	GLsizei mWindowWidth = 1280;

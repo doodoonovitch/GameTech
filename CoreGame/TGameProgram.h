@@ -56,24 +56,28 @@ public:
 
 		while (!done)
 		{
-			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			mTimer.Tick([this, &done, &msg]
 			{
-				if (msg.message == WM_QUIT)
+				if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 				{
-					done = TRUE;
+					if (msg.message == WM_QUIT)
+					{
+						done = TRUE;
+					}
+					else
+					{
+						TranslateMessage(&msg);
+						DispatchMessage(&msg);
+					}
 				}
 				else
 				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
+					double elapsedTime = mTimer.GetElapsedSeconds();
+					mGameEngine.OnUpdate(elapsedTime);
+					mGameEngine.OnRender(elapsedTime);
+					SwapBuffers(mHDC);
 				}
-			}
-			else
-			{
-				mGameEngine.OnUpdate(0.016);
-				mGameEngine.OnRender(0.016);
-				SwapBuffers(mHDC);
-			}
+			});
 		}
 
 		OnShutdown();

@@ -90,6 +90,7 @@ namespace CoreGame
 
 
 #include "Sys\DisplayMonitorHelper.h"
+#include "Sys\StepTimer.h"
 #include "GameProgram.h"
 #include "GameEngine.h"
 #include "TGameProgram.h"

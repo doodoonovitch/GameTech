@@ -31,6 +31,9 @@
     <ClInclude Include="Sys\DisplayMonitorHelper.h">
       <Filter>Sys</Filter>
     </ClInclude>
+    <ClInclude Include="Sys\StepTimer.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
