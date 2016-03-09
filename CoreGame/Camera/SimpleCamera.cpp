@@ -55,7 +55,11 @@ void SimpleCamera::OnInit()
 {
 	GL_CHECK_ERRORS
 
-		Engine::Initialize((GLsizei)mGameProgram.GetWindowWidth(), (GLsizei)mGameProgram.GetWindowHeight());
+	{
+		GLsizei w = (GLsizei)mGameProgram.GetWindowWidth();
+	GLsizei h = (GLsizei)mGameProgram.GetWindowHeight();
+		Engine::Initialize(0, 0, w, h, w, h);
+	}
 
 		Engine* engine = Engine::GetInstance();
 

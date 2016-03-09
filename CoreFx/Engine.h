@@ -32,7 +32,7 @@ public:
 
 public:
 
-	static void Initialize(GLsizei gBufferWidth, GLsizei gBufferHeight);
+	static void Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	static void Release();
 
 	static Engine* GetInstance();
@@ -185,7 +185,7 @@ private:
 
 private:
 
-	void InternalInitialize(GLsizei gBufferWidth, GLsizei gBufferHeight);
+	void InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	void InternalRelease();
 
 	void InternalCreateFrameDataBuffer();
@@ -222,6 +222,13 @@ private:
 	GLuint mGBufferTex[__gBuffer_count__];
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;
+
+	GLint mViewportX, mViewportY;
+	GLsizei mViewportWidth, mViewportHeight;
+
+	GLuint mQuadVAO;
+	GLuint mQuadVBO;
+	Shader mDrawQuadShader;
 
 	glm::vec4 mAmbientLight;
 
