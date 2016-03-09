@@ -17,15 +17,12 @@ void SimpleCamera::OnRender(double elapsedTime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//mDeltaTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	mDeltaTime = (float)elapsedTime;
 
 	Engine* engine = Engine::GetInstance();
 
 	engine->UpdateObjects();
 	engine->RenderObjects();
-
-	//glutSwapBuffers();
 }
 
 void SimpleCamera::OnShutdown()
@@ -58,7 +55,7 @@ void SimpleCamera::OnInit()
 {
 	GL_CHECK_ERRORS
 
-		Engine::Initialize();
+		Engine::Initialize((GLsizei)mGameProgram.GetWindowWidth(), (GLsizei)mGameProgram.GetWindowHeight());
 
 		Engine* engine = Engine::GetInstance();
 

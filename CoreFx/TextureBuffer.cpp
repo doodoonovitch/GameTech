@@ -36,7 +36,9 @@ void TextureBuffer::CreateResource(GLenum usage, GLenum internalformat, GLsizeip
 void TextureBuffer::ReleaseResource()
 {
 	glDeleteTextures(1, &mTextureId);
+	mTextureId = 0;
 	glDeleteBuffers(1, &mBufferId);
+	mBufferId = 0;
 }
 
 } // namespace CoreFx

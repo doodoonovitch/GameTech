@@ -34,6 +34,21 @@ public:
 		return mTimer;
 	}
 
+	const RECT & GetWindowRect() const
+	{
+		return mWinRect;
+	}
+
+	int GetWindowWidth() const
+	{
+		return mWinRect.right - mWinRect.left;
+	}
+
+	int GetWindowHeight() const
+	{
+		return mWinRect.bottom - mWinRect.top;
+	}
+
 protected:
 
 	HDC			mHDC = NULL;	// Private GDI Device Context
@@ -43,6 +58,7 @@ protected:
 	int			mMouseX = 0;
 	int			mMouseY = 0;
 	MouseState	mMouseState;
+	RECT		mWinRect;
 
 	Sys::StepTimer mTimer;
 	Sys::DisplayMonitorHelper mMonitorHelper;
