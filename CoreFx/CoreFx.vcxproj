@@ -205,9 +205,11 @@
     <None Include="..\Data\Shaders\axis_shader.frag" />
     <None Include="..\Data\Shaders\axis_shader.vert" />
     <None Include="..\Data\Shaders\common.glsl" />
+    <None Include="..\Data\Shaders\deferred_cube_shader.frag" />
     <None Include="..\Data\Shaders\cube_shader.frag" />
     <None Include="..\Data\Shaders\cube_shader.geom" />
     <None Include="..\Data\Shaders\cube_shader.vert" />
+    <None Include="..\Data\Shaders\deferred_light_shader.frag" />
     <None Include="..\Data\Shaders\draw_vertex_normal_shader.frag" />
     <None Include="..\Data\Shaders\draw_vertex_normal_shader.geom" />
     <None Include="..\Data\Shaders\draw_vertex_normal_shader.vert" />

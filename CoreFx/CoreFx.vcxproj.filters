@@ -16,7 +16,7 @@
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{83a918bf-782a-4e91-af21-f33516218c7c}</UniqueIdentifier>
-      <Extensions>vert;frag</Extensions>
+      <Extensions>vert;frag;geom;glsl</Extensions>
     </Filter>
     <Filter Include="Geometry">
       <UniqueIdentifier>{fe18b7ec-9555-4105-9565-e155b49cd69c}</UniqueIdentifier>
@@ -214,6 +214,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\common.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\deferred_light_shader.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\deferred_cube_shader.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
