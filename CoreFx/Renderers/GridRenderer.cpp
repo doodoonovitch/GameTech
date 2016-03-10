@@ -16,8 +16,8 @@ GridRenderer::GridRenderer(int width, int depth)
 	std::cout << "Initialize GridRenderer...." << std::endl;
 
 	//setup shader
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid_shader.vert");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid_shader.frag");
+	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid.vs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddAttribute("vVertex");

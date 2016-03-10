@@ -16,8 +16,8 @@ AxisRenderer::AxisRenderer()
 	std::cout << "Initialize AxisRenderer...." << std::endl;
 
 	//setup shader
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis_shader.vert");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis_shader.frag");
+	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis.vsh.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddAttribute("vVertex");

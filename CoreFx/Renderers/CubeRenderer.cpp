@@ -20,9 +20,9 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 	std::cout << "Initialize CubeRenderer...." << std::endl;
 
 	//setup shader
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube_shader.vert");
-	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/cube_shader.geom");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube_shader.frag");
+	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube.vs.glsl");
+	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/cube.gs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube.forward.fs.glsl");
 
 	mShader.CreateAndLinkProgram();
 
