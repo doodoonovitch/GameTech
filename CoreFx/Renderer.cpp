@@ -6,7 +6,8 @@ namespace CoreFx
 {
 
 
-Renderer::Renderer()
+Renderer::Renderer(GLuint propertyCount)
+	: mMaterials(propertyCount)
 {
 }
 

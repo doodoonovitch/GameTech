@@ -101,6 +101,7 @@
     <ClInclude Include="Maths\DualQuaternion.h">
       <Filter>Maths</Filter>
     </ClInclude>
+    <ClInclude Include="PropertyData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="Maths\DualQuaternion.cpp">
       <Filter>Maths</Filter>
     </ClCompile>
+    <ClCompile Include="PropertyData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

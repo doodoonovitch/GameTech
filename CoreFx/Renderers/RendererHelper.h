@@ -18,8 +18,10 @@ public:
 
 	static constexpr int mVboCount = T_vbo_count;
 
-	RendererHelper()
-		: Renderer()
+protected:
+
+	RendererHelper(GLuint propertyCount)
+		: Renderer(propertyCount)
 		, mVaoID(0)
 	{
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
@@ -33,8 +35,6 @@ public:
 		// Release buffers (vao & vbo)
 		ReleaseBuffers();
 	}
-
-protected:
 
 	void ReleaseBuffers()
 	{
@@ -59,18 +59,6 @@ template<typename T_Object, int T_vbo_count>
 class SceneObjectRenderer : public RendererHelper<T_Object, T_vbo_count>
 {
 public:
-
-	SceneObjectRenderer(size_t capacity, size_t pageSize)
-		: RendererHelper<T_Object, T_vbo_count>()
-		, mObjs(capacity, pageSize)
-	{
-
-	}
-
-	virtual ~SceneObjectRenderer(void)
-	{
-		ReleaseObjects();
-	}
 
 	void ClearObjectState()
 	{
@@ -102,6 +90,18 @@ public:
 	}
 
 protected:
+
+	SceneObjectRenderer(GLuint propertyCount, size_t capacity, size_t pageSize)
+		: RendererHelper<T_Object, T_vbo_count>(propertyCount)
+		, mObjs(capacity, pageSize)
+	{
+
+	}
+
+	virtual ~SceneObjectRenderer(void)
+	{
+		ReleaseObjects();
+	}
 
 	void ReleaseObjects()
 	{

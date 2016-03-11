@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 MeshRenderer::MeshRenderer(const Geometry::MeshData& meshData, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Mesh, 1>(capacity, pageSize)
+	: SceneObjectRenderer<Renderables::Mesh, 1>(0, capacity, pageSize)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize MeshRenderer...." << std::endl;

@@ -14,13 +14,16 @@ class Renderer : public ObjectInstance
 {
 public:
 
-	Renderer();
+	Renderer(GLuint propertyCount);
 	virtual ~Renderer();
 
 	virtual void BeginFrame() = 0;
 	virtual void EndFrame() = 0;
 	virtual void Render() = 0;
 
+protected:
+
+	PropertyData mMaterials;
 };
 
 

@@ -149,6 +149,7 @@
     <ClInclude Include="Lights\PointLight.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Maths\DualQuaternion.h" />
+    <ClInclude Include="PropertyData.h" />
     <ClInclude Include="Renderables\Axis.h" />
     <ClInclude Include="Renderables\Cube.h" />
     <ClInclude Include="Renderables\Grid.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="Lights\Light.cpp" />
     <ClCompile Include="Lights\PointLight.cpp" />
     <ClCompile Include="Maths\DualQuaternion.cpp" />
+    <ClCompile Include="PropertyData.cpp" />
     <ClCompile Include="Renderables\Axis.cpp" />
     <ClCompile Include="Renderables\Cube.cpp" />
     <ClCompile Include="Renderables\Grid.cpp" />

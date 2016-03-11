@@ -55,6 +55,7 @@ namespace CoreFx
 #include "Maths\DualQuaternion.h"
 
 #include "InstanceContainer.h"
+#include "PropertyData.h"
 #include "Shader.h"
 #include "Frame.h"
 #include "SceneObject.h"

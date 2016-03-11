@@ -13,6 +13,11 @@ namespace CoreFx
 class CubeRenderer : public SceneObjectRenderer<Renderables::Cube, 2>
 {
 public:
+	enum
+	{
+		Property_Per_Material = 3
+	};
+
 	CubeRenderer(std::string const & texture, std::uint8_t materialCount, size_t capacity, size_t pageSize = 10);
 	virtual ~CubeRenderer();
 
@@ -52,7 +57,7 @@ private:
 	
 	Texture2D const * mTexture;
 
-	std::vector<MaterialData> mMaterials;
+	GLuint mMaterialCount;
 
 	TextureBuffer mModelMatrixBuffer;
 	TextureBuffer mMaterialDataBuffer;
