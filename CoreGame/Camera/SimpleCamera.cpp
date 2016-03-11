@@ -57,17 +57,19 @@ void SimpleCamera::OnInit()
 
 	{
 		GLsizei w = (GLsizei)mGameProgram.GetWindowWidth();
-	GLsizei h = (GLsizei)mGameProgram.GetWindowHeight();
+		GLsizei h = (GLsizei)mGameProgram.GetWindowHeight();
 		Engine::Initialize(0, 0, w, h, w, h);
 	}
 
 		Engine* engine = Engine::GetInstance();
 
+#ifdef FORWARD_RENDERING
 		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
 		engine->AttachRenderer(gridRenderer);
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
+#endif // FORWARD_RENDERING
 
 		int xCount = 30;
 		int yCount = 30;

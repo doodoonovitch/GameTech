@@ -55,11 +55,13 @@ private:
 	std::vector<MaterialData> mMaterials;
 
 	TextureBuffer mModelMatrixBuffer;
-	TextureBuffer mMaterialDataBuffer;
 	TextureBuffer mMaterialIndexBuffer;
+	TextureBuffer mMaterialDataBuffer;
 
 	bool mIsMaterialIndexBufferSet;
 	bool mIsMaterialDataBufferSet;
+
+	friend class Engine;
 };
 
 

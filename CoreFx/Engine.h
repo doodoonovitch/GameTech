@@ -21,6 +21,7 @@ namespace CoreFx
 		class DirectionalLight;
 	}
 
+
 class Engine
 {
 public:
@@ -106,6 +107,15 @@ public:
 	{
 		return mLightDataBuffer;
 	}
+
+
+public:
+
+	// Add materials for deferred rendering :
+	//	- matProps : pointer to materials data
+	//  - matCount : materials count
+	//  - propCount : per material properties count; 1 property = 4 GLfloat
+	GLint AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount);
 
 	// ---------------------------------------------------------------------------
 	// Debug Tools
@@ -247,6 +257,9 @@ private:
 
 	bool mInitialized;
 	bool mIsDrawVertexNormalEnabled;
+
+	std::vector<GLfloat> mMaterials;
+
 
 	enum
 	{

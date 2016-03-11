@@ -235,15 +235,14 @@ void Engine::RenderObjects()
 	static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
-	//{ // preparation for gbuffer rendering pass
-	//	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-	//	glViewport(0, 0, mGBufferWidth, mGBufferHeight);
-	//	glDrawBuffers(2, drawBuffers);
-	//	glClearBufferuiv(GL_COLOR, 0, uintZeros);
-	//	glClearBufferuiv(GL_COLOR, 1, uintZeros);
-	//	glClearBufferfv(GL_DEPTH, 0, floatZeros);
-	//}
-
+	{ // preparation for gbuffer rendering pass
+		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+		glViewport(0, 0, mGBufferWidth, mGBufferHeight);
+		glDrawBuffers(2, drawBuffers);
+		glClearBufferuiv(GL_COLOR, 0, uintZeros);
+		glClearBufferuiv(GL_COLOR, 1, uintZeros);
+		glClearBufferfv(GL_DEPTH, 0, floatZeros);
+	}
 
 	if (!mLightDescBuffer.IsCreated())
 	{
@@ -309,23 +308,27 @@ glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 	});
 
 
-	//{
-	//	mDrawQuadShader.Use();
-	//		glBindVertexArray(mQuadVAO);
-	//			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//			glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
-	//			glDrawBuffer(GL_BACK);
+	{
+		mDrawQuadShader.Use();
+			glBindVertexArray(mQuadVAO);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+				glDrawBuffer(GL_BACK);
 
-	//			glActiveTexture(GL_TEXTURE0);
-	//			glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_1]);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_1]);
 
-	//			glActiveTexture(GL_TEXTURE1);
-	//			glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_2]);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_2]);
 
-	//			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	//		glBindVertexArray(0);
-	//	mDrawQuadShader.UnUse();
-	//}
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, mTexture->GetId());
+
+
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindVertexArray(0);
+		mDrawQuadShader.UnUse();
+	}
 
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -377,6 +380,20 @@ void Engine::DeleteLight(Lights::Light * & light)
 	SAFE_DELETE(light);
 }
 
+GLint Engine::AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount)
+{
+	assert(matCount > 0);
+	assert(propPerMatCount > 0);
+
+	GLint index = (GLint)mMaterials.size();
+	GLsizei propCount = matCount * propPerMatCount;
+	GLsizei floatCount = propCount * 4;
+
+	mMaterials.reserve(index + floatCount);
+	memcpy(mMaterials.data() + index, matProps, floatCount * sizeof(GLfloat));
+
+	return index / sizeof(GLfloat);
+}
 
 
 
