@@ -204,19 +204,22 @@
     <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Data\Shaders\axis_shader.frag" />
-    <None Include="..\Data\Shaders\axis_shader.vert" />
+    <None Include="..\Data\Shaders\axis.forward.fs.glsl" />
+    <None Include="..\Data\Shaders\axis.vsh.glsl" />
     <None Include="..\Data\Shaders\common.glsl" />
-    <None Include="..\Data\Shaders\cube_shader.frag" />
-    <None Include="..\Data\Shaders\cube_shader.geom" />
-    <None Include="..\Data\Shaders\cube_shader.vert" />
+    <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\cube.forward.fs.glsl" />
+    <None Include="..\Data\Shaders\cube.gs.glsl" />
+    <None Include="..\Data\Shaders\cube.vs.glsl" />
+    <None Include="..\Data\Shaders\light.fs.glsl" />
+    <None Include="..\Data\Shaders\light.vs.glsl" />
     <None Include="..\Data\Shaders\draw_vertex_normal_shader.frag" />
     <None Include="..\Data\Shaders\draw_vertex_normal_shader.geom" />
     <None Include="..\Data\Shaders\draw_vertex_normal_shader.vert" />
     <None Include="..\Data\Shaders\flat.frag" />
     <None Include="..\Data\Shaders\flat.vert" />
-    <None Include="..\Data\Shaders\grid_shader.frag" />
-    <None Include="..\Data\Shaders\grid_shader.vert" />
+    <None Include="..\Data\Shaders\grid.forward.fs.glsl" />
+    <None Include="..\Data\Shaders\grid.vs.glsl" />
     <None Include="..\Data\Shaders\mesh_material_def.inc" />
     <None Include="..\Data\Shaders\mesh_shader_NUV.frag" />
     <None Include="..\Data\Shaders\mesh_shader_NUV.geom" />

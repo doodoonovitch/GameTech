@@ -1,23 +1,43 @@
 layout(location = 0) out vec4 vFragColor;
 
-in GS_OUT
-{
-	vec4 Position;
-	vec3 Normal;
-	vec2 TexUV;
-	flat int MaterialIndex;
-} fs_in;
+in vec2 TexUV;
 
-uniform sampler2D texSampler1;
+uniform usampler2D gBuffer0;
+uniform sampler2D gBuffer1;
+
 uniform samplerBuffer materialDataSampler;
 uniform isamplerBuffer lightDescSampler;
 uniform samplerBuffer lightDataSampler;
 
+
+struct FragmentInfo
+{
+    vec3 Position;
+    vec3 Normal;
+	vec2 TexUV;
+    uint MaterialIndex;
+};
+
+void UnpackGBuffer(ivec2 coord, out FragmentInfo fragment)
+{
+    uvec4 data0 = texelFetch(gBuffer0, ivec2(coord), 0);
+    vec4 data1 = texelFetch(gBuffer0, ivec2(coord), 0);
+    vec2 temp;
+
+    temp = unpackHalf2x16(data0.y);
+    fragment.Normal = vec3(temp.y, data1.w);
+    fragment.MaterialIndex = data0.w;
+
+    fragment.Position = data1.xyz;
+}
+
+
 void main(void)
 {
-	int matIndex = fs_in.MaterialIndex;
+	FragmentInfo fs_in;
+	UnpackGBuffer(TexUV, fs_in);
 
-	vec4 v = texelFetch(materialDataSampler, matIndex);
+	vec4 v = texelFetch(materialDataSampler, fs_in.MaterialIndex);
 	vec4 materialAmbient = vec4(v.xyz, 1);
 
 	uint bitfieldValue = floatBitsToUint(v.w);
@@ -25,27 +45,27 @@ void main(void)
 	int diffuseTextureIndex = int(GetDiffuseTextureIndex(bitfieldValue));
 	int specularTextureIndex = int(GetSpecularTextureIndex(bitfieldValue));
 
-	v = texelFetch(materialDataSampler, matIndex + 1);
+	v = texelFetch(materialDataSampler, fs_in.MaterialIndex + 1);
 	vec4 materialDiffuse = vec4(v.xyz, 1);
 
-	v = texelFetch(materialDataSampler, matIndex + 2);
+	v = texelFetch(materialDataSampler, fragInfo.MaterialIndex + 2);
 	vec4 materialSpecular = vec4(v.xyz, 1);
 
 	float materialShininess = v.w;
 
 	if (ambientTextureIndex != 0x000000FF)
 	{
-		materialAmbient = materialAmbient * texture(texSampler1, fs_in.TexUV);
+		materialAmbient = materialAmbient * texture(textureSampler, fs_in.TexUV);
 	}
 	
 	if (diffuseTextureIndex != 0x000000FF)
 	{
-		materialDiffuse = materialDiffuse * texture(texSampler1, fs_in.TexUV);
+		materialDiffuse = materialDiffuse * texture(textureSampler, fs_in.TexUV);
 	}
 
 	if (specularTextureIndex != 0x000000FF)
 	{
-		materialSpecular = materialSpecular * texture(texSampler1, fs_in.TexUV);
+		materialSpecular = materialSpecular * texture(textureSampler, fs_in.TexUV);
 	}
 	
 	vec3 ambientColor = u_AmbientLight.xyz;
@@ -104,5 +124,5 @@ void main(void)
 
 	}
 	
-	vFragColor = clamp(materialAmbient * vec4(ambientColor, 1) + materialDiffuse * vec4(diffuseColor,1) + materialSpecular * vec4(specularColor, 1), 0, 1);
+	vFragColor =  clamp(materialAmbient * vec4(ambientColor, 1) + materialDiffuse * vec4(diffuseColor,1) + materialSpecular * vec4(specularColor, 1), 0, 1);
 }

@@ -95,7 +95,8 @@ protected:
 		DWORD		dwExStyle;					// Window Extended Style
 		DWORD		dwStyle;					// Window Style
 
-		mFullscreen = fullscreenflag;			// Set The Global Fullscreen Flag
+		mFullscreen = fullscreenflag;			
+		mWinRect = winRect;
 
 		mHInstance = GetModuleHandle(NULL);					// Grab An Instance For Our Window
 		wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;		// Redraw On Size, And Own DC For Window.
@@ -148,8 +149,8 @@ protected:
 			WS_CLIPSIBLINGS |					// Required Window Style
 			WS_CLIPCHILDREN,					// Required Window Style
 			0, 0,								// Window Position
-			winRect.right - winRect.left,		// Calculate Window Width
-			winRect.bottom - winRect.top,		// Calculate Window Height
+			mWinRect.right - mWinRect.left,		// Calculate Window Width
+			mWinRect.bottom - mWinRect.top,		// Calculate Window Height
 			NULL,								// No Parent Window
 			NULL,								// No Menu
 			mHInstance,							// Instance
@@ -160,7 +161,7 @@ protected:
 			return false;
 		}
 
-		SetWindowPos(mHWnd, NULL, winRect.left, winRect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+		SetWindowPos(mHWnd, NULL, mWinRect.left, mWinRect.top, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 
 		static	PIXELFORMATDESCRIPTOR pfd =				// pfd Tells Windows How We Want Things To Be
 		{

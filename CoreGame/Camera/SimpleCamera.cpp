@@ -17,15 +17,12 @@ void SimpleCamera::OnRender(double elapsedTime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//mDeltaTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 	mDeltaTime = (float)elapsedTime;
 
 	Engine* engine = Engine::GetInstance();
 
 	engine->UpdateObjects();
 	engine->RenderObjects();
-
-	//glutSwapBuffers();
 }
 
 void SimpleCamera::OnShutdown()
@@ -58,15 +55,21 @@ void SimpleCamera::OnInit()
 {
 	GL_CHECK_ERRORS
 
-		Engine::Initialize();
+	{
+		GLsizei w = (GLsizei)mGameProgram.GetWindowWidth();
+		GLsizei h = (GLsizei)mGameProgram.GetWindowHeight();
+		Engine::Initialize(0, 0, w, h, w, h);
+	}
 
 		Engine* engine = Engine::GetInstance();
 
+#ifdef FORWARD_RENDERING
 		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
 		engine->AttachRenderer(gridRenderer);
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
+#endif // FORWARD_RENDERING
 
 		int xCount = 30;
 		int yCount = 30;

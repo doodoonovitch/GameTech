@@ -16,7 +16,7 @@
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{83a918bf-782a-4e91-af21-f33516218c7c}</UniqueIdentifier>
-      <Extensions>vert;frag</Extensions>
+      <Extensions>vert;frag;geom;glsl</Extensions>
     </Filter>
     <Filter Include="Geometry">
       <UniqueIdentifier>{fe18b7ec-9555-4105-9565-e155b49cd69c}</UniqueIdentifier>
@@ -173,24 +173,6 @@
     <None Include="..\Data\Shaders\flat.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\grid_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\grid_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\axis_shader.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\axis_shader.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Data\Shaders\mesh_shader_NUV.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -198,9 +180,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\mesh_material_def.inc">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube_shader.geom">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\mesh_shader_NUV.geom">
@@ -216,6 +195,36 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\common.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\light.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\light.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.deferred.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis.vsh.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid.vs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

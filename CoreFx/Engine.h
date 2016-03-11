@@ -21,6 +21,7 @@ namespace CoreFx
 		class DirectionalLight;
 	}
 
+
 class Engine
 {
 public:
@@ -32,7 +33,7 @@ public:
 
 public:
 
-	static void Initialize();
+	static void Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	static void Release();
 
 	static Engine* GetInstance();
@@ -106,6 +107,15 @@ public:
 	{
 		return mLightDataBuffer;
 	}
+
+
+public:
+
+	// Add materials for deferred rendering :
+	//	- matProps : pointer to materials data
+	//  - matCount : materials count
+	//  - propCount : per material properties count; 1 property = 4 GLfloat
+	GLint AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount);
 
 	// ---------------------------------------------------------------------------
 	// Debug Tools
@@ -185,11 +195,12 @@ private:
 
 private:
 
-	void InternalInitialize();
+	void InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	void InternalRelease();
 
 	void InternalCreateFrameDataBuffer();
 
+	void CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
 
 	Engine();
 	~Engine();
@@ -199,12 +210,35 @@ private:
 
 
 private:
-	
+
+	static Engine* sInstance;
+
 	TextureManager * mTextureManager;
 	RendererContainer * mRenderers;
 	LightContainer * mLights;
 
 	Camera* mCamera;
+
+	enum GBufferType
+	{
+		gBuffer_DepthBuffer,
+		gBuffer_ColorBuffer_1,
+		gBuffer_ColorBuffer_2,
+
+		__gBuffer_count__
+	};
+
+	GLuint mGBuffer;
+	GLuint mGBufferTex[__gBuffer_count__];
+	GLsizei mGBufferWidth;
+	GLsizei mGBufferHeight;
+
+	GLint mViewportX, mViewportY;
+	GLsizei mViewportWidth, mViewportHeight;
+
+	GLuint mQuadVAO;
+	GLuint mQuadVBO;
+	Shader mDrawQuadShader;
 
 	glm::vec4 mAmbientLight;
 
@@ -223,6 +257,9 @@ private:
 
 	bool mInitialized;
 	bool mIsDrawVertexNormalEnabled;
+
+	std::vector<GLfloat> mMaterials;
+
 
 	enum
 	{
@@ -262,7 +299,6 @@ private:
 	TextureBuffer mLightDataBuffer;
 
 
-	static Engine* sInstance;
 };
 
 

@@ -15,6 +15,15 @@ Engine::Engine()
 	, mRenderers(nullptr)
 	, mLights(nullptr)
 	, mCamera(nullptr)
+	, mGBuffer(0)
+	, mGBufferWidth(1920)
+	, mGBufferHeight(1080)
+	, mViewportX(0)
+	, mViewportY(0)
+	, mViewportWidth(1920)
+	, mViewportHeight(1080)
+	, mQuadVAO(0)
+	, mQuadVBO(0)
 	, mAmbientLight(0.1f, 0.1f, 0.1f, 0.f)
 	, mLightDataIndex(0)
 	, mDrawVertexNormalColor(0.41f, 0.f, 1.f, 0.f)
@@ -28,6 +37,7 @@ Engine::Engine()
 	, mIsDrawVertexNormalEnabled(false)
 {
 	memset(mBufferIds, 0, sizeof(mBufferIds));
+	memset(mGBufferTex, 0, sizeof(mGBufferTex));
 }
 
 
@@ -36,10 +46,17 @@ Engine::~Engine()
 	InternalRelease();
 }
 
-void Engine::InternalInitialize()
+void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
 {
 	if (!mInitialized)
 	{
+		mViewportX = viewportX;
+		mViewportY = viewportY;
+		mViewportWidth = viewportWidth;
+		mViewportHeight = viewportHeight;
+
+		CreateGBuffers(gBufferWidth, gBufferHeight);
+		
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		//glFrontFace(GL_CCW);
@@ -67,6 +84,7 @@ void Engine::InternalRelease()
 	if (mInitialized)
 	{
 		glDeleteBuffers(__BufferId_Count__, mBufferIds);
+		memset(mBufferIds, 0, sizeof(mBufferIds));
 
 		SAFE_DELETE(mCamera);
 
@@ -84,9 +102,59 @@ void Engine::InternalRelease()
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
 
+		glDeleteTextures(__gBuffer_count__, mGBufferTex);
+		memset(mGBufferTex, 0, sizeof(mGBufferTex));
+		glDeleteFramebuffers(1, &mGBuffer);
+		mGBuffer = 0;
+
 		mInitialized = false;
 		mIsDrawVertexNormalEnabled = false;
+
 	}
+}
+
+void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
+{
+	mGBufferWidth = gBufferWidth;
+	mGBufferHeight = gBufferHeight;
+
+	glGenFramebuffers(1, &mGBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+	glGenTextures(__gBuffer_count__, mGBufferTex);
+	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_1]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32UI, mGBufferWidth, mGBufferHeight);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_2]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, mGBufferWidth, mGBufferHeight);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, mGBufferWidth, mGBufferHeight);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_ColorBuffer_1], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_ColorBuffer_2], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mGBufferTex[gBuffer_DepthBuffer], 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	GLfloat quadVertices[] = {
+		// Positions        // Texture Coords
+		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+	};
+	// Setup plane VAO
+	glGenVertexArrays(1, &mQuadVAO);
+	glGenBuffers(1, &mQuadVBO);
+
+	glBindVertexArray(mQuadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, mQuadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glBindVertexArray(0);
 }
 
 void Engine::InternalCreateFrameDataBuffer()
@@ -121,9 +189,9 @@ void Engine::InternalCreateFrameDataBuffer()
 	GL_CHECK_ERRORS;
 }
 
-void Engine::Initialize()
+void Engine::Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
 {
-	GetInstance()->InternalInitialize();
+	GetInstance()->InternalInitialize(viewportX, viewportY, viewportWidth, viewportHeight, gBufferWidth, gBufferHeight);
 }
 
 void Engine::Release()
@@ -162,6 +230,20 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
+	static const GLuint uintZeros[] = { 0, 0, 0, 0 };
+	static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
+	{ // preparation for gbuffer rendering pass
+		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+		glViewport(0, 0, mGBufferWidth, mGBufferHeight);
+		glDrawBuffers(2, drawBuffers);
+		glClearBufferuiv(GL_COLOR, 0, uintZeros);
+		glClearBufferuiv(GL_COLOR, 1, uintZeros);
+		glClearBufferfv(GL_DEPTH, 0, floatZeros);
+	}
+
 	if (!mLightDescBuffer.IsCreated())
 	{
 		GLsizeiptr bufferSize = (mLights->GetCount() + 1) * sizeof(GLuint);
@@ -218,11 +300,36 @@ void Engine::RenderObjects()
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
+glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
 		renderer->Render();
 	});
+
+
+	{
+		mDrawQuadShader.Use();
+			glBindVertexArray(mQuadVAO);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+				glDrawBuffer(GL_BACK);
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_1]);
+
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_2]);
+
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, mTexture->GetId());
+
+
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindVertexArray(0);
+		mDrawQuadShader.UnUse();
+	}
+
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -273,6 +380,20 @@ void Engine::DeleteLight(Lights::Light * & light)
 	SAFE_DELETE(light);
 }
 
+GLint Engine::AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount)
+{
+	assert(matCount > 0);
+	assert(propPerMatCount > 0);
+
+	GLint index = (GLint)mMaterials.size();
+	GLsizei propCount = matCount * propPerMatCount;
+	GLsizei floatCount = propCount * 4;
+
+	mMaterials.reserve(index + floatCount);
+	memcpy(mMaterials.data() + index, matProps, floatCount * sizeof(GLfloat));
+
+	return index / sizeof(GLfloat);
+}
 
 
 

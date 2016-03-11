@@ -211,20 +211,20 @@ void Shader::AddUniform(const std::string& uniform)
 	GL_CHECK_ERRORS;
 }
 
-GLuint Shader::GetAttribute(const std::string& attribute) const
+GLint Shader::GetAttribute(const std::string& attribute) const
 {
 	auto it = mAttributeList.find(attribute);
 	if (it == mAttributeList.end())
-		return 0xFFFFFFFF;
+		return -1;
 	else
 		return it->second;
 }
 
-GLuint Shader::GetUniform(const std::string& uniform) const
+GLint Shader::GetUniform(const std::string& uniform) const
 {
 	auto it = mUniformLocationList.find(uniform);
 	if (it == mUniformLocationList.end())
-		return 0xFFFFFFFF;
+		return -1;
 	else
 		return it->second;
 }

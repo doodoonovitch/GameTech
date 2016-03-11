@@ -60,11 +60,13 @@ private:
 	GLuint mMaterialCount;
 
 	TextureBuffer mModelMatrixBuffer;
-	TextureBuffer mMaterialDataBuffer;
 	TextureBuffer mMaterialIndexBuffer;
+	TextureBuffer mMaterialDataBuffer;
 
 	bool mIsMaterialIndexBufferSet;
 	bool mIsMaterialDataBufferSet;
+
+	friend class Engine;
 };
 
 

@@ -35,7 +35,7 @@ public:
 
 public:
 	Shader(void);
-	~Shader(void);
+	virtual ~Shader(void);
 	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, bool includeCommon = true);
 	void LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon = true);
 	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, bool includeCommon = true);
@@ -46,28 +46,27 @@ public:
 	void UnUse() const;
 	void AddAttribute(const std::string& attribute);
 	void AddUniform(const std::string& uniform);
-	GLuint GetAttribute(const std::string& attribute) const;
-	GLuint GetUniform(const std::string& uniform) const;
-	GLuint GetProgram() const { return mProgram; }
+	GLint GetAttribute(const std::string& attribute) const;
+	GLint GetUniform(const std::string& uniform) const;
+	GLint GetProgram() const { return mProgram; }
 
 	void SetupFrameDataBlockBinding() const;
 
 	static const char* ShaderName(GLenum shaderType);
 
-private:
+protected:
+
 	bool MergeFile(std::string& buffer, const std::string& filename) const;
 
-private:
+protected:
 
 	static std::string sCommonInclude;
 
 	GLuint mProgram;
 	std::vector<GLuint> mShaders;
-	std::map<std::string, GLuint> mAttributeList;
-	std::map<std::string, GLuint> mUniformLocationList;
+	std::map<std::string, GLint> mAttributeList;
+	std::map<std::string, GLint> mUniformLocationList;
 };
-
-
 
 
 } // namespace Core
