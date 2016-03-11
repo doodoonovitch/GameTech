@@ -57,24 +57,20 @@ public:
 		return mLightDesc >> LIGHT_DATA_INDEX_SHIFT;
 	}
 
-	static GLuint GetPropertySize() { return 4 * sizeof(GLfloat); }
+	static GLuint GetPropertySize() { return PropertyData::GetPropertySize(); }
 
-	GLuint GetPropertyCount() const { return mPropertyCount; }
+	GLuint GetPropertyCount() const { return mPropertyData.GetPropertyCount(); }
 
-	GLuint GetDataSize() const { return mPropertyCount * GetPropertySize(); }
-	GLfloat* GetData() const { return mData; }
+	GLuint GetDataSize() const { return mPropertyData.GetDataSize(); }
+	const GLfloat * GetData() const { return mPropertyData.GetData(); }
 
-	bool GetIsModified() const
-	{
-		return mIsModified;
-	}
+	bool GetIsModified() const { return mPropertyData.GetIsModified(); }
 
 	void SetProperty(const glm::vec4 & value, GLuint propertyIndex);
 	void SetProperty(const glm::vec3 & value, GLuint propertyIndex);
 	const GLfloat * GetProperty(GLuint propertyIndex) const
 	{
-		assert(propertyIndex < mPropertyCount);
-		return &mData[4 * propertyIndex];
+		return mPropertyData.GetProperty(propertyIndex);
 	}
 
 	void SetAmbient(const glm::vec3 & value)
@@ -113,13 +109,12 @@ protected:
 
 	GLfloat * GetProperty(GLuint propertyIndex) 
 	{
-		assert(propertyIndex < mPropertyCount);
-		return &mData[4 * propertyIndex];
+		return mPropertyData.GetProperty(propertyIndex);
 	}
 
 	void SetIsModified(bool isModified)
 	{
-		mIsModified = isModified;
+		mPropertyData.SetIsModified(isModified);
 	}
 
 private:
@@ -134,10 +129,7 @@ private:
 private:
 
 	GLuint mLightDesc;
-	GLfloat * mData;
-	GLuint mPropertyCount;
-	bool mIsModified;
-
+	PropertyData mPropertyData;
 };
 
 
