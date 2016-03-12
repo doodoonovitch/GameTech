@@ -22,9 +22,10 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube.vs.glsl");
 	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/cube.gs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube.deferred.fs.glsl");
 #ifdef FORWARD_RENDERING
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube.forward.fs.glsl");
+#else
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube.deferred.fs.glsl");
 #endif //FORWARD_RENDERING
 
 	mShader.CreateAndLinkProgram();
@@ -41,17 +42,20 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 		mShader.AddUniform("lightDescSampler");
 		mShader.AddUniform("lightDataSampler");
 		mShader.AddUniform("textureSampler");
+#else
+		mShader.AddUniform("u_MaterialBaseIndex");
 #endif // FORWARD_RENDERING
 		
 		//pass values of constant uniforms at initialization
-		glUniform1i(mShader.GetUniform("perInstanceDataSampler"), 1);
-		glUniform1i(mShader.GetUniform("materialIndexSampler"), 2);
+		glUniform1i(mShader.GetUniform("perInstanceDataSampler"), 0);
+		glUniform1i(mShader.GetUniform("materialIndexSampler"), 1);
 
 #ifdef FORWARD_RENDERING
-		glUniform1i(mShader.GetUniform("textureSampler"), 0);
-		glUniform1i(mShader.GetUniform("materialDataSampler"), 3);
+		glUniform1i(mShader.GetUniform("materialDataSampler"), 2);
+		glUniform1i(mShader.GetUniform("textureSampler"), 3);
 		glUniform1i(mShader.GetUniform("lightDescSampler"), 4);
 		glUniform1i(mShader.GetUniform("lightDataSampler"), 5);
+#else
 #endif // FORWARD_RENDERING
 
 		mShader.SetupFrameDataBlockBinding();
@@ -74,6 +78,7 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 	std::cout << "\t materialDataSampler : " << mShader.GetUniform("materialDataSampler") << std::endl;
 	std::cout << "\t lightDescSampler : " << mShader.GetUniform("lightDescSampler") << std::endl;
 	std::cout << "\t textureSampler : " << mShader.GetUniform("textureSampler") << std::endl;
+#else
 #endif // FORWARD_RENDERING
 
 	std::cout << std::endl;
@@ -156,15 +161,17 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 		GL_CHECK_ERRORS;
 
 	glBindVertexArray(0);
-
-	
+		
 	mTexture = Engine::GetInstance()->GetTextureManager()->LoadTexture2D(texture);
 
-	mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R8UI, GetCapacity() * sizeof(std::uint8_t), nullptr);
+	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
 
 #ifdef FORWARD_RENDERING	
 	mMaterialDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, mMaterials.GetDataSize(), nullptr);
+#else
 #endif // FORWARD_RENDERING
+
+	mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R8UI, GetCapacity() * sizeof(std::uint8_t), nullptr);
 
 	std::cout << "\t mVaoID : " << mVaoID << std::endl;
 	std::cout << "\t mVboID[VBO_Vertex] : " << mVboIDs[VBO_Vertex] << std::endl;
@@ -177,17 +184,19 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 CubeRenderer::~CubeRenderer()
 {
 	mModelMatrixBuffer.ReleaseResource();
-	mMaterialIndexBuffer.ReleaseResource();
 
 #ifdef FORWARD_RENDERING	
 	mMaterialDataBuffer.ReleaseResource();
+#else
 #endif // FORWARD_RENDERING
+
+	mMaterialIndexBuffer.ReleaseResource();
 
 	Engine::GetInstance()->GetTextureManager()->ReleaseTexture2D(mTexture);
 }
 
 void CubeRenderer::Render()
-{	
+{
 #ifdef FORWARD_RENDERING
 	Engine * engine = Engine::GetInstance();
 
@@ -201,6 +210,7 @@ void CubeRenderer::Render()
 
 		mIsMaterialDataBufferSet = true;
 	}
+#else
 #endif // FORWARD_RENDERING
 
 	if (!mIsMaterialIndexBufferSet)
@@ -246,18 +256,21 @@ void CubeRenderer::Render()
 			glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetTextureId());
 
 #ifdef FORWARD_RENDERING
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mTexture->GetId());
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetTextureId());
 
 			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetTextureId());
+			glBindTexture(GL_TEXTURE_2D, mTexture->GetId());
 
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDescBuffer().GetTextureId());
 
 			glActiveTexture(GL_TEXTURE5);
 			glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDataBuffer().GetTextureId());
+#else
 #endif // FORWARD_RENDERING
+
+			glUniform1i(mShader.GetUniform("u_MaterialBaseIndex"), GetMaterialBaseIndex());
 
 			glDrawElementsInstanced(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 		glBindVertexArray(0);
@@ -286,6 +299,7 @@ void CubeRenderer::Render()
 			glBindVertexArray(0);
 		drawVertexNormalShader.UnUse();
 	}
+#else
 #endif // FORWARD_RENDERING
 
 }

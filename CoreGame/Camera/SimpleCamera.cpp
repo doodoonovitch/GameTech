@@ -69,6 +69,7 @@ void SimpleCamera::OnInit()
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
+#else
 #endif // FORWARD_RENDERING
 
 		int xCount = 30;

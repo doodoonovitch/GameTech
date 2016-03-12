@@ -55,8 +55,13 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		mViewportWidth = viewportWidth;
 		mViewportHeight = viewportHeight;
 
+#ifdef FORWARD_RENDERING
+		gBufferWidth;
+		gBufferHeight;
+#else
 		CreateGBuffers(gBufferWidth, gBufferHeight);
-		
+#endif // FORWARD_RENDERING
+
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		//glFrontFace(GL_CCW);
@@ -102,10 +107,13 @@ void Engine::InternalRelease()
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
 
+#ifdef FORWARD_RENDERING
+#else
 		glDeleteTextures(__gBuffer_count__, mGBufferTex);
 		memset(mGBufferTex, 0, sizeof(mGBufferTex));
 		glDeleteFramebuffers(1, &mGBuffer);
 		mGBuffer = 0;
+#endif // FORWARD_RENDERING
 
 		mInitialized = false;
 		mIsDrawVertexNormalEnabled = false;
@@ -155,6 +163,32 @@ void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindVertexArray(0);
+}
+
+void Engine::CreateMaterialBuffer()
+{
+	int bufferSize = 0;
+	mRenderers->ForEach([&bufferSize](Renderer * renderer)
+	{
+		bufferSize += renderer->mMaterials.GetDataSize();
+	});
+
+	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+
+	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId());
+	GLsizeiptr offset = 0;
+	GLint baseIndex = 0;
+	mRenderers->ForEach([&offset, &baseIndex](Renderer * renderer)
+	{
+		renderer->mMaterialBaseIndex = baseIndex;
+		GLsizei dataSize = renderer->mMaterials.GetDataSize();
+		std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+		GL_CHECK_ERRORS;
+		memcpy(buffer, renderer->mMaterials.GetData(), dataSize);
+		glUnmapBuffer(GL_TEXTURE_BUFFER);
+		offset += dataSize;
+		baseIndex += renderer->mMaterials.GetPropertyCount();
+	});
 }
 
 void Engine::InternalCreateFrameDataBuffer()
@@ -230,6 +264,8 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
+#ifdef FORWARD_RENDERING
+#else
 	static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -243,6 +279,12 @@ void Engine::RenderObjects()
 		glClearBufferuiv(GL_COLOR, 1, uintZeros);
 		glClearBufferfv(GL_DEPTH, 0, floatZeros);
 	}
+
+	if (!mMaterialBuffer.IsCreated())
+	{
+		CreateMaterialBuffer();
+	}
+#endif // FORWARD_RENDERING
 
 	if (!mLightDescBuffer.IsCreated())
 	{
@@ -300,14 +342,15 @@ void Engine::RenderObjects()
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
-glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
 		renderer->Render();
 	});
 
-
+#ifdef FORWARD_RENDERING
+#else
 	{
 		mDrawQuadShader.Use();
 			glBindVertexArray(mQuadVAO);
@@ -321,15 +364,14 @@ glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_2]);
 
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, mTexture->GetId());
-
+				//glActiveTexture(GL_TEXTURE2);
+				//glBindTexture(GL_TEXTURE_2D, mTexture->GetId());
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
 		mDrawQuadShader.UnUse();
 	}
-
+#endif // FORWARD_RENDERING
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -380,19 +422,14 @@ void Engine::DeleteLight(Lights::Light * & light)
 	SAFE_DELETE(light);
 }
 
-GLint Engine::AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount)
+bool Engine::AttachRenderer(Renderer* renderer)
 {
-	assert(matCount > 0);
-	assert(propPerMatCount > 0);
+	return mRenderers->Attach(renderer);
+}
 
-	GLint index = (GLint)mMaterials.size();
-	GLsizei propCount = matCount * propPerMatCount;
-	GLsizei floatCount = propCount * 4;
-
-	mMaterials.reserve(index + floatCount);
-	memcpy(mMaterials.data() + index, matProps, floatCount * sizeof(GLfloat));
-
-	return index / sizeof(GLfloat);
+bool Engine::DetachRenderer(Renderer* renderer)
+{
+	return mRenderers->Detach(renderer);
 }
 
 

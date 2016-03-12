@@ -70,15 +70,9 @@ public:
 	// Renderers
 public:
 
-	bool AttachRenderer(Renderer* renderer)
-	{
-		return mRenderers->Attach(renderer);
-	}
+	bool AttachRenderer(Renderer* renderer);
 
-	bool DetachRenderer(Renderer* renderer)
-	{
-		return mRenderers->Detach(renderer);
-	}
+	bool DetachRenderer(Renderer* renderer);
 
 
 	// Lights
@@ -107,15 +101,6 @@ public:
 	{
 		return mLightDataBuffer;
 	}
-
-
-public:
-
-	// Add materials for deferred rendering :
-	//	- matProps : pointer to materials data
-	//  - matCount : materials count
-	//  - propCount : per material properties count; 1 property = 4 GLfloat
-	GLint AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount);
 
 	// ---------------------------------------------------------------------------
 	// Debug Tools
@@ -202,6 +187,8 @@ private:
 
 	void CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
 
+	void CreateMaterialBuffer();
+
 	Engine();
 	~Engine();
 
@@ -258,8 +245,6 @@ private:
 	bool mInitialized;
 	bool mIsDrawVertexNormalEnabled;
 
-	std::vector<GLfloat> mMaterials;
-
 
 	enum
 	{
@@ -298,7 +283,7 @@ private:
 	TextureBuffer mLightDescBuffer;
 	TextureBuffer mLightDataBuffer;
 
-
+	TextureBuffer mMaterialBuffer;
 };
 
 
