@@ -12,7 +12,9 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 	, mTexture(nullptr)
 	, mMaterialCount(materialCount)
 	, mIsMaterialIndexBufferSet(false)
+#ifdef FORWARD_RENDERING
 	, mIsMaterialDataBufferSet(false)
+#endif // FORWARD_RENDERING
 {
 	memset(mMaterials.GetData(), 0, mMaterials.GetDataSize());
 
@@ -334,7 +336,9 @@ void CubeRenderer::SetMaterial(std::uint8_t materialIndex, const glm::vec3& ambi
 	if (materialIndex < mMaterialCount)
 	{
 		mIsMaterialIndexBufferSet = false;
+#ifdef FORWARD_RENDERING
 		mIsMaterialDataBufferSet = false;
+#endif // FORWARD_RENDERING
 
 		GLuint propertyIndex = Property_Per_Material * materialIndex;
 
