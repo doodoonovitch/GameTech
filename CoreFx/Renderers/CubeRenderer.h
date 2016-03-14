@@ -61,13 +61,9 @@ private:
 
 	TextureBuffer mModelMatrixBuffer;
 	TextureBuffer mMaterialIndexBuffer;
-#ifdef FORWARD_RENDERING
 	TextureBuffer mMaterialDataBuffer;
-#endif // FORWARD_RENDERING
 	bool mIsMaterialIndexBufferSet;
-#ifdef FORWARD_RENDERING
 	bool mIsMaterialDataBufferSet;
-#endif // FORWARD_RENDERING
 
 	friend class Engine;
 };

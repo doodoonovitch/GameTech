@@ -35,7 +35,7 @@
 
 #include "macros.h"
 
-//#define FORWARD_RENDERING
+#define FORWARD_RENDERING
 
 namespace CoreFx
 {

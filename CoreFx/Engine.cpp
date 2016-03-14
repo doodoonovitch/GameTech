@@ -129,18 +129,22 @@ void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	glGenFramebuffers(1, &mGBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
 	glGenTextures(__gBuffer_count__, mGBufferTex);
-	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_1]);
+
+	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, mGBufferWidth, mGBufferHeight);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32UI, mGBufferWidth, mGBufferHeight);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_2]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, mGBufferWidth, mGBufferHeight);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, mGBufferWidth, mGBufferHeight);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_ColorBuffer_1], 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_ColorBuffer_2], 0);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mGBufferTex[gBuffer_DepthBuffer], 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -274,7 +278,7 @@ void Engine::RenderObjects()
 	{ // preparation for gbuffer rendering pass
 		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
 		glViewport(0, 0, mGBufferWidth, mGBufferHeight);
-		glDrawBuffers(2, drawBuffers);
+		glDrawBuffers(3, drawBuffers);
 		glClearBufferuiv(GL_COLOR, 0, uintZeros);
 		glClearBufferuiv(GL_COLOR, 1, uintZeros);
 		glClearBufferfv(GL_DEPTH, 0, floatZeros);
@@ -342,6 +346,7 @@ void Engine::RenderObjects()
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
+
 	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -359,13 +364,10 @@ void Engine::RenderObjects()
 				glDrawBuffer(GL_BACK);
 
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_1]);
+				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
 
 				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_ColorBuffer_2]);
-
-				//glActiveTexture(GL_TEXTURE2);
-				//glBindTexture(GL_TEXTURE_2D, mTexture->GetId());
+				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
@@ -377,7 +379,6 @@ void Engine::RenderObjects()
 	{
 		renderer->EndFrame();
 	});
-
 }
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)

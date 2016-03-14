@@ -2,8 +2,8 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 uniform int u_MaterialBaseIndex;
-uniform samplerBuffer perInstanceDataSampler;
-uniform isamplerBuffer materialIndexSampler;
+uniform samplerBuffer u_perInstanceDataSampler;
+uniform isamplerBuffer u_materialIndexSampler;
 
 #define PROPERTY_PER_MATERIAL_COUNT 3
 
@@ -27,12 +27,12 @@ void main()
 {  
 	DualQuat modelDQ;
 	int index = gs_in[0].InstanceId * 2;
-	modelDQ.Qr = texelFetch(perInstanceDataSampler, index);
-	modelDQ.Qd = texelFetch(perInstanceDataSampler, index + 1);
+	modelDQ.Qr = texelFetch(u_perInstanceDataSampler, index);
+	modelDQ.Qd = texelFetch(u_perInstanceDataSampler, index + 1);
 
 	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 
-	int matIndex = texelFetch(materialIndexSampler, gs_in[0].InstanceId).r * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
+	int matIndex = texelFetch(u_materialIndexSampler, gs_in[0].InstanceId).r * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{

@@ -209,8 +209,8 @@ private:
 	enum GBufferType
 	{
 		gBuffer_DepthBuffer,
-		gBuffer_ColorBuffer_1,
-		gBuffer_ColorBuffer_2,
+		gBuffer_PositionBuffer,
+		gBuffer_DataBuffer,
 
 		__gBuffer_count__
 	};
