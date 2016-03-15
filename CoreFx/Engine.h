@@ -164,6 +164,13 @@ public:
 	
 	// ---------------------------------------------------------------------------
 
+public:
+
+	// Add materials for deferred rendering : 
+	//  - matProps : pointer to materials data 
+	//  - matCount : materials count 
+	//  - propCount : per material properties count; 1 property = 4 GLfloat 
+	GLint AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount);
 
 private:
 
@@ -189,6 +196,8 @@ private:
 
 	void CreateMaterialBuffer();
 
+	void InitializeDeferredPassQuadShader();
+
 	Engine();
 	~Engine();
 
@@ -205,6 +214,8 @@ private:
 	LightContainer * mLights;
 
 	Camera* mCamera;
+
+	Renderables::RenderableObject<1> * mDeferredLightPass;
 
 	enum GBufferType
 	{
@@ -223,9 +234,6 @@ private:
 	GLint mViewportX, mViewportY;
 	GLsizei mViewportWidth, mViewportHeight;
 
-	GLuint mQuadVAO;
-	GLuint mQuadVBO;
-	Shader mDrawQuadShader;
 
 	glm::vec4 mAmbientLight;
 
@@ -284,6 +292,9 @@ private:
 	TextureBuffer mLightDataBuffer;
 
 	TextureBuffer mMaterialBuffer;
+
+	TextureBuffer mMaterialDataBuffer;
+	std::vector<GLfloat> mMaterials;
 };
 
 

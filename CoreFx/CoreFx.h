@@ -35,7 +35,7 @@
 
 #include "macros.h"
 
-#define FORWARD_RENDERING
+//#define FORWARD_RENDERING
 
 namespace CoreFx
 {
@@ -64,6 +64,7 @@ namespace CoreFx
 #include "Renderer.h"
 #include "Renderers\RendererHelper.h"
 #include "Renderers\DrawNormalShader.h"
+#include "Renderables\RenderableObject.h"
 
 #include "TextureBuffer.h"
 
@@ -82,7 +83,6 @@ namespace CoreFx
 
 
 #include "Camera.h"
-#include "Renderables\RenderableObject.h"
 #include "Renderables\Axis.h"
 #include "Renderables\Grid.h"
 #include "Renderables\Cube.h"

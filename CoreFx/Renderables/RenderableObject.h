@@ -11,17 +11,15 @@ namespace CoreFx
 
 
 
-template<int T_vbo_count, bool T_hasFrame = true>
-class RenderableObject : public SceneObject
+template<int T_vbo_count>
+class RenderableObject
 {
 public:
 
-	static constexpr bool mHasFrame = T_hasFrame;
 	static constexpr int mVboCount = T_vbo_count;
 
 	RenderableObject(void) 
-		: SceneObject(mHasFrame)
-		, mVaoID(0)
+		: mVaoID(0)
 	{
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
 	}
@@ -34,6 +32,12 @@ public:
 		// Release buffers (vao & vbo)
 		ReleaseBuffers();
 	}
+
+	inline GLuint GetVao() const					{ return mVaoID; }
+	inline GLuint GetVbo(int index) const			{ assert(index < mVboCount); return mVboIDs[index]; }
+	inline const Shader & GetShader() const			{ return mShader; }
+	inline Shader & GetShader()						{ return mShader; }
+
 
 protected:
 

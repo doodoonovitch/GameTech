@@ -2,72 +2,53 @@ layout(location = 0) out vec4 vFragColor;
 
 in vec2 TexUV;
 
-uniform usampler2D gBuffer0;
-uniform sampler2D gBuffer1;
+uniform sampler2D u_gBufferPosition;
+uniform usampler2D u_gBufferRGBA32UI;
 
-uniform samplerBuffer materialDataSampler;
-uniform isamplerBuffer lightDescSampler;
-uniform samplerBuffer lightDataSampler;
+uniform samplerBuffer u_materialDataSampler;
+uniform isamplerBuffer u_lightDescSampler;
+uniform samplerBuffer u_lightDataSampler;
 
 
 struct FragmentInfo
 {
     vec3 Position;
     vec3 Normal;
-	vec2 TexUV;
-    uint MaterialIndex;
+	vec3 Albedo;
+    int MaterialIndex;
 };
 
-void UnpackGBuffer(ivec2 coord, out FragmentInfo fragment)
+void UnpackGBuffer(vec2 coord, out FragmentInfo fragment)
 {
-    uvec4 data0 = texelFetch(gBuffer0, ivec2(coord), 0);
-    vec4 data1 = texelFetch(gBuffer0, ivec2(coord), 0);
-    vec2 temp;
+    fragment.Position = texture(u_gBufferPosition, coord, 0).xyz;
+    uvec4 data = texture(u_gBufferRGBA32UI, coord, 0);
 
-    temp = unpackHalf2x16(data0.y);
-    fragment.Normal = vec3(temp.y, data1.w);
-    fragment.MaterialIndex = data0.w;
+    vec2 temp = unpackHalf2x16(data.y);
+    fragment.Albedo.xy = unpackHalf2x16(data.x);
+    fragment.Albedo.z = temp.x;
 
-    fragment.Position = data1.xyz;
+    fragment.Normal.xy = unpackHalf2x16(data.z);
+    fragment.Normal.z = temp.y;
+
+    fragment.MaterialIndex = int(data.w);
 }
-
 
 void main(void)
 {
 	FragmentInfo fs_in;
 	UnpackGBuffer(TexUV, fs_in);
 
-	vec4 v = texelFetch(materialDataSampler, fs_in.MaterialIndex);
-	vec4 materialAmbient = vec4(v.xyz, 1);
+	vec4 matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex);
+	vec4 materialAmbient = vec4(matData.xyz * fs_in.Albedo, 1);
 
-	uint bitfieldValue = floatBitsToUint(v.w);
-	int ambientTextureIndex = int(GetAmbientTextureIndex(bitfieldValue));
-	int diffuseTextureIndex = int(GetDiffuseTextureIndex(bitfieldValue));
-	int specularTextureIndex = int(GetSpecularTextureIndex(bitfieldValue));
+	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 1);
+	vec4 materialDiffuse = vec4(matData.xyz, 1);
 
-	v = texelFetch(materialDataSampler, fs_in.MaterialIndex + 1);
-	vec4 materialDiffuse = vec4(v.xyz, 1);
+	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 2);
+	vec4 materialSpecular = vec4(matData.xyz, 1);
 
-	v = texelFetch(materialDataSampler, fragInfo.MaterialIndex + 2);
-	vec4 materialSpecular = vec4(v.xyz, 1);
+	float materialShininess = matData.w;
 
-	float materialShininess = v.w;
-
-	if (ambientTextureIndex != 0x000000FF)
-	{
-		materialAmbient = materialAmbient * texture(textureSampler, fs_in.TexUV);
-	}
-	
-	if (diffuseTextureIndex != 0x000000FF)
-	{
-		materialDiffuse = materialDiffuse * texture(textureSampler, fs_in.TexUV);
-	}
-
-	if (specularTextureIndex != 0x000000FF)
-	{
-		materialSpecular = materialSpecular * texture(textureSampler, fs_in.TexUV);
-	}
-	
 	vec3 ambientColor = u_AmbientLight.xyz;
 	vec3 specularColor = vec3(0, 0, 0);
 	vec3 diffuseColor = vec3(0, 0, 0);
@@ -75,16 +56,16 @@ void main(void)
 	vec3 normal = normalize(fs_in.Normal);
 	vec3 viewDirection = normalize(-fs_in.Position.xyz);
 
-	int lightCount = texelFetch(lightDescSampler, 0).x;
+	int lightCount = texelFetch(u_lightDescSampler, 0).x;
 	for(int lightIndex = 0; lightIndex < lightCount; ++lightIndex)
 	{
-		int lightDesc = texelFetch(lightDescSampler, lightIndex + 1).x;
+		int lightDesc = texelFetch(u_lightDescSampler, lightIndex + 1).x;
 		int lightType = GetLightType(lightDesc);
 		int dataIndex = GetLightDataIndex(lightDesc);
 
-		vec3 lightAmbient = texelFetch(lightDataSampler, dataIndex + LIGHT_AMBIENT_PROPERTY).xyz;
-		vec3 lightDiffuse = texelFetch(lightDataSampler, dataIndex + LIGHT_DIFFUSE_PROPERTY).xyz;
-		vec3 lightSpecular = texelFetch(lightDataSampler, dataIndex + LIGHT_SPECULAR_PROPERTY).xyz;
+		vec3 lightAmbient = texelFetch(u_lightDataSampler, dataIndex + LIGHT_AMBIENT_PROPERTY).xyz;
+		vec3 lightDiffuse = texelFetch(u_lightDataSampler, dataIndex + LIGHT_DIFFUSE_PROPERTY).xyz;
+		vec3 lightSpecular = texelFetch(u_lightDataSampler, dataIndex + LIGHT_SPECULAR_PROPERTY).xyz;
 
 		float attenuation = 1.0;
 		vec3 lightDirection;
@@ -92,8 +73,8 @@ void main(void)
 
 		if (lightType == POINT_LIGHT_TYPE)
 		{
-			vec4 lightPosition = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
-			vec4 attenuationCoef = texelFetch(lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
+			vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
+			vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
 
 			lightDirection = lightPosition.xyz - fs_in.Position.xyz;
 			float lightDistance = length(lightDirection);
@@ -105,7 +86,7 @@ void main(void)
 		}
 		else if (lightType == DIRECTIONAL_LIGHT_TYPE)
 		{
-			lightDirection = -texelFetch(lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
+			lightDirection = -texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
 
 			reflectionDirection = reflect(lightDirection, normal);
 		}
