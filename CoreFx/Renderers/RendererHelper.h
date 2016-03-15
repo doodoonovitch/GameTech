@@ -36,6 +36,12 @@ protected:
 		ReleaseBuffers();
 	}
 
+	void CreateBuffers()
+	{
+		glGenVertexArrays(1, &mVaoID);
+		glGenBuffers(mVboCount, mVboIDs);
+	}
+
 	void ReleaseBuffers()
 	{
 		//Destroy vao and vbo

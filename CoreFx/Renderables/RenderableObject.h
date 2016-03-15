@@ -18,7 +18,7 @@ public:
 
 	static constexpr int mVboCount = T_vbo_count;
 
-	RenderableObject(void) 
+	RenderableObject() 
 		: mVaoID(0)
 	{
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
@@ -33,13 +33,11 @@ public:
 		ReleaseBuffers();
 	}
 
-	inline GLuint GetVao() const					{ return mVaoID; }
-	inline GLuint GetVbo(int index) const			{ assert(index < mVboCount); return mVboIDs[index]; }
-	inline const Shader & GetShader() const			{ return mShader; }
-	inline Shader & GetShader()						{ return mShader; }
-
-
-protected:
+	void CreateBuffers()
+	{
+		glGenVertexArrays(1, &mVaoID);
+		glGenBuffers(mVboCount, mVboIDs);
+	}
 
 	void ReleaseBuffers()
 	{
@@ -49,6 +47,12 @@ protected:
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
 		mVaoID = 0;
 	}
+
+	inline GLuint GetVao() const					{ return mVaoID; }
+	inline GLuint GetVbo(int index) const			{ assert(index < mVboCount); return mVboIDs[index]; }
+	inline const Shader & GetShader() const			{ return mShader; }
+	inline Shader & GetShader()						{ return mShader; }
+
 
 protected:
 	GLuint mVaoID;

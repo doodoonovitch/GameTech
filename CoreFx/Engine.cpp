@@ -186,22 +186,37 @@ void Engine::InitializeDeferredPassQuadShader()
 	shader.SetupFrameDataBlockBinding();
 	shader.UnUse();
 
-	GLfloat quadVertices[] = {
+	GL_CHECK_ERRORS;
+
+	GLfloat quadVertices[] = 
+	{
 		// Positions        // Texture Coords
 		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
 		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 	};
+
+	mDeferredLightPass->CreateBuffers();
+
 	// Setup plane VAO
 	glBindVertexArray(mDeferredLightPass->GetVao());
-	glBindBuffer(GL_ARRAY_BUFFER, mDeferredLightPass->GetVbo(0));
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+
+		glBindBuffer(GL_ARRAY_BUFFER, mDeferredLightPass->GetVbo(0));
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+		GL_CHECK_ERRORS;
+
+		glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
+		glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		GL_CHECK_ERRORS;
+
+		glEnableVertexAttribArray(Shader::UV_ATTRIBUTE);
+		glVertexAttribPointer(Shader::UV_ATTRIBUTE, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		GL_CHECK_ERRORS;
+
 	glBindVertexArray(0);
+
+	GL_CHECK_ERRORS;
 }
 
 void Engine::CreateMaterialBuffer()
@@ -303,28 +318,6 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
-#ifdef FORWARD_RENDERING
-#else
-	static const GLuint uintZeros[] = { 0, 0, 0, 0 };
-	static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
-	{ // preparation for gbuffer rendering pass
-		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-		glViewport(0, 0, mGBufferWidth, mGBufferHeight);
-		glDrawBuffers(3, drawBuffers);
-		glClearBufferuiv(GL_COLOR, 0, uintZeros);
-		glClearBufferuiv(GL_COLOR, 1, uintZeros);
-		glClearBufferfv(GL_DEPTH, 0, floatZeros);
-	}
-
-	if (!mMaterialBuffer.IsCreated())
-	{
-		CreateMaterialBuffer();
-	}
-#endif // FORWARD_RENDERING
-
 	if (!mLightDescBuffer.IsCreated())
 	{
 		GLsizeiptr bufferSize = (mLights->GetCount() + 1) * sizeof(GLuint);
@@ -382,6 +375,31 @@ void Engine::RenderObjects()
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 
 
+#ifdef FORWARD_RENDERING
+#else
+	static const GLuint uintZeros[] = { 0, 0, 0, 0 };
+	static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
+	{ // preparation for gbuffer rendering pass
+		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+		glViewport(0, 0, mGBufferWidth, mGBufferHeight);
+		glDrawBuffers(3, drawBuffers);
+		glClearBufferuiv(GL_COLOR, 0, uintZeros);
+		glClearBufferuiv(GL_COLOR, 1, uintZeros);
+		glClearBufferfv(GL_DEPTH, 0, floatZeros);
+	}
+
+	if (!mMaterialBuffer.IsCreated())
+	{
+		CreateMaterialBuffer();
+	}
+#endif // FORWARD_RENDERING
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
 	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -392,11 +410,14 @@ void Engine::RenderObjects()
 #ifdef FORWARD_RENDERING
 #else
 	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDrawBuffer(GL_BACK);
+		glDisable(GL_DEPTH_TEST);
+
 		mDeferredLightPass->GetShader().Use();
 			glBindVertexArray(mDeferredLightPass->GetVao());
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-				glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
-				glDrawBuffer(GL_BACK);
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
@@ -405,7 +426,7 @@ void Engine::RenderObjects()
 				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 
 				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetTextureId());
+				glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
 
 				glActiveTexture(GL_TEXTURE3);
 				glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
@@ -416,6 +437,20 @@ void Engine::RenderObjects()
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
 		mDeferredLightPass->GetShader().UnUse();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 #endif // FORWARD_RENDERING
 

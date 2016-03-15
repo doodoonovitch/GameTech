@@ -292,8 +292,6 @@ private:
 	TextureBuffer mLightDataBuffer;
 
 	TextureBuffer mMaterialBuffer;
-
-	TextureBuffer mMaterialDataBuffer;
 	std::vector<GLfloat> mMaterials;
 };
 

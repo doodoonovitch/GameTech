@@ -136,8 +136,9 @@ CubeRenderer::CubeRenderer(std::string const & texture, std::uint8_t materialCou
 	};
 	
 	//setup vao and vbo stuff
-	glGenVertexArrays(1, &mVaoID);
-	glGenBuffers(mVboCount, mVboIDs);
+	//glGenVertexArrays(1, &mVaoID);
+	//glGenBuffers(mVboCount, mVboIDs);
+	CreateBuffers();
 
 	glBindVertexArray(mVaoID);
 
