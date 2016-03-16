@@ -1,6 +1,10 @@
 layout(location = 0) out vec4 vFragColor;
 
-in vec2 TexUV;
+in VS_OUT
+{
+	vec2 TexUV;
+} fs_in;
+
 
 uniform sampler2D u_gBufferPosition;
 uniform usampler2D u_gBufferRGBA32UI;
@@ -35,16 +39,16 @@ void UnpackGBuffer(vec2 coord, out FragmentInfo fragment)
 
 void main(void)
 {
-	FragmentInfo fs_in;
-	UnpackGBuffer(TexUV, fs_in);
+	FragmentInfo gData;
+	UnpackGBuffer(fs_in.TexUV, gData);
+	
+	vec4 matData = texelFetch(u_materialDataSampler, gData.MaterialIndex);
+	vec4 materialAmbient = vec4(matData.xyz * gData.Albedo, 1);
 
-	vec4 matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex);
-	vec4 materialAmbient = vec4(matData.xyz * fs_in.Albedo, 1);
-
-	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 1);
+	matData = texelFetch(u_materialDataSampler, gData.MaterialIndex + 1);
 	vec4 materialDiffuse = vec4(matData.xyz, 1);
 
-	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 2);
+	matData = texelFetch(u_materialDataSampler, gData.MaterialIndex + 2);
 	vec4 materialSpecular = vec4(matData.xyz, 1);
 
 	float materialShininess = matData.w;
@@ -53,8 +57,8 @@ void main(void)
 	vec3 specularColor = vec3(0, 0, 0);
 	vec3 diffuseColor = vec3(0, 0, 0);
 
-	vec3 normal = normalize(fs_in.Normal);
-	vec3 viewDirection = normalize(-fs_in.Position.xyz);
+	vec3 normal = normalize(gData.Normal);
+	vec3 viewDirection = normalize(-gData.Position.xyz);
 
 	int lightCount = texelFetch(u_lightDescSampler, 0).x;
 	for(int lightIndex = 0; lightIndex < lightCount; ++lightIndex)
@@ -76,7 +80,7 @@ void main(void)
 			vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
 			vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
 
-			lightDirection = lightPosition.xyz - fs_in.Position.xyz;
+			lightDirection = lightPosition.xyz - gData.Position.xyz;
 			float lightDistance = length(lightDirection);
 			lightDirection = lightDirection / lightDistance;
 
@@ -106,4 +110,5 @@ void main(void)
 	}
 	
 	vFragColor =  clamp(materialAmbient * vec4(ambientColor, 1) + materialDiffuse * vec4(diffuseColor,1) + materialSpecular * vec4(specularColor, 1), 0, 1);
+	//vFragColor = vec4(gData.Position, 1);
 }

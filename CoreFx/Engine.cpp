@@ -17,6 +17,7 @@ Engine::Engine()
 	, mCamera(nullptr)
 	, mDeferredLightPass(nullptr)
 	, mGBuffer(0)
+	, mDepthBuffer(0)
 	, mGBufferWidth(1920)
 	, mGBufferHeight(1080)
 	, mViewportX(0)
@@ -67,7 +68,9 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		//glFrontFace(GL_CCW);
 
 		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
+		//glDepthFunc(GL_LESS);
+
+		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 
 		mTextureManager = new TextureManager();
 		mTextureManager->Initialize();
@@ -113,6 +116,8 @@ void Engine::InternalRelease()
 		memset(mGBufferTex, 0, sizeof(mGBufferTex));
 		glDeleteFramebuffers(1, &mGBuffer);
 		mGBuffer = 0;
+		glDeleteRenderbuffers(1, &mDepthBuffer);
+		mDepthBuffer = 0;
 
 		SAFE_DELETE(mDeferredLightPass);
 #endif // FORWARD_RENDERING
@@ -127,26 +132,38 @@ void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	mGBufferWidth = gBufferWidth;
 	mGBufferHeight = gBufferHeight;
 
+	std::cout << std::endl;
+	std::cout << "Initialize Deferred framebuffers..." << std::endl;
+	std::cout << "\t Size = " << mGBufferWidth << " x " << mGBufferHeight << std::endl;
+
 	glGenFramebuffers(1, &mGBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
 	glGenTextures(__gBuffer_count__, mGBufferTex);
+	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB32F, mGBufferWidth, mGBufferHeight);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
+	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32UI, mGBufferWidth, mGBufferHeight);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, mGBufferWidth, mGBufferHeight);
-
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mGBufferTex[gBuffer_DepthBuffer], 0);
+	GL_CHECK_ERRORS;
+
+	glGenRenderbuffers(1, &mDepthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
+	GL_CHECK_ERRORS;
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete!" << std::endl;
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -384,11 +401,8 @@ void Engine::RenderObjects()
 
 	{ // preparation for gbuffer rendering pass
 		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-		glViewport(0, 0, mGBufferWidth, mGBufferHeight);
-		glDrawBuffers(3, drawBuffers);
-		glClearBufferuiv(GL_COLOR, 0, uintZeros);
-		glClearBufferuiv(GL_COLOR, 1, uintZeros);
-		glClearBufferfv(GL_DEPTH, 0, floatZeros);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDrawBuffers(2, drawBuffers);
 	}
 
 	if (!mMaterialBuffer.IsCreated())
@@ -398,9 +412,6 @@ void Engine::RenderObjects()
 #endif // FORWARD_RENDERING
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-
-	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -411,9 +422,7 @@ void Engine::RenderObjects()
 #else
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDrawBuffer(GL_BACK);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 
 		mDeferredLightPass->GetShader().Use();

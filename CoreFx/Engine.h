@@ -219,7 +219,6 @@ private:
 
 	enum GBufferType
 	{
-		gBuffer_DepthBuffer,
 		gBuffer_PositionBuffer,
 		gBuffer_DataBuffer,
 
@@ -228,6 +227,7 @@ private:
 
 	GLuint mGBuffer;
 	GLuint mGBufferTex[__gBuffer_count__];
+	GLuint mDepthBuffer;
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;
 
