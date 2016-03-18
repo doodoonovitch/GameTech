@@ -401,7 +401,6 @@ void Engine::RenderObjects()
 
 	{ // preparation for gbuffer rendering pass
 		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDrawBuffers(2, drawBuffers);
 	}
 
@@ -409,8 +408,12 @@ void Engine::RenderObjects()
 	{
 		CreateMaterialBuffer();
 	}
+
+	glDisable(GL_BLEND);
 #endif // FORWARD_RENDERING
 
+	glDepthMask(GL_TRUE);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -423,6 +426,7 @@ void Engine::RenderObjects()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT);
+		glDepthMask(GL_FALSE);
 		glDisable(GL_DEPTH_TEST);
 
 		mDeferredLightPass->GetShader().Use();

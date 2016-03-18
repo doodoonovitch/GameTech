@@ -15,4 +15,18 @@ Texture2D::~Texture2D()
 {
 }
 
+
+TextureGroup::TextureGroup(GLuint textureId, TextureGroupId groupId, GLint layerCount)
+	: Texture2D(textureId)
+	, mGroupId(groupId)
+	, mLayerCount(layerCount)
+{
+
+}
+
+TextureGroup::~TextureGroup()
+{
+
+}
+
 } // namespace CoreFx

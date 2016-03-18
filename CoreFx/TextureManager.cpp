@@ -5,8 +5,10 @@ namespace CoreFx
 {
 
 
+
 TextureManager::TextureManager()
 	: mDefault2D(nullptr)
+	, mDefaultTexGroup(nullptr)
 {
 }
 
@@ -150,6 +152,152 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
 void TextureManager::ReleaseTexture2D(Texture2D const *& texture)
 {
 	texture = nullptr;
+}
+
+TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> tex2DFilenameList)
+{
+	if (tex2DFilenameList.empty())
+	{
+		printf("Error: Cannot load texture group : tex2DFilenameList is empty!\n");
+		return mDefaultTexGroup;
+	}
+
+	KTX_error_code err;
+	GLuint modelId = 0;
+	GLenum target;
+	KTX_dimensions dimensions;
+	GLboolean isMipmapped;
+	GLenum glerr;
+
+	GLint layerCount = (GLint)tex2DFilenameList.size();
+	int modelIndex = 0;
+	for (modelIndex = 0; modelIndex < layerCount; ++modelIndex)
+	{
+		const std::string & modelFilename = tex2DFilenameList[modelIndex];
+		err = ktxLoadTextureN(modelFilename.c_str(), &modelId, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+		if (modelId != 0)
+		{
+			break;
+		}
+	} 
+
+	if (modelId == 0)
+	{
+		printf("Error: Cannot load texture group : no valid texture file found.\n");
+		return mDefaultTexGroup;
+	}
+
+	if (layerCount == 1 || dimensions.depth > 1)
+	{
+		return new TextureGroup(modelId, groupId, dimensions.depth);
+	}
+
+	KTX_header header;
+	if (!KTX_ReadHeader(tex2DFilenameList[modelId].c_str(), header))
+	{
+		printf("Error: Cannot load texture group : reading header has failed!\n");
+		return mDefaultTexGroup;
+	}
+
+	GLuint id = 0;
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount);
+
+	for (int index = 0; index < layerCount; ++index)
+	{
+		GLuint srcId = 0;
+		if (index == modelIndex)
+		{
+			srcId = modelId;
+		}
+		else
+		{
+			const std::string & filename = tex2DFilenameList[modelIndex];
+			err = ktxLoadTextureN(filename.c_str(), &srcId, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+			if (srcId == 0)
+			{
+				srcId = mDefault2D->GetId();
+			}
+		}
+
+		glBindTexture(GL_TEXTURE_2D, srcId);
+
+		uint32_t wCopied = 0, hCopied = 0;
+		uint32_t x = 0, y = 0;
+		while (hCopied < header.pixelHeight)
+		{
+			uint32_t h = min(header.pixelHeight, (uint32_t)dimensions.height);
+			while (wCopied < header.pixelWidth)
+			{
+				uint32_t w = min(header.pixelWidth, (uint32_t)dimensions.width);
+
+				glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, (GLint)x, (GLint)y, (GLint)index, (GLint)x, (GLint)y, (GLsizei)w, (GLsizei)h);
+				wCopied += w;
+				x = wCopied;
+			}
+			hCopied += h;
+			y = hCopied;
+		}
+		
+		if (srcId != mDefault2D->GetId())
+		{
+			glDeleteTextures(1, &srcId);
+		}
+	}
+
+	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
+	return texGroup;
+}
+
+bool TextureManager::KTX_ReadHeader(FILE* f, KTX_header & header)
+{
+	static const char ktxIdentifierRef[12] = { '«', 'K', 'T', 'X', ' ', '1', '1', '»', '\r', '\n', '\x1A', '\n' };
+	static const uint32_t ktxEndianRef = 0x04030201;
+	static const uint32_t ktxEndianRefReverse = 0x01020304;
+
+	if (fread(&header, sizeof(KTX_header), 1, f) != sizeof(KTX_header))
+	{
+		printf("Error: Cannot read KTX file header !\n");
+		return false;
+	}
+
+	if (memcmp(&header.identifier, ktxIdentifierRef, sizeof(ktxIdentifierRef)) != 0)
+	{
+		printf("Error: Cannot read KTX file header : file identifier not found !\n");
+		return false;
+	}
+
+	if (header.endianness == ktxEndianRefReverse)
+	{
+
+	}
+
+	if (header.endianness != ktxEndianRef)
+	{
+		printf("Error: Cannot read KTX file header : wrong endianness!\n");
+		return false;
+	}
+
+	return true;
+}
+
+bool TextureManager::KTX_ReadHeader(const char * filename, KTX_header & header)
+{
+	FILE * f;
+	bool ret = false;
+
+	if (fopen_s(&f, filename, "rb") == 0)
+	{
+		ret = KTX_ReadHeader(f, header);
+		fclose(f);
+	}
+	else
+	{
+		printf("Error: Cannot open file '%s'!\n", filename);
+	}
+
+	return ret;
 }
 
 } // namespace CoreFx

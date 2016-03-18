@@ -72,10 +72,10 @@ namespace CoreFx
 #include "Lights\PointLight.h"
 #include "Lights\DirectionalLight.h"
 
-#include "Engine.h"
-
 #include "Texture2D.h"
 #include "TextureManager.h"
+
+#include "Engine.h"
 
 #include "Geometry\VertexData.h"
 #include "Geometry\MaterialData.h"
