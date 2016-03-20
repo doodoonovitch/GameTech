@@ -20,6 +20,8 @@ public:
 
 	void ReleaseTexture2D(Texture2D const *& texture);
 
+	void ReleaseTextureGroup(TextureGroup const *& texture);
+
 private:
 
 	TextureManager();
@@ -29,6 +31,7 @@ private:
 	void Release();
 
 	void ReleaseAllTexture2D();
+	void ReleaseAllTextureGroup();
 
 	TextureManager(TextureManager const &) = delete;
 	TextureManager & operator=(TextureManager const &) = delete;
@@ -62,6 +65,8 @@ private:
 
 	Texture2D * mDefault2D;
 	TextureGroup * mDefaultTexGroup;
+
+	KTX_dimensions mDefault2DDimensions;
 
 	typedef std::map<std::string, Texture2D*> Tex2DIdMap;
 	typedef std::map<TextureGroupId, TextureGroup*> TexGroupMap;

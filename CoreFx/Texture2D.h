@@ -36,7 +36,7 @@ private:
 };
 
 
-typedef int32_t TextureGroupId;
+typedef uint32_t TextureGroupId;
 
 enum class TextureWrap
 {
@@ -58,6 +58,35 @@ protected:
 	~TextureGroup();
 
 	inline GLint GetLayerCount() const { return mLayerCount; }
+
+
+public:
+
+	static TextureGroupId CreateGroupId(GLsizei width, GLsizei height, TextureWrap wrapS, TextureWrap wrapT)
+	{
+		return (uint32_t)height << 19 | (uint32_t)width << 6 | (uint32_t)wrapT << 3 | (uint32_t)wrapS;
+	}
+
+	static GLsizei GetWidthFromGroupId(TextureGroupId id)
+	{
+		return (GLsizei)((id >> 6) & (uint32_t)0x1FFF);
+	}
+
+	static GLsizei GetHeightFromGroupId(TextureGroupId id)
+	{
+		return (GLsizei)((id >> 19) & (uint32_t)0x1FFF);
+	}
+
+	static TextureWrap GetWrapSFromGroupId(TextureGroupId id)
+	{
+		return (TextureWrap)(id & (uint32_t)0x7);
+	}
+
+	static TextureWrap GetWrapTFromGroupId(TextureGroupId id)
+	{
+		return (TextureWrap)((id >> 3) & (uint32_t)0x7);
+	}
+
 
 private:
 

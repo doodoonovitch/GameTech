@@ -18,7 +18,7 @@ public:
 		Property_Per_Material = 3
 	};
 
-	CubeRenderer(std::string const & texture, std::uint8_t materialCount, size_t capacity, size_t pageSize = 10);
+	CubeRenderer(std::vector<std::string> const & texture, std::uint8_t materialCount, size_t capacity, size_t pageSize = 10);
 	virtual ~CubeRenderer();
 
 	virtual void Render() override;
@@ -26,7 +26,8 @@ public:
 	Renderables::Cube * CreateCube(std::uint8_t materialIndex);
 	void DeleteCube(Renderables::Cube *& cube);
 
-	void SetMaterial(std::uint8_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, std::int8_t ambientTextureIndex, std::int8_t diffuseTextureIndex, std::int8_t specularTextureIndex, std::int8_t normalTextureIndex);
+	void SetMaterial(std::uint8_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, 
+		std::int8_t ambientTextureIndex, std::int8_t diffuseTextureIndex, std::int8_t specularTextureIndex, std::int8_t normalTextureIndex);
 
 private:
 
@@ -55,7 +56,7 @@ private:
 
 private:
 	
-	Texture2D const * mTexture;
+	TextureGroup const * mTexture;
 
 	GLuint mMaterialCount;
 

@@ -8,7 +8,7 @@ in GS_OUT
 	flat int MaterialIndex;
 } fs_in;
 
-uniform sampler2D u_textureSampler;
+uniform sampler2DArray u_textureSampler;
 uniform samplerBuffer u_materialDataSampler;
 uniform isamplerBuffer u_lightDescSampler;
 uniform samplerBuffer u_lightDataSampler;
@@ -35,17 +35,17 @@ void main(void)
 
 	if (ambientTextureIndex != 0x000000FF)
 	{
-		materialAmbient = materialAmbient * texture(u_textureSampler, fs_in.TexUV);
+		materialAmbient = materialAmbient * texture(u_textureSampler, vec3(fs_in.TexUV, ambientTextureIndex));
 	}
 	
 	if (diffuseTextureIndex != 0x000000FF)
 	{
-		materialDiffuse = materialDiffuse * texture(u_textureSampler, fs_in.TexUV);
+		materialDiffuse = materialDiffuse * texture(u_textureSampler, vec3(fs_in.TexUV, diffuseTextureIndex));
 	}
 
 	if (specularTextureIndex != 0x000000FF)
 	{
-		materialSpecular = materialSpecular * texture(u_textureSampler, fs_in.TexUV);
+		materialSpecular = materialSpecular * texture(u_textureSampler, vec3(fs_in.TexUV, specularTextureIndex));
 	}
 	
 	vec3 ambientColor = u_AmbientLight.xyz;

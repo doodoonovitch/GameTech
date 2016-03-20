@@ -9,7 +9,7 @@ in GS_OUT
 	flat int MaterialIndex;
 } fs_in;
 
-uniform sampler2D u_textureSampler;
+uniform sampler2DArray u_textureSampler;
 uniform samplerBuffer u_materialDataSampler;
 
 
@@ -25,7 +25,7 @@ void main(void)
 	vec4 materialAmbient = vec4(0);
 	if (ambientTextureIndex != 0x000000FF)
 	{
-		materialAmbient = texture(u_textureSampler, fs_in.TexUV);
+		materialAmbient = texture(u_textureSampler, vec3(fs_in.TexUV, ambientTextureIndex));
 	}
 
 	uvec4 data = uvec4(0);

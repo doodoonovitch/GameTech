@@ -21,6 +21,7 @@ TextureManager::~TextureManager()
 void TextureManager::Release()
 {
 	ReleaseAllTexture2D();
+	ReleaseAllTextureGroup();
 
 	if (mDefault2D != nullptr)
 	{
@@ -52,6 +53,29 @@ void TextureManager::ReleaseAllTexture2D()
 	glDeleteTextures((GLsizei)count, ids.data());
 }
 
+void TextureManager::ReleaseAllTextureGroup()
+{
+	if (mTexGroupMap.empty())
+		return;
+
+	size_t max = mTexGroupMap.size();
+	std::vector<GLuint> ids(max);
+	size_t count = 0;
+	for (TexGroupMap::const_iterator it = mTexGroupMap.begin(); it != mTexGroupMap.end(); ++it)
+	{
+		if (it->second->GetId() != mDefault2D->GetId())
+		{
+			ids[count++] = it->second->GetId();
+		}
+
+		delete it->second;
+	}
+
+	mTexGroupMap.clear();
+
+	glDeleteTextures((GLsizei)count, ids.data());
+}
+
 struct RGBA
 {
 	GLubyte r, g, b, a;
@@ -67,11 +91,10 @@ void TextureManager::Initialize()
 
 	GLuint id;
 	GLenum target;
-	KTX_dimensions dimensions;
 	GLboolean isMipmapped;
 	GLenum glerr;
 
-	KTX_error_code err = ktxLoadTextureN(filename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+	KTX_error_code err = ktxLoadTextureN(filename.c_str(), &id, &target, &mDefault2DDimensions, &isMipmapped, &glerr, nullptr, nullptr);
 
 	if (err != KTX_SUCCESS)
 	{
@@ -154,8 +177,17 @@ void TextureManager::ReleaseTexture2D(Texture2D const *& texture)
 	texture = nullptr;
 }
 
+void TextureManager::ReleaseTextureGroup(TextureGroup const *& texture)
+{
+	texture = nullptr;
+}
+
 TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> tex2DFilenameList)
 {
+	TexGroupMap::const_iterator it = mTexGroupMap.find(groupId);
+	if (it != mTexGroupMap.end())
+		return it->second;
+
 	if (tex2DFilenameList.empty())
 	{
 		printf("Error: Cannot load texture group : tex2DFilenameList is empty!\n");
@@ -163,65 +195,52 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	}
 
 	KTX_error_code err;
-	GLuint modelId = 0;
 	GLenum target;
 	KTX_dimensions dimensions;
 	GLboolean isMipmapped;
 	GLenum glerr;
 
 	GLint layerCount = (GLint)tex2DFilenameList.size();
-	int modelIndex = 0;
-	for (modelIndex = 0; modelIndex < layerCount; ++modelIndex)
+
+	GLuint id = 0;
+
+	if (layerCount == 1)
 	{
-		const std::string & modelFilename = tex2DFilenameList[modelIndex];
-		err = ktxLoadTextureN(modelFilename.c_str(), &modelId, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-		if (modelId != 0)
+		err = ktxLoadTextureN(tex2DFilenameList.front().c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+		if (id != 0)
 		{
-			break;
+			TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
+			mTexGroupMap[id] = texGroup;
+			return texGroup;
 		}
-	} 
-
-	if (modelId == 0)
-	{
-		printf("Error: Cannot load texture group : no valid texture file found.\n");
-		return mDefaultTexGroup;
-	}
-
-	if (layerCount == 1 || dimensions.depth > 1)
-	{
-		return new TextureGroup(modelId, groupId, dimensions.depth);
 	}
 
 	KTX_header header;
-	if (!KTX_ReadHeader(tex2DFilenameList[modelId].c_str(), header))
+	if (!KTX_ReadHeader(tex2DFilenameList[0].c_str(), header))
 	{
 		printf("Error: Cannot load texture group : reading header has failed!\n");
 		return mDefaultTexGroup;
 	}
 
-	GLuint id = 0;
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount);
 
+	GLuint fbo = 0;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+
 	for (int index = 0; index < layerCount; ++index)
 	{
 		GLuint srcId = 0;
-		if (index == modelIndex)
+		const std::string & filename = tex2DFilenameList[index];
+		err = ktxLoadTextureN(filename.c_str(), &srcId, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+		if (srcId == 0)
 		{
-			srcId = modelId;
-		}
-		else
-		{
-			const std::string & filename = tex2DFilenameList[modelIndex];
-			err = ktxLoadTextureN(filename.c_str(), &srcId, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-			if (srcId == 0)
-			{
-				srcId = mDefault2D->GetId();
-			}
+			srcId = mDefault2D->GetId();
 		}
 
-		glBindTexture(GL_TEXTURE_2D, srcId);
+		glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, srcId, 0);
 
 		uint32_t wCopied = 0, hCopied = 0;
 		uint32_t x = 0, y = 0;
@@ -246,7 +265,15 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		}
 	}
 
+	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+	glBindFramebuffer(GL_READ_BUFFER, 0);
+	glDeleteFramebuffers(1, &fbo);
+
 	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
+
+	mTexGroupMap[id] = texGroup;
+
 	return texGroup;
 }
 
@@ -256,7 +283,7 @@ bool TextureManager::KTX_ReadHeader(FILE* f, KTX_header & header)
 	static const uint32_t ktxEndianRef = 0x04030201;
 	static const uint32_t ktxEndianRefReverse = 0x01020304;
 
-	if (fread(&header, sizeof(KTX_header), 1, f) != sizeof(KTX_header))
+	if (fread(&header, 1, sizeof(KTX_header), f) != sizeof(KTX_header))
 	{
 		printf("Error: Cannot read KTX file header !\n");
 		return false;
