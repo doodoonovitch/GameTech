@@ -406,6 +406,7 @@ void Engine::RenderObjects()
 
 	if (!mMaterialBuffer.IsCreated())
 	{
+		CreateTextures();
 		CreateMaterialBuffer();
 	}
 
@@ -538,15 +539,6 @@ GLint Engine::AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei
 		return index / sizeof(GLfloat);
 }
 
-//void Engine::ComputeTextureGroupId(TextureDescList & textureDescList)
-//{
-//	for (TextureDescList::iterator it = textureDescList.begin(); it != textureDescList.end(); ++it)
-//	{
-//		TextureDesc & desc = *it;
-//		TextureManager::CompleteTextureDesc(desc);
-//	}
-//}
-
 
 class TextureGroupLayerCount
 {
@@ -559,7 +551,7 @@ public:
 
 typedef std::map<TextureGroupId, TextureGroupLayerCount> TextureGroupLayerCountMap;
 
-void Engine::CreateRenderTextures()
+void Engine::CreateTextures()
 {
 	int samplerIndex = 0;
 	TextureGroupLayerCountMap layerCountByMap;

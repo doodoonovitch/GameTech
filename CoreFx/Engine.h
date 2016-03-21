@@ -193,7 +193,7 @@ private:
 	void CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
 
 	void CreateMaterialBuffer();
-	void CreateRenderTextures();
+	void CreateTextures();
 
 	void InitializeDeferredPassQuadShader();
 
