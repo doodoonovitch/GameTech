@@ -14,6 +14,7 @@ namespace CoreFx
 class Renderer : public ObjectInstance
 {
 	friend class Engine;
+
 public:
 
 	Renderer(GLuint propertyCount);
@@ -26,10 +27,15 @@ public:
 	const PropertyData & GetMaterials() const {	return mMaterials; }
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
+	const TextureInfoList & GetTextures() const { return mTextures; }
+	bool AddTexture(const char * filename, uint16_t rendererId, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
+
 protected:
 
 	PropertyData mMaterials;
 	GLint mMaterialBaseIndex;
+	TextureInfoList mTextures;
+	
 };
 
 

@@ -61,6 +61,7 @@ namespace CoreFx
 #include "Shader.h"
 #include "Frame.h"
 #include "SceneObject.h"
+#include "Texture2D.h"
 #include "Renderer.h"
 #include "Renderers\RendererHelper.h"
 #include "Renderers\DrawNormalShader.h"
@@ -72,7 +73,6 @@ namespace CoreFx
 #include "Lights\PointLight.h"
 #include "Lights\DirectionalLight.h"
 
-#include "Texture2D.h"
 #include "TextureManager.h"
 
 #include "Engine.h"

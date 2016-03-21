@@ -327,4 +327,5 @@ bool TextureManager::KTX_ReadHeader(const char * filename, KTX_header & header)
 	return ret;
 }
 
+
 } // namespace CoreFx

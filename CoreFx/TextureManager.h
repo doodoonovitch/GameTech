@@ -22,23 +22,9 @@ public:
 
 	void ReleaseTextureGroup(TextureGroup const *& texture);
 
-private:
+public:
 
-	TextureManager();
-	~TextureManager();
-
-	void Initialize();
-	void Release();
-
-	void ReleaseAllTexture2D();
-	void ReleaseAllTextureGroup();
-
-	TextureManager(TextureManager const &) = delete;
-	TextureManager & operator=(TextureManager const &) = delete;
-
-private:
-
-	typedef struct KTX_header_t 
+	typedef struct KTX_header_t
 	{
 		uint8_t  identifier[12];
 		uint32_t endianness;
@@ -60,6 +46,20 @@ private:
 
 	static bool KTX_ReadHeader(FILE* f, KTX_header & header);
 	static bool KTX_ReadHeader(const char * filename, KTX_header & header);
+
+private:
+
+	TextureManager();
+	~TextureManager();
+
+	void Initialize();
+	void Release();
+
+	void ReleaseAllTexture2D();
+	void ReleaseAllTextureGroup();
+
+	TextureManager(TextureManager const &) = delete;
+	TextureManager & operator=(TextureManager const &) = delete;
 
 private:
 

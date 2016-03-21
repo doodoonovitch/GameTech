@@ -183,7 +183,6 @@ private:
 		__BufferId_Count__
 	};
 
-
 private:
 
 	void InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
@@ -194,6 +193,7 @@ private:
 	void CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
 
 	void CreateMaterialBuffer();
+	void CreateRenderTextures();
 
 	void InitializeDeferredPassQuadShader();
 
@@ -292,6 +292,8 @@ private:
 
 	TextureBuffer mMaterialBuffer;
 	std::vector<GLfloat> mMaterials;
+
+	TextureGroupList mTextureGroupList;
 };
 
 

@@ -538,6 +538,74 @@ GLint Engine::AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei
 		return index / sizeof(GLfloat);
 }
 
+//void Engine::ComputeTextureGroupId(TextureDescList & textureDescList)
+//{
+//	for (TextureDescList::iterator it = textureDescList.begin(); it != textureDescList.end(); ++it)
+//	{
+//		TextureDesc & desc = *it;
+//		TextureManager::CompleteTextureDesc(desc);
+//	}
+//}
+
+
+class TextureGroupLayerCount
+{
+public:
+
+	std::map<std::string, GLint> mLayerIndexByName;
+	GLint mLayerCount = 0;
+	GLint mSamplerIndex;
+};
+
+typedef std::map<TextureGroupId, TextureGroupLayerCount> TextureGroupLayerCountMap;
+
+void Engine::CreateRenderTextures()
+{
+	int samplerIndex = 0;
+	TextureGroupLayerCountMap layerCountByMap;
+	mRenderers->ForEach([&samplerIndex, &layerCountByMap](Renderer * renderer)
+	{
+		TextureInfoList & list = renderer->mTextures;
+		for (TextureInfoList::iterator texInfoIt = list.begin(); texInfoIt != list.end(); ++texInfoIt)
+		{
+			TextureGroupLayerCountMap::iterator mapIt = layerCountByMap.find(texInfoIt->GetGroupId());
+			if (mapIt == layerCountByMap.end())
+			{
+				std::pair<TextureGroupLayerCountMap::iterator, bool> res = layerCountByMap.insert(TextureGroupLayerCountMap::value_type(texInfoIt->GetGroupId(), TextureGroupLayerCount()));
+				mapIt = res.first;
+				mapIt->second.mSamplerIndex = samplerIndex;
+				++samplerIndex;
+			}
+
+			TextureGroupLayerCount & item = mapIt->second;
+			std::map<std::string, GLint>::iterator it = item.mLayerIndexByName.find(texInfoIt->GetFilename());
+			if (it == item.mLayerIndexByName.end())
+			{
+				item.mLayerIndexByName[texInfoIt->GetFilename()] = item.mLayerCount;
+				texInfoIt->mLayerIndex = item.mLayerCount;
+				++item.mLayerCount;
+			}
+			else
+			{
+				texInfoIt->mLayerIndex = it->second;
+			}
+			texInfoIt->mSamplerIndex = mapIt->second.mSamplerIndex;
+		}
+	});
+
+	for (TextureGroupLayerCountMap::const_iterator it = layerCountByMap.begin(); it != layerCountByMap.end(); ++it)
+	{
+		const TextureGroupLayerCount & item = it->second;
+		std::vector<std::string> textureList(item.mLayerCount);
+		for (std::map<std::string, GLint>::const_iterator it2 = item.mLayerIndexByName.begin(); it2 != item.mLayerIndexByName.end(); ++it2)
+		{
+			textureList[it2->second] = it2->first;
+		}
+
+		const TextureGroup* texGroup = mTextureManager->LoadTextureGroup(it->first, textureList);
+		mTextureGroupList.push_back(texGroup);
+	}
+}
 
 	// =======================================================================
 	// =======================================================================
