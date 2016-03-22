@@ -597,6 +597,11 @@ void Engine::CreateTextures()
 		const TextureGroup* texGroup = mTextureManager->LoadTextureGroup(it->first, textureList);
 		mTextureGroupList.push_back(texGroup);
 	}
+
+	mRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->UpdateMaterialTextureIndex();
+	});
 }
 
 	// =======================================================================

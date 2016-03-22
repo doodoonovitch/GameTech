@@ -82,11 +82,11 @@ void SimpleCamera::OnInit()
 		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(textureList, 5, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
 
-		cubeRenderer->SetMaterial(0, glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, -1, -1, -1);
-		cubeRenderer->SetMaterial(1, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, -1, -1, -1);
-		cubeRenderer->SetMaterial(2, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, -1, -1, -1);
-		cubeRenderer->SetMaterial(3, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, -1, -1, -1);
-		cubeRenderer->SetMaterial(4, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, -1, -1, -1);
+		cubeRenderer->SetMaterial(0, glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+		cubeRenderer->SetMaterial(1, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+		cubeRenderer->SetMaterial(2, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+		cubeRenderer->SetMaterial(3, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+		cubeRenderer->SetMaterial(4, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
 
 
 		const glm::vec3 XAxis(1.f, 0.f, 0.f);

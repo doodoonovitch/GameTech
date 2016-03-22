@@ -24,6 +24,8 @@ public:
 	virtual void EndFrame() = 0;
 	virtual void Render() = 0;
 
+	virtual void UpdateMaterialTextureIndex() {}
+
 	const PropertyData & GetMaterials() const {	return mMaterials; }
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
