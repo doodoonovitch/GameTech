@@ -13,6 +13,7 @@ uniform samplerBuffer u_materialDataSampler;
 uniform isamplerBuffer u_lightDescSampler;
 uniform samplerBuffer u_lightDataSampler;
 
+uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
 
 struct FragmentInfo
 {
