@@ -210,7 +210,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		if (id != 0)
 		{
 			TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
-			mTexGroupMap[id] = texGroup;
+			mTexGroupMap[groupId] = texGroup;
 			return texGroup;
 		}
 	}
@@ -272,7 +272,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
 
-	mTexGroupMap[id] = texGroup;
+	mTexGroupMap[groupId] = texGroup;
 
 	return texGroup;
 }

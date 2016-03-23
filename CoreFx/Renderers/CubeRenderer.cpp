@@ -37,9 +37,9 @@ CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t 
 
 		mShader.AddUniform("u_perInstanceDataSampler");
 		mShader.AddUniform("u_materialIndexSampler");
+#ifdef FORWARD_RENDERING
 		mShader.AddUniform("u_materialDataSampler");
 		mShader.AddUniform("u_textureSampler");
-#ifdef FORWARD_RENDERING
 		mShader.AddUniform("u_lightDescSampler");
 		mShader.AddUniform("u_lightDataSampler");
 #else
@@ -49,10 +49,10 @@ CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t 
 		//pass values of constant uniforms at initialization
 		glUniform1i(mShader.GetUniform("u_perInstanceDataSampler"), 0);
 		glUniform1i(mShader.GetUniform("u_materialIndexSampler"), 1);
-		glUniform1i(mShader.GetUniform("u_materialDataSampler"), 2);
-		glUniform1i(mShader.GetUniform("u_textureSampler"), 3);
 
 #ifdef FORWARD_RENDERING
+		glUniform1i(mShader.GetUniform("u_materialDataSampler"), 2);
+		glUniform1i(mShader.GetUniform("u_textureSampler"), 3);
 		glUniform1i(mShader.GetUniform("u_lightDescSampler"), 4);
 		glUniform1i(mShader.GetUniform("u_lightDataSampler"), 5);
 #else
@@ -73,10 +73,10 @@ CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t 
 	std::cout << "Uniform attribute index : " << std::endl;
 	std::cout << "\t u_perInstanceDataSampler : " << mShader.GetUniform("u_perInstanceDataSampler") << std::endl;
 	std::cout << "\t u_materialIndexSampler : " << mShader.GetUniform("u_materialIndexSampler") << std::endl;
-	std::cout << "\t u_materialDataSampler : " << mShader.GetUniform("u_materialDataSampler") << std::endl;
-	std::cout << "\t u_textureSampler : " << mShader.GetUniform("u_textureSampler") << std::endl;
 
 #ifdef FORWARD_RENDERING
+	std::cout << "\t u_materialDataSampler : " << mShader.GetUniform("u_materialDataSampler") << std::endl;
+	std::cout << "\t u_textureSampler : " << mShader.GetUniform("u_textureSampler") << std::endl;
 	std::cout << "\t u_lightDescSampler : " << mShader.GetUniform("u_lightDescSampler") << std::endl;
 	std::cout << "\t u_lightDataSampler : " << mShader.GetUniform("u_lightDataSampler") << std::endl;
 #else
@@ -245,14 +245,14 @@ void CubeRenderer::Render()
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetTextureId());
 
+#ifdef FORWARD_RENDERING
+			Engine * engine = Engine::GetInstance();
+
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetTextureId());
 
-			//glActiveTexture(GL_TEXTURE3);
-			//glBindTexture(GL_TEXTURE_2D_ARRAY, mTexture->GetId());
-
-#ifdef FORWARD_RENDERING
-			Engine * engine = Engine::GetInstance();
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D_ARRAY, mTexture->GetId());
 
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDescBuffer().GetTextureId());

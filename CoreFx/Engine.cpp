@@ -192,7 +192,7 @@ void Engine::InitializeDeferredPassQuadShader()
 	shader.AddUniform("u_lightDescSampler");
 	shader.AddUniform("u_lightDataSampler");
 
-	shader.AddUniform("u_textureSampler");
+	shader.AddUniform("u_textureSampler[0]");
 
 	//pass values of constant uniforms at initialization
 	glUniform1i(shader.GetUniform("u_gBufferPosition"), 0);
@@ -202,10 +202,11 @@ void Engine::InitializeDeferredPassQuadShader()
 	glUniform1i(shader.GetUniform("u_lightDescSampler"), 3);
 	glUniform1i(shader.GetUniform("u_lightDataSampler"), 4);
 
-	int uniformIndex = shader.GetUniform("u_textureSampler");
+	int uniformIndex = shader.GetUniform("u_textureSampler[0]");
 	for (int i = 0; i < MAX_TEXTURE_SAMPLER; ++i)
 	{
 		glUniform1i(uniformIndex + i, i + FIRST_TEXTURE_SAMPLER_INDEX);
+		GL_CHECK_ERRORS;
 	}
 
 	shader.SetupFrameDataBlockBinding();
@@ -402,6 +403,13 @@ void Engine::RenderObjects()
 
 #ifdef FORWARD_RENDERING
 #else
+
+	if (!mMaterialBuffer.IsCreated())
+	{
+		CreateMaterialBuffer();
+		CreateTextures();
+	}
+
 	static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -410,12 +418,6 @@ void Engine::RenderObjects()
 	{ // preparation for gbuffer rendering pass
 		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
 		glDrawBuffers(2, drawBuffers);
-	}
-
-	if (!mMaterialBuffer.IsCreated())
-	{
-		CreateTextures();
-		CreateMaterialBuffer();
 	}
 
 	glDisable(GL_BLEND);
