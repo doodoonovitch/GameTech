@@ -7,9 +7,8 @@ namespace CoreFx
 	{
 
 
-CubeRenderer::CubeRenderer(std::vector<std::string> const & texture, std::uint8_t materialCount, size_t capacity, size_t pageSize)
+CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t pageSize)
 	: SceneObjectRenderer<Renderables::Cube, 2>(materialCount * Property_Per_Material, capacity, pageSize)
-	, mTexture(nullptr)
 	, mMaterialCount(materialCount)
 	, mMaterialTextureIndexesList(materialCount)
 	, mIsMaterialIndexBufferSet(false)
@@ -165,8 +164,6 @@ CubeRenderer::CubeRenderer(std::vector<std::string> const & texture, std::uint8_
 
 	glBindVertexArray(0);
 		
-	mTexture = Engine::GetInstance()->GetTextureManager()->LoadTextureGroup(1, texture);
-
 	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
 
 	mMaterialDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, mMaterials.GetDataSize(), nullptr);
@@ -191,8 +188,6 @@ CubeRenderer::~CubeRenderer()
 #endif // FORWARD_RENDERING
 
 	mMaterialIndexBuffer.ReleaseResource();
-
-	Engine::GetInstance()->GetTextureManager()->ReleaseTextureGroup(mTexture);
 }
 
 void CubeRenderer::Render()
@@ -253,8 +248,8 @@ void CubeRenderer::Render()
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_BUFFER, mMaterialDataBuffer.GetTextureId());
 
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D_ARRAY, mTexture->GetId());
+			//glActiveTexture(GL_TEXTURE3);
+			//glBindTexture(GL_TEXTURE_2D_ARRAY, mTexture->GetId());
 
 #ifdef FORWARD_RENDERING
 			Engine * engine = Engine::GetInstance();

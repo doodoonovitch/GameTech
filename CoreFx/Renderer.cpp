@@ -17,7 +17,7 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::AddTexture(const char * filename, uint16_t rendererId, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT)
+bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT)
 {
 	assert(filename != nullptr);
 
@@ -29,8 +29,9 @@ bool Renderer::AddTexture(const char * filename, uint16_t rendererId, TextureCat
 	}
 
 #ifdef FORWARD_RENDERING
+	uint16_t rendererId = (uint16_t)GetId();
 #else
-	rendererId = 0;
+	uint16_t rendererId = 0;
 #endif
 	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)hd.pixelWidth, (GLsizei)hd.pixelHeight, wrapS, wrapT);
 

@@ -39,7 +39,12 @@
 #define GetSpecularTextureIndex(bitfieldValue)		((bitfieldValue & uint(255 << 16)) >> 16)
 #define GetNormalTextureIndex(bitfieldValue)		((bitfieldValue & uint(255 << 8)) >> 8)
 
-#define MAX_TEXTURE_SAMPLER							60
+#define GetAmbientSamplerIndex(bitfieldValue)		(bitfieldValue & uint(255))
+#define GetDiffuseSamplerIndex(bitfieldValue)		((bitfieldValue & uint(255 << 24)) >> 24)
+#define GetSpecularSamplerIndex(bitfieldValue)		((bitfieldValue & uint(255 << 16)) >> 16)
+#define GetNormalSamplerIndex(bitfieldValue)		((bitfieldValue & uint(255 << 8)) >> 8)
+
+#define MAX_TEXTURE_SAMPLER							20
 
 struct DualQuat
 {

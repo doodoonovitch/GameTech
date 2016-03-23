@@ -23,7 +23,7 @@ public:
 
 	static constexpr TextureIndex NoTexture = (TextureIndex)-1;
 
-	CubeRenderer(std::vector<std::string> const & texture, std::uint8_t materialCount, size_t capacity, size_t pageSize = 10);
+	CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t pageSize = 10);
 	virtual ~CubeRenderer();
 
 	virtual void Render() override;
@@ -73,8 +73,6 @@ private:
 
 private:
 	
-	TextureGroup const * mTexture;
-
 	GLuint mMaterialCount;
 
 	TextureBuffer mModelMatrixBuffer;

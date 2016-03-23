@@ -9,29 +9,13 @@ in GS_OUT
 	flat int MaterialIndex;
 } fs_in;
 
-uniform sampler2DArray u_textureSampler;
-uniform samplerBuffer u_materialDataSampler;
-
-
 void main(void)
 {
 	outPosition = fs_in.Position.xyz;
 
-	int matIndex = fs_in.MaterialIndex;
-	vec4 matData = texelFetch(u_materialDataSampler, matIndex);
-	uint bitfieldValue = floatBitsToUint(matData.w);
-	int ambientTextureIndex = int(GetAmbientTextureIndex(bitfieldValue));
-
-	vec4 materialAmbient = vec4(0);
-	if (ambientTextureIndex != 0x000000FF)
-	{
-		materialAmbient = texture(u_textureSampler, vec3(fs_in.TexUV, ambientTextureIndex));
-	}
-
 	uvec4 data = uvec4(0);
-
-	data.x = packHalf2x16(materialAmbient.xy);
-	data.y = packHalf2x16(vec2(materialAmbient.z, fs_in.Normal.z));
+	data.x = packHalf2x16(fs_in.TexUV);
+	data.y = packHalf2x16(vec2(0, fs_in.Normal.z));
 	data.z = packHalf2x16(fs_in.Normal.xy);
 	data.w = fs_in.MaterialIndex;
 

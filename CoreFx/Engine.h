@@ -256,6 +256,8 @@ private:
 	enum
 	{
 		MAX_LIGHT_COUNT = 16,
+		FIRST_TEXTURE_SAMPLER_INDEX = 10,
+		MAX_TEXTURE_SAMPLER = 60
 	};
 
 	enum FrameDataUniforms

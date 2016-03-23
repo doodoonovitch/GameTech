@@ -192,6 +192,8 @@ void Engine::InitializeDeferredPassQuadShader()
 	shader.AddUniform("u_lightDescSampler");
 	shader.AddUniform("u_lightDataSampler");
 
+	shader.AddUniform("u_textureSampler");
+
 	//pass values of constant uniforms at initialization
 	glUniform1i(shader.GetUniform("u_gBufferPosition"), 0);
 	glUniform1i(shader.GetUniform("u_gBufferRGBA32UI"), 1);
@@ -199,6 +201,12 @@ void Engine::InitializeDeferredPassQuadShader()
 	glUniform1i(shader.GetUniform("u_materialDataSampler"), 2);
 	glUniform1i(shader.GetUniform("u_lightDescSampler"), 3);
 	glUniform1i(shader.GetUniform("u_lightDataSampler"), 4);
+
+	int uniformIndex = shader.GetUniform("u_textureSampler");
+	for (int i = 0; i < MAX_TEXTURE_SAMPLER; ++i)
+	{
+		glUniform1i(uniformIndex + i, i + FIRST_TEXTURE_SAMPLER_INDEX);
+	}
 
 	shader.SetupFrameDataBlockBinding();
 	shader.UnUse();
@@ -447,6 +455,12 @@ void Engine::RenderObjects()
 
 				glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
+
+				for (int i = 0; i < (int)mTextureGroupList.size(); ++i)
+				{
+					glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
+					glBindTexture(GL_TEXTURE_BUFFER, mTextureGroupList[i]->GetId());
+				}
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);

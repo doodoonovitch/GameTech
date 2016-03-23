@@ -30,7 +30,7 @@ public:
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
 	const TextureInfoList & GetTextures() const { return mTextures; }
-	bool AddTexture(const char * filename, uint16_t rendererId, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
+	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
 
 protected:
 

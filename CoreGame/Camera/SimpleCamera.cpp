@@ -77,10 +77,13 @@ void SimpleCamera::OnInit()
 		int zCount = 30;
 		std::vector<std::string> textureList;
 		//textureList.push_back("medias/cube_array.ktx");
-		textureList.push_back("medias/cube.ktx");
-		textureList.push_back("medias/cube2.ktx");
-		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(textureList, 5, xCount * yCount * zCount, 1);
+		//textureList.push_back("medias/cube.ktx");
+		//textureList.push_back("medias/cube2.ktx");
+		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(5, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
+
+		cubeRenderer->AddTexture("medias/cube.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/cube2.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
 
 		cubeRenderer->SetMaterial(0, glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
 		cubeRenderer->SetMaterial(1, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);

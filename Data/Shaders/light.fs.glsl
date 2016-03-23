@@ -44,15 +44,37 @@ void main(void)
 	UnpackGBuffer(fs_in.TexUV, gData);
 	
 	vec4 matData = texelFetch(u_materialDataSampler, gData.MaterialIndex);
-	vec4 materialAmbient = vec4(matData.xyz * gData.Albedo, 1);
+	vec4 materialAmbient = vec4(matData.xyz, 1);
+	uint bitfieldValue = floatBitsToUint(matData.w);
+	int ambientTextureIndex = int(GetAmbientTextureIndex(bitfieldValue));
+	int diffuseTextureIndex = int(GetDiffuseTextureIndex(bitfieldValue));
+	int specularTextureIndex = int(GetSpecularTextureIndex(bitfieldValue));
 
 	matData = texelFetch(u_materialDataSampler, gData.MaterialIndex + 1);
 	vec4 materialDiffuse = vec4(matData.xyz, 1);
+	bitfieldValue = floatBitsToUint(matData.w);
+	int ambientSamplerIndex = int(GetAmbientSamplerIndex(bitfieldValue));
+	int diffuseSamplerIndex = int(GetDiffuseSamplerIndex(bitfieldValue));
+	int specularSamplerIndex = int(GetSpecularSamplerIndex(bitfieldValue));
 
 	matData = texelFetch(u_materialDataSampler, gData.MaterialIndex + 2);
 	vec4 materialSpecular = vec4(matData.xyz, 1);
-
 	float materialShininess = matData.w;
+
+	if (ambientTextureIndex != 0x000000FF)
+	{
+		materialAmbient = materialAmbient * texture(u_textureSampler[ambientSamplerIndex], vec3(fs_in.TexUV, ambientTextureIndex));
+	}
+	
+	if (diffuseTextureIndex != 0x000000FF)
+	{
+		materialDiffuse = materialDiffuse * texture(u_textureSampler[diffuseSamplerIndex], vec3(fs_in.TexUV, diffuseTextureIndex));
+	}
+
+	if (specularTextureIndex != 0x000000FF)
+	{
+		materialSpecular = materialSpecular * texture(u_textureSampler[specularTextureIndex], vec3(fs_in.TexUV, specularTextureIndex));
+	}
 
 	vec3 ambientColor = u_AmbientLight.xyz;
 	vec3 specularColor = vec3(0, 0, 0);
