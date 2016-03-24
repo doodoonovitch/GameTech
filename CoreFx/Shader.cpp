@@ -172,7 +172,8 @@ void Shader::CreateAndLinkProgram()
 	GLint status;
 	glLinkProgram(mProgram);
 	glGetProgramiv(mProgram, GL_LINK_STATUS, &status);
-	if (status == GL_FALSE) {
+	if (status == GL_FALSE) 
+	{
 		GLint infoLogLength;
 
 		glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &infoLogLength);

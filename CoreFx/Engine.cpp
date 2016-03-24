@@ -202,10 +202,13 @@ void Engine::InitializeDeferredPassQuadShader()
 	glUniform1i(shader.GetUniform("u_lightDescSampler"), 3);
 	glUniform1i(shader.GetUniform("u_lightDataSampler"), 4);
 
-	int uniformIndex = shader.GetUniform("u_textureSampler[0]");
 	for (int i = 0; i < MAX_TEXTURE_SAMPLER; ++i)
 	{
-		glUniform1i(uniformIndex + i, i + FIRST_TEXTURE_SAMPLER_INDEX);
+		char uniformName[50];
+		sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
+		int uniformIndex = glGetUniformLocation(shader.GetProgram(), uniformName);
+		GL_CHECK_ERRORS;
+		glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);
 		GL_CHECK_ERRORS;
 	}
 
@@ -255,17 +258,16 @@ void Engine::CreateMaterialBuffer()
 
 	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
 
-	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId());
+	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId()); GL_CHECK_ERRORS;
 	GLsizeiptr offset = 0;
 	GLint baseIndex = 0;
 	mRenderers->ForEach([&offset, &baseIndex](Renderer * renderer)
 	{
 		renderer->mMaterialBaseIndex = baseIndex;
 		GLsizei dataSize = renderer->mMaterials.GetDataSize();
-		std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
-		GL_CHECK_ERRORS;
+		std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;		
 		memcpy(buffer, renderer->mMaterials.GetData(), dataSize);
-		glUnmapBuffer(GL_TEXTURE_BUFFER);
+		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
 		offset += dataSize;
 		baseIndex += renderer->mMaterials.GetPropertyCount();
 	});
@@ -276,12 +278,9 @@ void Engine::InternalCreateFrameDataBuffer()
 	GLuint program = mDrawVertexNormalShader.GetProgram();
 
 	printf("Getting FrameData uniform block information...\n");
-	glGetUniformIndices(program, __uniforms_count__, mFrameDataUniformNames, mFrameDataUniformIndices);
-	GL_CHECK_ERRORS;
-	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_OFFSET, mFrameDataUniformOffsets);
-	GL_CHECK_ERRORS;
-	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_SIZE, mFrameDataUniformSizes);
-	GL_CHECK_ERRORS;
+	glGetUniformIndices(program, __uniforms_count__, mFrameDataUniformNames, mFrameDataUniformIndices); GL_CHECK_ERRORS;
+	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_OFFSET, mFrameDataUniformOffsets); GL_CHECK_ERRORS;
+	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_SIZE, mFrameDataUniformSizes); GL_CHECK_ERRORS;
 
 	int lastItem = __uniforms_count__ - 1;
 	mFrameDataSize = mFrameDataUniformOffsets[lastItem] + mFrameDataUniformSizes[lastItem];
@@ -295,12 +294,10 @@ void Engine::InternalCreateFrameDataBuffer()
 	}
 	printf("\n");
 
-	glGenBuffers(__BufferId_Count__, mBufferIds);
-	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
-	glBufferData(GL_UNIFORM_BUFFER, mFrameDataSize, nullptr, GL_STATIC_DRAW);
-	GL_CHECK_ERRORS;
-	glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]);
-	GL_CHECK_ERRORS;
+	glGenBuffers(__BufferId_Count__, mBufferIds); GL_CHECK_ERRORS;
+	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); GL_CHECK_ERRORS;
+	glBufferData(GL_UNIFORM_BUFFER, mFrameDataSize, nullptr, GL_STATIC_DRAW); GL_CHECK_ERRORS;
+	glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]); GL_CHECK_ERRORS;
 }
 
 void Engine::Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
@@ -344,14 +341,15 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
+	// Light desc buffer
+	// -----------------------------------------------------------------------
 	if (!mLightDescBuffer.IsCreated())
 	{
 		GLsizeiptr bufferSize = (mLights->GetCount() + 1) * sizeof(GLuint);
 		mLightDescBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, bufferSize, nullptr);
 
-		glBindBuffer(GL_TEXTURE_BUFFER, mLightDescBuffer.GetBufferId());
-		GLuint * lightDescBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
-		GL_CHECK_ERRORS;
+		glBindBuffer(GL_TEXTURE_BUFFER, mLightDescBuffer.GetBufferId()); GL_CHECK_ERRORS;
+		GLuint * lightDescBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);	GL_CHECK_ERRORS;
 		lightDescBuffer[0] = (GLuint)mLights->GetCount();
 
 		mLights->ForEach([&lightDescBuffer](Lights::Light * light)
@@ -360,9 +358,12 @@ void Engine::RenderObjects()
 			lightDescBuffer[index] = light->mLightDesc;
 		});
 
-		glUnmapBuffer(GL_TEXTURE_BUFFER);
+		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
 	}
+	// -----------------------------------------------------------------------
 
+	// Light data buffer
+	// -----------------------------------------------------------------------
 	if (!mLightDataBuffer.IsCreated())
 	{
 		GLsizeiptr bufferSize = 0;
@@ -374,23 +375,25 @@ void Engine::RenderObjects()
 		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
 	}
 
-	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId());
+	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); GL_CHECK_ERRORS;
+
 	GLsizeiptr offset = 0;
 	mLights->ForEach([&offset](Lights::Light * light)
 	{
 		GLsizei dataSize = light->GetDataSize();
-		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
-		GL_CHECK_ERRORS;
+		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
 		memcpy(lightDataBuffer, light->GetData(), dataSize);
 		offset += dataSize;
-		glUnmapBuffer(GL_TEXTURE_BUFFER);
+		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
 	});
+	// -----------------------------------------------------------------------
 
 
-	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
-	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+	// Frame data buffer
+	// -----------------------------------------------------------------------
+	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); GL_CHECK_ERRORS;
 
-	GL_CHECK_ERRORS;
+	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);	GL_CHECK_ERRORS;
 	assert(buffer != nullptr);
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
@@ -398,17 +401,21 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
 	*((GLint*)(buffer + mFrameDataUniformOffsets[u_LightCount])) = (GLint)mLights->GetCount();
 
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glUnmapBuffer(GL_UNIFORM_BUFFER); GL_CHECK_ERRORS;
+	// -----------------------------------------------------------------------
 
 
 #ifdef FORWARD_RENDERING
 #else
 
+	// material and texture creation
+	// -----------------------------------------------------------------------
 	if (!mMaterialBuffer.IsCreated())
 	{
-		CreateMaterialBuffer();
 		CreateTextures();
+		CreateMaterialBuffer();
 	}
+	// -----------------------------------------------------------------------
 
 	static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -416,16 +423,16 @@ void Engine::RenderObjects()
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
 	{ // preparation for gbuffer rendering pass
-		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-		glDrawBuffers(2, drawBuffers);
+		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
+		glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
 	}
 
-	glDisable(GL_BLEND);
+	glDisable(GL_BLEND); GL_CHECK_ERRORS;
 #endif // FORWARD_RENDERING
 
-	glDepthMask(GL_TRUE);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE); GL_CHECK_ERRORS;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); GL_CHECK_ERRORS;
+	glEnable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -435,10 +442,10 @@ void Engine::RenderObjects()
 #ifdef FORWARD_RENDERING
 #else
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glDepthMask(GL_FALSE);
-		glDisable(GL_DEPTH_TEST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+		glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
+		glDepthMask(GL_FALSE); GL_CHECK_ERRORS;
+		glDisable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
 
 		mDeferredLightPass->GetShader().Use();
 			glBindVertexArray(mDeferredLightPass->GetVao());
@@ -610,6 +617,8 @@ void Engine::CreateTextures()
 			textureList[it2->second] = it2->first;
 		}
 
+		//textureList.resize(1);
+		//textureList[0] = "medias/cube_array.ktx";
 		const TextureGroup* texGroup = mTextureManager->LoadTextureGroup(it->first, textureList);
 		mTextureGroupList.push_back(texGroup);
 	}

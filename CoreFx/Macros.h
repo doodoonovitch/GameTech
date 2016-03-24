@@ -5,9 +5,9 @@
 
 #define GL_CHECK_ERRORS \
 {\
-	GLenum err = glGetError();\
-	if (err != GL_NO_ERROR) {\
-	std::cerr << "Error " << err << " : " << gluErrorString(err) << std::endl;\
+	GLenum err_GL_CHECK_ERRORS = glGetError();\
+	if (err_GL_CHECK_ERRORS != GL_NO_ERROR) {\
+	std::cerr << "Error " << err_GL_CHECK_ERRORS << " : " << gluErrorString(err_GL_CHECK_ERRORS) << std::endl;\
 	assert(false);}\
 }
 

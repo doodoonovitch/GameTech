@@ -200,6 +200,14 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	GLboolean isMipmapped;
 	GLenum glerr;
 
+
+	KTX_header header;
+	if (!KTX_ReadHeader(tex2DFilenameList[0].c_str(), header))
+	{
+		printf("Error: Cannot load texture group : reading header has failed!\n");
+		return mDefaultTexGroup;
+	}
+
 	GLint layerCount = (GLint)tex2DFilenameList.size();
 
 	GLuint id = 0;
@@ -209,26 +217,20 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		err = ktxLoadTextureN(tex2DFilenameList.front().c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
 		if (id != 0)
 		{
-			TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
+			TextureGroup * texGroup = new TextureGroup(id, groupId, (GLint)header.numberOfArrayElements);
 			mTexGroupMap[groupId] = texGroup;
 			return texGroup;
 		}
 	}
 
-	KTX_header header;
-	if (!KTX_ReadHeader(tex2DFilenameList[0].c_str(), header))
-	{
-		printf("Error: Cannot load texture group : reading header has failed!\n");
-		return mDefaultTexGroup;
-	}
-
-	glGenTextures(1, &id);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount);
+	glGenTextures(1, &id); GL_CHECK_ERRORS;
+	glBindTexture(GL_TEXTURE_2D_ARRAY, id); GL_CHECK_ERRORS;
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
+	
 
 	GLuint fbo = 0;
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+	glGenFramebuffers(1, &fbo); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo); GL_CHECK_ERRORS;
 
 	for (int index = 0; index < layerCount; ++index)
 	{
@@ -240,7 +242,8 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 			srcId = mDefault2D->GetId();
 		}
 
-		glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, srcId, 0);
+		glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, srcId, 0); GL_CHECK_ERRORS;
+		glReadBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
 
 		uint32_t wCopied = 0, hCopied = 0;
 		uint32_t x = 0, y = 0;
@@ -251,24 +254,26 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 			{
 				uint32_t w = min(header.pixelWidth, (uint32_t)dimensions.width);
 
-				glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, (GLint)x, (GLint)y, (GLint)index, (GLint)x, (GLint)y, (GLsizei)w, (GLsizei)h);
+				glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, (GLint)x, (GLint)y, (GLint)index, (GLint)x, (GLint)y, (GLsizei)w, (GLsizei)h); GL_CHECK_ERRORS;
 				wCopied += w;
 				x = wCopied;
 			}
 			hCopied += h;
 			y = hCopied;
 		}
-		
+		glReadBuffer(GL_NONE); GL_CHECK_ERRORS;
+
 		if (srcId != mDefault2D->GetId())
 		{
 			glDeleteTextures(1, &srcId);
 		}
 	}
 
-	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+	glGenerateMipmap(GL_TEXTURE_2D_ARRAY); GL_CHECK_ERRORS;
 
-	glBindFramebuffer(GL_READ_BUFFER, 0);
-	glDeleteFramebuffers(1, &fbo);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, 0); GL_CHECK_ERRORS;
+
+	glDeleteFramebuffers(1, &fbo); GL_CHECK_ERRORS;
 
 	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
 

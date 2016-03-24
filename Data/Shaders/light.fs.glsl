@@ -63,17 +63,17 @@ void main(void)
 
 	if (ambientTextureIndex != 0x000000FF)
 	{
-		materialAmbient = materialAmbient * texture(u_textureSampler[ambientSamplerIndex], vec3(fs_in.TexUV, ambientTextureIndex));
+		materialAmbient = materialAmbient * texture(u_textureSampler[/*ambientSamplerIndex*/0], vec3(fs_in.TexUV, ambientTextureIndex));
 	}
 	
 	if (diffuseTextureIndex != 0x000000FF)
 	{
-		materialDiffuse = materialDiffuse * texture(u_textureSampler[diffuseSamplerIndex], vec3(fs_in.TexUV, diffuseTextureIndex));
+		materialDiffuse = materialDiffuse * texture(u_textureSampler[/*diffuseSamplerIndex*/0], vec3(fs_in.TexUV, diffuseTextureIndex));
 	}
 
 	if (specularTextureIndex != 0x000000FF)
 	{
-		materialSpecular = materialSpecular * texture(u_textureSampler[specularTextureIndex], vec3(fs_in.TexUV, specularTextureIndex));
+		materialSpecular = materialSpecular * texture(u_textureSampler[/*specularTextureIndex*/0], vec3(fs_in.TexUV, specularTextureIndex));
 	}
 
 	vec3 ambientColor = u_AmbientLight.xyz;
