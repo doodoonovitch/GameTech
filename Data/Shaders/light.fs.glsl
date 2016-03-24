@@ -19,7 +19,7 @@ struct FragmentInfo
 {
     vec3 Position;
     vec3 Normal;
-	vec3 Albedo;
+	vec2 TexUV;
     int MaterialIndex;
 };
 
@@ -29,8 +29,7 @@ void UnpackGBuffer(vec2 coord, out FragmentInfo fragment)
     uvec4 data = texture(u_gBufferRGBA32UI, coord, 0);
 
     vec2 temp = unpackHalf2x16(data.y);
-    fragment.Albedo.xy = unpackHalf2x16(data.x);
-    fragment.Albedo.z = temp.x;
+    fragment.TexUV.xy = unpackHalf2x16(data.x);
 
     fragment.Normal.xy = unpackHalf2x16(data.z);
     fragment.Normal.z = temp.y;
@@ -63,17 +62,17 @@ void main(void)
 
 	if (ambientTextureIndex != 0x000000FF)
 	{
-		materialAmbient = materialAmbient * texture(u_textureSampler[/*ambientSamplerIndex*/0], vec3(fs_in.TexUV, ambientTextureIndex));
+		materialAmbient = materialAmbient * texture(u_textureSampler[ambientSamplerIndex], vec3(gData.TexUV, ambientTextureIndex));
 	}
 	
 	if (diffuseTextureIndex != 0x000000FF)
 	{
-		materialDiffuse = materialDiffuse * texture(u_textureSampler[/*diffuseSamplerIndex*/0], vec3(fs_in.TexUV, diffuseTextureIndex));
+		materialDiffuse = materialDiffuse * texture(u_textureSampler[diffuseSamplerIndex], vec3(gData.TexUV, diffuseTextureIndex));
 	}
 
 	if (specularTextureIndex != 0x000000FF)
 	{
-		materialSpecular = materialSpecular * texture(u_textureSampler[/*specularTextureIndex*/0], vec3(fs_in.TexUV, specularTextureIndex));
+		materialSpecular = materialSpecular * texture(u_textureSampler[specularTextureIndex], vec3(gData.TexUV, specularTextureIndex));
 	}
 
 	vec3 ambientColor = u_AmbientLight.xyz;

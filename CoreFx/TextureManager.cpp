@@ -242,7 +242,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 			srcId = mDefault2D->GetId();
 		}
 
-		glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, srcId, 0); GL_CHECK_ERRORS;
+		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcId, 0); GL_CHECK_ERRORS;
 		glReadBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
 
 		uint32_t wCopied = 0, hCopied = 0;
@@ -261,18 +261,20 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 			hCopied += h;
 			y = hCopied;
 		}
-		glReadBuffer(GL_NONE); GL_CHECK_ERRORS;
 
 		if (srcId != mDefault2D->GetId())
 		{
 			glDeleteTextures(1, &srcId);
 		}
+
+		glReadBuffer(GL_NONE); GL_CHECK_ERRORS;
 	}
 
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY); GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0); GL_CHECK_ERRORS;
 
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &fbo); GL_CHECK_ERRORS;
 
 	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);

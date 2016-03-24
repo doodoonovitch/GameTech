@@ -116,7 +116,7 @@ void Engine::InternalRelease()
 		memset(mGBufferTex, 0, sizeof(mGBufferTex));
 		glDeleteFramebuffers(1, &mGBuffer);
 		mGBuffer = 0;
-		glDeleteRenderbuffers(1, &mDepthBuffer);
+		glDeleteTextures(1, &mDepthBuffer);
 		mDepthBuffer = 0;
 
 		SAFE_DELETE(mDeferredLightPass);
@@ -145,26 +145,29 @@ void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glGenRenderbuffers(1, &mDepthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
+	glGenTextures(1, &mDepthBuffer);
+	glBindTexture(GL_TEXTURE_2D, mDepthBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthBuffer, 0);
 	GL_CHECK_ERRORS;
+
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "Framebuffer not complete!" << std::endl;
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void Engine::InitializeDeferredPassQuadShader()
@@ -417,21 +420,19 @@ void Engine::RenderObjects()
 	}
 	// -----------------------------------------------------------------------
 
-	static const GLuint uintZeros[] = { 0, 0, 0, 0 };
-	static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
+	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	{ // preparation for gbuffer rendering pass
-		glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
-		glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
 	}
 
 	glDisable(GL_BLEND); GL_CHECK_ERRORS;
 #endif // FORWARD_RENDERING
 
-	glDepthMask(GL_TRUE); GL_CHECK_ERRORS;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); GL_CHECK_ERRORS;
+	glDepthMask(GL_TRUE); GL_CHECK_ERRORS;
 	glEnable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -442,7 +443,8 @@ void Engine::RenderObjects()
 #ifdef FORWARD_RENDERING
 #else
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+
 		glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
 		glDepthMask(GL_FALSE); GL_CHECK_ERRORS;
 		glDisable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
@@ -468,26 +470,12 @@ void Engine::RenderObjects()
 				for (int i = 0; i < (int)mTextureGroupList.size(); ++i)
 				{
 					glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
-					glBindTexture(GL_TEXTURE_BUFFER, mTextureGroupList[i]->GetId());
+					glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureGroupList[i]->GetId());
 				}
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
 		mDeferredLightPass->GetShader().UnUse();
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 #endif // FORWARD_RENDERING
 
