@@ -54,14 +54,8 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		mViewportY = viewportY;
 		mViewportWidth = viewportWidth;
 		mViewportHeight = viewportHeight;
-
-#ifdef FORWARD_RENDERING
-		gBufferWidth;
-		gBufferHeight;
-#else
-		CreateGBuffers(gBufferWidth, gBufferHeight);
-		InitializeDeferredPassQuadShader();
-#endif // FORWARD_RENDERING
+		mGBufferWidth = gBufferWidth;
+		mGBufferHeight = gBufferHeight;
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -116,7 +110,7 @@ void Engine::InternalRelease()
 		memset(mGBufferTex, 0, sizeof(mGBufferTex));
 		glDeleteFramebuffers(1, &mGBuffer);
 		mGBuffer = 0;
-		glDeleteTextures(1, &mDepthBuffer);
+		glDeleteRenderbuffers(1, &mDepthBuffer);
 		mDepthBuffer = 0;
 
 		SAFE_DELETE(mDeferredLightPass);
@@ -127,7 +121,58 @@ void Engine::InternalRelease()
 	}
 }
 
-void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
+void Engine::CreateDynamicResources()
+{
+	// Light desc buffer
+	// -----------------------------------------------------------------------
+	assert(!mLightDescBuffer.IsCreated());
+	{
+		GLsizeiptr bufferSize = (mLights->GetCount() + 1) * sizeof(GLuint);
+		mLightDescBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, bufferSize, nullptr);
+
+		glBindBuffer(GL_TEXTURE_BUFFER, mLightDescBuffer.GetBufferId()); GL_CHECK_ERRORS;
+		GLuint * lightDescBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);	GL_CHECK_ERRORS;
+		lightDescBuffer[0] = (GLuint)mLights->GetCount();
+
+		mLights->ForEach([&lightDescBuffer](Lights::Light * light)
+		{
+			int index = light->GetInstanceId() + 1;
+			lightDescBuffer[index] = light->mLightDesc;
+		});
+
+		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
+	}
+	// -----------------------------------------------------------------------
+
+	// Light data buffer
+	// -----------------------------------------------------------------------
+	assert(!mLightDataBuffer.IsCreated());
+	{
+		GLsizeiptr bufferSize = 0;
+		mLights->ForEach([&bufferSize](Lights::Light * light)
+		{
+			bufferSize += light->GetDataSize();
+		});
+
+		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+	}
+	// -----------------------------------------------------------------------
+
+#ifdef FORWARD_RENDERING
+#else
+	InternalCreateGBuffers(mGBufferWidth, mGBufferHeight);
+
+	// material and texture creation
+	// -----------------------------------------------------------------------
+	InternalCreateTextures();
+	InternalCreateMaterialBuffer();
+	// -----------------------------------------------------------------------
+	
+	InitializeDeferredPassQuadShader();
+#endif // FORWARD_RENDERING
+}
+
+void Engine::InternalCreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 {
 	mGBufferWidth = gBufferWidth;
 	mGBufferHeight = gBufferHeight;
@@ -145,20 +190,20 @@ void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glGenTextures(1, &mDepthBuffer);
-	glBindTexture(GL_TEXTURE_2D, mDepthBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthBuffer, 0);
+	glGenRenderbuffers(1, &mDepthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
 	GL_CHECK_ERRORS;
 
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -167,7 +212,7 @@ void Engine::CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "Framebuffer not complete!" << std::endl;
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Engine::InitializeDeferredPassQuadShader()
@@ -180,7 +225,20 @@ void Engine::InitializeDeferredPassQuadShader()
 	//setup shader
 	Shader & shader = mDeferredLightPass->GetShader();
 	shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
-	shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/light.fs.glsl");
+	//shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/light.fs.glsl");
+	std::vector<std::string> lightFsGlsl(2);
+	Shader::MergeFile(lightFsGlsl[0], "shaders/light.fs.glsl");
+	std::string & textureFuncSource = lightFsGlsl[1];
+	textureFuncSource = "vec4 TexGet(int samplerIndex, vec3 p)\r\n{\r\n";
+	const int tmpBufferCount = 200;
+	char tmpBuffer[tmpBufferCount];
+	for (int itex = 0; itex < (int)mTextureGroupList.size(); ++itex)
+	{
+		sprintf_s(tmpBuffer, tmpBufferCount, "%sif(samplerIndex == %i) { return texture(u_textureSampler[%i], p); }\r\n", itex == 0 ? "\t" : "\telse ", itex, itex);
+		textureFuncSource.append(tmpBuffer);
+	}
+	textureFuncSource.append("\treturn vec4(0);\r\n}");
+	shader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	shader.CreateAndLinkProgram();
 
@@ -205,14 +263,16 @@ void Engine::InitializeDeferredPassQuadShader()
 	glUniform1i(shader.GetUniform("u_lightDescSampler"), 3);
 	glUniform1i(shader.GetUniform("u_lightDataSampler"), 4);
 
-	for (int i = 0; i < MAX_TEXTURE_SAMPLER; ++i)
+	for (int i = 0; i < (int)mTextureGroupList.size(); ++i)
 	{
 		char uniformName[50];
 		sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
-		int uniformIndex = glGetUniformLocation(shader.GetProgram(), uniformName);
-		GL_CHECK_ERRORS;
-		glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);
-		GL_CHECK_ERRORS;
+		int uniformIndex = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		if (uniformIndex > 0)
+		{
+			glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);	GL_CHECK_ERRORS;
+			std::cout << "\t" << uniformName << " : " << uniformIndex << std::endl;
+		}
 	}
 
 	shader.SetupFrameDataBlockBinding();
@@ -220,13 +280,13 @@ void Engine::InitializeDeferredPassQuadShader()
 
 	GL_CHECK_ERRORS;
 
-	GLfloat quadVertices[] = 
+	GLfloat quadVertices[] =
 	{
 		// Positions        // Texture Coords
-		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f, 
+		-1.0f, -1.0f, 0.0f, 
+		1.0f, 1.0f, 0.0f, 
+		1.0f, -1.0f, 0.0f, 
 	};
 
 	mDeferredLightPass->CreateBuffers();
@@ -239,11 +299,7 @@ void Engine::InitializeDeferredPassQuadShader()
 		GL_CHECK_ERRORS;
 
 		glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
-		glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-		GL_CHECK_ERRORS;
-
-		glEnableVertexAttribArray(Shader::UV_ATTRIBUTE);
-		glVertexAttribPointer(Shader::UV_ATTRIBUTE, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 		GL_CHECK_ERRORS;
 
 	glBindVertexArray(0);
@@ -251,7 +307,7 @@ void Engine::InitializeDeferredPassQuadShader()
 	GL_CHECK_ERRORS;
 }
 
-void Engine::CreateMaterialBuffer()
+void Engine::InternalCreateMaterialBuffer()
 {
 	int bufferSize = 0;
 	mRenderers->ForEach([&bufferSize](Renderer * renderer)
@@ -344,40 +400,8 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
-	// Light desc buffer
+	// Fill light data buffer 
 	// -----------------------------------------------------------------------
-	if (!mLightDescBuffer.IsCreated())
-	{
-		GLsizeiptr bufferSize = (mLights->GetCount() + 1) * sizeof(GLuint);
-		mLightDescBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, bufferSize, nullptr);
-
-		glBindBuffer(GL_TEXTURE_BUFFER, mLightDescBuffer.GetBufferId()); GL_CHECK_ERRORS;
-		GLuint * lightDescBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);	GL_CHECK_ERRORS;
-		lightDescBuffer[0] = (GLuint)mLights->GetCount();
-
-		mLights->ForEach([&lightDescBuffer](Lights::Light * light)
-		{
-			int index = light->GetInstanceId() + 1;
-			lightDescBuffer[index] = light->mLightDesc;
-		});
-
-		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
-	}
-	// -----------------------------------------------------------------------
-
-	// Light data buffer
-	// -----------------------------------------------------------------------
-	if (!mLightDataBuffer.IsCreated())
-	{
-		GLsizeiptr bufferSize = 0;
-		mLights->ForEach([&bufferSize](Lights::Light * light)
-		{
-			bufferSize += light->GetDataSize();
-		});
-
-		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
-	}
-
 	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); GL_CHECK_ERRORS;
 
 	GLsizeiptr offset = 0;
@@ -411,29 +435,20 @@ void Engine::RenderObjects()
 #ifdef FORWARD_RENDERING
 #else
 
-	// material and texture creation
-	// -----------------------------------------------------------------------
-	if (!mMaterialBuffer.IsCreated())
-	{
-		CreateTextures();
-		CreateMaterialBuffer();
-	}
-	// -----------------------------------------------------------------------
-
 	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
-	{ // preparation for gbuffer rendering pass
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
-	}
+	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
+	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
 
 	glDisable(GL_BLEND); GL_CHECK_ERRORS;
 #endif // FORWARD_RENDERING
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); GL_CHECK_ERRORS;
 	glDepthMask(GL_TRUE); GL_CHECK_ERRORS;
 	glEnable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); GL_CHECK_ERRORS;
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -443,11 +458,11 @@ void Engine::RenderObjects()
 #ifdef FORWARD_RENDERING
 #else
 	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
 
-		glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
 		glDepthMask(GL_FALSE); GL_CHECK_ERRORS;
 		glDisable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
+		glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
 
 		mDeferredLightPass->GetShader().Use();
 			glBindVertexArray(mDeferredLightPass->GetVao());
@@ -562,7 +577,7 @@ public:
 
 typedef std::map<TextureGroupId, TextureGroupLayerCount> TextureGroupLayerCountMap;
 
-void Engine::CreateTextures()
+void Engine::InternalCreateTextures()
 {
 	int samplerIndex = 0;
 	TextureGroupLayerCountMap layerCountByMap;

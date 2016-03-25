@@ -43,6 +43,8 @@ public:
 		return mTextureManager;
 	}
 
+	void CreateDynamicResources();
+
 	void UpdateObjects();
 	void RenderObjects();
 
@@ -190,10 +192,10 @@ private:
 
 	void InternalCreateFrameDataBuffer();
 
-	void CreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
+	void InternalCreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
 
-	void CreateMaterialBuffer();
-	void CreateTextures();
+	void InternalCreateMaterialBuffer();
+	void InternalCreateTextures();
 
 	void InitializeDeferredPassQuadShader();
 

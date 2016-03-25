@@ -367,18 +367,18 @@ void CubeRenderer::UpdateMaterialTextureIndex()
 
 		GLfloat * prop1 = mMaterials.GetProperty(materialIndex * Property_Per_Material);
 
-		GLint ambientIndex = texIndexes.mAmbient != NoTexture ? texInfo[texIndexes.mAmbient].GetLayerIndex() : -1;
-		GLint diffuseIndex = texIndexes.mDiffuse != NoTexture ? texInfo[texIndexes.mDiffuse].GetLayerIndex() : -1;
-		GLint specularIndex = texIndexes.mSpecular != NoTexture ? texInfo[texIndexes.mSpecular].GetLayerIndex() : -1;
-		GLint normalIndex = texIndexes.mNormal != NoTexture ? texInfo[texIndexes.mNormal].GetLayerIndex() : -1;
+		std::uint8_t ambientIndex = texIndexes.mAmbient != NoTexture ? (std::uint8_t)texInfo[texIndexes.mAmbient].GetLayerIndex() : 0xFF;
+		std::uint8_t diffuseIndex = texIndexes.mDiffuse != NoTexture ? (std::uint8_t)texInfo[texIndexes.mDiffuse].GetLayerIndex() : 0xFF;
+		std::uint8_t specularIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetLayerIndex() : 0xFF;
+		std::uint8_t normalIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetLayerIndex() : 0xFF;
 
 		GLbitfield textureIndexes = ((diffuseIndex & 0xFF) << 24) | ((specularIndex & 0xFF) << 16) | ((normalIndex & 0xFF) << 8) | (ambientIndex & 0xFF);
 		memcpy(&prop1[3], &textureIndexes, sizeof(GLfloat));
 
-		ambientIndex = texIndexes.mAmbient != NoTexture ? texInfo[texIndexes.mAmbient].GetSamplerIndex() : -1;
-		diffuseIndex = texIndexes.mDiffuse != NoTexture ? texInfo[texIndexes.mDiffuse].GetSamplerIndex() : -1;
-		specularIndex = texIndexes.mSpecular != NoTexture ? texInfo[texIndexes.mSpecular].GetSamplerIndex() : -1;
-		normalIndex = texIndexes.mNormal != NoTexture ? texInfo[texIndexes.mNormal].GetSamplerIndex() : -1;
+		ambientIndex = texIndexes.mAmbient != NoTexture ? (std::uint8_t)texInfo[texIndexes.mAmbient].GetSamplerIndex() : 0xFF;
+		diffuseIndex = texIndexes.mDiffuse != NoTexture ? (std::uint8_t)texInfo[texIndexes.mDiffuse].GetSamplerIndex() : 0xFF;
+		specularIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetSamplerIndex() : 0xFF;
+		normalIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetSamplerIndex() : 0xFF;
 
 		GLbitfield samplerIndexes = ((diffuseIndex & 0xFF) << 24) | ((specularIndex & 0xFF) << 16) | ((normalIndex & 0xFF) << 8) | (ambientIndex & 0xFF);
 		memcpy(&prop1[7], &samplerIndexes, sizeof(GLfloat));

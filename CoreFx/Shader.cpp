@@ -138,7 +138,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & f
 	LoadFromString(whichShader, buffers, includeCommon);
 }
 
-bool Shader::MergeFile(std::string& buffer, const std::string& filename) const
+bool Shader::MergeFile(std::string& buffer, const std::string& filename) 
 {
 	ifstream fp(filename, ifstream::in);
 	if (fp.is_open())

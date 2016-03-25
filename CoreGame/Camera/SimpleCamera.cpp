@@ -15,7 +15,7 @@ namespace CoreGame
 
 void SimpleCamera::OnRender(double elapsedTime)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	mDeltaTime = (float)elapsedTime;
 
@@ -148,6 +148,8 @@ void SimpleCamera::OnInit()
 	engine->SetCamera(mCamera);
 
 	SetupViewportAndProjection();
+
+	engine->CreateDynamicResources();
 
 	cout << "Initialization successfull" << endl;
 }

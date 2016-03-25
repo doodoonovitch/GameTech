@@ -15,6 +15,8 @@ uniform samplerBuffer u_lightDataSampler;
 
 uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
 
+vec4 TexGet(int samplerIndex, vec3 p);
+
 struct FragmentInfo
 {
     vec3 Position;
@@ -28,11 +30,11 @@ void UnpackGBuffer(vec2 coord, out FragmentInfo fragment)
     fragment.Position = texture(u_gBufferPosition, coord, 0).xyz;
     uvec4 data = texture(u_gBufferRGBA32UI, coord, 0);
 
-    vec2 temp = unpackHalf2x16(data.y);
     fragment.TexUV.xy = unpackHalf2x16(data.x);
 
-    fragment.Normal.xy = unpackHalf2x16(data.z);
+    vec2 temp = unpackHalf2x16(data.y);
     fragment.Normal.z = temp.y;
+    fragment.Normal.xy = unpackHalf2x16(data.z);
 
     fragment.MaterialIndex = int(data.w);
 }
@@ -60,19 +62,19 @@ void main(void)
 	vec4 materialSpecular = vec4(matData.xyz, 1);
 	float materialShininess = matData.w;
 
-	if (ambientTextureIndex != 0x000000FF)
+	if ((ambientTextureIndex & 0x000000FF)!= 0x000000FF)
 	{
-		materialAmbient = materialAmbient * texture(u_textureSampler[ambientSamplerIndex], vec3(gData.TexUV, ambientTextureIndex));
+		materialAmbient = materialAmbient * TexGet(ambientSamplerIndex, vec3(gData.TexUV, ambientTextureIndex));
 	}
 	
-	if (diffuseTextureIndex != 0x000000FF)
+	if ((diffuseTextureIndex & 0x000000FF)!= 0x000000FF)
 	{
-		materialDiffuse = materialDiffuse * texture(u_textureSampler[diffuseSamplerIndex], vec3(gData.TexUV, diffuseTextureIndex));
+		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec3(gData.TexUV, diffuseTextureIndex));
 	}
 
-	if (specularTextureIndex != 0x000000FF)
+	if ((specularTextureIndex & 0x000000FF)!= 0x000000FF)
 	{
-		materialSpecular = materialSpecular * texture(u_textureSampler[specularTextureIndex], vec3(gData.TexUV, specularTextureIndex));
+		materialSpecular = materialSpecular * TexGet(specularSamplerIndex, vec3(gData.TexUV, specularTextureIndex));
 	}
 
 	vec3 ambientColor = u_AmbientLight.xyz;

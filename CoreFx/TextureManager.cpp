@@ -224,8 +224,8 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	}
 
 	glGenTextures(1, &id); GL_CHECK_ERRORS;
-	glBindTexture(GL_TEXTURE_2D_ARRAY, id); GL_CHECK_ERRORS;
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
+	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); GL_CHECK_ERRORS;
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY_EXT, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
 	
 
 	GLuint fbo = 0;
@@ -254,7 +254,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 			{
 				uint32_t w = min(header.pixelWidth, (uint32_t)dimensions.width);
 
-				glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, (GLint)x, (GLint)y, (GLint)index, (GLint)x, (GLint)y, (GLsizei)w, (GLsizei)h); GL_CHECK_ERRORS;
+				glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY_EXT, 0, (GLint)x, (GLint)y, (GLint)index, (GLint)x, (GLint)y, (GLsizei)w, (GLsizei)h); GL_CHECK_ERRORS;
 				wCopied += w;
 				x = wCopied;
 			}
@@ -270,9 +270,9 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		glReadBuffer(GL_NONE); GL_CHECK_ERRORS;
 	}
 
-	glGenerateMipmap(GL_TEXTURE_2D_ARRAY); GL_CHECK_ERRORS;
+	glGenerateMipmap(GL_TEXTURE_2D_ARRAY_EXT); GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D_ARRAY, 0); GL_CHECK_ERRORS;
+	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0); GL_CHECK_ERRORS;
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &fbo); GL_CHECK_ERRORS;

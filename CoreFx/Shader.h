@@ -54,9 +54,7 @@ public:
 
 	static const char* ShaderName(GLenum shaderType);
 
-protected:
-
-	bool MergeFile(std::string& buffer, const std::string& filename) const;
+	static bool MergeFile(std::string& buffer, const std::string& filename);
 
 protected:
 
