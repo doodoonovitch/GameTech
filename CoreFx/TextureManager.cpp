@@ -218,6 +218,11 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		if (id != 0)
 		{
 			TextureGroup * texGroup = new TextureGroup(id, groupId, (GLint)header.numberOfArrayElements);
+			
+			glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); GL_CHECK_ERRORS;
+			SetTextureGroupParams(texGroup);
+			glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0); GL_CHECK_ERRORS;
+
 			mTexGroupMap[groupId] = texGroup;
 			return texGroup;
 		}
@@ -227,6 +232,8 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); GL_CHECK_ERRORS;
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY_EXT, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
 	
+	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
+	SetTextureGroupParams(texGroup);
 
 	GLuint fbo = 0;
 	glGenFramebuffers(1, &fbo); GL_CHECK_ERRORS;
@@ -277,12 +284,23 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &fbo); GL_CHECK_ERRORS;
 
-	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
-
 	mTexGroupMap[groupId] = texGroup;
 
 	return texGroup;
 }
+
+void TextureManager::SetTextureGroupParams(TextureGroup const * tex)
+{
+	TextureWrap wrapS = TextureInfo::GetWrapSFromGroupId(tex->GetGroupId());
+	TextureWrap wrapT = TextureInfo::GetWrapTFromGroupId(tex->GetGroupId());
+
+	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
+	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
+}
+
 
 bool TextureManager::KTX_ReadHeader(FILE* f, KTX_header & header)
 {

@@ -134,6 +134,32 @@ public:
 		return (uint16_t)((id >> 32) & 0xFFFF);
 	}
 
+	static GLenum FromTextureWrap(TextureWrap wrap)
+	{
+		switch (wrap)
+		{
+		case TextureWrap::Clamp:
+			return GL_CLAMP;
+
+		case TextureWrap::ClampToBorder:
+			return GL_CLAMP_TO_BORDER;
+
+		case TextureWrap::ClampToEdge:
+			return GL_CLAMP_TO_EDGE;
+
+		case TextureWrap::MirrorClampToEdge:
+			return GL_MIRROR_CLAMP_TO_EDGE;
+
+		case TextureWrap::MirrorRepeat:
+			return GL_MIRRORED_REPEAT;
+
+		case TextureWrap::Repeat:
+			return GL_REPEAT;
+		}
+
+		return GL_CLAMP;
+	}
+
 private:
 
 
@@ -159,6 +185,8 @@ protected:
 	~TextureGroup();
 
 public:
+
+	inline TextureGroupId GetGroupId() const { return mGroupId; }
 
 	inline GLint GetLayerCount() const { return mLayerCount; }
 

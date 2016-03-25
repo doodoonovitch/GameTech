@@ -61,6 +61,8 @@ private:
 	TextureManager(TextureManager const &) = delete;
 	TextureManager & operator=(TextureManager const &) = delete;
 
+	static void SetTextureGroupParams(TextureGroup const * tex);
+
 private:
 
 	Texture2D * mDefault2D;
