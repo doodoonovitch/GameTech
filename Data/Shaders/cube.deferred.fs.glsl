@@ -1,5 +1,5 @@
-layout(location = 0) out vec3 outPosition;
-layout(location = 1) out uvec4 outRGBA32UI;
+layout(location = 0) out vec4 outPosition;
+layout(location = 1) out uvec2 outData;
 
 in GS_OUT
 {
@@ -11,13 +11,7 @@ in GS_OUT
 
 void main(void)
 {
-	outPosition = fs_in.Position.xyz;
+	outPosition = vec4(fs_in.Position.xyz, intBitsToFloat(fs_in.MaterialIndex));
 
-	uvec4 data = uvec4(0);
-	data.x = packHalf2x16(fs_in.TexUV);
-	data.y = packHalf2x16(vec2(0, fs_in.Normal.z));
-	data.z = packHalf2x16(fs_in.Normal.xy);
-	data.w = fs_in.MaterialIndex;
-
-	outRGBA32UI = data;
+	outData = uvec2(packHalf2x16(fs_in.TexUV.xy), packHalf2x16(fs_in.Normal.xy));
 }

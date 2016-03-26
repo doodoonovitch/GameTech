@@ -187,14 +187,14 @@ void Engine::InternalCreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, mGBufferWidth, mGBufferHeight, 0, GL_RG_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
@@ -247,7 +247,7 @@ void Engine::InitializeDeferredPassQuadShader()
 	shader.AddAttribute("in_TexUV");
 
 	shader.AddUniform("u_gBufferPosition");
-	shader.AddUniform("u_gBufferRGBA32UI");
+	shader.AddUniform("u_gBufferData");
 	shader.AddUniform("u_materialDataSampler");
 
 	shader.AddUniform("u_lightDescSampler");
@@ -257,7 +257,7 @@ void Engine::InitializeDeferredPassQuadShader()
 
 	//pass values of constant uniforms at initialization
 	glUniform1i(shader.GetUniform("u_gBufferPosition"), 0);
-	glUniform1i(shader.GetUniform("u_gBufferRGBA32UI"), 1);
+	glUniform1i(shader.GetUniform("u_gBufferData"), 1);
 
 	glUniform1i(shader.GetUniform("u_materialDataSampler"), 2);
 	glUniform1i(shader.GetUniform("u_lightDescSampler"), 3);
@@ -445,6 +445,9 @@ void Engine::RenderObjects()
 
 	glDisable(GL_BLEND); GL_CHECK_ERRORS;
 #endif // FORWARD_RENDERING
+
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
 
 	glDepthMask(GL_TRUE); GL_CHECK_ERRORS;
 	glEnable(GL_DEPTH_TEST); GL_CHECK_ERRORS;

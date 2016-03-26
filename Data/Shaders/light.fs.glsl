@@ -7,7 +7,7 @@ in VS_OUT
 
 
 uniform sampler2D u_gBufferPosition;
-uniform usampler2D u_gBufferRGBA32UI;
+uniform usampler2D u_gBufferData;
 
 uniform samplerBuffer u_materialDataSampler;
 uniform isamplerBuffer u_lightDescSampler;
@@ -27,16 +27,15 @@ struct FragmentInfo
 
 void UnpackGBuffer(vec2 coord, out FragmentInfo fragment)
 {
-    fragment.Position = texture(u_gBufferPosition, coord, 0).xyz;
-    uvec4 data = texture(u_gBufferRGBA32UI, coord, 0);
+    vec4 pos = texture(u_gBufferPosition, coord, 0);
+	fragment.Position = pos.xyz;
+	fragment.MaterialIndex = floatBitsToInt(pos.w);
 
+    uvec2 data = texture(u_gBufferData, coord, 0).xy;
     fragment.TexUV.xy = unpackHalf2x16(data.x);
+    fragment.Normal.xy = unpackHalf2x16(data.y);
+	fragment.Normal.z = sqrt(dot(fragment.Normal.xy, fragment.Normal.xy));
 
-    vec2 temp = unpackHalf2x16(data.y);
-    fragment.Normal.z = temp.y;
-    fragment.Normal.xy = unpackHalf2x16(data.z);
-
-    fragment.MaterialIndex = int(data.w);
 }
 
 void main(void)
