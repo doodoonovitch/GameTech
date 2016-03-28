@@ -35,8 +35,6 @@
 
 #include "macros.h"
 
-//#define FORWARD_RENDERING
-
 namespace CoreFx
 {
 
@@ -58,10 +56,10 @@ namespace CoreFx
 
 #include "InstanceContainer.h"
 #include "PropertyData.h"
+#include "Texture2D.h"
 #include "Shader.h"
 #include "Frame.h"
 #include "SceneObject.h"
-#include "Texture2D.h"
 #include "Renderer.h"
 #include "Renderers\RendererHelper.h"
 #include "Renderers\DrawNormalShader.h"

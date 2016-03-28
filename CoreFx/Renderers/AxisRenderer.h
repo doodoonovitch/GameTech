@@ -16,10 +16,8 @@ public:
 	AxisRenderer();
 	virtual ~AxisRenderer();
 
-	virtual void BeginFrame() override {}
-	virtual void EndFrame() override {}
-
-	virtual void Render() override;
+	virtual void Render() override {};
+	virtual void DebugRender() override;
 
 private:
 

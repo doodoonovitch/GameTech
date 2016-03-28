@@ -27,6 +27,7 @@ public:
 	virtual ~CubeRenderer();
 
 	virtual void Render() override;
+	virtual void DebugRender() override;
 
 	virtual void UpdateMaterialTextureIndex() override;
 
@@ -54,9 +55,9 @@ private:
 	struct MaterialData
 	{
 		__declspec(align(4)) GLfloat mAmbient[3];
-		__declspec(align(4)) GLbitfield mTextureIndexes;			// diffuse, specular, normal, ambient texture index
+		__declspec(align(4)) GLbitfield mAmbientNormalIndexes;		// ambient, normal sampler and texture index
 		__declspec(align(4)) GLfloat mDiffuse[3];
-		__declspec(align(4)) GLbitfield mTextureSamplerIndexes;		// diffuse, specular, normal, ambient texture index
+		__declspec(align(4)) GLbitfield mDiffuseSpecularIndexes;	// diffuse, specular sampler and texture index
 		__declspec(align(4)) GLfloat mSpecular[3];
 		__declspec(align(4)) float mShininess;
 	};
@@ -71,13 +72,22 @@ private:
 
 	typedef std::vector<MaterialTextureIndexes> MaterialTextureIndexesList;
 
+	const int mIndexCount = 36;
+
+	const int FIRST_TEXTURE_SAMPLER_INDEX = 3;
+
+private:
+
+	static void ComputeTangent(GLfloat vertices[], int vertexCount, GLushort indices[], int indexCount);
+
+	void InitializeShader();
+
 private:
 	
 	GLuint mMaterialCount;
 
 	TextureBuffer mModelMatrixBuffer;
 	TextureBuffer mMaterialIndexBuffer;
-	TextureBuffer mMaterialDataBuffer;
 
 	MaterialTextureIndexesList mMaterialTextureIndexesList;
 

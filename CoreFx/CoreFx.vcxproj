@@ -205,7 +205,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Data\Shaders\axis.forward.fs.glsl" />
-    <None Include="..\Data\Shaders\axis.vsh.glsl" />
+    <None Include="..\Data\Shaders\axis.vs.glsl" />
     <None Include="..\Data\Shaders\common.glsl" />
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\cube.forward.fs.glsl" />

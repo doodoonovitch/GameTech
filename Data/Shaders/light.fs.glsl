@@ -46,16 +46,16 @@ void main(void)
 	vec4 matData = texelFetch(u_materialDataSampler, gData.MaterialIndex);
 	vec4 materialAmbient = vec4(matData.xyz, 1);
 	uint bitfieldValue = floatBitsToUint(matData.w);
-	int ambientTextureIndex = int(GetAmbientTextureIndex(bitfieldValue));
-	int diffuseTextureIndex = int(GetDiffuseTextureIndex(bitfieldValue));
-	int specularTextureIndex = int(GetSpecularTextureIndex(bitfieldValue));
+	int ambientTextureIndex = int((bitfieldValue >> 16) & uint(255));
+	int ambientSamplerIndex = int((bitfieldValue >> 24) & uint(255));
 
 	matData = texelFetch(u_materialDataSampler, gData.MaterialIndex + 1);
 	vec4 materialDiffuse = vec4(matData.xyz, 1);
 	bitfieldValue = floatBitsToUint(matData.w);
-	int ambientSamplerIndex = int(GetAmbientSamplerIndex(bitfieldValue));
-	int diffuseSamplerIndex = int(GetDiffuseSamplerIndex(bitfieldValue));
-	int specularSamplerIndex = int(GetSpecularSamplerIndex(bitfieldValue));
+	int diffuseTextureIndex = int((bitfieldValue >> 16) & uint(255));
+	int diffuseSamplerIndex = int((bitfieldValue >> 24) & uint(255));
+	int specularTextureIndex = int(bitfieldValue & uint(255));
+	int specularSamplerIndex = int((bitfieldValue >> 8) & uint(255));
 
 	matData = texelFetch(u_materialDataSampler, gData.MaterialIndex + 2);
 	vec4 materialSpecular = vec4(matData.xyz, 1);

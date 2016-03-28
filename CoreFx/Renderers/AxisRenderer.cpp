@@ -16,7 +16,7 @@ AxisRenderer::AxisRenderer()
 	std::cout << "Initialize AxisRenderer...." << std::endl;
 
 	//setup shader
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis.vsh.glsl");
+	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis.vs.glsl");
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
@@ -75,7 +75,7 @@ AxisRenderer::~AxisRenderer()
 {
 }
  
-void AxisRenderer::Render()
+void AxisRenderer::DebugRender()
 {
 	mShader.Use();
 		glBindVertexArray(mVaoID);

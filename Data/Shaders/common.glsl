@@ -3,9 +3,9 @@
 #define	POSITION_ATTRIBUTE							0
 #define	NORMAL_ATTRIBUTE							1
 #define	TANGENT_ATTRIBUTE							2
-#define	BINORMAL_ATTRIBUTE							3
-#define	UV_ATTRIBUTE								4
-#define	MATERIALID_ATTRIBUTE						5
+#define	UV_ATTRIBUTE								3
+#define	MATERIALID_ATTRIBUTE						4
+#define	BINORMAL_ATTRIBUTE							5
 
 #define POINT_LIGHT_TYPE							0
 #define DIRECTIONAL_LIGHT_TYPE						1
@@ -27,22 +27,6 @@
 #define GetLightType(lightDesc)						(lightDesc & 15)
 #define GetLightDataIndex(lightDesc)				(lightDesc >> 16)
 
-/*
-#define GetAmbientTextureIndex(bitfieldValue)		(bitfieldValue & 0x000000FF)
-#define GetDiffuseTextureIndex(bitfieldValue)		((bitfieldValue & 0xFF000000) >> 24)
-#define GetSpecularTextureIndex(bitfieldValue)		((bitfieldValue & 0x00FF0000) >> 16)
-#define GetNormalTextureIndex(bitfieldValue)		((bitfieldValue & 0x0000FF00) >> 8)
-*/
-
-#define GetAmbientTextureIndex(bitfieldValue)		(bitfieldValue & uint(255))
-#define GetDiffuseTextureIndex(bitfieldValue)		((bitfieldValue & uint(255 << 24)) >> 24)
-#define GetSpecularTextureIndex(bitfieldValue)		((bitfieldValue & uint(255 << 16)) >> 16)
-#define GetNormalTextureIndex(bitfieldValue)		((bitfieldValue & uint(255 << 8)) >> 8)
-
-#define GetAmbientSamplerIndex(bitfieldValue)		(bitfieldValue & uint(255))
-#define GetDiffuseSamplerIndex(bitfieldValue)		((bitfieldValue & uint(255 << 24)) >> 24)
-#define GetSpecularSamplerIndex(bitfieldValue)		((bitfieldValue & uint(255 << 16)) >> 16)
-#define GetNormalSamplerIndex(bitfieldValue)		((bitfieldValue & uint(255 << 8)) >> 8)
 
 #define FIRST_TEXTURE_SAMPLER_INDEX					10
 #define MAX_TEXTURE_SAMPLER							32
@@ -183,3 +167,30 @@ vec3 dqTransformNormal(vec3 normal, DualQuat dq)
 {
     return normal + 2.0 * cross( dq.Qr.xyz, cross( dq.Qr.xyz, normal ) + dq.Qr.w * normal );
 }
+
+vec3 GetBumpedNormal(sampler2DArray gNormalMap, vec3 texCoord)
+{
+    vec3 bumpMapNormal = texture(gNormalMap, texCoord).xyz;
+    bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
+	return bumpMapNormal;
+}
+
+vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, vec3 bumpMapNormal)
+{
+	normal = normalize(normal);
+	tangent = normalize(tangent);
+    tangent = normalize(tangent - dot(tangent, normal) * normal);
+    vec3 bitangent = cross(tangent, normal);
+    mat3 TBN = mat3(tangent, bitangent, normal);
+    vec3 newNormal;
+    newNormal = TBN * bumpMapNormal;
+    newNormal = normalize(newNormal);
+    return newNormal;
+}
+
+vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, sampler2DArray gNormalMap, vec3 texCoord)
+{
+	vec3 bumpMapNormal = GetBumpedNormal(gNormalMap, texCoord);
+	return ComputeBumpedNormal(normal, tangent, bumpMapNormal);
+}
+

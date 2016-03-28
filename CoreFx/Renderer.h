@@ -20,24 +20,26 @@ public:
 	Renderer(GLuint propertyCount);
 	virtual ~Renderer();
 
-	virtual void BeginFrame() = 0;
-	virtual void EndFrame() = 0;
 	virtual void Render() = 0;
+	virtual void DebugRender() = 0;
 
 	virtual void UpdateMaterialTextureIndex() {}
 
 	const PropertyData & GetMaterials() const {	return mMaterials; }
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
-	const TextureInfoList & GetTextures() const { return mTextures; }
+	const TextureInfoList & GetTextureInfoList() const { return mTextures; }
 	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
+
+	const TextureMapping & GetTextureMapping() const { return mTextureMapping; }
 
 protected:
 
 	PropertyData mMaterials;
 	GLint mMaterialBaseIndex;
 	TextureInfoList mTextures;
-	
+	TextureMapping mTextureMapping;
+
 };
 
 

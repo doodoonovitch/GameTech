@@ -17,9 +17,9 @@ public:
 		POSITION_ATTRIBUTE			= 0,
 		NORMAL_ATTRIBUTE			= 1,
 		TANGENT_ATTRIBUTE			= 2,
-		BINORMAL_ATTRIBUTE			= 3,
-		UV_ATTRIBUTE				= 4,
-		MATERIALID_ATTRIBUTE		= 5,
+		UV_ATTRIBUTE				= 3,
+		MATERIALID_ATTRIBUTE		= 4,
+		BINORMAL_ATTRIBUTE			= 5,
 
 		USER_FIRST_ATTRIBUTE,
 	};
@@ -55,6 +55,8 @@ public:
 	static const char* ShaderName(GLenum shaderType);
 
 	static bool MergeFile(std::string& buffer, const std::string& filename);
+
+	static void GenerateTexGetFunction(std::string & generatedSource, int texSamplerCount, const char * samplerUniformVarName = "u_textureSampler");
 
 protected:
 

@@ -23,6 +23,41 @@ namespace CoreFx
 
 class Engine
 {
+private:
+
+	enum BufferIdIndex
+	{
+		FrameData_BufferId,
+
+		__BufferId_Count__
+	};
+
+	enum GBufferType
+	{
+		gBuffer_PositionBuffer,
+		gBuffer_DataBuffer,
+		gBuffer_DepthBuffer,
+
+		__gBuffer_count__
+	};
+
+	enum
+	{
+		MAX_LIGHT_COUNT = 16,
+		FIRST_TEXTURE_SAMPLER_INDEX = 10,
+		MAX_TEXTURE_SAMPLER = 32
+	};
+
+	enum FrameDataUniforms
+	{
+		u_ProjMatrix,
+		u_ViewDQ,
+		u_AmbientLight,
+		u_LightCount,
+
+		__uniforms_count__
+	};
+
 public:
 
 	enum BindingIndex
@@ -103,6 +138,11 @@ public:
 		return mLightDataBuffer;
 	}
 
+	const TextureBuffer & GetMaterialDataBuffer() const
+	{
+		return mMaterialBuffer;
+	}
+
 	// ---------------------------------------------------------------------------
 	// Debug Tools
 	//
@@ -165,25 +205,11 @@ public:
 	
 	// ---------------------------------------------------------------------------
 
-public:
-
-	// Add materials for deferred rendering : 
-	//  - matProps : pointer to materials data 
-	//  - matCount : materials count 
-	//  - propCount : per material properties count; 1 property = 4 GLfloat 
-	GLint AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount);
 
 private:
 
 	typedef InstanceContainer<Renderer> RendererContainer;
 	typedef InstanceContainer<Lights::Light> LightContainer;
-
-	enum BufferIdIndex
-	{
-		FrameData_BufferId,
-
-		__BufferId_Count__
-	};
 
 private:
 
@@ -192,7 +218,7 @@ private:
 
 	void InternalCreateFrameDataBuffer();
 
-	void InternalCreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight);
+	void InternalCreateGBuffers();
 
 	void InternalCreateMaterialBuffer();
 	void InternalCreateTextures();
@@ -218,23 +244,13 @@ private:
 
 	Renderables::RenderableObject<1> * mDeferredLightPass;
 
-	enum GBufferType
-	{
-		gBuffer_PositionBuffer,
-		gBuffer_DataBuffer,
-
-		__gBuffer_count__
-	};
-
 	GLuint mGBuffer;
 	GLuint mGBufferTex[__gBuffer_count__];
-	GLuint mDepthBuffer;
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;
 
 	GLint mViewportX, mViewportY;
 	GLsizei mViewportWidth, mViewportHeight;
-
 
 	glm::vec4 mAmbientLight;
 
@@ -253,24 +269,6 @@ private:
 
 	bool mInitialized;
 	bool mIsDrawVertexNormalEnabled;
-
-
-	enum
-	{
-		MAX_LIGHT_COUNT = 16,
-		FIRST_TEXTURE_SAMPLER_INDEX = 10,
-		MAX_TEXTURE_SAMPLER = 32
-	};
-
-	enum FrameDataUniforms
-	{
-		u_ProjMatrix,
-		u_ViewDQ,
-		u_AmbientLight,
-		u_LightCount,
-
-		__uniforms_count__
-	};
 
 	GLsizei mFrameDataSize;
 
@@ -297,7 +295,8 @@ private:
 	TextureBuffer mMaterialBuffer;
 	std::vector<GLfloat> mMaterials;
 
-	TextureGroupList mTextureGroupList;
+	//TextureGroupList mTextureGroupList;
+	TextureMapping mLightPassTextureMapping;
 };
 
 

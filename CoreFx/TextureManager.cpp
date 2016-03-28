@@ -40,9 +40,9 @@ void TextureManager::ReleaseAllTexture2D()
 	size_t count = 0;
 	for (Tex2DIdMap::const_iterator it = m2DTexMap.begin(); it != m2DTexMap.end(); ++it)
 	{
-		if (it->second->GetId() != mDefault2D->GetId())
+		if (it->second->GetResourceId() != mDefault2D->GetResourceId())
 		{
-			ids[count++] = it->second->GetId();
+			ids[count++] = it->second->GetResourceId();
 		}
 
 		delete it->second;
@@ -63,9 +63,9 @@ void TextureManager::ReleaseAllTextureGroup()
 	size_t count = 0;
 	for (TexGroupMap::const_iterator it = mTexGroupMap.begin(); it != mTexGroupMap.end(); ++it)
 	{
-		if (it->second->GetId() != mDefault2D->GetId())
+		if (it->second->GetResourceId() != mDefault2D->GetResourceId())
 		{
-			ids[count++] = it->second->GetId();
+			ids[count++] = it->second->GetResourceId();
 		}
 
 		delete it->second;
@@ -148,7 +148,7 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
 	}
 	else
 	{
-		Texture2D* tex = new Texture2D(mDefault2D->GetId());
+		Texture2D* tex = new Texture2D(mDefault2D->GetResourceId());
 		m2DTexMap[s] = tex;
 
 		GLuint id;
@@ -212,21 +212,21 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 	GLuint id = 0;
 
-	if (layerCount == 1)
-	{
-		err = ktxLoadTextureN(tex2DFilenameList.front().c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-		if (id != 0)
-		{
-			TextureGroup * texGroup = new TextureGroup(id, groupId, (GLint)header.numberOfArrayElements);
-			
-			glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); GL_CHECK_ERRORS;
-			SetTextureGroupParams(texGroup);
-			glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0); GL_CHECK_ERRORS;
+	//if (layerCount == 1)
+	//{
+	//	err = ktxLoadTextureN(tex2DFilenameList.front().c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+	//	if (id != 0)
+	//	{
+	//		TextureGroup * texGroup = new TextureGroup(id, groupId, (GLint)header.numberOfArrayElements);
+	//		
+	//		glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); GL_CHECK_ERRORS;
+	//		SetTextureGroupParams(texGroup);
+	//		glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0); GL_CHECK_ERRORS;
 
-			mTexGroupMap[groupId] = texGroup;
-			return texGroup;
-		}
-	}
+	//		mTexGroupMap[groupId] = texGroup;
+	//		return texGroup;
+	//	}
+	//}
 
 	glGenTextures(1, &id); GL_CHECK_ERRORS;
 	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); GL_CHECK_ERRORS;
@@ -246,7 +246,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		err = ktxLoadTextureN(filename.c_str(), &srcId, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
 		if (srcId == 0)
 		{
-			srcId = mDefault2D->GetId();
+			srcId = mDefault2D->GetResourceId();
 		}
 
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcId, 0); GL_CHECK_ERRORS;
@@ -269,7 +269,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 			y = hCopied;
 		}
 
-		if (srcId != mDefault2D->GetId())
+		if (srcId != mDefault2D->GetResourceId())
 		{
 			glDeleteTextures(1, &srcId);
 		}

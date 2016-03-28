@@ -63,14 +63,11 @@ void SimpleCamera::OnInit()
 
 		Engine* engine = Engine::GetInstance();
 
-#ifdef FORWARD_RENDERING
 		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
 		engine->AttachRenderer(gridRenderer);
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
-#else
-#endif // FORWARD_RENDERING
 
 		int xCount = 30;
 		int yCount = 30;
@@ -79,17 +76,32 @@ void SimpleCamera::OnInit()
 		//textureList.push_back("medias/cube_array.ktx");
 		//textureList.push_back("medias/cube.ktx");
 		//textureList.push_back("medias/cube2.ktx");
-		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(5, xCount * yCount * zCount, 1);
+		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(8, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
 
 		cubeRenderer->AddTexture("medias/cube.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
 		cubeRenderer->AddTexture("medias/cube2.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/cube_N.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/fallforestrocks01.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/bricks.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/bricks_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/bricks1024.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
 
-		cubeRenderer->SetMaterial(0, glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-		cubeRenderer->SetMaterial(1, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-		cubeRenderer->SetMaterial(2, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-		cubeRenderer->SetMaterial(3, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-		cubeRenderer->SetMaterial(4, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+		cubeRenderer->SetMaterial(0, glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
+		cubeRenderer->SetMaterial(1, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
+
+		cubeRenderer->SetMaterial(2, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.4f, 0.4f, 0.4f), 64, 3, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 4);
+
+		cubeRenderer->SetMaterial(3, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 5, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 6);
+
+		cubeRenderer->SetMaterial(4, glm::vec3(.5f, .2f, 0.f), glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, Renderers::CubeRenderer::NoTexture, 8, 9);
+
+		cubeRenderer->SetMaterial(5, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
+		cubeRenderer->SetMaterial(6, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
+		cubeRenderer->SetMaterial(7, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
 
 
 		const glm::vec3 XAxis(1.f, 0.f, 0.f);
@@ -111,7 +123,7 @@ void SimpleCamera::OnInit()
 					float zAngle = (glm::two_pi<float>() * (float)k) / (float)zCount;
 					glm::quat qZ = glm::angleAxis(zAngle, ZAxis);
 
-					Cube * cube = cubeRenderer->CreateCube(i % 5);
+					Cube * cube = cubeRenderer->CreateCube(i % 8);
 					cube->GetFrame()->SetPosition(glm::vec3(1.5f + 5.f * i, 1.f + 5.f * k, -1.5f + -5.f * j));
 
 					glm::quat qRot = qX * qY * qZ;
@@ -139,7 +151,7 @@ void SimpleCamera::OnInit()
 
 	// Setup Lights
 		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(15.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 0.14f, 0.07f);
-		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.2f, 0.2f, 0.2f));
+		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.2f, 0.2f, 0.2f));
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 0.7f, 1.8f);
 
 	//setup camera

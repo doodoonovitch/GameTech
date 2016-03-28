@@ -28,11 +28,20 @@ bool Renderer::AddTexture(const char * filename, TextureCategory category, Textu
 		return false;
 	}
 
-#ifdef FORWARD_RENDERING
-	uint16_t rendererId = (uint16_t)GetId();
-#else
-	uint16_t rendererId = 0;
-#endif
+	uint16_t rendererId;
+	switch (category)
+	{
+	case TextureCategory::Ambient:
+	case TextureCategory::Diffuse:
+	case TextureCategory::Specular:
+		rendererId = 0;
+		break;
+
+	default:
+		rendererId = (uint16_t)GetInstanceId();
+		break;
+	}
+
 	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)hd.pixelWidth, (GLsizei)hd.pixelHeight, wrapS, wrapT);
 
 	mTextures.push_back(textureInfo);

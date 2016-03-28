@@ -75,16 +75,6 @@ public:
 		});
 	}
 
-	virtual void BeginFrame() override
-	{
-		
-	}
-
-	virtual void EndFrame() override
-	{
-		ClearObjectState();
-	}
-
 	size_t GetCapacity() const
 	{
 		return mObjs.GetCapacity();

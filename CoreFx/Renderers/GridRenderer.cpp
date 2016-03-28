@@ -91,7 +91,7 @@ GridRenderer::~GridRenderer()
 {
 }
  
-void GridRenderer::Render()
+void GridRenderer::DebugRender()
 {
 	mShader.Use();
 		glBindVertexArray(mVaoID);

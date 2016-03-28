@@ -13,7 +13,7 @@ class Texture2D
 {
 public:
 
-	inline GLuint GetId() const
+	inline GLuint GetResourceId() const
 	{
 		return mId;
 	}
@@ -55,6 +55,8 @@ enum class TextureCategory
 	Specular,
 	NormalMap,
 	HeightMap,
+
+	__max_category__ = HeightMap
 };
 
 
@@ -91,8 +93,8 @@ public:
 	GLsizei GetHeight() const { return GetHeightFromGroupId(mGroupId); }
 	TextureWrap GetWrapS() const { return GetWrapSFromGroupId(mGroupId); }
 	TextureWrap GetWrapT() const { return GetWrapTFromGroupId(mGroupId); }
-	TextureCategory GetCategory() const { GetCategoryFromGroupId(mGroupId); }
-	uint16_t GetRendererId() const { GetRendererIdFromGroupId(mGroupId); }
+	TextureCategory GetCategory() const { return GetCategoryFromGroupId(mGroupId); }
+	uint16_t GetRendererId() const { return GetRendererIdFromGroupId(mGroupId); }
 
 	const std::string & GetFilename() const { return mFilename; }
 
@@ -163,8 +165,8 @@ public:
 private:
 
 
-	GLint mSamplerIndex = -1;
-	GLint mLayerIndex = -1;
+	mutable GLint mSamplerIndex = -1;
+	mutable GLint mLayerIndex = -1;
 
 	TextureGroupId mGroupId;
 	std::string mFilename;
@@ -190,6 +192,13 @@ public:
 
 	inline GLint GetLayerCount() const { return mLayerCount; }
 
+	GLsizei GetWidth() const { return TextureInfo::GetWidthFromGroupId(mGroupId); }
+	GLsizei GetHeight() const { return TextureInfo::GetHeightFromGroupId(mGroupId); }
+	TextureWrap GetWrapS() const { return TextureInfo::GetWrapSFromGroupId(mGroupId); }
+	TextureWrap GetWrapT() const { return TextureInfo::GetWrapTFromGroupId(mGroupId); }
+	TextureCategory GetCategory() const { return TextureInfo::GetCategoryFromGroupId(mGroupId); }
+	uint16_t GetRendererId() const { return TextureInfo::GetRendererIdFromGroupId(mGroupId); }
+
 
 private:
 
@@ -202,6 +211,23 @@ private:
 };
 
 typedef std::vector<const TextureGroup *> TextureGroupList;
+
+
+typedef std::vector<const TextureInfo *> TexInfoPtrList;
+struct TextureMappingItem
+{
+	const TextureGroup * mTexture = nullptr;
+	GLint mSamplerIndex = -1;
+	TexInfoPtrList mTexInfoList;
+};
+
+typedef std::vector<TextureMappingItem> TextureMappingList;
+
+struct TextureMapping
+{
+	int mSamplerCount = 0;
+	TextureMappingList mMapping;
+};
 
 } // namespace CoreFx
 #endif // COREFX_TEXTURE2D_H

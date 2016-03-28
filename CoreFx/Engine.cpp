@@ -17,7 +17,6 @@ Engine::Engine()
 	, mCamera(nullptr)
 	, mDeferredLightPass(nullptr)
 	, mGBuffer(0)
-	, mDepthBuffer(0)
 	, mGBufferWidth(1920)
 	, mGBufferHeight(1080)
 	, mViewportX(0)
@@ -104,17 +103,12 @@ void Engine::InternalRelease()
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
 
-#ifdef FORWARD_RENDERING
-#else
 		glDeleteTextures(__gBuffer_count__, mGBufferTex);
 		memset(mGBufferTex, 0, sizeof(mGBufferTex));
 		glDeleteFramebuffers(1, &mGBuffer);
 		mGBuffer = 0;
-		glDeleteRenderbuffers(1, &mDepthBuffer);
-		mDepthBuffer = 0;
 
 		SAFE_DELETE(mDeferredLightPass);
-#endif // FORWARD_RENDERING
 
 		mInitialized = false;
 		mIsDrawVertexNormalEnabled = false;
@@ -158,9 +152,7 @@ void Engine::CreateDynamicResources()
 	}
 	// -----------------------------------------------------------------------
 
-#ifdef FORWARD_RENDERING
-#else
-	InternalCreateGBuffers(mGBufferWidth, mGBufferHeight);
+	InternalCreateGBuffers();
 
 	// material and texture creation
 	// -----------------------------------------------------------------------
@@ -169,20 +161,16 @@ void Engine::CreateDynamicResources()
 	// -----------------------------------------------------------------------
 	
 	InitializeDeferredPassQuadShader();
-#endif // FORWARD_RENDERING
 }
 
-void Engine::InternalCreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
+void Engine::InternalCreateGBuffers()
 {
-	mGBufferWidth = gBufferWidth;
-	mGBufferHeight = gBufferHeight;
-
 	std::cout << std::endl;
 	std::cout << "Initialize Deferred framebuffers..." << std::endl;
 	std::cout << "\t Size = " << mGBufferWidth << " x " << mGBufferHeight << std::endl;
 
 	glGenFramebuffers(1, &mGBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mGBuffer);
 	glGenTextures(__gBuffer_count__, mGBufferTex);
 	GL_CHECK_ERRORS;
 
@@ -190,20 +178,19 @@ void Engine::InternalCreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, mGBufferWidth, mGBufferHeight, 0, GL_RG_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
+	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glGenRenderbuffers(1, &mDepthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
+	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -212,7 +199,7 @@ void Engine::InternalCreateGBuffers(GLsizei gBufferWidth, GLsizei gBufferHeight)
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "Framebuffer not complete!" << std::endl;
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void Engine::InitializeDeferredPassQuadShader()
@@ -224,20 +211,15 @@ void Engine::InitializeDeferredPassQuadShader()
 
 	//setup shader
 	Shader & shader = mDeferredLightPass->GetShader();
+
+	// vertex shader
 	shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
-	//shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/light.fs.glsl");
+
+	// fragment shader
 	std::vector<std::string> lightFsGlsl(2);
 	Shader::MergeFile(lightFsGlsl[0], "shaders/light.fs.glsl");
 	std::string & textureFuncSource = lightFsGlsl[1];
-	textureFuncSource = "vec4 TexGet(int samplerIndex, vec3 p)\r\n{\r\n";
-	const int tmpBufferCount = 200;
-	char tmpBuffer[tmpBufferCount];
-	for (int itex = 0; itex < (int)mTextureGroupList.size(); ++itex)
-	{
-		sprintf_s(tmpBuffer, tmpBufferCount, "%sif(samplerIndex == %i) { return texture(u_textureSampler[%i], p); }\r\n", itex == 0 ? "\t" : "\telse ", itex, itex);
-		textureFuncSource.append(tmpBuffer);
-	}
-	textureFuncSource.append("\treturn vec4(0);\r\n}");
+	Shader::GenerateTexGetFunction(textureFuncSource, (int)mLightPassTextureMapping.mMapping.size());
 	shader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	shader.CreateAndLinkProgram();
@@ -253,8 +235,6 @@ void Engine::InitializeDeferredPassQuadShader()
 	shader.AddUniform("u_lightDescSampler");
 	shader.AddUniform("u_lightDataSampler");
 
-	shader.AddUniform("u_textureSampler[0]");
-
 	//pass values of constant uniforms at initialization
 	glUniform1i(shader.GetUniform("u_gBufferPosition"), 0);
 	glUniform1i(shader.GetUniform("u_gBufferData"), 1);
@@ -263,7 +243,7 @@ void Engine::InitializeDeferredPassQuadShader()
 	glUniform1i(shader.GetUniform("u_lightDescSampler"), 3);
 	glUniform1i(shader.GetUniform("u_lightDataSampler"), 4);
 
-	for (int i = 0; i < (int)mTextureGroupList.size(); ++i)
+	for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
 	{
 		char uniformName[50];
 		sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
@@ -322,13 +302,16 @@ void Engine::InternalCreateMaterialBuffer()
 	GLint baseIndex = 0;
 	mRenderers->ForEach([&offset, &baseIndex](Renderer * renderer)
 	{
-		renderer->mMaterialBaseIndex = baseIndex;
 		GLsizei dataSize = renderer->mMaterials.GetDataSize();
-		std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;		
-		memcpy(buffer, renderer->mMaterials.GetData(), dataSize);
-		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
-		offset += dataSize;
-		baseIndex += renderer->mMaterials.GetPropertyCount();
+		if (dataSize > 0)
+		{
+			renderer->mMaterialBaseIndex = baseIndex;
+			std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
+			memcpy(buffer, renderer->mMaterials.GetData(), dataSize);
+			glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
+			offset += dataSize;
+			baseIndex += renderer->mMaterials.GetPropertyCount();
+		}
 	});
 }
 
@@ -383,11 +366,6 @@ Engine* Engine::GetInstance()
 
 void Engine::UpdateObjects()
 {
-	mRenderers->ForEach([](Renderer * renderer)
-	{
-		renderer->BeginFrame();
-	});
-
 	assert(mCamera != nullptr);
 	assert(mCamera->GetFrame() != nullptr);
 	mCamera->Update();
@@ -431,20 +409,13 @@ void Engine::RenderObjects()
 	glUnmapBuffer(GL_UNIFORM_BUFFER); GL_CHECK_ERRORS;
 	// -----------------------------------------------------------------------
 
-
-#ifdef FORWARD_RENDERING
-#else
-
 	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 
-	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
-	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
 
 	glDisable(GL_BLEND); GL_CHECK_ERRORS;
-#endif // FORWARD_RENDERING
 
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
@@ -458,48 +429,54 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
-#ifdef FORWARD_RENDERING
-#else
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+	// light pass
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
 
-		glDepthMask(GL_FALSE); GL_CHECK_ERRORS;
-		glDisable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
-		glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
+	glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
 
-		mDeferredLightPass->GetShader().Use();
-			glBindVertexArray(mDeferredLightPass->GetVao());
+	glDepthMask(GL_FALSE); GL_CHECK_ERRORS;
+	glDisable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
 
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
+	mDeferredLightPass->GetShader().Use();
+		glBindVertexArray(mDeferredLightPass->GetVao());
 
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
 
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 
-				glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
 
-				glActiveTexture(GL_TEXTURE4);
-				glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
 
-				for (int i = 0; i < (int)mTextureGroupList.size(); ++i)
-				{
-					glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
-					glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureGroupList[i]->GetId());
-				}
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
 
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
-		mDeferredLightPass->GetShader().UnUse();
-	}
-#endif // FORWARD_RENDERING
+			for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
+			{
+				glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
+				glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
+			}
+
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+	mDeferredLightPass->GetShader().UnUse();
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+	glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); GL_CHECK_ERRORS;
+
+	//glEnable(GL_BLEND);
+	//glBlendEquation(GL_FUNC_ADD);
+	//glBlendFunc(GL_ONE, GL_ONE);
+	glEnable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		renderer->EndFrame();
+		renderer->DebugRender();
 	});
 }
 
@@ -555,20 +532,100 @@ bool Engine::DetachRenderer(Renderer* renderer)
 	return mRenderers->Detach(renderer);
 }
 
-GLint Engine::AddMaterialsForDeferredRendering(const GLfloat * matProps, GLsizei matCount, GLsizei propPerMatCount)
+void Engine::InternalCreateTextures()
 {
-		assert(matCount > 0);
-		assert(propPerMatCount > 0);
+	assert(mLightPassTextureMapping.mMapping.empty());
+	
+	mRenderers->ForEach([this](Renderer * renderer)
+	{
+		const TextureInfoList & texInfoList = renderer->GetTextureInfoList();
+		for (TextureInfoList::const_iterator texInfoListIter = texInfoList.begin(); texInfoListIter != texInfoList.end(); ++texInfoListIter)
+		{
+			TextureMapping * texMap;
 
-		GLint index = (GLint)mMaterials.size();
-		GLsizei propCount = matCount * propPerMatCount;
-		GLsizei floatCount = propCount * 4;
-		mMaterials.reserve(index + floatCount);
-		memcpy(mMaterials.data() + index, matProps, floatCount * sizeof(GLfloat));
-		return index / sizeof(GLfloat);
+			const TextureInfo & texInfo = *texInfoListIter;
+			switch (texInfo.GetCategory())
+			{
+			case TextureCategory::Ambient:
+			case TextureCategory::Diffuse:
+			case TextureCategory::Specular:
+				texMap = &mLightPassTextureMapping;
+				break;
+
+			default:
+				texMap = &renderer->mTextureMapping;
+				break;
+			}
+
+			TextureMappingList::iterator targetIt = std::find_if(texMap->mMapping.begin(), texMap->mMapping.end(), [&texInfo](const TextureMappingItem & item)
+			{
+				return item.mTexInfoList.front()->GetGroupId() == texInfo.GetGroupId();
+			});
+
+			TextureMappingItem * lpti;
+			if (targetIt == texMap->mMapping.end())
+			{
+				texMap->mMapping.push_back(TextureMappingItem());
+				lpti = &texMap->mMapping.back();
+				lpti->mSamplerIndex = texMap->mSamplerCount;
+				++texMap->mSamplerCount;
+			}
+			else
+			{
+				lpti = &(*targetIt);
+			}
+
+			texInfo.mSamplerIndex = lpti->mSamplerIndex;
+
+			TexInfoPtrList::const_iterator it = std::find_if(lpti->mTexInfoList.begin(), lpti->mTexInfoList.end(), [&texInfo](const TextureInfo * item)
+			{
+				return item->GetFilename() == texInfo.GetFilename();
+			});
+
+			if (it == lpti->mTexInfoList.end())
+			{
+				texInfo.mLayerIndex = (GLint)lpti->mTexInfoList.size();
+				lpti->mTexInfoList.push_back(&texInfo);
+			}
+			else
+			{
+				texInfo.mLayerIndex = (*it)->GetLayerIndex();
+			}
+		}
+
+		for (TextureMappingList::iterator it = renderer->mTextureMapping.mMapping.begin(); it != renderer->mTextureMapping.mMapping.end(); ++it)
+		{
+			std::vector<std::string> textureList;
+			textureList.reserve(it->mTexInfoList.size());
+			for (TexInfoPtrList::const_iterator it2 = it->mTexInfoList.begin(); it2 != it->mTexInfoList.end(); ++it2)
+			{
+				textureList.push_back((*it2)->GetFilename());
+			}
+
+			it->mTexture = mTextureManager->LoadTextureGroup(it->mTexInfoList.front()->GetGroupId(), textureList);
+		}
+	});
+
+	for (TextureMappingList::iterator it = mLightPassTextureMapping.mMapping.begin(); it != mLightPassTextureMapping.mMapping.end(); ++it)
+	{
+		std::vector<std::string> textureList;
+		textureList.reserve(it->mTexInfoList.size());
+		for (TexInfoPtrList::const_iterator it2 = it->mTexInfoList.begin(); it2 != it->mTexInfoList.end(); ++it2)
+		{
+			textureList.push_back((*it2)->GetFilename());
+		}
+
+		it->mTexture = mTextureManager->LoadTextureGroup(it->mTexInfoList.front()->GetGroupId(), textureList);
+	}
+
+	mRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->UpdateMaterialTextureIndex();
+	});
+
 }
 
-
+/*
 class TextureGroupLayerCount
 {
 public:
@@ -594,8 +651,21 @@ void Engine::InternalCreateTextures()
 			{
 				std::pair<TextureGroupLayerCountMap::iterator, bool> res = layerCountByMap.insert(TextureGroupLayerCountMap::value_type(texInfoIt->GetGroupId(), TextureGroupLayerCount()));
 				mapIt = res.first;
-				mapIt->second.mSamplerIndex = samplerIndex;
-				++samplerIndex;
+				switch (texInfoIt->GetCategory())
+				{
+				case TextureCategory::Ambient:
+				case TextureCategory::Diffuse:
+				case TextureCategory::Specular:
+					mapIt->second.mSamplerIndex = samplerIndex;
+					++samplerIndex;
+					break;
+
+				case TextureCategory::NormalMap:
+				case TextureCategory::HeightMap:
+				default:
+					mapIt->second.mSamplerIndex = -1;
+					break;
+				}
 			}
 
 			TextureGroupLayerCount & item = mapIt->second;
@@ -626,7 +696,20 @@ void Engine::InternalCreateTextures()
 		//textureList.resize(1);
 		//textureList[0] = "medias/cube_array.ktx";
 		const TextureGroup* texGroup = mTextureManager->LoadTextureGroup(it->first, textureList);
-		mTextureGroupList.push_back(texGroup);
+
+		switch (texGroup->GetCategory())
+		{
+		case TextureCategory::Ambient:
+		case TextureCategory::Diffuse:
+		case TextureCategory::Specular:
+			mTextureGroupList.push_back(texGroup);
+			break;
+
+		case TextureCategory::NormalMap:
+		case TextureCategory::HeightMap:
+		default:
+			break;
+		}		
 	}
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -634,7 +717,7 @@ void Engine::InternalCreateTextures()
 		renderer->UpdateMaterialTextureIndex();
 	});
 }
-
+*/
 	// =======================================================================
 	// =======================================================================
 } // namespace CoreFx
