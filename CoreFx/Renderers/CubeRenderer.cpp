@@ -411,6 +411,11 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& amb
 	}
 }
 
+void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat)
+{
+	SetMaterial(materialIndex, mat.mAmbient, mat.mDiffuse, mat.mSpecular, mat.mShininess, mat.mAmbientTextureIndex, mat.mDiffuseTextureIndex, mat.mSpecularTextureIndex, mat.mNormalTextureIndex);
+}
+
 
 void CubeRenderer::UpdateMaterialTextureIndex()
 {

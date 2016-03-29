@@ -23,6 +23,32 @@ public:
 
 	static constexpr TextureIndex NoTexture = (TextureIndex)-1;
 
+	struct MaterialDesc
+	{
+		MaterialDesc(const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess,
+			TextureIndex ambientTextureIndex, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex)
+			: mAmbient(ambient)
+			, mDiffuse(diffuse)
+			, mSpecular(specular)
+			, mShininess(shininess)
+			, mAmbientTextureIndex(ambientTextureIndex)
+			, mDiffuseTextureIndex(diffuseTextureIndex)
+			, mSpecularTextureIndex(specularTextureIndex)
+			, mNormalTextureIndex(normalTextureIndex)
+		{}
+
+		glm::vec3 mAmbient;
+		glm::vec3 mDiffuse;
+		glm::vec3 mSpecular;
+		float mShininess;
+		TextureIndex mAmbientTextureIndex;
+		TextureIndex mDiffuseTextureIndex;
+		TextureIndex mSpecularTextureIndex;
+		TextureIndex mNormalTextureIndex;
+	};
+
+public:
+
 	CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t pageSize = 10);
 	virtual ~CubeRenderer();
 
@@ -36,6 +62,8 @@ public:
 
 	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, 
 		TextureIndex ambientTextureIndex, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex);
+
+	void SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat);
 
 private:
 

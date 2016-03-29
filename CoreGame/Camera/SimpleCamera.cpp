@@ -72,11 +72,8 @@ void SimpleCamera::OnInit()
 		int xCount = 30;
 		int yCount = 30;
 		int zCount = 30;
-		std::vector<std::string> textureList;
-		//textureList.push_back("medias/cube_array.ktx");
-		//textureList.push_back("medias/cube.ktx");
-		//textureList.push_back("medias/cube2.ktx");
-		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(8, xCount * yCount * zCount, 1);
+		const int materialCount = 8;
+		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(materialCount, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
 
 		cubeRenderer->AddTexture("medias/cube.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
@@ -90,18 +87,27 @@ void SimpleCamera::OnInit()
 		cubeRenderer->AddTexture("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp);
 		cubeRenderer->AddTexture("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
 
-		cubeRenderer->SetMaterial(0, glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
-		cubeRenderer->SetMaterial(1, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
+		{
+			Renderers::CubeRenderer::MaterialDesc mats[materialCount] =
+			{
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
 
-		cubeRenderer->SetMaterial(2, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.4f, 0.4f, 0.4f), 64, 3, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 4);
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.4f, 0.4f, 0.4f), 64, 3, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 4),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 64, 5, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 6),
 
-		cubeRenderer->SetMaterial(3, glm::vec3(.5f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 64, 5, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 6);
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, Renderers::CubeRenderer::NoTexture, 8, 9),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
 
-		cubeRenderer->SetMaterial(4, glm::vec3(.5f, .3f, .1f), glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, Renderers::CubeRenderer::NoTexture, 8, 9);
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2)
+			};
 
-		cubeRenderer->SetMaterial(5, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
-		cubeRenderer->SetMaterial(6, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
-		cubeRenderer->SetMaterial(7, glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
+			for (int i = 0; i < materialCount; ++i)
+			{
+				cubeRenderer->SetMaterial(i, mats[i]);
+			}
+		}
 
 
 		const glm::vec3 XAxis(1.f, 0.f, 0.f);
@@ -123,7 +129,7 @@ void SimpleCamera::OnInit()
 					float zAngle = (glm::two_pi<float>() * (float)k) / (float)zCount;
 					glm::quat qZ = glm::angleAxis(zAngle, ZAxis);
 
-					Cube * cube = cubeRenderer->CreateCube(i % 8);
+					Cube * cube = cubeRenderer->CreateCube(i % materialCount);
 					cube->GetFrame()->SetPosition(glm::vec3(1.5f + 5.f * i, 1.f + 5.f * k, -1.5f + -5.f * j));
 
 					glm::quat qRot = qX * qY * qZ;
