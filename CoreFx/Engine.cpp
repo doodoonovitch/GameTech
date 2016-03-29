@@ -13,7 +13,6 @@ namespace CoreFx
 Engine::Engine()
 	: mTextureManager(nullptr)
 	, mRenderers(nullptr)
-	, mLights(nullptr)
 	, mCamera(nullptr)
 	, mDeferredLightPass(nullptr)
 	, mGBuffer(0)
@@ -24,7 +23,6 @@ Engine::Engine()
 	, mViewportWidth(1920)
 	, mViewportHeight(1080)
 	, mAmbientLight(0.1f, 0.1f, 0.1f, 0.f)
-	, mLightDataIndex(0)
 	, mDrawVertexNormalColor(0.41f, 0.f, 1.f, 0.f)
 	, mDrawPointLightColor(1.f, 1.f, 0.f, 0.f)
 	, mDrawDirectionalLightColor(1.f, 0.f, 0.f, 0.f)
@@ -35,6 +33,10 @@ Engine::Engine()
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
 {
+	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
+	{
+		mLights[i] = nullptr;
+	}
 	memset(mBufferIds, 0, sizeof(mBufferIds));
 	memset(mGBufferTex, 0, sizeof(mGBufferTex));
 }
@@ -70,8 +72,11 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 
 		mRenderers = new RendererContainer(64, 16);
 
-		mLights = new LightContainer(MAX_LIGHT_COUNT, 1);
-
+		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
+		{
+			mLights[i] = new LightContainer(1, 1);
+		}
+		
 		mDrawVertexNormalShader.LoadShaders();
 
 		InternalCreateFrameDataBuffer();
@@ -91,12 +96,14 @@ void Engine::InternalRelease()
 
 		SAFE_DELETE(mRenderers);
 
-		mLights->ForEach([](Lights::Light* obj)
+		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{
-			delete obj;
-		});
-		SAFE_DELETE(mLights);
-		mLightDataIndex = 0;
+			mLights[i]->ForEach([](Lights::Light* obj)
+			{
+				delete obj;
+			});
+			SAFE_DELETE(mLights[i]);
+		}
 		mLightDescBuffer.ReleaseResource();
 		mLightDataBuffer.ReleaseResource();
 
@@ -120,19 +127,33 @@ void Engine::CreateDynamicResources()
 	// Light desc buffer
 	// -----------------------------------------------------------------------
 	assert(!mLightDescBuffer.IsCreated());
-	{
-		GLsizeiptr bufferSize = (mLights->GetCount() + 1) * sizeof(GLuint);
+	{		
+		GLuint lightCount = 0;
+		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
+		{
+			lightCount += (GLuint)mLights[i]->GetCount();
+		}
+
+		GLsizeiptr bufferSize = (lightCount + 1) * sizeof(GLuint);
+
 		mLightDescBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, bufferSize, nullptr);
 
 		glBindBuffer(GL_TEXTURE_BUFFER, mLightDescBuffer.GetBufferId()); GL_CHECK_ERRORS;
 		GLuint * lightDescBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);	GL_CHECK_ERRORS;
-		lightDescBuffer[0] = (GLuint)mLights->GetCount();
+		lightDescBuffer[0] = (GLuint)lightCount;
 
-		mLights->ForEach([&lightDescBuffer](Lights::Light * light)
+		int index = 1;
+		GLuint lightDataIndex = 0;
+		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{
-			int index = light->GetInstanceId() + 1;
-			lightDescBuffer[index] = light->mLightDesc;
-		});
+			mLights[i]->ForEach([&index, &lightDataIndex, &lightDescBuffer](Lights::Light * light)
+			{
+				light->SetDataIndex(lightDataIndex);
+				lightDataIndex += light->GetPropertyCount();
+
+				lightDescBuffer[index++] = light->mLightDesc;
+			});
+		}
 
 		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
 	}
@@ -143,10 +164,13 @@ void Engine::CreateDynamicResources()
 	assert(!mLightDataBuffer.IsCreated());
 	{
 		GLsizeiptr bufferSize = 0;
-		mLights->ForEach([&bufferSize](Lights::Light * light)
+		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{
-			bufferSize += light->GetDataSize();
-		});
+			mLights[i]->ForEach([&bufferSize](Lights::Light * light)
+			{
+				bufferSize += light->GetDataSize();
+			});
+		}
 
 		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
 	}
@@ -324,8 +348,10 @@ void Engine::InternalCreateFrameDataBuffer()
 	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_OFFSET, mFrameDataUniformOffsets); GL_CHECK_ERRORS;
 	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_SIZE, mFrameDataUniformSizes); GL_CHECK_ERRORS;
 
-	int lastItem = __uniforms_count__ - 1;
-	mFrameDataSize = mFrameDataUniformOffsets[lastItem] + mFrameDataUniformSizes[lastItem];
+	//int lastItem = __uniforms_count__ - 1;
+	//mFrameDataSize = mFrameDataUniformOffsets[lastItem] + mFrameDataUniformSizes[lastItem];
+	GLuint frameDataUniformIndex = glGetUniformBlockIndex(program, "FrameData");
+	glGetActiveUniformBlockiv(program, frameDataUniformIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &mFrameDataSize);
 
 	printf("\n");
 	printf("FrameData uniform block : \n");
@@ -370,10 +396,13 @@ void Engine::UpdateObjects()
 	assert(mCamera->GetFrame() != nullptr);
 	mCamera->Update();
 
-	mLights->ForEach([this](Lights::Light * light)
+	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
-		light->TransformInViewCoords(mCamera->GetViewMatrix());
-	});
+		mLights[i]->ForEach([this](Lights::Light * light)
+		{
+			light->TransformInViewCoords(mCamera->GetViewMatrix());
+		});
+	}
 }
 
 void Engine::RenderObjects()
@@ -383,14 +412,17 @@ void Engine::RenderObjects()
 	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); GL_CHECK_ERRORS;
 
 	GLsizeiptr offset = 0;
-	mLights->ForEach([&offset](Lights::Light * light)
+	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
-		GLsizei dataSize = light->GetDataSize();
-		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
-		memcpy(lightDataBuffer, light->GetData(), dataSize);
-		offset += dataSize;
-		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
-	});
+		mLights[i]->ForEach([&offset](Lights::Light * light)
+		{
+			GLsizei dataSize = light->GetDataSize();
+			std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
+			memcpy(lightDataBuffer, light->GetData(), dataSize);
+			offset += dataSize;
+			glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
+		});
+	}
 	// -----------------------------------------------------------------------
 
 
@@ -404,7 +436,12 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
-	*((GLint*)(buffer + mFrameDataUniformOffsets[u_LightCount])) = (GLint)mLights->GetCount();
+
+	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_DirectionalLightCount };
+	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
+	{
+		*((GLint*)(buffer + mFrameDataUniformOffsets[lightUniformVarIndex[i]])) = (GLint)mLights[i]->GetCount();
+	}
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER); GL_CHECK_ERRORS;
 	// -----------------------------------------------------------------------
@@ -482,12 +519,11 @@ void Engine::RenderObjects()
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
 {
-	if (mLights->GetCount() < MAX_LIGHT_COUNT)
+	const int lightType = (int)LightType::PointLight;
+	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
 		Lights::PointLight *light = new Lights::PointLight(position, color, ambient, diffuse, specular, constantAttenuation, linearAttenuation, quadraticAttenuation);
-		light->SetDataIndex(mLightDataIndex);
-		mLightDataIndex += light->GetPropertyCount();
-		mLights->Attach(light);
+		mLights[lightType]->Attach(light);
 		return light;
 	}
 	else
@@ -499,12 +535,11 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::v
 
 Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular)
 {
-	if (mLights->GetCount() < MAX_LIGHT_COUNT)
+	const int lightType = (int)LightType::DirectionalLight;
+	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
 		Lights::DirectionalLight *light = new Lights::DirectionalLight(direction, color, ambient, diffuse, specular);
-		light->SetDataIndex(mLightDataIndex);
-		mLightDataIndex += light->GetPropertyCount();
-		mLights->Attach(light);
+		mLights[lightType]->Attach(light);
 		return light;
 	}
 	else
@@ -518,7 +553,7 @@ void Engine::DeleteLight(Lights::Light * & light)
 {
 	if (light == nullptr)
 		return;
-	mLights->Detach(light);
+	mLights[light->GetLightType()]->Detach(light);
 	SAFE_DELETE(light);
 }
 

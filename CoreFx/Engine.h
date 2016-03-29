@@ -53,9 +53,18 @@ private:
 		u_ProjMatrix,
 		u_ViewDQ,
 		u_AmbientLight,
-		u_LightCount,
+		u_PointLightCount,
+		u_DirectionalLightCount,
 
 		__uniforms_count__
+	};
+
+	enum class LightType
+	{
+		PointLight,
+		DirectionalLight,
+
+		__count__
 	};
 
 public:
@@ -238,9 +247,9 @@ private:
 
 	TextureManager * mTextureManager;
 	RendererContainer * mRenderers;
-	LightContainer * mLights;
+	LightContainer * mLights[Lights::Light::__light_type_count__];
 
-	Camera* mCamera;
+	Camera * mCamera;
 
 	Renderables::RenderableObject<1> * mDeferredLightPass;
 
@@ -253,8 +262,6 @@ private:
 	GLsizei mViewportWidth, mViewportHeight;
 
 	glm::vec4 mAmbientLight;
-
-	GLuint mLightDataIndex;
 
 	GLuint mBufferIds[__BufferId_Count__];
 
@@ -280,7 +287,8 @@ private:
 		"u_ProjMatrix",
 		"u_ViewDQ.Qr",
 		"u_AmbientLight",
-		"u_LightCount",
+		"u_PointLightCount",
+		"u_DirectionalLightCount",
 	};
 
 	// Light description buffer : 

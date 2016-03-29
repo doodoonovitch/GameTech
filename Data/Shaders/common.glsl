@@ -45,7 +45,8 @@ layout (std140, shared) uniform FrameData
 
 	vec4 u_AmbientLight;
 
-	int u_LightCount; 
+	int u_PointLightCount; 
+	int u_DirectionalLightCount;
 };
 
 

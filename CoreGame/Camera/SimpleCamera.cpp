@@ -95,9 +95,9 @@ void SimpleCamera::OnInit()
 
 		cubeRenderer->SetMaterial(2, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.4f, 0.4f, 0.4f), 64, 3, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 4);
 
-		cubeRenderer->SetMaterial(3, glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 5, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 6);
+		cubeRenderer->SetMaterial(3, glm::vec3(.5f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 64, 5, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 6);
 
-		cubeRenderer->SetMaterial(4, glm::vec3(.5f, .2f, 0.f), glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, Renderers::CubeRenderer::NoTexture, 8, 9);
+		cubeRenderer->SetMaterial(4, glm::vec3(.5f, .3f, .1f), glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, Renderers::CubeRenderer::NoTexture, 8, 9);
 
 		cubeRenderer->SetMaterial(5, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
 		cubeRenderer->SetMaterial(6, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2);
@@ -151,8 +151,9 @@ void SimpleCamera::OnInit()
 
 	// Setup Lights
 		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(15.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 1.f, 1.f, 0.14f, 0.07f);
-		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(1.0f, 0.2f, 0.2f), 0.2f, 0.2f, 0.2f);
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.2f, 1.f, 0.2f), 1.f, 1.f, 1.f, 1.f, 0.7f, 1.8f);
+		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), 0.2f, 0.2f, 0.2f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 1.f, 1.f, 0.7f, 1.8f);
+		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 1.f, 1.f, 0.7f, 0.02f);
 
 	//setup camera
 	mCamera = new Camera();

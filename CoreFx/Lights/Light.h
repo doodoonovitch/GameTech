@@ -48,7 +48,9 @@ public:
 	{
 		Point_Light,
 		Directional_Light,
-		Spot_Light,
+		//Spot_Light,
+
+		__light_type_count__
 	};
 	
 	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) = 0;
