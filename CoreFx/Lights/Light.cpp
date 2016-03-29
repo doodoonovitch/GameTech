@@ -8,16 +8,23 @@ namespace CoreFx
 
 
 
-Light::Light(LightType lightType, GLuint propertyCount, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular)
+Light::Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, glm::vec3 const & intensity)
 	: SceneObject(true)
 	, mLightDesc( ((GLuint)lightType) & LIGHT_TYPE_MASK )
 	, mPropertyData(propertyCount)
 {
-	SetProperty(glm::vec4(ambient, 1.f), Ambient_Color_Property);
-	SetProperty(glm::vec4(diffuse, 1.f), Diffuse_Color_Property);
-	SetProperty(glm::vec4(specular, 1.f), Specular_Color_Property);
+	SetProperty(glm::vec4(color, 1.f), Color_Property);
+	SetProperty(intensity, Intensity_Property);
 }
 
+Light::Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat ambientIntensity, GLfloat diffuseIntensity, GLfloat specularIntensity)
+: SceneObject(true)
+, mLightDesc(((GLuint)lightType) & LIGHT_TYPE_MASK)
+, mPropertyData(propertyCount)
+{
+	SetProperty(glm::vec4(color, 1.f), Color_Property);
+	SetProperty(glm::vec3(ambientIntensity, diffuseIntensity, specularIntensity), Intensity_Property);
+}
 
 Light::~Light()
 {

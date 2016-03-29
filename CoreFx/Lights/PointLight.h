@@ -22,7 +22,7 @@ public:
 
 	enum PropertyIndex
 	{
-		Position_Property = Light::__Ambient_Diffuse_Specular_Color_Property_Count__,
+		Position_Property = Light::__Common_Property_Count__,
 		Attenuation_Property,
 
 		__property_count__
@@ -82,7 +82,7 @@ public:
 protected:
 
 
-	PointLight(const glm::vec3 & position, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
+	PointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
 	virtual ~PointLight();
 
 protected:

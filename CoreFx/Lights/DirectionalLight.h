@@ -20,7 +20,7 @@ class DirectionalLight : public Light
 public:
 	enum PropertyIndex
 	{
-		Direction_Property = Light::__Ambient_Diffuse_Specular_Color_Property_Count__,
+		Direction_Property = Light::__Common_Property_Count__,
 
 		__property_count__
 	};
@@ -43,7 +43,7 @@ public:
 
 protected:
 	
-	DirectionalLight(const glm::vec3 & direction, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular);
+	DirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular);
 	virtual ~DirectionalLight();
 
 private:

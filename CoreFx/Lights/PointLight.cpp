@@ -8,8 +8,8 @@ namespace CoreFx
 
 
 
-PointLight::PointLight(const glm::vec3 & position, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
-	: Light(Light::Point_Light, __property_count__, ambient, diffuse, specular)
+PointLight::PointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+	: Light(Light::Point_Light, __property_count__, color, ambient, diffuse, specular)
 	, mWorldPosition(position, 1.f)
 {
 	SetProperty(glm::vec4(constantAttenuation, linearAttenuation, quadraticAttenuation, 0.f), Attenuation_Property);

@@ -31,11 +31,17 @@ public:
 	enum BasicLightPropertyIndex
 	{
 
-		Ambient_Color_Property,
-		Diffuse_Color_Property,
-		Specular_Color_Property,
+		Color_Property,
+		Intensity_Property,
 
-		__Ambient_Diffuse_Specular_Color_Property_Count__
+		__Common_Property_Count__
+	};
+
+	enum LightIntensityIndex
+	{
+		Ambient_Intensity,
+		Diffuse_Intensity,
+		Specular_Intensity,
 	};
 
 	enum LightType
@@ -73,38 +79,48 @@ public:
 		return mPropertyData.GetProperty(propertyIndex);
 	}
 
-	void SetAmbient(const glm::vec3 & value)
+	void SetColor(const glm::vec3 & value)
 	{
-		SetProperty(value, Ambient_Color_Property);
+		SetProperty(value, Color_Property);
 	}
-	const glm::vec3 & GetAmbient() const
+	const glm::vec3 & GetColor() const
 	{
-		return *(glm::vec3 *)GetProperty(Ambient_Color_Property);
-	}
-
-	void SetDiffuse(const glm::vec3 & value)
-	{
-		SetProperty(value, Diffuse_Color_Property);
-	}
-	const glm::vec3 & GetDiffuse() const
-	{
-		return *(glm::vec3 *)GetProperty(Diffuse_Color_Property);
+		return *(glm::vec3 *)GetProperty(Color_Property);
 	}
 
-	void SetSpecular(const glm::vec3 & value)
+	void SetIntensity(const glm::vec3 & value)
 	{
-		SetProperty(value, Specular_Color_Property);
+		SetProperty(value, Intensity_Property);
 	}
-	const glm::vec3 & GetSpecular() const
+	const glm::vec3 & GetIntensity() const
 	{
-		return *(glm::vec3 *)GetProperty(Specular_Color_Property);
+		return *(glm::vec3 *)GetProperty(Intensity_Property);
+	}
+
+	void SetIntensity(GLfloat ambient, GLfloat diffuse, GLfloat specular)
+	{
+		glm::vec3 value(ambient, diffuse, specular);
+		SetProperty(value, Intensity_Property);
+	}
+	GLfloat GetAmbientIntensity() const
+	{
+		return GetProperty(Intensity_Property)[Ambient_Intensity];
+	}
+	GLfloat GetDiffuseIntensity() const
+	{
+		return GetProperty(Intensity_Property)[Diffuse_Intensity];
+	}
+	GLfloat GetSpecularIntensity() const
+	{
+		return GetProperty(Intensity_Property)[Specular_Intensity];
 	}
 
 
 protected:
 
 	
-	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular);
+	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, glm::vec3 const & intensity);
+	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat ambientIntensity, GLfloat diffuseIntensity, GLfloat specularIntensity);
 	virtual ~Light();
 
 	GLfloat * GetProperty(GLuint propertyIndex) 

@@ -8,8 +8,8 @@ namespace CoreFx
 
 
 
-DirectionalLight::DirectionalLight(const glm::vec3 & direction, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular)
-	: Light(Light::Directional_Light, __property_count__, ambient, diffuse, specular)
+DirectionalLight::DirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular)
+	: Light(Light::Directional_Light, __property_count__, color, ambient, diffuse, specular)
 	, mWorldDirection(direction, 0.f)
 {
 }

@@ -480,11 +480,11 @@ void Engine::RenderObjects()
 	});
 }
 
-Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
 {
 	if (mLights->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::PointLight *light = new Lights::PointLight(position, ambient, diffuse, specular, constantAttenuation, linearAttenuation, quadraticAttenuation);
+		Lights::PointLight *light = new Lights::PointLight(position, color, ambient, diffuse, specular, constantAttenuation, linearAttenuation, quadraticAttenuation);
 		light->SetDataIndex(mLightDataIndex);
 		mLightDataIndex += light->GetPropertyCount();
 		mLights->Attach(light);
@@ -497,11 +497,11 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::v
 	}
 }
 
-Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & ambient, glm::vec3 const & diffuse, glm::vec3 const & specular)
+Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular)
 {
 	if (mLights->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::DirectionalLight *light = new Lights::DirectionalLight(direction, ambient, diffuse, specular);
+		Lights::DirectionalLight *light = new Lights::DirectionalLight(direction, color, ambient, diffuse, specular);
 		light->SetDataIndex(mLightDataIndex);
 		mLightDataIndex += light->GetPropertyCount();
 		mLights->Attach(light);
