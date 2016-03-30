@@ -512,7 +512,6 @@ void Engine::RenderObjects()
 	mDeferredLightPass->GetShader().UnUse();
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
 	glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); GL_CHECK_ERRORS;
 
 	//glEnable(GL_BLEND);
