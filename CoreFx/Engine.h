@@ -36,7 +36,7 @@ private:
 	{
 		gBuffer_PositionBuffer,
 		gBuffer_DataBuffer,
-		gBuffer_DepthBuffer,
+		//gBuffer_DepthBuffer,
 
 		__gBuffer_count__
 	};
@@ -254,6 +254,7 @@ private:
 	Renderables::RenderableObject<1> * mDeferredLightPass;
 
 	GLuint mGBuffer;
+	GLuint mDepthBuffer;
 	GLuint mGBufferTex[__gBuffer_count__];
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;

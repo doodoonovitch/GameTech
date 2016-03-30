@@ -16,6 +16,7 @@ Engine::Engine()
 	, mCamera(nullptr)
 	, mDeferredLightPass(nullptr)
 	, mGBuffer(0)
+	, mDepthBuffer(0)
 	, mGBufferWidth(1920)
 	, mGBufferHeight(1080)
 	, mViewportX(0)
@@ -110,6 +111,8 @@ void Engine::InternalRelease()
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
 
+		glDeleteRenderbuffers(1, &mDepthBuffer);
+		mDepthBuffer = 0;
 		glDeleteTextures(__gBuffer_count__, mGBufferTex);
 		memset(mGBufferTex, 0, sizeof(mGBufferTex));
 		glDeleteFramebuffers(1, &mGBuffer);
@@ -212,9 +215,14 @@ void Engine::InternalCreateGBuffers()
 	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer], 0);
+	//glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer], 0);
+	//GL_CHECK_ERRORS;
+	glGenRenderbuffers(1, &mDepthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
 	GL_CHECK_ERRORS;
 
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -240,6 +248,7 @@ void Engine::InitializeDeferredPassQuadShader()
 	shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
 
 	// fragment shader
+	std::cout << "Loading shader file : shaders/light.fs.glsl" << std::endl;
 	std::vector<std::string> lightFsGlsl(2);
 	Shader::MergeFile(lightFsGlsl[0], "shaders/light.fs.glsl");
 	std::string & textureFuncSource = lightFsGlsl[1];
@@ -503,7 +512,7 @@ void Engine::RenderObjects()
 	mDeferredLightPass->GetShader().UnUse();
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
 	glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); GL_CHECK_ERRORS;
 
 	//glEnable(GL_BLEND);

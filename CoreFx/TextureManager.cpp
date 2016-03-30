@@ -199,6 +199,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	KTX_dimensions dimensions;
 	GLboolean isMipmapped;
 	GLenum glerr;
+	GLuint id = 0;
 
 
 	KTX_header header;
@@ -210,12 +211,10 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 	GLint layerCount = (GLint)tex2DFilenameList.size();
 
-	GLuint id = 0;
-
 	//if (layerCount == 1)
 	//{
 	//	err = ktxLoadTextureN(tex2DFilenameList.front().c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-	//	if (id != 0)
+	//	if (id != 0 && target == GL_TEXTURE_2D_ARRAY_EXT)
 	//	{
 	//		TextureGroup * texGroup = new TextureGroup(id, groupId, (GLint)header.numberOfArrayElements);
 	//		
@@ -228,16 +227,16 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	//	}
 	//}
 
+	GLuint fbo = 0;
+	glGenFramebuffers(1, &fbo); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo); GL_CHECK_ERRORS;
+
 	glGenTextures(1, &id); GL_CHECK_ERRORS;
-	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); GL_CHECK_ERRORS;
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY_EXT, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
+	glBindTexture(GL_TEXTURE_2D_ARRAY, id); GL_CHECK_ERRORS;
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
 	
 	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
 	SetTextureGroupParams(texGroup);
-
-	GLuint fbo = 0;
-	glGenFramebuffers(1, &fbo); GL_CHECK_ERRORS;
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo); GL_CHECK_ERRORS;
 
 	for (int index = 0; index < layerCount; ++index)
 	{
@@ -252,38 +251,27 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcId, 0); GL_CHECK_ERRORS;
 		glReadBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
 
-		uint32_t wCopied = 0, hCopied = 0;
-		uint32_t x = 0, y = 0;
-		while (hCopied < header.pixelHeight)
-		{
-			uint32_t h = min(header.pixelHeight, (uint32_t)dimensions.height);
-			while (wCopied < header.pixelWidth)
-			{
-				uint32_t w = min(header.pixelWidth, (uint32_t)dimensions.width);
+		glFramebufferTexture3D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_ARRAY, id, 0, index); GL_CHECK_ERRORS;
+		glDrawBuffer(GL_COLOR_ATTACHMENT1); GL_CHECK_ERRORS;
 
-				glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY_EXT, 0, (GLint)x, (GLint)y, (GLint)index, (GLint)x, (GLint)y, (GLsizei)w, (GLsizei)h); GL_CHECK_ERRORS;
-				wCopied += w;
-				x = wCopied;
-			}
-			hCopied += h;
-			y = hCopied;
-		}
+		glBlitFramebuffer(0, 0, dimensions.width, dimensions.height, 0, 0, header.pixelWidth, header.pixelHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR); GL_CHECK_ERRORS;
+
+		glReadBuffer(GL_NONE); GL_CHECK_ERRORS;
+		glDrawBuffer(GL_NONE); GL_CHECK_ERRORS;
 
 		if (srcId != mDefault2D->GetResourceId())
 		{
 			glDeleteTextures(1, &srcId);
 		}
-
-		glReadBuffer(GL_NONE); GL_CHECK_ERRORS;
 	}
 
-	glGenerateMipmap(GL_TEXTURE_2D_ARRAY_EXT); GL_CHECK_ERRORS;
-
-	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0); GL_CHECK_ERRORS;
-
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &fbo); GL_CHECK_ERRORS;
 
+	glGenerateMipmap(GL_TEXTURE_2D_ARRAY); GL_CHECK_ERRORS;
+
+	glBindTexture(GL_TEXTURE_2D_ARRAY, 0); GL_CHECK_ERRORS;
+	
 	mTexGroupMap[groupId] = texGroup;
 
 	return texGroup;
@@ -294,11 +282,11 @@ void TextureManager::SetTextureGroupParams(TextureGroup const * tex)
 	TextureWrap wrapS = TextureInfo::GetWrapSFromGroupId(tex->GetGroupId());
 	TextureWrap wrapT = TextureInfo::GetWrapTFromGroupId(tex->GetGroupId());
 
-	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
-	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
 }
 
 
