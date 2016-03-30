@@ -92,6 +92,8 @@ public:
 	void UpdateObjects();
 	void RenderObjects();
 
+	void SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
+
 	Camera* GetCamera() const
 	{
 		return mCamera;
@@ -228,6 +230,7 @@ private:
 	void InternalCreateFrameDataBuffer();
 
 	void InternalCreateGBuffers();
+	void InternalReleaseGBuffers();
 
 	void InternalCreateMaterialBuffer();
 	void InternalCreateTextures();

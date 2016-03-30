@@ -111,12 +111,7 @@ void Engine::InternalRelease()
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
 
-		glDeleteRenderbuffers(1, &mDepthBuffer);
-		mDepthBuffer = 0;
-		glDeleteTextures(__gBuffer_count__, mGBufferTex);
-		memset(mGBufferTex, 0, sizeof(mGBufferTex));
-		glDeleteFramebuffers(1, &mGBuffer);
-		mGBuffer = 0;
+		InternalReleaseGBuffers();
 
 		SAFE_DELETE(mDeferredLightPass);
 
@@ -179,8 +174,6 @@ void Engine::CreateDynamicResources()
 	}
 	// -----------------------------------------------------------------------
 
-	InternalCreateGBuffers();
-
 	// material and texture creation
 	// -----------------------------------------------------------------------
 	InternalCreateTextures();
@@ -197,7 +190,7 @@ void Engine::InternalCreateGBuffers()
 	std::cout << "\t Size = " << mGBufferWidth << " x " << mGBufferHeight << std::endl;
 
 	glGenFramebuffers(1, &mGBuffer);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mGBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
 	glGenTextures(__gBuffer_count__, mGBufferTex);
 	GL_CHECK_ERRORS;
 
@@ -205,14 +198,14 @@ void Engine::InternalCreateGBuffers()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, mGBufferWidth, mGBufferHeight, 0, GL_RG_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	//glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
@@ -231,7 +224,36 @@ void Engine::InternalCreateGBuffers()
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "Framebuffer not complete!" << std::endl;
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Engine::InternalReleaseGBuffers()
+{
+	glDeleteRenderbuffers(1, &mDepthBuffer);
+	mDepthBuffer = 0;
+	glDeleteTextures(__gBuffer_count__, mGBufferTex);
+	memset(mGBufferTex, 0, sizeof(mGBufferTex));
+	glDeleteFramebuffers(1, &mGBuffer);
+	mGBuffer = 0;
+}
+
+void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
+{
+	bool recreateGBuffers = mGBufferWidth != gBufferWidth || mGBufferHeight != gBufferHeight;
+
+	if (recreateGBuffers)
+	{
+		InternalReleaseGBuffers();
+	}
+
+	mViewportX = viewportX;
+	mViewportY = viewportY;
+	mViewportWidth = viewportWidth;
+	mViewportHeight = viewportHeight;
+	mGBufferWidth = gBufferWidth;
+	mGBufferHeight = gBufferHeight;
+
+	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 }
 
 void Engine::InitializeDeferredPassQuadShader()
@@ -295,7 +317,7 @@ void Engine::InitializeDeferredPassQuadShader()
 
 	GLfloat quadVertices[] =
 	{
-		// Positions        // Texture Coords
+		// Positions        
 		-1.0f, 1.0f, 0.0f, 
 		-1.0f, -1.0f, 0.0f, 
 		1.0f, 1.0f, 0.0f, 
@@ -416,6 +438,11 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
+	if (mGBuffer == 0)
+	{
+		InternalCreateGBuffers();
+	}
+
 	// Fill light data buffer 
 	// -----------------------------------------------------------------------
 	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); GL_CHECK_ERRORS;

@@ -43,12 +43,11 @@ void SimpleCamera::SetupViewportAndProjection()
 {
 	if (mCamera != nullptr)
 	{
-		//set the viewport size
-		glViewport(0, 0, mWindowWidth, mWindowHeight);
-		//setup the projection matrix 
 		assert(mCamera != nullptr);
 		mCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight);
 	}
+
+	Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
 }
 
 void SimpleCamera::OnInit()
