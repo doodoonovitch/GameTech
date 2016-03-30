@@ -14,9 +14,11 @@ Engine::Engine()
 	: mTextureManager(nullptr)
 	, mRenderers(nullptr)
 	, mCamera(nullptr)
-	, mDeferredLightPass(nullptr)
-	, mGBuffer(0)
-	, mDepthBuffer(0)
+	, mQuad(nullptr)
+	, mDeferredFBO(0)
+	, mDepthRBO(0)
+	, mHdrFBO(0)
+	, mHdrBuffer(0)
 	, mGBufferWidth(1920)
 	, mGBufferHeight(1080)
 	, mViewportX(0)
@@ -39,7 +41,7 @@ Engine::Engine()
 		mLights[i] = nullptr;
 	}
 	memset(mBufferIds, 0, sizeof(mBufferIds));
-	memset(mGBufferTex, 0, sizeof(mGBufferTex));
+	memset(mGBuffers, 0, sizeof(mGBuffers));
 }
 
 
@@ -113,7 +115,7 @@ void Engine::InternalRelease()
 
 		InternalReleaseGBuffers();
 
-		SAFE_DELETE(mDeferredLightPass);
+		SAFE_DELETE(mQuad);
 
 		mInitialized = false;
 		mIsDrawVertexNormalEnabled = false;
@@ -180,7 +182,9 @@ void Engine::CreateDynamicResources()
 	InternalCreateMaterialBuffer();
 	// -----------------------------------------------------------------------
 	
-	InitializeDeferredPassQuadShader();
+	InternalInitializeQuadVAO();
+	InternalInitializeDeferredPassShader();
+	InternalInitializeToneMappingShader();
 }
 
 void Engine::InternalCreateGBuffers()
@@ -189,52 +193,88 @@ void Engine::InternalCreateGBuffers()
 	std::cout << "Initialize Deferred framebuffers..." << std::endl;
 	std::cout << "\t Size = " << mGBufferWidth << " x " << mGBufferHeight << std::endl;
 
-	glGenFramebuffers(1, &mGBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, mGBuffer);
-	glGenTextures(__gBuffer_count__, mGBufferTex);
+	glGenFramebuffers(1, &mDeferredFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, mDeferredFBO);
+	glGenTextures(__gBuffer_count__, mGBuffers);
 	GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBufferTex[gBuffer_PositionBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBuffers[gBuffer_PositionBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DataBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, mGBufferWidth, mGBufferHeight, 0, GL_RG_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBufferTex[gBuffer_DataBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBuffers[gBuffer_DataBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	//glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer]);
+	//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBufferTex[gBuffer_DepthBuffer], 0);
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer], 0);
 	//GL_CHECK_ERRORS;
-	glGenRenderbuffers(1, &mDepthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer);
+	glGenRenderbuffers(1, &mDepthRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, mDepthRBO);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
 	GL_CHECK_ERRORS;
 
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
+		std::cout << "... failed!" << std::endl;
+	std::cout << "...complete!" << std::endl;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Engine::InternalReleaseGBuffers()
 {
-	glDeleteRenderbuffers(1, &mDepthBuffer);
-	mDepthBuffer = 0;
-	glDeleteTextures(__gBuffer_count__, mGBufferTex);
-	memset(mGBufferTex, 0, sizeof(mGBufferTex));
-	glDeleteFramebuffers(1, &mGBuffer);
-	mGBuffer = 0;
+	glDeleteRenderbuffers(1, &mDepthRBO);
+	mDepthRBO = 0;
+	glDeleteTextures(__gBuffer_count__, mGBuffers);
+	memset(mGBuffers, 0, sizeof(mGBuffers));
+	glDeleteFramebuffers(1, &mDeferredFBO);
+	mDeferredFBO = 0;
+}
+
+void Engine::InternalCreateHdrBuffers()
+{
+	std::cout << std::endl;
+	std::cout << "Initialize HDR framebuffers..." << std::endl;
+	std::cout << "\t Size = " << mGBufferWidth << " x " << mGBufferHeight << std::endl;
+
+	glGenFramebuffers(1, &mHdrFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, mHdrFBO);
+	glGenTextures(1, &mHdrBuffer);
+	GL_CHECK_ERRORS;
+
+	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mHdrBuffer, 0);
+	GL_CHECK_ERRORS;
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "... failed!" << std::endl;
+	std::cout << "...complete!" << std::endl;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Engine::InternalReleaseHdrBuffers()
+{
+	glDeleteTextures(1, &mHdrBuffer);
+	mHdrBuffer = 0;
+	glDeleteFramebuffers(1, &mHdrFBO);
+	mHdrFBO = 0;
 }
 
 void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
@@ -244,6 +284,7 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 	if (recreateGBuffers)
 	{
 		InternalReleaseGBuffers();
+		InternalReleaseHdrBuffers();
 	}
 
 	mViewportX = viewportX;
@@ -256,18 +297,46 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 }
 
-void Engine::InitializeDeferredPassQuadShader()
+void Engine::InternalInitializeQuadVAO()
+{
+	mQuad = new Renderables::VertexArrayObject<1>();
+
+	GLfloat quadVertices[] =
+	{
+		// Positions        
+		-1.0f, 1.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+	};
+
+	mQuad->CreateBuffers();
+
+	// Setup plane VAO
+	glBindVertexArray(mQuad->GetVao());
+
+	glBindBuffer(GL_ARRAY_BUFFER, mQuad->GetVbo(0));
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	GL_CHECK_ERRORS;
+
+	glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
+	glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	GL_CHECK_ERRORS;
+
+	glBindVertexArray(0);
+
+	GL_CHECK_ERRORS;
+}
+
+void Engine::InternalInitializeDeferredPassShader()
 {
 	std::cout << std::endl;
 	std::cout << "Initialize Deferred light pass shader..." << std::endl;
 
-	mDeferredLightPass = new Renderables::RenderableObject<1>();
-
 	//setup shader
-	Shader & shader = mDeferredLightPass->GetShader();
 
 	// vertex shader
-	shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+	mDeferredShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
 
 	// fragment shader
 	std::cout << "Loading shader file : shaders/light.fs.glsl" << std::endl;
@@ -275,34 +344,33 @@ void Engine::InitializeDeferredPassQuadShader()
 	Shader::MergeFile(lightFsGlsl[0], "shaders/light.fs.glsl");
 	std::string & textureFuncSource = lightFsGlsl[1];
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mLightPassTextureMapping.mMapping.size());
-	shader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
+	mDeferredShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
-	shader.CreateAndLinkProgram();
+	mDeferredShader.CreateAndLinkProgram();
 
-	shader.Use();
-	shader.AddAttribute("in_Position");
-	shader.AddAttribute("in_TexUV");
+	mDeferredShader.Use();
+	mDeferredShader.AddAttribute("in_Position");
 
-	shader.AddUniform("u_gBufferPosition");
-	shader.AddUniform("u_gBufferData");
-	shader.AddUniform("u_materialDataSampler");
+	mDeferredShader.AddUniform("u_gBufferPosition");
+	mDeferredShader.AddUniform("u_gBufferData");
+	mDeferredShader.AddUniform("u_materialDataSampler");
 
-	shader.AddUniform("u_lightDescSampler");
-	shader.AddUniform("u_lightDataSampler");
+	mDeferredShader.AddUniform("u_lightDescSampler");
+	mDeferredShader.AddUniform("u_lightDataSampler");
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(shader.GetUniform("u_gBufferPosition"), 0);
-	glUniform1i(shader.GetUniform("u_gBufferData"), 1);
+	glUniform1i(mDeferredShader.GetUniform("u_gBufferPosition"), 0);
+	glUniform1i(mDeferredShader.GetUniform("u_gBufferData"), 1);
 
-	glUniform1i(shader.GetUniform("u_materialDataSampler"), 2);
-	glUniform1i(shader.GetUniform("u_lightDescSampler"), 3);
-	glUniform1i(shader.GetUniform("u_lightDataSampler"), 4);
+	glUniform1i(mDeferredShader.GetUniform("u_materialDataSampler"), 2);
+	glUniform1i(mDeferredShader.GetUniform("u_lightDescSampler"), 3);
+	glUniform1i(mDeferredShader.GetUniform("u_lightDataSampler"), 4);
 
 	for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
 	{
 		char uniformName[50];
 		sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
-		int uniformIndex = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		int uniformIndex = glGetUniformLocation(mDeferredShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
 		if (uniformIndex > 0)
 		{
 			glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);	GL_CHECK_ERRORS;
@@ -310,37 +378,42 @@ void Engine::InitializeDeferredPassQuadShader()
 		}
 	}
 
-	shader.SetupFrameDataBlockBinding();
-	shader.UnUse();
+	mDeferredShader.SetupFrameDataBlockBinding();
+	mDeferredShader.UnUse();
 
 	GL_CHECK_ERRORS;
-
-	GLfloat quadVertices[] =
-	{
-		// Positions        
-		-1.0f, 1.0f, 0.0f, 
-		-1.0f, -1.0f, 0.0f, 
-		1.0f, 1.0f, 0.0f, 
-		1.0f, -1.0f, 0.0f, 
-	};
-
-	mDeferredLightPass->CreateBuffers();
-
-	// Setup plane VAO
-	glBindVertexArray(mDeferredLightPass->GetVao());
-
-		glBindBuffer(GL_ARRAY_BUFFER, mDeferredLightPass->GetVbo(0));
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-		GL_CHECK_ERRORS;
-
-		glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
-		glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-		GL_CHECK_ERRORS;
-
-	glBindVertexArray(0);
-
-	GL_CHECK_ERRORS;
+	std::cout << "... done." << std::endl;
 }
+
+void Engine::InternalInitializeToneMappingShader()
+{
+	std::cout << std::endl;
+	std::cout << "Initialize tone mapping shader..." << std::endl;
+
+	//setup shader
+
+	// vertex shader
+	mToneMappingShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+	mToneMappingShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/tonemapping.fs.glsl");
+
+	mToneMappingShader.CreateAndLinkProgram();
+
+	mToneMappingShader.Use();
+	mToneMappingShader.AddAttribute("in_Position");
+
+	mToneMappingShader.AddUniform("u_Exposure");
+	mToneMappingShader.AddUniform("u_InvGamma");
+	mToneMappingShader.AddUniform("u_HdrBuffer");
+
+	glUniform1i(mToneMappingShader.GetUniform("u_HdrBuffer"), 0);
+
+	mToneMappingShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	std::cout << "... done." << std::endl;
+}
+
 
 void Engine::InternalCreateMaterialBuffer()
 {
@@ -438,9 +511,10 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
-	if (mGBuffer == 0)
+	if (mDeferredFBO == 0)
 	{
 		InternalCreateGBuffers();
+		InternalCreateHdrBuffers();
 	}
 
 	// Fill light data buffer 
@@ -486,7 +560,7 @@ void Engine::RenderObjects()
 	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDeferredFBO); GL_CHECK_ERRORS;
 
 	glDisable(GL_BLEND); GL_CHECK_ERRORS;
 
@@ -503,21 +577,22 @@ void Engine::RenderObjects()
 	});
 
 	// light pass
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); GL_CHECK_ERRORS;
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
 
 	glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
 
 	glDepthMask(GL_FALSE); GL_CHECK_ERRORS;
 	glDisable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
 
-	mDeferredLightPass->GetShader().Use();
-		glBindVertexArray(mDeferredLightPass->GetVao());
+	mDeferredShader.Use();
+		glBindVertexArray(mQuad->GetVao());
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_PositionBuffer]);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, mGBufferTex[gBuffer_DataBuffer]);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DataBuffer]);
 
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
@@ -536,9 +611,22 @@ void Engine::RenderObjects()
 
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-	mDeferredLightPass->GetShader().UnUse();
+	mDeferredShader.UnUse();
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+	glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
+
+	mToneMappingShader.Use();
+		glBindVertexArray(mQuad->GetVao());
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
+
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+	mDeferredShader.UnUse();
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); GL_CHECK_ERRORS;
 	glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); GL_CHECK_ERRORS;
 
 	//glEnable(GL_BLEND);

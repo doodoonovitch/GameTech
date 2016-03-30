@@ -155,9 +155,9 @@ void SimpleCamera::OnInit()
 		*/
 
 	// Setup Lights
-		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(15.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 1.f, 1.f, 0.14f, 0.07f);
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(15.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 10.f, 20.f, 10.f, 1.f, 0.14f, 0.07f);
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), 0.2f, 0.2f, 0.2f);
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 1.f, 1.f, 0.7f, 1.8f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 5.f, 20.f, 20.f, 1.f, 0.7f, 1.8f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 1.f, 1.f, 0.7f, 0.02f);
 
 	//setup camera

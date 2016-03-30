@@ -102,6 +102,9 @@
       <Filter>Maths</Filter>
     </ClInclude>
     <ClInclude Include="PropertyData.h" />
+    <ClInclude Include="Renderables\VertexArrayObject.h">
+      <Filter>Renderables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -225,6 +228,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\axis.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\tonemapping.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -151,5 +151,5 @@ void main(void)
 		specularColor += lightColor * specularFactor;
 	}
 	
-	vFragColor =  clamp(materialAmbient * vec4(ambientColor, 1) + materialDiffuse * vec4(diffuseColor,1) + materialSpecular * vec4(specularColor, 1), 0, 1);
+	vFragColor =  materialAmbient * vec4(ambientColor, 1) + materialDiffuse * vec4(diffuseColor,1) + materialSpecular * vec4(specularColor, 1);
 }

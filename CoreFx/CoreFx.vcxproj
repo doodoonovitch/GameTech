@@ -155,6 +155,7 @@
     <ClInclude Include="Renderables\Grid.h" />
     <ClInclude Include="Renderables\Mesh.h" />
     <ClInclude Include="Renderables\RenderableObject.h" />
+    <ClInclude Include="Renderables\VertexArrayObject.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Renderers\AxisRenderer.h" />
     <ClInclude Include="Renderers\CubeRenderer.h" />
@@ -224,6 +225,7 @@
     <None Include="..\Data\Shaders\mesh_shader_NUV.frag" />
     <None Include="..\Data\Shaders\mesh_shader_NUV.geom" />
     <None Include="..\Data\Shaders\mesh_shader_NUV.vert" />
+    <None Include="..\Data\Shaders\tonemapping.fs.glsl" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -232,10 +232,15 @@ private:
 	void InternalCreateGBuffers();
 	void InternalReleaseGBuffers();
 
+	void InternalCreateHdrBuffers();
+	void InternalReleaseHdrBuffers();
+
 	void InternalCreateMaterialBuffer();
 	void InternalCreateTextures();
 
-	void InitializeDeferredPassQuadShader();
+	void InternalInitializeQuadVAO();
+	void InternalInitializeDeferredPassShader();
+	void InternalInitializeToneMappingShader();
 
 	Engine();
 	~Engine();
@@ -254,14 +259,19 @@ private:
 
 	Camera * mCamera;
 
-	Renderables::RenderableObject<1> * mDeferredLightPass;
+	Renderables::VertexArrayObject<1> * mQuad;
+	Shader mDeferredShader;
+	Shader mToneMappingShader;
 
-	GLuint mGBuffer;
-	GLuint mDepthBuffer;
-	GLuint mGBufferTex[__gBuffer_count__];
+	GLuint mDeferredFBO;
+	GLuint mDepthRBO;
+	GLuint mGBuffers[__gBuffer_count__];
+
+	GLuint mHdrFBO;
+	GLuint mHdrBuffer;
+
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;
-
 	GLint mViewportX, mViewportY;
 	GLsizei mViewportWidth, mViewportHeight;
 

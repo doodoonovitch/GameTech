@@ -63,6 +63,7 @@ namespace CoreFx
 #include "Renderer.h"
 #include "Renderers\RendererHelper.h"
 #include "Renderers\DrawNormalShader.h"
+#include "Renderables\VertexArrayObject.h"
 #include "Renderables\RenderableObject.h"
 
 #include "TextureBuffer.h"
