@@ -420,6 +420,8 @@ void Engine::InternalInitializeToneMappingShader()
 
 void Engine::InternalCreateMaterialBuffer()
 {
+	std::cout << "[Engine] initialize object materials buffer..." << std::endl;
+
 	int bufferSize = 0;
 	mRenderers->ForEach([&bufferSize](Renderer * renderer)
 	{
@@ -437,6 +439,7 @@ void Engine::InternalCreateMaterialBuffer()
 		if (dataSize > 0)
 		{
 			renderer->mMaterialBaseIndex = baseIndex;
+			std::cout << "\t renderer mMaterialBaseIndex : " << renderer->mMaterialBaseIndex << std::endl;
 			std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
 			memcpy(buffer, renderer->mMaterials.GetData(), dataSize);
 			glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
@@ -523,7 +526,7 @@ void Engine::RenderObjects()
 
 	// Fill light data buffer 
 	// -----------------------------------------------------------------------
-	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); GL_CHECK_ERRORS;
+	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); 
 
 	GLsizeiptr offset = 0;
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
@@ -531,10 +534,10 @@ void Engine::RenderObjects()
 		mLights[i]->ForEach([&offset](Lights::Light * light)
 		{
 			GLsizei dataSize = light->GetDataSize();
-			std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
+			std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); 
 			memcpy(lightDataBuffer, light->GetData(), dataSize);
 			offset += dataSize;
-			glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
+			glUnmapBuffer(GL_TEXTURE_BUFFER); 
 		});
 	}
 	// -----------------------------------------------------------------------
@@ -542,9 +545,9 @@ void Engine::RenderObjects()
 
 	// Frame data buffer
 	// -----------------------------------------------------------------------
-	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); GL_CHECK_ERRORS;
+	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); 
 
-	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);	GL_CHECK_ERRORS;
+	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);	
 	assert(buffer != nullptr);
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
@@ -557,23 +560,23 @@ void Engine::RenderObjects()
 		*((GLint*)(buffer + mFrameDataUniformOffsets[lightUniformVarIndex[i]])) = (GLint)mLights[i]->GetCount();
 	}
 
-	glUnmapBuffer(GL_UNIFORM_BUFFER); GL_CHECK_ERRORS;
+	glUnmapBuffer(GL_UNIFORM_BUFFER); 
 	// -----------------------------------------------------------------------
 
 	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDeferredFBO); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDeferredFBO);
 
-	glDisable(GL_BLEND); GL_CHECK_ERRORS;
+	glDisable(GL_BLEND); 
 
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 
-	glDepthMask(GL_TRUE); GL_CHECK_ERRORS;
-	glEnable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); GL_CHECK_ERRORS;
+	glDepthMask(GL_TRUE); 
+	glEnable(GL_DEPTH_TEST); 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -581,13 +584,13 @@ void Engine::RenderObjects()
 	});
 
 	// light pass
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); GL_CHECK_ERRORS;
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); 
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); 
 
-	glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
+	glClear(GL_COLOR_BUFFER_BIT); 
 
-	glDepthMask(GL_FALSE); GL_CHECK_ERRORS;
-	glDisable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
+	glDepthMask(GL_FALSE); 
+	glDisable(GL_DEPTH_TEST); 
 
 	mDeferredShader.Use();
 		glBindVertexArray(mQuad->GetVao());
@@ -617,8 +620,8 @@ void Engine::RenderObjects()
 		glBindVertexArray(0);
 	mDeferredShader.UnUse();
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); GL_CHECK_ERRORS;
-	glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); 
+	glClear(GL_COLOR_BUFFER_BIT); 
 
 	mToneMappingShader.Use();
 
@@ -634,18 +637,18 @@ void Engine::RenderObjects()
 		glBindVertexArray(0);
 	mDeferredShader.UnUse();
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); GL_CHECK_ERRORS;
-	glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); GL_CHECK_ERRORS;
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); 
+	//glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); 
 
-	//glEnable(GL_BLEND);
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_ONE, GL_ONE);
-	glEnable(GL_DEPTH_TEST); GL_CHECK_ERRORS;
+	////glEnable(GL_BLEND);
+	////glBlendEquation(GL_FUNC_ADD);
+	////glBlendFunc(GL_ONE, GL_ONE);
+	//glEnable(GL_DEPTH_TEST); 
 
-	mRenderers->ForEach([](Renderer * renderer)
-	{
-		renderer->DebugRender();
-	});
+	//mRenderers->ForEach([](Renderer * renderer)
+	//{
+	//	renderer->DebugRender();
+	//});
 }
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
