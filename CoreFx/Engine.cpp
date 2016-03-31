@@ -25,6 +25,9 @@ Engine::Engine()
 	, mViewportY(0)
 	, mViewportWidth(1920)
 	, mViewportHeight(1080)
+	, mExposure(1.0f)
+	, mGamma(1.0f)
+	, mInvGamma(1.0f)
 	, mAmbientLight(0.1f, 0.1f, 0.1f, 0.f)
 	, mDrawVertexNormalColor(0.41f, 0.f, 1.f, 0.f)
 	, mDrawPointLightColor(1.f, 1.f, 0.f, 0.f)
@@ -617,6 +620,10 @@ void Engine::RenderObjects()
 	glClear(GL_COLOR_BUFFER_BIT); GL_CHECK_ERRORS;
 
 	mToneMappingShader.Use();
+
+		glUniform1f(mToneMappingShader.GetUniform("u_Exposure"), mExposure);
+		glUniform1f(mToneMappingShader.GetUniform("u_InvGamma"), mInvGamma);
+
 		glBindVertexArray(mQuad->GetVao());
 
 			glActiveTexture(GL_TEXTURE0);

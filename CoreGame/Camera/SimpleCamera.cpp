@@ -265,6 +265,8 @@ void SimpleCamera::OnMouseMove(int x, int y)
 
 void SimpleCamera::OnKeyDown(wchar_t key)
 {
+	float exposureInc = 0.01f;
+	float gammaInc = 0.01f;
 	switch (key)
 	{
 	case L' ':
@@ -275,6 +277,26 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 	case L'n':
 		Engine::GetInstance()->EnableDrawVertexNormal(!Engine::GetInstance()->IsDrawVertexNormalEnabled());
 		//glutPostRedisplay();
+		break;
+
+	case 'e':
+		exposureInc = -exposureInc;
+	case 'E':
+		{
+			float exposure = Engine::GetInstance()->GetExposure();
+			exposure = glm::clamp(exposure + exposureInc, 0.01f, 10.0f);
+			Engine::GetInstance()->SetExposure(exposure);
+		}
+		break;
+
+	case 'g':
+		gammaInc = -gammaInc;
+	case 'G':
+		{
+			float gamma = Engine::GetInstance()->GetGamma();
+			gamma = glm::clamp(gamma + gammaInc, 0.01f, 10.0f);
+			Engine::GetInstance()->SetGamma(gamma);
+		}
 		break;
 	}
 	//glutPostRedisplay();

@@ -104,6 +104,27 @@ public:
 		mCamera = camera;
 	}
 
+	void SetExposure(float value)
+	{
+		mExposure = value;
+	}
+
+	float GetExposure() const
+	{
+		return mExposure;
+	}
+
+	void SetGamma(float value)
+	{
+		mGamma = value;
+		mInvGamma = 1.0f / mGamma;
+	}
+
+	float GetGamma() const
+	{
+		return mGamma;
+	}
+
 	bool IsDrawVertexNormalEnabled() const
 	{
 		return mIsDrawVertexNormalEnabled;
@@ -274,6 +295,10 @@ private:
 	GLsizei mGBufferHeight;
 	GLint mViewportX, mViewportY;
 	GLsizei mViewportWidth, mViewportHeight;
+
+	float mExposure;
+	float mGamma;
+	float mInvGamma;
 
 	glm::vec4 mAmbientLight;
 
