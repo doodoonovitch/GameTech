@@ -419,6 +419,9 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const MaterialDesc &
 
 void CubeRenderer::UpdateMaterialTextureIndex()
 {
+	std::cout << "CubeRenderer materials..." << std::endl;
+	std::cout << "\t mMaterialBaseIndex : " << GetMaterialBaseIndex() << std::endl;
+
 	const TextureInfoList & texInfo = GetTextureInfoList();
 
 	for (GLuint materialIndex = 0; materialIndex < (GLuint)mMaterialTextureIndexesList.size(); ++materialIndex)
@@ -442,6 +445,8 @@ void CubeRenderer::UpdateMaterialTextureIndex()
 
 		GLbitfield diffuseSpecularIndexes = ((diffuseSamplerIndex & 0xFF) << 24) | ((diffuseTextureIndex & 0xFF) << 16) | ((specularSamplerIndex & 0xFF) << 8) | (specularTextureIndex & 0xFF);
 		memcpy(&prop1[7], &diffuseSpecularIndexes, sizeof(GLfloat));
+
+		std::cout << "\t Material " << materialIndex << " : ambient texture layer = " << (int)ambientTextureIndex << ", sampler = " << (int)ambientSamplerIndex << std::endl;
 	}
 
 	InitializeShader();

@@ -233,10 +233,13 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		}
 
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcId, 0); GL_CHECK_ERRORS;
-		glReadBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
-
 		glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, id, 0, index); GL_CHECK_ERRORS;
+
+		glReadBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
 		glDrawBuffer(GL_COLOR_ATTACHMENT1); GL_CHECK_ERRORS;
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "[LoadTextureGroup] glCheckFramebufferStatus() returns failure!" << std::endl;
 
 		glBlitFramebuffer(0, 0, dimensions.width, dimensions.height, 0, 0, header.pixelWidth, header.pixelHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR); GL_CHECK_ERRORS;
 
