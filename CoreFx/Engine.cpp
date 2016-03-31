@@ -508,6 +508,7 @@ void Engine::UpdateObjects()
 		mLights[i]->ForEach([this](Lights::Light * light)
 		{
 			light->TransformInViewCoords(mCamera->GetViewMatrix());
+			light->SetIsModified(false);
 		});
 	}
 }
@@ -550,7 +551,7 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
 
-	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_DirectionalLightCount };
+	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
 		*((GLint*)(buffer + mFrameDataUniformOffsets[lightUniformVarIndex[i]])) = (GLint)mLights[i]->GetCount();
@@ -649,7 +650,7 @@ void Engine::RenderObjects()
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
 {
-	const int lightType = (int)LightType::PointLight;
+	const int lightType = (int)Lights::Light::Point_Light;
 	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
 		Lights::PointLight *light = new Lights::PointLight(position, color, ambient, diffuse, specular, constantAttenuation, linearAttenuation, quadraticAttenuation);
@@ -663,9 +664,26 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::v
 	}
 }
 
+Lights::SpotLight * Engine::CreateSpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+{
+	const int lightType = (int)Lights::Light::Spot_Light;
+	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
+	{
+		Lights::SpotLight *light = new Lights::SpotLight(position, color, ambient, diffuse, specular, direction, innerConeAngle, outerConeAngle, constantAttenuation, linearAttenuation, quadraticAttenuation);
+		mLights[lightType]->Attach(light);
+		return light;
+	}
+	else
+	{
+		std::cerr << "Cannot create a Point Light : max lights reached!" << std::endl;
+		return nullptr;
+	}
+}
+
+
 Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular)
 {
-	const int lightType = (int)LightType::DirectionalLight;
+	const int lightType = (int)Lights::Light::Directional_Light;
 	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
 		Lights::DirectionalLight *light = new Lights::DirectionalLight(direction, color, ambient, diffuse, specular);

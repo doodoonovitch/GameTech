@@ -17,6 +17,10 @@
 #define POINT_LIGHT_POSITION_PROPERTY				2
 #define POINT_LIGHT_ATTENUATION_PROPERTY			3	
 
+#define SPOT_LIGHT_POSITION_PROPERTY				2
+#define SPOT_LIGHT_DIRECTION_PROPERTY				3
+#define SPOT_LIGHT_ATTENUATION_PROPERTY				4	
+
 #define DIRECTIONAL_LIGHT_DIRECTION_PROPERTY		2
 
 
@@ -46,6 +50,7 @@ layout (std140, shared) uniform FrameData
 	vec4 u_AmbientLight;
 
 	int u_PointLightCount; 
+	int u_SpotLightCount;
 	int u_DirectionalLightCount;
 };
 

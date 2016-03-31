@@ -70,6 +70,7 @@ namespace CoreFx
 
 #include "Lights\Light.h"
 #include "Lights\PointLight.h"
+#include "Lights\SpotLight.h"
 #include "Lights\DirectionalLight.h"
 
 #include "TextureManager.h"

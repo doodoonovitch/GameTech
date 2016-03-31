@@ -112,7 +112,7 @@ void main(void)
 
 			reflectionDirection = reflect(-lightDirection, normal);
 
-		float ambientFactor = lightIntensity.x * attenuation * lightIntensity.x;
+		float ambientFactor = attenuation * lightIntensity.x;
 		ambientColor += lightColor * ambientFactor;
 
 		float diffuseFactor = max(0, dot(normal, lightDirection)) * attenuation * lightIntensity.y;		
@@ -121,7 +121,51 @@ void main(void)
 		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), materialShininess) * attenuation * lightIntensity.z;	
 		specularColor += lightColor * specularFactor;
 	}
+	
+	// spot light evaluation
+	for(int spotLight = 0; spotLight < u_SpotLightCount; ++spotLight)
+	{
+		int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
+		++lightIndex;
 
+		int lightType = GetLightType(lightDesc);
+		int dataIndex = GetLightDataIndex(lightDesc);
+
+		vec3 lightColor = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY).xyz;
+		vec3 lightIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_INTENSITY_PROPERTY).xyz;
+
+		float attenuation = 1.0;
+
+			vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_POSITION_PROPERTY);
+			vec4 spotDirection = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_DIRECTION_PROPERTY);
+			vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_ATTENUATION_PROPERTY);
+			float innerConeCos = spotDirection.w;
+			float outerConeCos = attenuationCoef.w;
+
+			vec3 lightDirection = lightPosition.xyz - gData.Position.xyz;
+			float lightDistance = length(lightDirection);
+			lightDirection = lightDirection / lightDistance;
+
+			attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
+
+			vec3 reflectionDirection = reflect(-lightDirection, normal);
+
+			float theta = dot(lightDirection, normalize(-spotDirection.xyz)); 
+			float epsilon = (innerConeCos - outerConeCos);
+			float spotIntensity = clamp((theta - outerConeCos) / epsilon, 0.0, 1.0);
+
+			attenuation = attenuation * spotIntensity;
+
+		float ambientFactor = attenuation * lightIntensity.x;
+		ambientColor += lightColor * ambientFactor;
+
+		float diffuseFactor = max(0, dot(normal, lightDirection)) * attenuation * lightIntensity.y;		
+		diffuseColor += lightColor * diffuseFactor; 
+
+		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), materialShininess) * attenuation * lightIntensity.z;	
+		specularColor += lightColor * specularFactor;
+	}
+	
 	// Directional light evaluation
 	for(int dirLight = 0; dirLight < u_DirectionalLightCount; ++dirLight)
 	{
@@ -141,7 +185,7 @@ void main(void)
 		lightDirection = -texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
 		reflectionDirection = reflect(lightDirection, normal);
 
-		float ambientFactor = lightIntensity.x * attenuation * lightIntensity.x;
+		float ambientFactor = attenuation * lightIntensity.x;
 		ambientColor += lightColor * ambientFactor;
 
 		float diffuseFactor = max(0, dot(normal, lightDirection)) * attenuation * lightIntensity.y;		

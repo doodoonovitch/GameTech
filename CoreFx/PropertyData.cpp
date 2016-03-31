@@ -43,7 +43,7 @@ void PropertyData::SetProperty(const glm::vec4 & value, GLuint propertyIndex)
 void PropertyData::SetProperty(const glm::vec3 & value, GLuint propertyIndex)
 {
 	assert(propertyIndex < mPropertyCount);
-	memcpy(&mData[Element_Per_Property * propertyIndex], glm::value_ptr(value), sizeof(glm::vec3));
+	memcpy(&mData[Element_Per_Property * propertyIndex], glm::value_ptr(value), 3 * sizeof(GLfloat));
 	SetIsModified(true);
 }
 

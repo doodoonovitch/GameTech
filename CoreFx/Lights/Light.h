@@ -47,8 +47,8 @@ public:
 	enum LightType
 	{
 		Point_Light,
+		Spot_Light,
 		Directional_Light,
-		//Spot_Light,
 
 		__light_type_count__
 	};

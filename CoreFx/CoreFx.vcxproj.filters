@@ -105,6 +105,9 @@
     <ClInclude Include="Renderables\VertexArrayObject.h">
       <Filter>Renderables</Filter>
     </ClInclude>
+    <ClInclude Include="Lights\SpotLight.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -165,6 +168,9 @@
       <Filter>Maths</Filter>
     </ClCompile>
     <ClCompile Include="PropertyData.cpp" />
+    <ClCompile Include="Lights\SpotLight.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

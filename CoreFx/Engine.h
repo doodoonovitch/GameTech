@@ -43,7 +43,7 @@ private:
 
 	enum
 	{
-		MAX_LIGHT_COUNT = 16,
+		MAX_LIGHT_COUNT = 200,
 		FIRST_TEXTURE_SAMPLER_INDEX = 10,
 		MAX_TEXTURE_SAMPLER = 32
 	};
@@ -54,17 +54,10 @@ private:
 		u_ViewDQ,
 		u_AmbientLight,
 		u_PointLightCount,
+		u_SpotLightCount,
 		u_DirectionalLightCount,
 
 		__uniforms_count__
-	};
-
-	enum class LightType
-	{
-		PointLight,
-		DirectionalLight,
-
-		__count__
 	};
 
 public:
@@ -157,6 +150,8 @@ public:
 	}
 
 	Lights::PointLight * CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation = 1.f, GLfloat linearAttenuation = 0.f, GLfloat quadraticAttenuation = 0.f);
+	Lights::SpotLight * CreateSpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation = 1.f, GLfloat linearAttenuation = 0.f, GLfloat quadraticAttenuation = 0.f);
+
 	Lights::DirectionalLight * CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular);
 	void DeleteLight(Lights::Light * & light);
 
@@ -327,6 +322,7 @@ private:
 		"u_ViewDQ.Qr",
 		"u_AmbientLight",
 		"u_PointLightCount",
+		"u_SpotLightCount",
 		"u_DirectionalLightCount",
 	};
 
