@@ -17,6 +17,17 @@
 using namespace CoreFx;
 using namespace CoreGame;
 
+bool getChoiceFromArgs(int argc, char **argv, int & choice)
+{
+	if (argc >= 2)
+	{
+		if (sscanf_s(argv[1], "%i", &choice) == 1)
+			return true;
+	}
+
+	return false;
+}
+
 int main(int argc, char **argv)
 {
 	TGameProgram<SimpleCamera> simpleCameraSample;
@@ -27,29 +38,33 @@ int main(int argc, char **argv)
 
 	{
 		int choice = 0;
+	
 		const Sys::DisplayMonitorHelper & helper = simpleCameraSample.GetDisplayMonitorHelper();
 		const Sys::DisplayMonitorInfoList & infoList = helper.GetDisplayMonitorList();
 
-		do
+		if (!getChoiceFromArgs(argc, argv, choice))
 		{
-			int i = 1;
-
-			wprintf(L"\t%i - Window Mode\n", i++);
-
-			Sys::DisplayMonitorInfoList::const_iterator it;
-			for (it = infoList.begin(); it != infoList.end(); ++it, ++i)
+			do
 			{
-				const Sys::DisplayMonitorInfo & info = *it;
-				wprintf(L"\t%i - Fullscreen on monitor '%s' (%i, %i - %i x %i)\n", i, info.mName.c_str(), info.mVirtualScreen.left, info.mVirtualScreen.top, std::abs(info.mVirtualScreen.right - info.mVirtualScreen.left), std::abs(info.mVirtualScreen.bottom - info.mVirtualScreen.top));
-			}
+				int i = 1;
 
-			wprintf(L"\t0 - Exit\n");
+				wprintf(L"\t%i - Window Mode\n", i++);
 
-			wprintf(L"Please, enter your choice : ");
-			wscanf_s(L"%i", &choice);
-			wprintf(L"\n\n");
+				Sys::DisplayMonitorInfoList::const_iterator it;
+				for (it = infoList.begin(); it != infoList.end(); ++it, ++i)
+				{
+					const Sys::DisplayMonitorInfo & info = *it;
+					wprintf(L"\t%i - Fullscreen on monitor '%s' (%i, %i - %i x %i)\n", i, info.mName.c_str(), info.mVirtualScreen.left, info.mVirtualScreen.top, std::abs(info.mVirtualScreen.right - info.mVirtualScreen.left), std::abs(info.mVirtualScreen.bottom - info.mVirtualScreen.top));
+				}
 
-		} while (!(choice >= 0 && (choice - 1) <= (int)infoList.size()));
+				wprintf(L"\t0 - Exit\n");
+
+				wprintf(L"Please, enter your choice : ");
+				wscanf_s(L"%i", &choice);
+				wprintf(L"\n\n");
+
+			} while (!(choice >= 0 && (choice - 1) <= (int)infoList.size()));
+		}
 
 		if (choice == 0)
 		{
