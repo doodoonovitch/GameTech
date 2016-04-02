@@ -109,7 +109,7 @@ public:
 protected:
 
 
-	SpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
+	SpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
 	virtual ~SpotLight();
 
 protected:

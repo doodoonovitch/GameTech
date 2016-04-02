@@ -16,7 +16,7 @@ public:
 
 	enum
 	{
-		Property_Per_Material = 3
+		Property_Per_Material = 2
 	};
 
 	typedef std::uint8_t TextureIndex;
@@ -25,13 +25,10 @@ public:
 
 	struct MaterialDesc
 	{
-		MaterialDesc(const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess,
-			TextureIndex ambientTextureIndex, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex)
-			: mAmbient(ambient)
-			, mDiffuse(diffuse)
+		MaterialDesc(const glm::vec3& diffuse, const glm::vec3& specular, int16_t shininess, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex)
+			: mDiffuse(diffuse)
 			, mSpecular(specular)
 			, mShininess(shininess)
-			, mAmbientTextureIndex(ambientTextureIndex)
 			, mDiffuseTextureIndex(diffuseTextureIndex)
 			, mSpecularTextureIndex(specularTextureIndex)
 			, mNormalTextureIndex(normalTextureIndex)
@@ -40,8 +37,7 @@ public:
 		glm::vec3 mAmbient;
 		glm::vec3 mDiffuse;
 		glm::vec3 mSpecular;
-		float mShininess;
-		TextureIndex mAmbientTextureIndex;
+		int16_t mShininess;
 		TextureIndex mDiffuseTextureIndex;
 		TextureIndex mSpecularTextureIndex;
 		TextureIndex mNormalTextureIndex;
@@ -60,8 +56,7 @@ public:
 	Renderables::Cube * CreateCube(std::uint8_t materialIndex);
 	void DeleteCube(Renderables::Cube *& cube);
 
-	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, 
-		TextureIndex ambientTextureIndex, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex);
+	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, const glm::vec3& specular, int16_t shininess, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex);
 
 	void SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat);
 
@@ -82,17 +77,15 @@ private:
 
 	struct MaterialData
 	{
-		__declspec(align(4)) GLfloat mAmbient[3];
-		__declspec(align(4)) GLbitfield mAmbientNormalIndexes;		// ambient, normal sampler and texture index
 		__declspec(align(4)) GLfloat mDiffuse[3];
 		__declspec(align(4)) GLbitfield mDiffuseSpecularIndexes;	// diffuse, specular sampler and texture index
 		__declspec(align(4)) GLfloat mSpecular[3];
-		__declspec(align(4)) float mShininess;
+		__declspec(align(4)) float mShininessNormalIndex;
 	};
 
 	struct MaterialTextureIndexes
 	{
-		TextureIndex mAmbient = CubeRenderer::NoTexture;
+		//TextureIndex mAmbient = CubeRenderer::NoTexture;
 		TextureIndex mDiffuse = CubeRenderer::NoTexture;
 		TextureIndex mSpecular = CubeRenderer::NoTexture;
 		TextureIndex mNormal = CubeRenderer::NoTexture;

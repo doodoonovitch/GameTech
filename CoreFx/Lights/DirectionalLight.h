@@ -43,7 +43,7 @@ public:
 
 protected:
 	
-	DirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular);
+	DirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat intensity);
 	virtual ~DirectionalLight();
 
 private:

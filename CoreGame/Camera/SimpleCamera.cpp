@@ -71,35 +71,39 @@ void SimpleCamera::OnInit()
 		int xCount = 30;
 		int yCount = 30;
 		int zCount = 30;
-		const int materialCount = 8;
+		const int materialCount = 9;
 		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(materialCount, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
 
-		cubeRenderer->AddTexture("medias/cube.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/cube2.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/cube_N.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/fallforestrocks01.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/bricks.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/bricks_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/bricks1024.ktx", TextureCategory::Ambient, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp);
-		cubeRenderer->AddTexture("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp);
+		cubeRenderer->AddTexture("medias/cube.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 0
+		cubeRenderer->AddTexture("medias/cube2.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 1
+		cubeRenderer->AddTexture("medias/cube_N.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 2
+		cubeRenderer->AddTexture("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 3
+		cubeRenderer->AddTexture("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 4
+		cubeRenderer->AddTexture("medias/bricks.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 5
+		cubeRenderer->AddTexture("medias/bricks_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 6
+		cubeRenderer->AddTexture("medias/bricks1024.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 7
+		cubeRenderer->AddTexture("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp); // 8
+		cubeRenderer->AddTexture("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 9
 
 		{
 			Renderers::CubeRenderer::MaterialDesc mats[materialCount] =
 			{
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), glm::vec3(1.f, 1.f, 1.f), 128, 3, Renderers::CubeRenderer::NoTexture, 4),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.4f, 0.4f, 0.4f), 64, 3, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 4),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 64, 5, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 6),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, 2),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, Renderers::CubeRenderer::NoTexture, 8, 9),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), glm::vec3(1.f, 1.f, 1.f), 128, 3, Renderers::CubeRenderer::NoTexture, 4),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture, 2)
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), glm::vec3(1.f, .6f, .2f), 256, 5, Renderers::CubeRenderer::NoTexture, 6),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, 8, 9),
+
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, 2),
+
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, 2),
+
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, 2)
 			};
 
 			for (int i = 0; i < materialCount; ++i)
@@ -155,11 +159,11 @@ void SimpleCamera::OnInit()
 		*/
 
 	// Setup Lights
-		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(15.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 10.f, 20.f, 10.f, 1.f, 0.14f, 0.07f);
-		Lights::SpotLight * ptLight1 = engine->CreateSpotLight(glm::vec3(15.f, 2.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 20.f, 20.f, glm::vec3(0.f, 0.f, -1.f), glm::radians(10.f), glm::radians(20.f), 1.f, 0.14f, 0.07f);
-		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), 0.2f, 0.2f, 0.2f);
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 5.f, 20.f, 20.f, 1.f, 0.7f, 1.8f);
-		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 1.f, 1.f, 0.7f, 0.02f);
+		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(5.f, 2.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 20.f, glm::normalize(glm::vec3(.4f, 0.f, -0.9f)), glm::radians(15.f), glm::radians(30.f), 0.1f, 0.2f, 0.5f);
+		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), 0.2f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.7f, 1.8f);
+		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 0.7f, 0.02f);
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);
 
 	//setup camera
 	mCamera = new Camera();

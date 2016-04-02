@@ -50,7 +50,6 @@ enum class TextureWrap
 
 enum class TextureCategory
 {
-	Ambient,
 	Diffuse,
 	Specular,
 	NormalMap,

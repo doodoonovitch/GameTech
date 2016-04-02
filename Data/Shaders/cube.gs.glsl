@@ -6,7 +6,7 @@ uniform int u_MaterialBaseIndex;
 uniform samplerBuffer u_perInstanceDataSampler;
 uniform isamplerBuffer u_materialIndexSampler;
 
-#define PROPERTY_PER_MATERIAL_COUNT 3
+#define PROPERTY_PER_MATERIAL_COUNT 2
 
 
 in VS_OUT

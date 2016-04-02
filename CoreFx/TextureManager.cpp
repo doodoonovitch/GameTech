@@ -89,14 +89,14 @@ void TextureManager::Initialize()
 {
 	const std::string filename("medias/uvtemplate.ktx");
 
-	GLuint id;
+	GLuint id = 0;
 	GLenum target;
 	GLboolean isMipmapped;
 	GLenum glerr;
 
 	KTX_error_code err = ktxLoadTextureN(filename.c_str(), &id, &target, &mDefault2DDimensions, &isMipmapped, &glerr, nullptr, nullptr);
 
-	if (err != KTX_SUCCESS)
+	if (err != KTX_SUCCESS || id == 0)
 	{
 		printf("Cannot load the texture '%s' : %s.", filename.c_str(), ktxErrorString(err));
 
@@ -132,6 +132,7 @@ void TextureManager::Initialize()
 
 	mDefault2D = new Texture2D(id);
 
+	PRINT_MESSAGE("[TextureManager] Texture mDefault2D : %i.\n", id);
 }
 
 Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
@@ -162,6 +163,7 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
 		if (id != 0)
 		{
 			tex->SetId(id);
+			PRINT_MESSAGE("[LoadTexture2D] Texture '%s' : %i.\n", filename.c_str(), id);
 		}
 		else
 		{
@@ -222,6 +224,8 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
 	SetTextureGroupParams(texGroup);
 
+	PRINT_MESSAGE("[LoadTextureGroup] Texture group '%I64x' (Cat=%i) : %i.\n", groupId, (int)TextureInfo::GetCategoryFromGroupId(groupId), id);
+
 	for (int index = 0; index < layerCount; ++index)
 	{
 		GLuint srcId = 0;
@@ -230,6 +234,11 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 		if (srcId == 0)
 		{
 			srcId = mDefault2D->GetResourceId();
+			PRINT_MESSAGE("[LoadTextureGroup] Add mDefault texture in layer %i.\n", index);
+		}
+		else
+		{
+			PRINT_MESSAGE("[LoadTextureGroup] Add texture '%i' in layer %i.\n", srcId, index);
 		}
 
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcId, 0); GL_CHECK_ERRORS;
@@ -245,6 +254,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 		if (srcId != mDefault2D->GetResourceId())
 		{
+			PRINT_MESSAGE("[LoadTextureGroup] Delete texture %i.\n", srcId);
 			glDeleteTextures(1, &srcId);
 		}
 	}

@@ -87,6 +87,10 @@ CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t 
 	const int tangentOffset = 6;
 	const int textureOffset = 9;
 
+	PRINT_GEN_VERTEXARRAY("[CubeRenderer]", mVaoID);
+	PRINT_GEN_BUFFER("[CubeRenderer]", mVboIDs[VBO_Vertex]);
+	PRINT_GEN_BUFFER("[CubeRenderer]", mVboIDs[VBO_Index]);
+
 	glBindVertexArray(mVaoID);
 
 		glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[VBO_Vertex]);
@@ -118,6 +122,9 @@ CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t 
 	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
 
 	mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R8UI, GetCapacity() * sizeof(std::uint8_t), nullptr);
+
+	PRINT_GEN_TEXTUREBUFFER("[CubeRenderer]", mModelMatrixBuffer);
+	PRINT_GEN_TEXTUREBUFFER("[CubeRenderer]", mMaterialIndexBuffer);
 }
 
 
@@ -383,7 +390,7 @@ void CubeRenderer::DeleteCube(Renderables::Cube *& cube)
 	mIsMaterialIndexBufferSet = false;
 }
 
-void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, TextureIndex ambientTextureIndex, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex)
+void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, const glm::vec3& specular, int16_t shininess, TextureIndex diffuseTextureIndex, TextureIndex specularTextureIndex, TextureIndex normalTextureIndex)
 {
 	assert(materialIndex < mMaterialCount);
 
@@ -394,17 +401,15 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& amb
 		GLuint propertyIndex = Property_Per_Material * materialIndex;
 
 		GLfloat * prop1 = mMaterials.GetProperty(propertyIndex);
-		memcpy(prop1, glm::value_ptr(ambient), sizeof(GLfloat) * 3);
+		memcpy(prop1, glm::value_ptr(diffuse), sizeof(GLfloat) * 3);
 
 		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
-		memcpy(prop2, glm::value_ptr(diffuse), sizeof(GLfloat) * 3);
+		memcpy(prop2, glm::value_ptr(specular), sizeof(GLfloat) * 3);
 
-		GLfloat * prop3 = mMaterials.GetProperty(propertyIndex + 2);
-		memcpy(prop3, glm::value_ptr(specular), sizeof(GLfloat) * 3);
-		memcpy(&prop3[3], &shininess, sizeof(GLfloat));
+		GLbitfield shininessNormalIndexes = ((shininess & 0xFFFF) << 16);
+		memcpy(&prop2[3], &shininessNormalIndexes, sizeof(GLfloat));
 
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
-		texIndexes.mAmbient = ambientTextureIndex;
 		texIndexes.mDiffuse = diffuseTextureIndex;
 		texIndexes.mSpecular = specularTextureIndex;
 		texIndexes.mNormal = normalTextureIndex;
@@ -413,7 +418,7 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& amb
 
 void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat)
 {
-	SetMaterial(materialIndex, mat.mAmbient, mat.mDiffuse, mat.mSpecular, mat.mShininess, mat.mAmbientTextureIndex, mat.mDiffuseTextureIndex, mat.mSpecularTextureIndex, mat.mNormalTextureIndex);
+	SetMaterial(materialIndex, mat.mDiffuse, mat.mSpecular, mat.mShininess, mat.mDiffuseTextureIndex, mat.mSpecularTextureIndex, mat.mNormalTextureIndex);
 }
 
 
@@ -425,23 +430,25 @@ void CubeRenderer::UpdateMaterialTextureIndex()
 	{
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
 
-		GLfloat * prop1 = mMaterials.GetProperty(materialIndex * Property_Per_Material);
-
-		std::uint8_t ambientTextureIndex = texIndexes.mAmbient != NoTexture ? (std::uint8_t)texInfo[texIndexes.mAmbient].GetLayerIndex() : 0xFF;
 		std::uint8_t diffuseTextureIndex = texIndexes.mDiffuse != NoTexture ? (std::uint8_t)texInfo[texIndexes.mDiffuse].GetLayerIndex() : 0xFF;
 		std::uint8_t specularTextureIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetLayerIndex() : 0xFF;
 		std::uint8_t normalTextureIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetLayerIndex() : 0xFF;
 
-		std::uint8_t ambientSamplerIndex = texIndexes.mAmbient != NoTexture ? (std::uint8_t)texInfo[texIndexes.mAmbient].GetSamplerIndex() : 0xFF;
 		std::uint8_t diffuseSamplerIndex = texIndexes.mDiffuse != NoTexture ? (std::uint8_t)texInfo[texIndexes.mDiffuse].GetSamplerIndex() : 0xFF;
 		std::uint8_t specularSamplerIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetSamplerIndex() : 0xFF;
 		std::uint8_t normalSamplerIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetSamplerIndex() : 0xFF;
 
-		GLbitfield ambientNormalIndexes = ((ambientSamplerIndex & 0xFF) << 24) | ((ambientTextureIndex & 0xFF) << 16) | ((normalSamplerIndex & 0xFF) << 8) | (normalTextureIndex & 0xFF);
-		memcpy(&prop1[3], &ambientNormalIndexes, sizeof(GLfloat));
+		GLuint propertyIndex = Property_Per_Material * materialIndex;
 
+		GLfloat * prop1 = mMaterials.GetProperty(propertyIndex);
 		GLbitfield diffuseSpecularIndexes = ((diffuseSamplerIndex & 0xFF) << 24) | ((diffuseTextureIndex & 0xFF) << 16) | ((specularSamplerIndex & 0xFF) << 8) | (specularTextureIndex & 0xFF);
-		memcpy(&prop1[7], &diffuseSpecularIndexes, sizeof(GLfloat));
+		memcpy(&prop1[3], &diffuseSpecularIndexes, sizeof(GLfloat));
+		
+		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
+		GLbitfield shininessNormalIndexes;
+		memcpy(&shininessNormalIndexes, &prop2[3], sizeof(GLfloat));
+		shininessNormalIndexes = (shininessNormalIndexes & 0xFFFF0000) | ((normalSamplerIndex & 0xFF) << 8) | (normalTextureIndex & 0xFF);
+		memcpy(&prop2[3], &shininessNormalIndexes, sizeof(GLfloat));
 	}
 
 	InitializeShader();

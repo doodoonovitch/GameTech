@@ -140,6 +140,7 @@ void Engine::CreateDynamicResources()
 		GLsizeiptr bufferSize = (lightCount + 1) * sizeof(GLuint);
 
 		mLightDescBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, bufferSize, nullptr);
+		PRINT_GEN_TEXTUREBUFFER("[Engine]", mLightDescBuffer);
 
 		glBindBuffer(GL_TEXTURE_BUFFER, mLightDescBuffer.GetBufferId()); GL_CHECK_ERRORS;
 		GLuint * lightDescBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);	GL_CHECK_ERRORS;
@@ -176,6 +177,7 @@ void Engine::CreateDynamicResources()
 		}
 
 		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+		PRINT_GEN_TEXTUREBUFFER("[Engine]", mLightDataBuffer);
 	}
 	// -----------------------------------------------------------------------
 
@@ -201,6 +203,10 @@ void Engine::InternalCreateGBuffers()
 	glGenTextures(__gBuffer_count__, mGBuffers);
 	GL_CHECK_ERRORS;
 
+	PRINT_GEN_FRAMEBUFFER("[Engine]", mDeferredFBO);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_PositionBuffer]);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_DataBuffer]);
+	
 	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -224,6 +230,8 @@ void Engine::InternalCreateGBuffers()
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
 	GL_CHECK_ERRORS;
+
+	PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
 
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
@@ -255,6 +263,9 @@ void Engine::InternalCreateHdrBuffers()
 	glBindFramebuffer(GL_FRAMEBUFFER, mHdrFBO);
 	glGenTextures(1, &mHdrBuffer);
 	GL_CHECK_ERRORS;
+
+	PRINT_GEN_FRAMEBUFFER("[Engine]", mHdrFBO);
+	PRINT_GEN_TEXTURE("[Engine]", mHdrBuffer);
 
 	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -427,6 +438,7 @@ void Engine::InternalCreateMaterialBuffer()
 	});
 
 	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+	PRINT_GEN_TEXTUREBUFFER("[Engine]", mMaterialBuffer);
 
 	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId()); GL_CHECK_ERRORS;
 	GLsizeiptr offset = 0;
@@ -473,6 +485,9 @@ void Engine::InternalCreateFrameDataBuffer()
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); GL_CHECK_ERRORS;
 	glBufferData(GL_UNIFORM_BUFFER, mFrameDataSize, nullptr, GL_STATIC_DRAW); GL_CHECK_ERRORS;
 	glBindBufferBase(GL_UNIFORM_BUFFER, FrameDataBuffer_BindingIndex, mBufferIds[FrameData_BufferId]); GL_CHECK_ERRORS;
+	glBindBuffer(GL_UNIFORM_BUFFER, 0); GL_CHECK_ERRORS;
+
+	PRINT_GEN_BUFFER("[Engine]", mBufferIds[FrameData_BufferId]);
 }
 
 void Engine::Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
@@ -484,12 +499,14 @@ void Engine::Release()
 {
 	GetInstance()->InternalRelease();
 	SAFE_DELETE(sInstance);
+	SAFE_DELETE(Log::Logger::sInstance);
 }
 
 Engine* Engine::GetInstance()
 {
 	if (sInstance == nullptr)
 	{
+		Log::Logger::sInstance = new Log::Logger();
 		sInstance = new Engine();
 	}
 
@@ -648,12 +665,12 @@ void Engine::RenderObjects()
 	});
 }
 
-Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
 {
 	const int lightType = (int)Lights::Light::Point_Light;
 	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::PointLight *light = new Lights::PointLight(position, color, ambient, diffuse, specular, constantAttenuation, linearAttenuation, quadraticAttenuation);
+		Lights::PointLight *light = new Lights::PointLight(position, color, intensity, constantAttenuation, linearAttenuation, quadraticAttenuation);
 		mLights[lightType]->Attach(light);
 		return light;
 	}
@@ -664,12 +681,12 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::v
 	}
 }
 
-Lights::SpotLight * Engine::CreateSpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+Lights::SpotLight * Engine::CreateSpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
 {
 	const int lightType = (int)Lights::Light::Spot_Light;
 	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::SpotLight *light = new Lights::SpotLight(position, color, ambient, diffuse, specular, direction, innerConeAngle, outerConeAngle, constantAttenuation, linearAttenuation, quadraticAttenuation);
+		Lights::SpotLight *light = new Lights::SpotLight(position, color, intensity, direction, innerConeAngle, outerConeAngle, constantAttenuation, linearAttenuation, quadraticAttenuation);
 		mLights[lightType]->Attach(light);
 		return light;
 	}
@@ -681,12 +698,12 @@ Lights::SpotLight * Engine::CreateSpotLight(const glm::vec3 & position, glm::vec
 }
 
 
-Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular)
+Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec3 & direction, glm::vec3 const & color, GLfloat intensity)
 {
 	const int lightType = (int)Lights::Light::Directional_Light;
 	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::DirectionalLight *light = new Lights::DirectionalLight(direction, color, ambient, diffuse, specular);
+		Lights::DirectionalLight *light = new Lights::DirectionalLight(direction, color, intensity);
 		mLights[lightType]->Attach(light);
 		return light;
 	}
@@ -729,7 +746,6 @@ void Engine::InternalCreateTextures()
 			const TextureInfo & texInfo = *texInfoListIter;
 			switch (texInfo.GetCategory())
 			{
-			case TextureCategory::Ambient:
 			case TextureCategory::Diffuse:
 			case TextureCategory::Specular:
 				texMap = &mLightPassTextureMapping;
@@ -807,100 +823,6 @@ void Engine::InternalCreateTextures()
 	});
 
 }
-
-/*
-class TextureGroupLayerCount
-{
-public:
-
-	std::map<std::string, GLint> mLayerIndexByName;
-	GLint mLayerCount = 0;
-	GLint mSamplerIndex;
-};
-
-typedef std::map<TextureGroupId, TextureGroupLayerCount> TextureGroupLayerCountMap;
-
-void Engine::InternalCreateTextures()
-{
-	int samplerIndex = 0;
-	TextureGroupLayerCountMap layerCountByMap;
-	mRenderers->ForEach([&samplerIndex, &layerCountByMap](Renderer * renderer)
-	{
-		TextureInfoList & list = renderer->mTextures;
-		for (TextureInfoList::iterator texInfoIt = list.begin(); texInfoIt != list.end(); ++texInfoIt)
-		{
-			TextureGroupLayerCountMap::iterator mapIt = layerCountByMap.find(texInfoIt->GetGroupId());
-			if (mapIt == layerCountByMap.end())
-			{
-				std::pair<TextureGroupLayerCountMap::iterator, bool> res = layerCountByMap.insert(TextureGroupLayerCountMap::value_type(texInfoIt->GetGroupId(), TextureGroupLayerCount()));
-				mapIt = res.first;
-				switch (texInfoIt->GetCategory())
-				{
-				case TextureCategory::Ambient:
-				case TextureCategory::Diffuse:
-				case TextureCategory::Specular:
-					mapIt->second.mSamplerIndex = samplerIndex;
-					++samplerIndex;
-					break;
-
-				case TextureCategory::NormalMap:
-				case TextureCategory::HeightMap:
-				default:
-					mapIt->second.mSamplerIndex = -1;
-					break;
-				}
-			}
-
-			TextureGroupLayerCount & item = mapIt->second;
-			std::map<std::string, GLint>::iterator it = item.mLayerIndexByName.find(texInfoIt->GetFilename());
-			if (it == item.mLayerIndexByName.end())
-			{
-				item.mLayerIndexByName[texInfoIt->GetFilename()] = item.mLayerCount;
-				texInfoIt->mLayerIndex = item.mLayerCount;
-				++item.mLayerCount;
-			}
-			else
-			{
-				texInfoIt->mLayerIndex = it->second;
-			}
-			texInfoIt->mSamplerIndex = mapIt->second.mSamplerIndex;
-		}
-	});
-
-	for (TextureGroupLayerCountMap::const_iterator it = layerCountByMap.begin(); it != layerCountByMap.end(); ++it)
-	{
-		const TextureGroupLayerCount & item = it->second;
-		std::vector<std::string> textureList(item.mLayerCount);
-		for (std::map<std::string, GLint>::const_iterator it2 = item.mLayerIndexByName.begin(); it2 != item.mLayerIndexByName.end(); ++it2)
-		{
-			textureList[it2->second] = it2->first;
-		}
-
-		//textureList.resize(1);
-		//textureList[0] = "medias/cube_array.ktx";
-		const TextureGroup* texGroup = mTextureManager->LoadTextureGroup(it->first, textureList);
-
-		switch (texGroup->GetCategory())
-		{
-		case TextureCategory::Ambient:
-		case TextureCategory::Diffuse:
-		case TextureCategory::Specular:
-			mTextureGroupList.push_back(texGroup);
-			break;
-
-		case TextureCategory::NormalMap:
-		case TextureCategory::HeightMap:
-		default:
-			break;
-		}		
-	}
-
-	mRenderers->ForEach([](Renderer * renderer)
-	{
-		renderer->UpdateMaterialTextureIndex();
-	});
-}
-*/
 	// =======================================================================
 	// =======================================================================
 } // namespace CoreFx

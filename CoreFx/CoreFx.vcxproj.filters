@@ -27,6 +27,9 @@
     <Filter Include="Lights">
       <UniqueIdentifier>{abcd24eb-1b80-4b65-8479-406fe5eb4f22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{20fe9843-0ea0-46bc-b031-180e0f80dbee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -108,6 +111,9 @@
     <ClInclude Include="Lights\SpotLight.h">
       <Filter>Lights</Filter>
     </ClInclude>
+    <ClInclude Include="Log\Logger.h">
+      <Filter>Log</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -170,6 +176,9 @@
     <ClCompile Include="PropertyData.cpp" />
     <ClCompile Include="Lights\SpotLight.cpp">
       <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Log\Logger.cpp">
+      <Filter>Log</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

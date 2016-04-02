@@ -31,17 +31,9 @@ public:
 	enum BasicLightPropertyIndex
 	{
 
-		Color_Property,
-		Intensity_Property,
+		ColorIntensity_Property,
 
 		__Common_Property_Count__
-	};
-
-	enum LightIntensityIndex
-	{
-		Ambient_Intensity,
-		Diffuse_Intensity,
-		Specular_Intensity,
 	};
 
 	enum LightType
@@ -83,46 +75,29 @@ public:
 
 	void SetColor(const glm::vec3 & value)
 	{
-		SetProperty(value, Color_Property);
+		SetProperty(value, ColorIntensity_Property);
 	}
 	const glm::vec3 & GetColor() const
 	{
-		return *(glm::vec3 *)GetProperty(Color_Property);
+		return *(glm::vec3 *)GetProperty(ColorIntensity_Property);
 	}
 
-	void SetIntensity(const glm::vec3 & value)
+	void SetIntensity(GLfloat value)
 	{
-		SetProperty(value, Intensity_Property);
+		GLfloat * prop = GetProperty(ColorIntensity_Property);
+		prop[3] = value;
+		SetIsModified(true);
 	}
-	const glm::vec3 & GetIntensity() const
+	GLfloat GetIntensity() const
 	{
-		return *(glm::vec3 *)GetProperty(Intensity_Property);
-	}
-
-	void SetIntensity(GLfloat ambient, GLfloat diffuse, GLfloat specular)
-	{
-		glm::vec3 value(ambient, diffuse, specular);
-		SetProperty(value, Intensity_Property);
-	}
-	GLfloat GetAmbientIntensity() const
-	{
-		return GetProperty(Intensity_Property)[Ambient_Intensity];
-	}
-	GLfloat GetDiffuseIntensity() const
-	{
-		return GetProperty(Intensity_Property)[Diffuse_Intensity];
-	}
-	GLfloat GetSpecularIntensity() const
-	{
-		return GetProperty(Intensity_Property)[Specular_Intensity];
+		return GetProperty(ColorIntensity_Property)[3];
 	}
 
 
 protected:
 
 	
-	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, glm::vec3 const & intensity);
-	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat ambientIntensity, GLfloat diffuseIntensity, GLfloat specularIntensity);
+	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat intensity);
 	virtual ~Light();
 
 	GLfloat * GetProperty(GLuint propertyIndex) 

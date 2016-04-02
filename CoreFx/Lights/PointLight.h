@@ -82,7 +82,7 @@ public:
 protected:
 
 
-	PointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
+	PointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
 	virtual ~PointLight();
 
 protected:

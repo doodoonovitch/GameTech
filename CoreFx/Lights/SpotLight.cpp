@@ -8,8 +8,8 @@ namespace CoreFx
 
 
 
-SpotLight::SpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat ambient, GLfloat diffuse, GLfloat specular, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
-	: Light(Light::Spot_Light, __property_count__, color, ambient, diffuse, specular)
+SpotLight::SpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+	: Light(Light::Spot_Light, __property_count__, color, intensity)
 	, mWorldPosition(position, 1.f)
 	, mWorldDirection(direction, 0.f)
 	, mInnerConeAngle(innerConeAngle)

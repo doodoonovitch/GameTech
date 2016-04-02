@@ -52,6 +52,8 @@ namespace CoreFx
 
 }; // namespace CoreFx
 
+#include "Log\Logger.h"
+
 #include "Maths\DualQuaternion.h"
 
 #include "InstanceContainer.h"

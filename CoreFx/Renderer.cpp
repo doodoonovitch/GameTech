@@ -31,7 +31,6 @@ bool Renderer::AddTexture(const char * filename, TextureCategory category, Textu
 	uint16_t rendererId;
 	switch (category)
 	{
-	case TextureCategory::Ambient:
 	case TextureCategory::Diffuse:
 	case TextureCategory::Specular:
 		rendererId = 0;
