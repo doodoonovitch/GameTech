@@ -21,6 +21,13 @@ public:
 
 private:
 
+	enum EUniformIndex
+	{
+		vGridSize,
+
+		__uniforms_count__
+	};
+
 	int m_vertexCount;
 };
 

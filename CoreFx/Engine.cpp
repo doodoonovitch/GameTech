@@ -38,6 +38,8 @@ Engine::Engine()
 	, mLightToDrawCount(16)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
+	, mDeferredShader("DeferredShader")
+	, mToneMappingShader("ToneMappingShader")
 {
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
@@ -360,25 +362,28 @@ void Engine::InternalInitializeDeferredPassShader()
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mLightPassTextureMapping.mMapping.size());
 	mDeferredShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
+	const char * uniformNames[__deferred_uniforms_count__] =
+	{
+		"u_gBufferPosition",
+		"u_gBufferData",
+		"u_materialDataSampler",
+		"u_lightDescSampler",
+		"u_lightDataSampler"
+	};
+
 	mDeferredShader.CreateAndLinkProgram();
 
 	mDeferredShader.Use();
-	mDeferredShader.AddAttribute("in_Position");
 
-	mDeferredShader.AddUniform("u_gBufferPosition");
-	mDeferredShader.AddUniform("u_gBufferData");
-	mDeferredShader.AddUniform("u_materialDataSampler");
-
-	mDeferredShader.AddUniform("u_lightDescSampler");
-	mDeferredShader.AddUniform("u_lightDataSampler");
+	mDeferredShader.AddUniforms(uniformNames, __deferred_uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(mDeferredShader.GetUniform("u_gBufferPosition"), 0);
-	glUniform1i(mDeferredShader.GetUniform("u_gBufferData"), 1);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferPosition), 0);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferData), 1);
 
-	glUniform1i(mDeferredShader.GetUniform("u_materialDataSampler"), 2);
-	glUniform1i(mDeferredShader.GetUniform("u_lightDescSampler"), 3);
-	glUniform1i(mDeferredShader.GetUniform("u_lightDataSampler"), 4);
+	glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
+	glUniform1i(mDeferredShader.GetUniform(u_lightDescSampler), 3);
+	glUniform1i(mDeferredShader.GetUniform(u_lightDataSampler), 4);
 
 	for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
 	{
@@ -410,16 +415,20 @@ void Engine::InternalInitializeToneMappingShader()
 	mToneMappingShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
 	mToneMappingShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/tonemapping.fs.glsl");
 
+	const char * uniformNames[__tonemapping_uniforms_count__] =
+	{
+		"u_Exposure",
+		"u_InvGamma",
+		"u_HdrBuffer"
+	};
+
 	mToneMappingShader.CreateAndLinkProgram();
 
 	mToneMappingShader.Use();
-	mToneMappingShader.AddAttribute("in_Position");
 
-	mToneMappingShader.AddUniform("u_Exposure");
-	mToneMappingShader.AddUniform("u_InvGamma");
-	mToneMappingShader.AddUniform("u_HdrBuffer");
+	mToneMappingShader.AddUniforms(uniformNames, __tonemapping_uniforms_count__);
 
-	glUniform1i(mToneMappingShader.GetUniform("u_HdrBuffer"), 0);
+	glUniform1i(mToneMappingShader.GetUniform(u_HdrBuffer), 0);
 
 	mToneMappingShader.UnUse();
 
@@ -639,8 +648,8 @@ void Engine::RenderObjects()
 
 	mToneMappingShader.Use();
 
-		glUniform1f(mToneMappingShader.GetUniform("u_Exposure"), mExposure);
-		glUniform1f(mToneMappingShader.GetUniform("u_InvGamma"), mInvGamma);
+		glUniform1f(mToneMappingShader.GetUniform(u_Exposure), mExposure);
+		glUniform1f(mToneMappingShader.GetUniform(u_InvGamma), mInvGamma);
 
 		glBindVertexArray(mQuad->GetVao());
 

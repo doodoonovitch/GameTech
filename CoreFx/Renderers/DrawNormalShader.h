@@ -22,6 +22,31 @@ public:
 
 private:
 
+	enum EAttributeIndex
+	{
+		in_Position,
+		in_Normal,
+
+		__attributes_count__
+	};
+
+	enum EUniformIndex
+	{
+		u_NormalMagnitude,
+		u_LightMagnitude,
+		u_VertexNormalColor,
+		u_PointLightColor,
+		u_DirectionalLightColor,
+		u_FirstLightIndex,
+		u_DrawLightCount,
+		perInstanceDataSampler,
+		lightDescSampler,
+		lightDataSampler,
+
+		__uniforms_count__
+	};
+
+
 };
 
 

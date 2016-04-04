@@ -163,7 +163,6 @@
     <ClInclude Include="Renderers\CubeRenderer.h" />
     <ClInclude Include="Renderers\DrawNormalShader.h" />
     <ClInclude Include="Renderers\GridRenderer.h" />
-    <ClInclude Include="Renderers\MeshRenderer.h" />
     <ClInclude Include="Renderers\RendererHelper.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
@@ -195,7 +194,6 @@
     <ClCompile Include="Renderers\CubeRenderer.cpp" />
     <ClCompile Include="Renderers\DrawNormalShader.cpp" />
     <ClCompile Include="Renderers\GridRenderer.cpp" />
-    <ClCompile Include="Renderers\MeshRenderer.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp">

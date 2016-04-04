@@ -267,6 +267,26 @@ private:
 
 private:
 
+	enum EDeferredShaderUniformIndex
+	{
+		u_gBufferPosition,
+		u_gBufferData,
+		u_materialDataSampler,
+		u_lightDescSampler,
+		u_lightDataSampler,
+
+		__deferred_uniforms_count__
+	};
+
+	enum EToneMappingShaderUniformIndex
+	{
+		u_Exposure,
+		u_InvGamma,
+		u_HdrBuffer,
+
+		__tonemapping_uniforms_count__
+	};
+
 	static Engine* sInstance;
 
 	TextureManager * mTextureManager;

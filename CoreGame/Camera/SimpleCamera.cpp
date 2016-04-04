@@ -91,16 +91,16 @@ void SimpleCamera::OnInit()
 			{
 				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), glm::vec3(1.f, 1.f, 1.f), 128, 3, Renderers::CubeRenderer::NoTexture, 4),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 8, 0, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, 2),
 
 				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), glm::vec3(1.f, 1.f, 1.f), 128, 3, Renderers::CubeRenderer::NoTexture, 4),
 
 				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), glm::vec3(1.f, .6f, .2f), 256, 5, Renderers::CubeRenderer::NoTexture, 6),
 				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, 8, 9),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 32, 1, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 16, 1, Renderers::CubeRenderer::NoTexture, 2),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, 2),
 
 				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, 2),
 				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, 2)
@@ -159,7 +159,7 @@ void SimpleCamera::OnInit()
 		*/
 
 	// Setup Lights
-		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(5.f, 2.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 20.f, glm::normalize(glm::vec3(.4f, 0.f, -0.9f)), glm::radians(15.f), glm::radians(30.f), 0.1f, 0.2f, 0.5f);
+		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), 0.2f);
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.7f, 1.8f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 0.7f, 0.02f);

@@ -10,36 +10,31 @@ namespace CoreFx
 
 
 GridRenderer::GridRenderer(int width, int depth)
-	: RendererHelper<Renderables::Grid, 1>(0)
+	: RendererHelper<Renderables::Grid, 1>(0, "GridRenderer")
 {
 	std::cout << std::endl;
 	std::cout << "Initialize GridRenderer...." << std::endl;
+
+	const char * uniformNames[__uniforms_count__] =
+	{
+		"vGridSize"
+	};
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid.vs.glsl");
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
-		mShader.AddAttribute("vVertex");
 
-		mShader.AddUniform("vGridSize");
+		mShader.AddUniforms(uniformNames, __uniforms_count__);
 
 		//pass values of constant uniforms at initialization
-		glUniform2f(mShader.GetUniform("vGridSize"), (float)width, (float)depth);
+		glUniform2f(mShader.GetUniform(vGridSize), (float)width, (float)depth);
 
 		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
-
-
-
-	std::cout << std::endl;
-	std::cout << "Vertex attribute index : " << std::endl;
-	std::cout << "\t vVertex : " << mShader.GetAttribute("vVertex") << std::endl;
-	std::cout << "Uniform attribute index : " << std::endl;
-	std::cout << "\t vGridSize : " << mShader.GetUniform("vGridSize") << std::endl;
-
 
 	m_vertexCount = ((width + 1) + (depth + 1)) * 2;
 	glm::vec3* vertices = new glm::vec3[m_vertexCount];
@@ -79,8 +74,6 @@ GridRenderer::GridRenderer(int width, int depth)
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "\t mVaoID : " << mVaoID << std::endl;
-	std::cout << "\t mVboID[0] : " << mVboIDs[0] << std::endl;
 	std::cout << "... GridRenderer initialized!" << std::endl << std::endl;
 
 	delete [] vertices;	 

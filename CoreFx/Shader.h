@@ -34,7 +34,7 @@ public:
 
 
 public:
-	Shader(void);
+	Shader(const char * title);
 	virtual ~Shader(void);
 	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, bool includeCommon = true);
 	void LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon = true);
@@ -44,10 +44,10 @@ public:
 
 	void Use() const;
 	void UnUse() const;
-	void AddAttribute(const std::string& attribute);
-	void AddUniform(const std::string& uniform);
-	GLint GetAttribute(const std::string& attribute) const;
-	GLint GetUniform(const std::string& uniform) const;
+	void AddAttributes(const char * names[], int count);
+	void AddUniforms(const char * names[], int count);
+	GLint GetAttribute(int index) const;
+	GLint GetUniform(int index) const;
 	GLint GetProgram() const { return mProgram; }
 
 	void SetupFrameDataBlockBinding() const;
@@ -64,8 +64,10 @@ protected:
 
 	GLuint mProgram;
 	std::vector<GLuint> mShaders;
-	std::map<std::string, GLint> mAttributeList;
-	std::map<std::string, GLint> mUniformLocationList;
+	std::vector<GLint> mAttributeList;
+	std::vector<GLint> mUniformLocationList;
+
+	std::string mTitle;
 };
 
 

@@ -20,9 +20,10 @@ public:
 
 protected:
 
-	RendererHelper(GLuint propertyCount)
+	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr)
 		: Renderer(propertyCount)
 		, mVaoID(0)
+		, mShader(shaderTitle)
 	{
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
 	}
@@ -87,8 +88,8 @@ public:
 
 protected:
 
-	SceneObjectRenderer(GLuint propertyCount, size_t capacity, size_t pageSize)
-		: RendererHelper<T_Object, T_vbo_count>(propertyCount)
+	SceneObjectRenderer(GLuint propertyCount, size_t capacity, size_t pageSize, const char * shaderTitle = nullptr)
+		: RendererHelper<T_Object, T_vbo_count>(propertyCount, shaderTitle)
 		, mObjs(capacity, pageSize)
 	{
 

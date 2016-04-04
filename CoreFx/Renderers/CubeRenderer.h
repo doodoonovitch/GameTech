@@ -62,6 +62,16 @@ public:
 
 private:
 
+	enum EUniformIndex
+	{
+		u_MaterialBaseIndex,
+		u_perInstanceDataSampler,
+		u_materialIndexSampler,
+		u_materialDataSampler,
+
+		__uniforms_count__
+	};
+
 	enum VBOIndex
 	{
 		VBO_Vertex = 0,

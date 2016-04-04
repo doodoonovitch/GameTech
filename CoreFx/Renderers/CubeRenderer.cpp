@@ -8,7 +8,7 @@ namespace CoreFx
 
 
 CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Cube, 2>(materialCount * Property_Per_Material, capacity, pageSize)
+	: SceneObjectRenderer<Renderables::Cube, 2>(materialCount * Property_Per_Material, capacity, pageSize, "CubeRenderer")
 	, mMaterialCount(materialCount)
 	, mMaterialTextureIndexesList(materialCount)
 	, mIsMaterialIndexBufferSet(false)
@@ -222,23 +222,23 @@ void CubeRenderer::InitializeShader()
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size(), "u_normalMapSampler");
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
+	const char * uniformNames[__uniforms_count__] =
+	{
+		"u_MaterialBaseIndex",
+		"u_perInstanceDataSampler",
+		"u_materialIndexSampler",
+		"u_materialDataSampler"
+	};
 
 	mShader.CreateAndLinkProgram();
 
 	mShader.Use();
-	mShader.AddAttribute("in_Position");
-	mShader.AddAttribute("in_Normal");
-	mShader.AddAttribute("in_TexUV");
-
-	mShader.AddUniform("u_MaterialBaseIndex");
-	mShader.AddUniform("u_perInstanceDataSampler");
-	mShader.AddUniform("u_materialIndexSampler");
-	mShader.AddUniform("u_materialDataSampler");
+	mShader.AddUniforms(uniformNames, __uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(mShader.GetUniform("u_perInstanceDataSampler"), 0);
-	glUniform1i(mShader.GetUniform("u_materialIndexSampler"), 1);
-	glUniform1i(mShader.GetUniform("u_materialDataSampler"), 2);
+	glUniform1i(mShader.GetUniform(u_perInstanceDataSampler), 0);
+	glUniform1i(mShader.GetUniform(u_materialIndexSampler), 1);
+	glUniform1i(mShader.GetUniform(u_materialDataSampler), 2);
 
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
@@ -257,22 +257,6 @@ void CubeRenderer::InitializeShader()
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
-
-
-	std::cout << std::endl;
-	std::cout << "Vertex attribute index : " << std::endl;
-	std::cout << "\t in_Position : " << mShader.GetAttribute("in_Position") << std::endl;
-	std::cout << "\t in_Normal : " << mShader.GetAttribute("in_Normal") << std::endl;
-	std::cout << "\t in_TexUV : " << mShader.GetAttribute("in_TexUV") << std::endl;
-	std::cout << std::endl;
-	std::cout << "Uniform attribute index : " << std::endl;
-	std::cout << "\t u_perInstanceDataSampler : " << mShader.GetUniform("u_perInstanceDataSampler") << std::endl;
-	std::cout << "\t u_materialIndexSampler : " << mShader.GetUniform("u_materialIndexSampler") << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "\t mVaoID : " << mVaoID << std::endl;
-	std::cout << "\t mVboID[VBO_Vertex] : " << mVboIDs[VBO_Vertex] << std::endl;
-	std::cout << "\t mVboID[VBO_Index] : " << mVboIDs[VBO_Index] << std::endl;
 
 	std::cout << "... CubeRenderer shader initialized!" << std::endl << std::endl;
 
@@ -331,7 +315,7 @@ void CubeRenderer::Render()
 				glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureMapping.mMapping[i].mTexture->GetResourceId());
 			}
 
-			glUniform1i(mShader.GetUniform("u_MaterialBaseIndex"), GetMaterialBaseIndex());
+			glUniform1i(mShader.GetUniform(u_MaterialBaseIndex), GetMaterialBaseIndex());
 
 			glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 		glBindVertexArray(0);

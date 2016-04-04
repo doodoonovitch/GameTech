@@ -15,15 +15,18 @@ AxisRenderer::AxisRenderer()
 	std::cout << std::endl;
 	std::cout << "Initialize AxisRenderer...." << std::endl;
 
+	const char * attributeNames[__attributes_count__] =
+	{
+		"vVertex",
+		"vColor"
+	};
+
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis.vs.glsl");
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
-		mShader.AddAttribute("vVertex");
-		mShader.AddAttribute("vColor");
-		//pass values of constant uniforms at initialization
-
+		mShader.AddAttributes(attributeNames, __attributes_count__);
 		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
 
@@ -52,12 +55,12 @@ AxisRenderer::AxisRenderer()
 		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 		GL_CHECK_ERRORS;
 		 
-		glEnableVertexAttribArray(mShader.GetAttribute("vVertex"));
-		glVertexAttribPointer(mShader.GetAttribute("vVertex"), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+		glEnableVertexAttribArray(mShader.GetAttribute(vVertex));
+		glVertexAttribPointer(mShader.GetAttribute(vVertex), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 		GL_CHECK_ERRORS;
 
-		glEnableVertexAttribArray(mShader.GetAttribute("vColor"));
-		glVertexAttribPointer(mShader.GetAttribute("vColor"), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(offsetof(Vertex, color)));
+		glEnableVertexAttribArray(mShader.GetAttribute(vColor));
+		glVertexAttribPointer(mShader.GetAttribute(vColor), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(offsetof(Vertex, color)));
 		GL_CHECK_ERRORS;
 
 		 
@@ -65,8 +68,6 @@ AxisRenderer::AxisRenderer()
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "\t mVaoID : " << mVaoID << std::endl;
-	std::cout << "\t mVboID[0] : " << mVboIDs[0] << std::endl;
 	std::cout << "... AxisRenderer initialized!" << std::endl << std::endl;
 }
 

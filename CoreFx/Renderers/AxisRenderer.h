@@ -20,6 +20,13 @@ public:
 	virtual void DebugRender() override;
 
 private:
+	enum EAttributeIndex
+	{
+		vVertex,
+		vColor,
+
+		__attributes_count__
+	};
 
 	struct Vertex
 	{

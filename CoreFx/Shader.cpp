@@ -8,8 +8,9 @@ namespace CoreFx
 
 	std::string Shader::sCommonInclude;
 
-Shader::Shader(void)
+Shader::Shader(const char * title)
 	: mProgram(0)
+	, mTitle(title != nullptr ? title : "")
 {
 	mAttributeList.clear();
 	mUniformLocationList.clear();
@@ -200,34 +201,36 @@ void Shader::UnUse() const
 	glUseProgram(0);
 }
 
-void Shader::AddAttribute(const std::string& attribute)
+void Shader::AddAttributes(const char * names[], int count)
 {
-	mAttributeList[attribute] = glGetAttribLocation(mProgram, attribute.c_str());
-	GL_CHECK_ERRORS;
+	mAttributeList.reserve(mAttributeList.size() + count);
+	for (auto i = 0; i < count; ++i)
+	{
+		mAttributeList.push_back(glGetAttribLocation(mProgram, names[i]));
+		PRINT_MESSAGE("\t[%s] + attribute : name='%s' (index=%i), location=%i.\n", mTitle.c_str(), names[i], i, mAttributeList.back());
+	}
 }
 
-void Shader::AddUniform(const std::string& uniform)
+void Shader::AddUniforms(const char * names[], int count)
 {
-	mUniformLocationList[uniform] = glGetUniformLocation(mProgram, uniform.c_str());
-	GL_CHECK_ERRORS;
+	mUniformLocationList.reserve(mUniformLocationList.size() + count);
+	for (auto i = 0; i < count; ++i)
+	{
+		mUniformLocationList.push_back(glGetUniformLocation(mProgram, names[i]));
+		PRINT_MESSAGE("\t[%s] + uniform : name='%s' (index=%i), location=%i.\n", mTitle.c_str(), names[i], i, mUniformLocationList.back());
+	}
 }
 
-GLint Shader::GetAttribute(const std::string& attribute) const
+GLint Shader::GetAttribute(int index) const
 {
-	auto it = mAttributeList.find(attribute);
-	if (it == mAttributeList.end())
-		return -1;
-	else
-		return it->second;
+	assert(index < mAttributeList.size());
+	return index < mAttributeList.size() ? mAttributeList[index] : -1;
 }
 
-GLint Shader::GetUniform(const std::string& uniform) const
+GLint Shader::GetUniform(int index) const
 {
-	auto it = mUniformLocationList.find(uniform);
-	if (it == mUniformLocationList.end())
-		return -1;
-	else
-		return it->second;
+	assert(index < mUniformLocationList.size());
+	return index < mUniformLocationList.size() ? mUniformLocationList[index] : -1;
 }
 
 void Shader::SetupFrameDataBlockBinding() const

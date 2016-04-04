@@ -93,7 +93,7 @@ namespace CoreFx
 #include "Renderers\CubeRenderer.h"
 #include "Renderers\GridRenderer.h"
 #include "Renderers\AxisRenderer.h"
-#include "Renderers\MeshRenderer.h"
+//#include "Renderers\MeshRenderer.h"
 
 
 #endif // COREFX_COREFX_H
