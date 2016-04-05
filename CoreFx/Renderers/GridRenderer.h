@@ -16,8 +16,8 @@ public:
 	GridRenderer(int width=10, int depth=10);
 	virtual ~GridRenderer();
 
-	virtual void Render() override;
-	virtual void DebugRender() override	{};
+	virtual void Render() override	{};
+	virtual void DebugRender() override;
 
 private:
 

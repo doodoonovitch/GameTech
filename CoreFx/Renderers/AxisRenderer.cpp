@@ -76,7 +76,7 @@ AxisRenderer::~AxisRenderer()
 {
 }
  
-void AxisRenderer::Render()
+void AxisRenderer::DebugRender()
 {
 	mShader.Use();
 		glBindVertexArray(mVaoID);

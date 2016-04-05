@@ -338,13 +338,7 @@ void CubeRenderer::DebugRender()
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDescBuffer().GetTextureId());
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_BUFFER, engine->GetLightDataBuffer().GetTextureId());
-
+		
 		glDrawElementsInstanced(GL_TRIANGLE_STRIP, mIndexCount, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 		glBindVertexArray(0);
 		drawVertexNormalShader.UnUse();

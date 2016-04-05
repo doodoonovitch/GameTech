@@ -606,6 +606,11 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
+	mRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->DebugRender();
+	});
+
 	// light pass
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); 
 

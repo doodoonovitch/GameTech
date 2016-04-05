@@ -242,6 +242,15 @@
     <None Include="..\Data\Shaders\axis.deferred.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\vertex_normal.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\vertex_normal.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\vertex_normal.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

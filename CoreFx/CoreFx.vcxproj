@@ -228,6 +228,9 @@
     <None Include="..\Data\Shaders\mesh_shader_NUV.geom" />
     <None Include="..\Data\Shaders\mesh_shader_NUV.vert" />
     <None Include="..\Data\Shaders\tonemapping.fs.glsl" />
+    <None Include="..\Data\Shaders\vertex_normal.fs.glsl" />
+    <None Include="..\Data\Shaders\vertex_normal.gs.glsl" />
+    <None Include="..\Data\Shaders\vertex_normal.vs.glsl" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

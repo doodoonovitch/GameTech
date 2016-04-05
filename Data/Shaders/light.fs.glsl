@@ -206,7 +206,7 @@ vec4 GridRenderer(vec3 Position, int MaterialIndex)
 	return vec4(texUV.xy, 1, 1);
 }
 
-vec4 AxisRenderer(vec3 Position, int MaterialIndex)
+vec4 ColorRenderer(vec3 Position, int MaterialIndex)
 {
     uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
     vec4 color = vec4(unpackHalf2x16(data.x), unpackHalf2x16(data.y));
@@ -232,11 +232,15 @@ void main(void)
 	}
 	else if(rendererId == AXIS_RENDERER_ID)
 	{
-		vFragColor = AxisRenderer(position, materialIndex);
+		vFragColor = ColorRenderer(position, materialIndex);
 	}
 	else if(rendererId == GRID_RENDERER_ID)
 	{
 		vFragColor = GridRenderer(position, materialIndex);
+	}
+	else if(rendererId == VERTEX_NORMAL_RENDERER_ID)
+	{
+		vFragColor = ColorRenderer(position, materialIndex);
 	}
 }
 
