@@ -198,6 +198,22 @@ vec4 CubeRenderer(vec3 Position, int MaterialIndex)
 	return  materialDiffuse * vec4(ambientColor *.5 + diffuseColor, 1) +  materialSpecular * vec4(specularColor, 1);
 }
 
+vec4 GridRenderer(vec3 Position, int MaterialIndex)
+{
+    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
+    vec2 texUV = unpackHalf2x16(data.x);
+
+	return vec4(texUV.xy, 1, 1);
+}
+
+vec4 AxisRenderer(vec3 Position, int MaterialIndex)
+{
+    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
+    vec4 color = vec4(unpackHalf2x16(data.x), unpackHalf2x16(data.y));
+
+	return color;
+}
+
 //
 // ---------------------------------------------------------------------------
 
@@ -213,6 +229,14 @@ void main(void)
 	if(rendererId == CUBE_RENDERER_ID)
 	{
 		vFragColor = CubeRenderer(position, materialIndex);
+	}
+	else if(rendererId == AXIS_RENDERER_ID)
+	{
+		vFragColor = AxisRenderer(position, materialIndex);
+	}
+	else if(rendererId == GRID_RENDERER_ID)
+	{
+		vFragColor = GridRenderer(position, materialIndex);
 	}
 }
 

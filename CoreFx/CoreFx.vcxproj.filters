@@ -227,12 +227,6 @@
     <None Include="..\Data\Shaders\cube.forward.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\axis.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\grid.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Data\Shaders\grid.vs.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -240,6 +234,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\tonemapping.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid.deferred.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis.deferred.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

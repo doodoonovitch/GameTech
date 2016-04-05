@@ -22,7 +22,7 @@ GridRenderer::GridRenderer(int width, int depth)
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid.vs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid.forward.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid.deferred.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 
@@ -84,12 +84,12 @@ GridRenderer::~GridRenderer()
 {
 }
  
-void GridRenderer::DebugRender()
+void GridRenderer::Render()
 {
 	mShader.Use();
-		glBindVertexArray(mVaoID);
-			glDrawArrays(GL_LINES, 0, m_vertexCount);
-		glBindVertexArray(0);
+	glBindVertexArray(mVaoID);
+	glDrawArrays(GL_LINES, 0, m_vertexCount);
+	glBindVertexArray(0);
 	mShader.UnUse();
 }
 

@@ -16,8 +16,8 @@ public:
 	AxisRenderer();
 	virtual ~AxisRenderer();
 
-	virtual void Render() override {};
-	virtual void DebugRender() override;
+	virtual void Render() override;
+	virtual void DebugRender() override {};
 
 private:
 	enum EAttributeIndex

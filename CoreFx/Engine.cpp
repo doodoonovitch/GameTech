@@ -659,18 +659,18 @@ void Engine::RenderObjects()
 		glBindVertexArray(0);
 	mDeferredShader.UnUse();
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); 
-	glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); 
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); 
+	//glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); 
 
-	//glEnable(GL_BLEND);
-	//glBlendEquation(GL_FUNC_ADD);
-	//glBlendFunc(GL_ONE, GL_ONE);
-	glEnable(GL_DEPTH_TEST); 
+	////glEnable(GL_BLEND);
+	////glBlendEquation(GL_FUNC_ADD);
+	////glBlendFunc(GL_ONE, GL_ONE);
+	//glEnable(GL_DEPTH_TEST); 
 
-	mRenderers->ForEach([](Renderer * renderer)
-	{
-		renderer->DebugRender();
-	});
+	//mRenderers->ForEach([](Renderer * renderer)
+	//{
+	//	renderer->DebugRender();
+	//});
 }
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)

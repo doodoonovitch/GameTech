@@ -54,9 +54,9 @@
 // ---------------------------------------------------------------------------
 // Render ids
 //
-#define CUBE_RENDERER_ID							0
-#define AXIS_RENDERER_ID							1
-#define GRID_RENDERER_ID							2
+#define CUBE_RENDERER_ID							1
+#define AXIS_RENDERER_ID							2
+#define GRID_RENDERER_ID							3
 //
 // ---------------------------------------------------------------------------
 

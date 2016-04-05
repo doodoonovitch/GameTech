@@ -23,7 +23,7 @@ AxisRenderer::AxisRenderer()
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis.vs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis.forward.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis.deferred.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddAttributes(attributeNames, __attributes_count__);
@@ -76,7 +76,7 @@ AxisRenderer::~AxisRenderer()
 {
 }
  
-void AxisRenderer::DebugRender()
+void AxisRenderer::Render()
 {
 	mShader.Use();
 		glBindVertexArray(mVaoID);
