@@ -29,9 +29,8 @@ void main(void)
 
 	vec3 normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
 	normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
-	//vec3 normal = fs_in.Normal;
 	
-	outPosition = vec4(fs_in.Position.xyz, intBitsToFloat(fs_in.MaterialIndex));
+	outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(CombineRenderIdAndMaterialIndex(CUBE_RENDERER_ID, fs_in.MaterialIndex)));
 
 	outData = uvec2(packHalf2x16(fs_in.TexUV.xy), packHalf2x16(normal.xy));
 }

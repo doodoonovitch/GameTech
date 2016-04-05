@@ -1,12 +1,21 @@
 #version 420
 
+// ---------------------------------------------------------------------------
+// Vertex attribute locations
+//
 #define	POSITION_ATTRIBUTE							0
 #define	NORMAL_ATTRIBUTE							1
 #define	TANGENT_ATTRIBUTE							2
 #define	UV_ATTRIBUTE								3
 #define	MATERIALID_ATTRIBUTE						4
 #define	BINORMAL_ATTRIBUTE							5
+//
+// ---------------------------------------------------------------------------
 
+
+// ---------------------------------------------------------------------------
+// Light property indices
+//
 #define POINT_LIGHT_TYPE							0
 #define DIRECTIONAL_LIGHT_TYPE						1
 #define SPOT_LIGHT_TYPE								2
@@ -21,17 +30,41 @@
 #define SPOT_LIGHT_ATTENUATION_PROPERTY				3	
 
 #define DIRECTIONAL_LIGHT_DIRECTION_PROPERTY		1
+//
+// ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
+// Light helper macros
+//
+#define GetLightType(lightDesc)						(lightDesc & 15)
+#define GetLightDataIndex(lightDesc)				(lightDesc >> 16)
+//
+// ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
+// Material sampler first index and max sampler count
+//
+#define FIRST_TEXTURE_SAMPLER_INDEX					10
+#define MAX_TEXTURE_SAMPLER							32
+//
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Render ids
+//
+#define CUBE_RENDERER_ID							0
+#define AXIS_RENDERER_ID							1
+#define GRID_RENDERER_ID							2
+//
+// ---------------------------------------------------------------------------
+
+#define CombineRenderIdAndMaterialIndex(rendererId, materialIndex) uint( (uint(rendererId) << 24) | (uint(materialIndex) & 0x00FFFFFF) )
 
 
 #define PI											3.14159265
 
-#define GetLightDesc(index)							u_LightDesc[index / 4][index & 3]
-#define GetLightType(lightDesc)						(lightDesc & 15)
-#define GetLightDataIndex(lightDesc)				(lightDesc >> 16)
-
-
-#define FIRST_TEXTURE_SAMPLER_INDEX					10
-#define MAX_TEXTURE_SAMPLER							32
 
 struct DualQuat
 {

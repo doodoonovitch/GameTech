@@ -17,33 +17,47 @@ uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
 
 vec4 TexGet(int samplerIndex, vec3 p);
 
-struct FragmentInfo
+
+// ---------------------------------------------------------------------------
+// GBuffer data extraction helpers
+//
+// ---------------------------------------------------------------------------
+
+void UnpackPositionAndMaterialIdFromGBuffer(out vec3 Position, out int MaterialIndex, out int RendererId)
 {
-    vec3 Position;
-    vec3 Normal;
-	vec2 TexUV;
-    int MaterialIndex;
-};
-
-void UnpackGBuffer(vec2 coord, out FragmentInfo fragment)
-{
-    vec4 pos = texture(u_gBufferPosition, coord, 0);
-	fragment.Position = pos.xyz;
-	fragment.MaterialIndex = floatBitsToInt(pos.w);
-
-    uvec2 data = texture(u_gBufferData, coord, 0).xy;
-    fragment.TexUV.xy = unpackHalf2x16(data.x);
-    fragment.Normal.xy = unpackHalf2x16(data.y);
-	fragment.Normal.z = sqrt(dot(fragment.Normal.xy, fragment.Normal.xy));
-
+    vec4 pos = texture(u_gBufferPosition, fs_in.TexUV, 0);
+	Position = pos.xyz;
+	uint bitfieldValue = floatBitsToUint(pos.w);
+	MaterialIndex = int(bitfieldValue & uint(0x00FFFFFF));
+	RendererId = int((bitfieldValue & uint(0xFF000000)) >> 24);
 }
 
-void main(void)
+void UnpackNormalTexUVFromGBuffer(out vec3 Normal, out vec2 TexUV)
 {
-	FragmentInfo gData;
-	UnpackGBuffer(fs_in.TexUV, gData);
-	
-	vec4 matData = texelFetch(u_materialDataSampler, gData.MaterialIndex);
+    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
+    TexUV.xy = unpackHalf2x16(data.x);
+    Normal.xy = unpackHalf2x16(data.y);
+	Normal.z = sqrt(dot(Normal.xy, Normal.xy));
+	Normal = normalize(Normal);
+}
+
+//
+// ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
+// Renderers
+//
+// ---------------------------------------------------------------------------
+
+vec4 CubeRenderer(vec3 Position, int MaterialIndex)
+{
+    vec3 normal;
+	vec2 texUV;
+
+	UnpackNormalTexUVFromGBuffer(normal, texUV);
+
+	vec4 matData = texelFetch(u_materialDataSampler, MaterialIndex);
 	vec4 materialDiffuse = vec4(matData.xyz, 1);
 	uint bitfieldValue = floatBitsToUint(matData.w);
 	int diffuseTextureIndex = int((bitfieldValue >> 16) & uint(255));
@@ -51,27 +65,26 @@ void main(void)
 	int specularTextureIndex = int(bitfieldValue & uint(255));
 	int specularSamplerIndex = int((bitfieldValue >> 8) & uint(255));
 
-	matData = texelFetch(u_materialDataSampler, gData.MaterialIndex + 1);
+	matData = texelFetch(u_materialDataSampler, MaterialIndex + 1);
 	vec4 materialSpecular = vec4(matData.xyz, 1);
 	bitfieldValue = floatBitsToUint(matData.w);
 	float materialShininess = float((bitfieldValue >> 16) & uint(65535));
 
 	if (diffuseTextureIndex != -1)
 	{
-		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec3(gData.TexUV, diffuseTextureIndex));
+		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec3(texUV, diffuseTextureIndex));
 	}
 
 	if (specularTextureIndex != -1)
 	{
-		materialSpecular = materialSpecular * TexGet(specularSamplerIndex, vec3(gData.TexUV, specularTextureIndex));
+		materialSpecular = materialSpecular * TexGet(specularSamplerIndex, vec3(texUV, specularTextureIndex));
 	}
 
 	vec3 ambientColor = u_AmbientLight.xyz;
 	vec3 diffuseColor = vec3(0, 0, 0);
 	vec3 specularColor = vec3(0, 0, 0);
 
-	vec3 normal = normalize(gData.Normal);
-	vec3 viewDirection = normalize(-gData.Position.xyz);
+	vec3 viewDirection = normalize(-Position.xyz);
 
 	int lightIndex = 1;
 
@@ -91,7 +104,7 @@ void main(void)
 		vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
 		vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
 
-		vec3 lightDirection = lightPosition.xyz - gData.Position.xyz;
+		vec3 lightDirection = lightPosition.xyz - Position.xyz;
 		float lightDistance = length(lightDirection);
 		lightDirection = lightDirection / lightDistance;
 
@@ -129,7 +142,7 @@ void main(void)
 		float innerConeCos = spotDirection.w;
 		float outerConeCos = attenuationCoef.w;
 
-		vec3 lightDirection = lightPosition.xyz - gData.Position.xyz;
+		vec3 lightDirection = lightPosition.xyz - Position.xyz;
 		float lightDistance = length(lightDirection);
 		lightDirection = lightDirection / lightDistance;
 
@@ -182,6 +195,24 @@ void main(void)
 		specularColor += lightColor * specularFactor;
 	}
 	
-	vFragColor =  materialDiffuse * vec4(ambientColor *.5 + diffuseColor, 1) +  materialSpecular * vec4(specularColor, 1);
+	return  materialDiffuse * vec4(ambientColor *.5 + diffuseColor, 1) +  materialSpecular * vec4(specularColor, 1);
+}
+
+//
+// ---------------------------------------------------------------------------
+
+
+void main(void)
+{
+	vec3 position;
+	int materialIndex;
+	int rendererId;
+
+	UnpackPositionAndMaterialIdFromGBuffer(position, materialIndex, rendererId);
+	
+	if(rendererId == CUBE_RENDERER_ID)
+	{
+		vFragColor = CubeRenderer(position, materialIndex);
+	}
 }
 

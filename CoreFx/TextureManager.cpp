@@ -222,7 +222,6 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
 	
 	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
-	SetTextureGroupParams(texGroup);
 
 	PRINT_MESSAGE("[LoadTextureGroup] Texture group '%I64x' (Cat=%i) : %i.\n", groupId, (int)TextureInfo::GetCategoryFromGroupId(groupId), id);
 
@@ -263,6 +262,19 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	glDeleteFramebuffers(1, &fbo); GL_CHECK_ERRORS;
 
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY); GL_CHECK_ERRORS;
+
+	TextureWrap wrapS = TextureInfo::GetWrapSFromGroupId(texGroup->GetGroupId());
+	TextureWrap wrapT = TextureInfo::GetWrapTFromGroupId(texGroup->GetGroupId());
+
+	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, header.numberOfMipmapLevels);
+
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0); GL_CHECK_ERRORS;
 
 	mTexGroupMap[groupId] = texGroup;
@@ -270,17 +282,6 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 	return texGroup;
 }
 
-void TextureManager::SetTextureGroupParams(TextureGroup const * tex)
-{
-	TextureWrap wrapS = TextureInfo::GetWrapSFromGroupId(tex->GetGroupId());
-	TextureWrap wrapT = TextureInfo::GetWrapTFromGroupId(tex->GetGroupId());
-
-	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
-}
 
 
 bool TextureManager::KTX_ReadHeader(FILE* f, KTX_header & header)
