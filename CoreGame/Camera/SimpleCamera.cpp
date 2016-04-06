@@ -71,7 +71,7 @@ void SimpleCamera::OnInit()
 		int xCount = 30;
 		int yCount = 30;
 		int zCount = 30;
-		const int materialCount = 9;
+		const int materialCount = 10;
 		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(materialCount, xCount * yCount * zCount, 1);
 		engine->AttachRenderer(cubeRenderer);
 
@@ -89,21 +89,25 @@ void SimpleCamera::OnInit()
 		{
 			Renderers::CubeRenderer::MaterialDesc mats[materialCount] =
 			{
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), glm::vec3(1.f, 1.f, 1.f), 128, 3, Renderers::CubeRenderer::NoTexture, 4),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 128, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 64, 0, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(1.f, 1.f, 1.f), 64, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), glm::vec3(1.f, 1.f, 1.f), 128, 3, Renderers::CubeRenderer::NoTexture, 4),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 128, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), glm::vec3(1.f, .6f, .2f), 256, 5, Renderers::CubeRenderer::NoTexture, 6),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), glm::vec3(.5f, .5f, .5f), 128, 7, 8, 9),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), 5, glm::vec3(1.f, .6f, .2f), 256, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6),
+				
+				
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 1, Renderers::CubeRenderer::NoTexture, glm::vec3(0.f, 8600.f, 5000.f), 8, 9),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 128, 8, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 9),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.f, 1.f, 1.f), 16, 1, Renderers::CubeRenderer::NoTexture, 2),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 1, glm::vec3(1.f, 1.f, 1.f), 16, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), glm::vec3(1.f, 1.f, 1.f), 128, 1, Renderers::CubeRenderer::NoTexture, 2),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 256, 0, Renderers::CubeRenderer::NoTexture, 2)
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 256, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
+
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), 1, glm::vec3(1.f, 1.f, 1.f), 128, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
+				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 256, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2)
 			};
 
 			for (int i = 0; i < materialCount; ++i)

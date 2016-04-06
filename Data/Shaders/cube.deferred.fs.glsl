@@ -19,7 +19,7 @@ in GS_OUT
 
 void main(void)
 {
-	vec4 matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 1);
+	vec4 matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 2);
 	uint bitfieldValue = floatBitsToUint(matData.w);
 	int normalTextureIndex = int(bitfieldValue & uint(255));
 	int normalSamplerIndex = int((bitfieldValue >> 8) & uint(255));
