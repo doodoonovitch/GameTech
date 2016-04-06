@@ -61,7 +61,9 @@
 //
 // ---------------------------------------------------------------------------
 
-#define CombineRenderIdAndMaterialIndex(rendererId, materialIndex) uint( (uint(rendererId) << 24) | (uint(materialIndex) & 0x00FFFFFF) )
+#define Mask_0x00FFFFFF								uint(16777215)
+#define Mask_0xFF000000								uint(uint(255) << 24)
+#define CombineRenderIdAndMaterialIndex(rendererId, materialIndex) uint((rendererId << 24) | (materialIndex & Mask_0x00FFFFFF))
 
 
 #define PI											3.14159265

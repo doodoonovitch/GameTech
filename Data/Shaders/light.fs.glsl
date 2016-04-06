@@ -28,8 +28,8 @@ void UnpackPositionAndMaterialIdFromGBuffer(out vec3 Position, out int MaterialI
     vec4 pos = texture(u_gBufferPosition, fs_in.TexUV, 0);
 	Position = pos.xyz;
 	uint bitfieldValue = floatBitsToUint(pos.w);
-	MaterialIndex = int(bitfieldValue & uint(0x00FFFFFF));
-	RendererId = int((bitfieldValue & uint(0xFF000000)) >> 24);
+	MaterialIndex = int(bitfieldValue & Mask_0x00FFFFFF);
+	RendererId = int((bitfieldValue & Mask_0xFF000000) >> 24);
 }
 
 void UnpackNormalTexUVFromGBuffer(out vec3 Normal, out vec2 TexUV)
