@@ -179,24 +179,6 @@
     <None Include="packages.config">
       <Filter>misc</Filter>
     </None>
-    <None Include="..\Data\Shaders\flat.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\flat.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\mesh_shader_NUV.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\mesh_shader_NUV.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\mesh_material_def.inc">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\mesh_shader_NUV.geom">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Data\Shaders\common.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -213,9 +195,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.forward.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\grid.vs.glsl">
@@ -240,6 +219,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\vertex_normal.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.tcs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.tes.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.deferred.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -58,6 +58,7 @@
 #define AXIS_RENDERER_ID							2
 #define GRID_RENDERER_ID							3
 #define VERTEX_NORMAL_RENDERER_ID					4
+#define TERRAIN_RENDERER_ID							5
 //
 // ---------------------------------------------------------------------------
 
