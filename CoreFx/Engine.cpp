@@ -550,19 +550,17 @@ void Engine::RenderObjects()
 	// Fill light data buffer 
 	// -----------------------------------------------------------------------
 	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); 
-
-	GLsizeiptr offset = 0;
+	std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
-		mLights[i]->ForEach([&offset](Lights::Light * light)
+		mLights[i]->ForEach([&lightDataBuffer](Lights::Light * light)
 		{
 			GLsizei dataSize = light->GetDataSize();
-			std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); 
 			memcpy(lightDataBuffer, light->GetData(), dataSize);
-			offset += dataSize;
-			glUnmapBuffer(GL_TEXTURE_BUFFER); 
+			lightDataBuffer += dataSize;
 		});
 	}
+	glUnmapBuffer(GL_TEXTURE_BUFFER);
 	// -----------------------------------------------------------------------
 
 

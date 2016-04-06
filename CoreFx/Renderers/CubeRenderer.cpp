@@ -284,19 +284,17 @@ void CubeRenderer::Render()
 	}
 
 	glBindBuffer(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetBufferId());
-	GLintptr offset = 0;
-	mObjs.ForEach([this, &offset](Renderables::Cube* obj)
+	std::uint8_t * buffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+	mObjs.ForEach([this, &buffer](Renderables::Cube* obj)
 	{
-		if (obj->GetFrame()->IsModified())
-		{
-			std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, sizeof(PerInstanceData), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); 
-
+		//if (obj->GetFrame()->IsModified())
+		//{
 			memcpy(buffer, glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetRealPart()), sizeof(glm::quat));
 			memcpy(buffer + sizeof(glm::quat), glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetDualPart()), sizeof(glm::quat));
-			glUnmapBuffer(GL_TEXTURE_BUFFER);
-		}
-		offset += sizeof(PerInstanceData);
+		//}
+		buffer += sizeof(PerInstanceData);
 	});
+	glUnmapBuffer(GL_TEXTURE_BUFFER);
 
 	mShader.Use();
 		glBindVertexArray(mVaoID);
