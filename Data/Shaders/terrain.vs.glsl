@@ -1,5 +1,5 @@
 uniform vec2 u_PatchCount;
-uniform vec2 u_MapSize;
+uniform ivec2 u_MapSize;
 uniform vec3 u_Scale;
 
 out VS_OUT

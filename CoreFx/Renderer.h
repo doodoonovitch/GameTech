@@ -33,12 +33,16 @@ public:
 
 	const TextureMapping & GetTextureMapping() const { return mTextureMapping; }
 
+	bool GetWireFrame() const { return mWireFrame; }
+	void SetWireFrame(bool value) { mWireFrame = value; }
+
 protected:
 
 	PropertyData mMaterials;
 	GLint mMaterialBaseIndex;
 	TextureInfoList mTextures;
 	TextureMapping mTextureMapping;
+	bool mWireFrame;
 
 };
 

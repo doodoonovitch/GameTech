@@ -111,6 +111,9 @@
     <ClInclude Include="Log\Logger.h">
       <Filter>Log</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\TerrainRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -173,6 +176,9 @@
     </ClCompile>
     <ClCompile Include="Log\Logger.cpp">
       <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\TerrainRenderer.cpp">
+      <Filter>Renderers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
