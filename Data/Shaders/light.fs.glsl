@@ -70,6 +70,12 @@ vec4 CubeRenderer(vec3 Position, int MaterialIndex)
 	bitfieldValue = floatBitsToUint(matData.w);
 	float materialShininess = float((bitfieldValue >> 16) & uint(65535));
 
+	matData = texelFetch(u_materialDataSampler, MaterialIndex + 2);
+	vec4 materialEmissive = vec4(matData.xyz, 1);
+	bitfieldValue = floatBitsToUint(matData.w);
+	int emissiveTextureIndex = int((bitfieldValue >> 16) & uint(255));
+	int emissiveSamplerIndex = int((bitfieldValue >> 24) & uint(255));
+
 	if (diffuseTextureIndex != -1)
 	{
 		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec3(texUV, diffuseTextureIndex));
@@ -78,6 +84,11 @@ vec4 CubeRenderer(vec3 Position, int MaterialIndex)
 	if (specularTextureIndex != -1)
 	{
 		materialSpecular = materialSpecular * TexGet(specularSamplerIndex, vec3(texUV, specularTextureIndex));
+	}
+
+	if (emissiveTextureIndex != -1)
+	{
+		materialEmissive = materialEmissive * TexGet(emissiveSamplerIndex, vec3(texUV, emissiveTextureIndex));
 	}
 
 	vec3 ambientColor = u_AmbientLight.xyz;
@@ -195,7 +206,7 @@ vec4 CubeRenderer(vec3 Position, int MaterialIndex)
 		specularColor += lightColor * specularFactor;
 	}
 	
-	return  materialDiffuse * vec4(ambientColor *.5 + diffuseColor, 1) +  materialSpecular * vec4(specularColor, 1);
+	return materialDiffuse * vec4(ambientColor *.5 + diffuseColor, 1) + materialSpecular * vec4(specularColor, 1) + materialEmissive;
 }
 
 vec4 GridRenderer(vec3 Position, int MaterialIndex)
