@@ -62,8 +62,8 @@ void SimpleCamera::OnInit()
 
 		Engine* engine = Engine::GetInstance();
 
-		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
-		engine->AttachRenderer(gridRenderer);
+		//Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
+		//engine->AttachRenderer(gridRenderer);
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
@@ -145,6 +145,9 @@ void SimpleCamera::OnInit()
 			}
 		}
 
+		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(2048, 2048, glm::vec3(1.f, 1.f, 1.f));
+		terrain->SetWireFrame(true);
+		engine->AttachRenderer(terrain);
 
 		/*
 		std::vector<Geometry::MeshData*> meshDataList;

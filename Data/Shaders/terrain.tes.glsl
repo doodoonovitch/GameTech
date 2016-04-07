@@ -9,12 +9,14 @@ in TCS_OUT
 {
 	vec2 TexUV;
 	int InstanceId;
-} tes_in;
+	ivec2 PatchIndex;
+} tes_in[];
 
 out TES_OUT
 {
 	vec3 Position;
 	vec2 TexUV;
+	flat ivec2 PatchIndex;
 } tes_out;
 
 void main()
@@ -27,11 +29,13 @@ void main()
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
 
 	int layer = tes_in[0].InstanceId / u_PatchPerTexture;
-	p.y += texture(u_HeightMap, vec3(tc, layer)).r * u_Scale.z;
+	p.y = texture(u_HeightMap, vec3(tc, layer)).r * u_Scale.z;
+	p.y = 0;
 
-	tes_out.Position = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1.0);
+	tes_out.Position = dqTransformPoint(u_ViewDQ, p.xyz);
 	gl_Position = u_ProjMatrix * vec4(tes_out.Position, 1.0);
 	tes_out.TexUV = tc;
+	tes_out.PatchIndex = tes_in[0].PatchIndex;
 }
 
 

@@ -225,6 +225,16 @@ vec4 ColorRenderer(vec3 Position, int MaterialIndex)
 	return color;
 }
 
+vec4 TerrainRenderer(vec3 Position, int MaterialIndex)
+{
+    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
+    vec2 texUV = unpackHalf2x16(data.x);
+    vec2 patchIndex = unpackHalf2x16(data.y);
+    vec4 color = vec4(patchIndex, 1, 1);
+
+	return color;
+}
+
 //
 // ---------------------------------------------------------------------------
 
@@ -252,6 +262,10 @@ void main(void)
 	else if(rendererId == VERTEX_NORMAL_RENDERER_ID)
 	{
 		vFragColor = ColorRenderer(position, materialIndex);
+	}
+	else if(rendererId == TERRAIN_RENDERER_ID)
+	{
+		vFragColor = TerrainRenderer(position, materialIndex);
 	}
 }
 

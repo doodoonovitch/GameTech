@@ -21,12 +21,17 @@ public:
 
 private:
 
+	void LoadHeightMap(const char * filename);
+
+private:
+
 	enum EUniformIndex
 	{
 		u_PatchCount,
 		u_MapSize, 
 		u_Scale,
 		u_PatchPerTexture,
+		u_HeightMap,
 
 		__uniforms_count__
 	};
@@ -34,7 +39,8 @@ private:
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
 	glm::vec3 mScale;
-	glm::int1 mPatchPerTexture;
+	GLint mPatchPerTexture;
+	GLuint mHeightMapTextureId;
 };
 
 

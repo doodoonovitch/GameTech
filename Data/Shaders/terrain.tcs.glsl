@@ -4,22 +4,24 @@ in VS_OUT
 {
 	vec2 TexUV;
 	int InstanceId;
-} tcs_in;
+	ivec2 PatchIndex;
+} tcs_in[];
 
 out TCS_OUT
 {
 	vec2 TexUV;
 	int InstanceId;
-} tcs_out;
+	ivec2 PatchIndex;
+} tcs_out[];
 
 void main()
 {
 	if (gl_InvocationID == 0)
 	{
-        vec4 p0 = u_ProjMatrix * dqTransformPoint(u_ViewDQ, gl_in[0].gl_Position.xyz);
-        vec4 p1 = u_ProjMatrix * dqTransformPoint(u_ViewDQ, gl_in[1].gl_Position.xyz);
-        vec4 p2 = u_ProjMatrix * dqTransformPoint(u_ViewDQ, gl_in[2].gl_Position.xyz);
-        vec4 p3 = u_ProjMatrix * dqTransformPoint(u_ViewDQ, gl_in[3].gl_Position.xyz);
+        vec4 p0 = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[0].gl_Position.xyz), 1.0);
+        vec4 p1 = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[1].gl_Position.xyz), 1.0);
+        vec4 p2 = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[2].gl_Position.xyz), 1.0);
+        vec4 p3 = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[3].gl_Position.xyz), 1.0);
         p0 /= p0.w;
         p1 /= p1.w;
         p2 /= p2.w;
@@ -51,6 +53,7 @@ void main()
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
     tcs_out[gl_InvocationID].TexUV = tcs_in[gl_InvocationID].TexUV;
     tcs_out[gl_InvocationID].InstanceId = tcs_in[gl_InvocationID].InstanceId;
+	tcs_out[gl_InvocationID].PatchIndex = tcs_in[gl_InvocationID].PatchIndex;
 }
 
 
