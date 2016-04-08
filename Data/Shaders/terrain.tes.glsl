@@ -1,6 +1,5 @@
 layout (quads, fractional_odd_spacing) in;
 
-uniform int u_PatchPerTexture;
 uniform vec3 u_Scale;
 
 uniform sampler2DArray u_HeightMap;
@@ -8,15 +7,15 @@ uniform sampler2DArray u_HeightMap;
 in TCS_OUT
 {
 	vec2 TexUV;
-	int InstanceId;
-	ivec2 PatchIndex;
+	int Layer;
+	int LocalIndex;
 } tes_in[];
 
 out TES_OUT
 {
 	vec3 Position;
 	vec2 TexUV;
-	flat ivec2 PatchIndex;
+	flat int LocalIndex;
 } tes_out;
 
 void main()
@@ -28,14 +27,12 @@ void main()
 	vec4 p2 = mix(gl_in[2].gl_Position,	gl_in[3].gl_Position, gl_TessCoord.x);
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
 
-	int layer = tes_in[0].InstanceId / u_PatchPerTexture;
-	p.y = texture(u_HeightMap, vec3(tc, layer)).r * u_Scale.z;
-	p.y = 0;
+	p.y = texture(u_HeightMap, vec3(tc, tes_in[0].Layer)).r * u_Scale.y;
 
 	tes_out.Position = dqTransformPoint(u_ViewDQ, p.xyz);
 	gl_Position = u_ProjMatrix * vec4(tes_out.Position, 1.0);
 	tes_out.TexUV = tc;
-	tes_out.PatchIndex = tes_in[0].PatchIndex;
+	tes_out.LocalIndex = tes_in[0].LocalIndex;
 }
 
 

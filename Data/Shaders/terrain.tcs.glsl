@@ -3,15 +3,15 @@ layout (vertices = 4) out;
 in VS_OUT
 {
 	vec2 TexUV;
-	int InstanceId;
-	ivec2 PatchIndex;
+	int Layer;
+	int LocalIndex;
 } tcs_in[];
 
 out TCS_OUT
 {
 	vec2 TexUV;
-	int InstanceId;
-	ivec2 PatchIndex;
+	int Layer;
+	int LocalIndex;
 } tcs_out[];
 
 void main()
@@ -27,7 +27,7 @@ void main()
         p2 /= p2.w;
         p3 /= p3.w;
 
-        if (p0.z <= 0.0 || p1.z <= 0.0 || p2.z <= 0.0 || p3.z <= 0.0)
+        if (p0.z <= 0.0 && p1.z <= 0.0 && p2.z <= 0.0 && p3.z <= 0.0)
 		{
             gl_TessLevelOuter[0] = 0.0;
             gl_TessLevelOuter[1] = 0.0;
@@ -47,13 +47,12 @@ void main()
             gl_TessLevelInner[0] = min(l1, l3);
             gl_TessLevelInner[1] = min(l0, l2);
         }
-
 	} 
 
-	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
     tcs_out[gl_InvocationID].TexUV = tcs_in[gl_InvocationID].TexUV;
-    tcs_out[gl_InvocationID].InstanceId = tcs_in[gl_InvocationID].InstanceId;
-	tcs_out[gl_InvocationID].PatchIndex = tcs_in[gl_InvocationID].PatchIndex;
+    tcs_out[gl_InvocationID].Layer = tcs_in[gl_InvocationID].Layer;
+	tcs_out[gl_InvocationID].LocalIndex = tcs_in[gl_InvocationID].LocalIndex;
+	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }
 
 

@@ -1,36 +1,32 @@
+layout (location = POSITION_ATTRIBUTE) in vec3 in_Position;
+
 uniform ivec2 u_PatchCount;
-uniform ivec2 u_MapSize;
 uniform vec3 u_Scale;
-uniform int u_PatchPerTexture;
 uniform sampler2DArray u_HeightMap;
 
 out VS_OUT
 {
 	vec2 TexUV;
-	int InstanceId;
-	ivec2 PatchIndex;
+	int Layer;
+	int LocalIndex;
 } vs_out;
 
 void main()
 {  
-	const vec4 vertices[] = vec4[]
-	(
-		vec4(0.0, 0.0, 0.0, 1.0),
-		vec4(1.0, 0.0, 0.0, 1.0),
-		vec4(0.0, 0.0, 1.0, 1.0),
-		vec4(1.0, 0.0, 1.0, 1.0)
-	);
+	int patchPerTexture = u_PatchCount.x * u_PatchCount.y;
+	int localIndex = gl_InstanceID % patchPerTexture;
+	int layer = gl_InstanceID / patchPerTexture;
 
-	ivec2 patchIndex = ivec2(gl_InstanceID % u_PatchCount.x, (gl_InstanceID / u_PatchCount.x) % u_PatchCount.y);
+	ivec2 patchIndex = ivec2(localIndex % u_PatchCount.x, localIndex / u_PatchCount.x);
 
-	//vs_out.TexUV = (vertices[gl_VertexID].xz / u_PatchCount) + (patchIndex * 64 / u_MapSize);
-	vs_out.TexUV = (vertices[gl_VertexID].xz / u_PatchCount);
+	vec2 texUV = (in_Position.xz + vec2(patchIndex.x, patchIndex.y)) / vec2(u_PatchCount.x, u_PatchCount.y);
 
-	float y = texture(u_HeightMap, vec3(vs_out.TexUV, gl_InstanceID / u_PatchPerTexture)).r;
-	vec3 pos = (vertices[gl_VertexID].xyz + vec3(patchIndex.x, y, patchIndex.y)) * u_Scale;
+	float height = texture(u_HeightMap, vec3(texUV, layer)).r;
+	vec3 pos = vec3(in_Position.xyz + vec3(patchIndex.x, height, patchIndex.y)) * u_Scale;
 
-	vs_out.InstanceId = gl_InstanceID;
+	vs_out.TexUV = texUV;
+	vs_out.Layer = layer;
+	vs_out.LocalIndex = localIndex;
 	gl_Position = vec4(pos, 1);
-	vs_out.PatchIndex = patchIndex;
 }
 

@@ -14,7 +14,6 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 	, mMapSize(heightMapWidth, heightMapDepth)
 	, mPatchCount(heightMapWidth / 64, heightMapDepth / 64)
 	, mScale(scale)
-	, mPatchPerTexture(mPatchCount.x * mPatchCount.y)
 	, mHeightMapTextureId(0)
 {
 	std::cout << std::endl;
@@ -23,9 +22,7 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 	const char * uniformNames[__uniforms_count__] =
 	{
 		"u_PatchCount",
-		"u_MapSize",
 		"u_Scale",
-		"u_PatchPerTexture",
 		"u_HeightMap",
 	};
 
@@ -41,9 +38,7 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 
 		//pass values of constant uniforms at initialization
 		glUniform2iv(mShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
-		glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
 		glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
-		glUniform1i(mShader.GetUniform(u_PatchPerTexture), mPatchPerTexture); GL_CHECK_ERRORS;
 
 		glUniform1i(mShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
 
@@ -52,9 +47,29 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 
 	GL_CHECK_ERRORS;
 
+	const float epsilon = 0.00001f;
+	const glm::vec3 vertices[] =
+	{
+		glm::vec3(0.0f,				0.0f, 0.0f),
+		glm::vec3(1.0f - epsilon,	0.0f, 0.0f),
+		glm::vec3(0.0f,				0.0f, 1.0f - epsilon),
+		glm::vec3(1.0f - epsilon,	0.0f, 1.0f - epsilon)
+	};
+		
+
 	//setup vao and vbo stuff
 	glGenVertexArrays(1, &mVaoID);
+	glGenBuffers(mVboCount, mVboIDs);
+
 	glBindVertexArray(mVaoID);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	GL_CHECK_ERRORS;
+
+	glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
+	glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+	GL_CHECK_ERRORS;
 
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
 
@@ -91,7 +106,7 @@ void TerrainRenderer::Render()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
 
-	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchPerTexture);
+	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y);
 
 	glBindVertexArray(0);
 	mShader.UnUse();
@@ -134,9 +149,9 @@ void TerrainRenderer::LoadHeightMap(const char * filename)
 	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_REPEAT);
 	
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 

@@ -227,10 +227,17 @@ vec4 ColorRenderer(vec3 Position, int MaterialIndex)
 
 vec4 TerrainRenderer(vec3 Position, int MaterialIndex)
 {
+	const vec4 colors[] = vec4[]
+	(
+		vec4(1, 0, 0, 1), vec4(0, 1, 0, 1), vec4(0, 0, 1, 1), 
+		vec4(0, 1, 1, 1), vec4( 1, 1, 0, 1)
+	);
+
     uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
     vec2 texUV = unpackHalf2x16(data.x);
-    vec2 patchIndex = unpackHalf2x16(data.y);
-    vec4 color = vec4(patchIndex, 1, 1);
+    uint localIndex = data.y;
+    vec4 color = colors[localIndex % 5];
+	//vec4 color = vec4(1.0, 1.0, 0, 1);
 
 	return color;
 }
