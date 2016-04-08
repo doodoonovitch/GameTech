@@ -1,4 +1,6 @@
-layout (quads, fractional_odd_spacing) in;
+//layout (quads, fractional_odd_spacing) in;
+layout (quads, fractional_even_spacing) in;
+//layout (quads, equal_spacing) in;
 
 uniform vec3 u_Scale;
 

@@ -1,7 +1,7 @@
 layout (vertices = 4) out;
 
 uniform float u_MinDist = 0.01;
-uniform float u_MaxDist = 10;
+uniform float u_MaxDist = 5;
 uniform float u_MinTess = 1;
 uniform float u_MaxTess = 64;
 
@@ -24,7 +24,8 @@ float CompTessFactor(vec4 p1, vec4 p0)
 {
 	float d = length(p1.xy - p0.xy);
 	float s = clamp((d - u_MinDist) / (u_MaxDist - u_MinDist), 0.0, 1.0);
-	return pow(2, (mix(u_MinTess, u_MaxTess, s)));
+	//return pow(2, (mix(u_MinTess, u_MaxTess, s)));
+	return mix(u_MinTess, u_MaxTess, s);
 
 }
 
