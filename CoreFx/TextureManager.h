@@ -18,6 +18,9 @@ public:
 
 	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> filenames);
 
+	TextureGroup const * LoadTexture2DArrayAsTextureGroup(uint16_t rendererId, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, std::string const & filename);
+
+
 	void ReleaseTexture2D(Texture2D const *& texture);
 
 	void ReleaseTextureGroup(TextureGroup const *& texture);

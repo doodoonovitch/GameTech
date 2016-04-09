@@ -52,7 +52,9 @@ private:
 	{
 		u_ProjMatrix,
 		u_ViewDQ,
+		u_EyePosition,
 		u_AmbientLight,
+		u_ScreenSize,
 		u_PointLightCount,
 		u_SpotLightCount,
 		u_DirectionalLightCount,
@@ -233,6 +235,15 @@ public:
 	// ---------------------------------------------------------------------------
 
 
+	bool GetWireFrame() const
+	{
+		return mWireFrame;
+	}
+	void SetWireFrame(bool value)
+	{
+		mWireFrame = value;
+	}
+
 private:
 
 	typedef InstanceContainer<Renderer> RendererContainer;
@@ -310,6 +321,7 @@ private:
 	GLsizei mGBufferHeight;
 	GLint mViewportX, mViewportY;
 	GLsizei mViewportWidth, mViewportHeight;
+	glm::vec2 mScreenSize;
 
 	float mExposure;
 	float mGamma;
@@ -340,7 +352,9 @@ private:
 	{
 		"u_ProjMatrix",
 		"u_ViewDQ.Qr",
+		"u_EyePosition",
 		"u_AmbientLight",
+		"u_ScreenSize",
 		"u_PointLightCount",
 		"u_SpotLightCount",
 		"u_DirectionalLightCount",
@@ -360,6 +374,9 @@ private:
 
 	//TextureGroupList mTextureGroupList;
 	TextureMapping mLightPassTextureMapping;
+
+	bool mWireFrame;
+
 };
 
 

@@ -83,7 +83,11 @@ layout (std140, shared) uniform FrameData
 
 	DualQuat u_ViewDQ;
 
+	vec4 u_EyePosition;
+
 	vec4 u_AmbientLight;
+
+	vec2 u_ScreenSize;
 
 	int u_PointLightCount; 
 	int u_SpotLightCount;

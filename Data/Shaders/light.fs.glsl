@@ -233,12 +233,55 @@ vec4 TerrainRenderer(vec3 Position, int MaterialIndex)
 		vec4(0, 1, 1, 1), vec4( 1, 1, 0, 1)
 	);
 
-    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
-    vec2 texUV = unpackHalf2x16(data.x);
-    uint localIndex = data.y;
-    vec4 color = colors[localIndex % 5];
-	//vec4 color = vec4(1.0, 1.0, 0, 1);
+    vec3 normal;
 
+    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
+	vec4 albedo = unpackUnorm4x8(data.x);
+    normal.xy = unpackHalf2x16(data.y);
+	normal.z = sqrt(dot(normal.xy, normal.xy));
+	normal = normalize(normal);
+
+	vec3 diffuseColor = vec3(0, 0, 0);
+	vec3 ambientColor = u_AmbientLight.xyz;
+	vec3 specularColor = vec3(0, 0, 0);
+
+	vec3 viewDirection = normalize(-Position.xyz);
+
+	int lightIndex = 1 + u_PointLightCount + u_SpotLightCount;
+
+	// Directional light evaluation
+	for(int dirLight = 0; dirLight < u_DirectionalLightCount; ++dirLight)
+	{
+		int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
+		++lightIndex;
+
+		int lightType = GetLightType(lightDesc);
+		int dataIndex = GetLightDataIndex(lightDesc);
+
+		vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
+		vec3 lightColor = lightColorIntensity.xyz;
+		float lightIntensity = lightColorIntensity.w;
+
+		vec3 lightDirection;
+		vec3 reflectionDirection;
+
+		lightDirection = -texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
+		reflectionDirection = reflect(lightDirection, normal);
+
+		float ambientFactor = lightIntensity;
+		ambientColor += lightColor * ambientFactor;
+
+		float diffuseFactor = max(0, dot(normal, lightDirection)) * lightIntensity;
+		diffuseColor += lightColor * diffuseFactor; 
+
+		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), 256/*materialShininess*/) * lightIntensity;	
+		specularColor += lightColor * specularFactor;
+	}
+
+	//vec4 color = vec4(normal, 1);
+	vec4 color = albedo * vec4(ambientColor * 0.5 + diffuseColor + specularColor, 1);
+	//vec4 color = vec4(ambientColor, 1); // * u_AmbientLight.xyz * 
+	//vec4 color = albedo;
 	return color;
 }
 

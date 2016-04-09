@@ -9,7 +9,6 @@ namespace CoreFx
 Renderer::Renderer(GLuint propertyCount)
 	: mMaterials(propertyCount)
 	, mMaterialBaseIndex(0)
-	, mWireFrame(false)
 {
 }
 
@@ -18,7 +17,7 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT)
+bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool onlyForThisRenderer)
 {
 	assert(filename != nullptr);
 
@@ -30,16 +29,23 @@ bool Renderer::AddTexture(const char * filename, TextureCategory category, Textu
 	}
 
 	uint16_t rendererId;
-	switch (category)
+	if (onlyForThisRenderer)
 	{
-	case TextureCategory::Diffuse:
-	case TextureCategory::Specular:
-		rendererId = 0;
-		break;
-
-	default:
 		rendererId = (uint16_t)GetInstanceId();
-		break;
+	}
+	else
+	{
+		switch (category)
+		{
+		case TextureCategory::Diffuse:
+		case TextureCategory::Specular:
+			rendererId = 0;
+			break;
+
+		default:
+			rendererId = (uint16_t)GetInstanceId();
+			break;
+		}
 	}
 
 	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)hd.pixelWidth, (GLsizei)hd.pixelHeight, wrapS, wrapT);

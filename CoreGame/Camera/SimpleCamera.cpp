@@ -145,8 +145,7 @@ void SimpleCamera::OnInit()
 			}
 		}
 
-		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(2048, 2048, glm::vec3(1.f, 10.f, 1.f));
-		terrain->SetWireFrame(true);
+		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(2048, 2048, glm::vec3(.1f, 50.f, .1f));
 		engine->AttachRenderer(terrain);
 
 		/*
@@ -167,7 +166,7 @@ void SimpleCamera::OnInit()
 
 	// Setup Lights
 		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
-		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(0.2f, 0.2f, 0.2f), 0.2f);
+		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 0.8f);
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.7f, 1.8f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 0.7f, 0.02f);
 		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);
@@ -310,6 +309,12 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 			Engine::GetInstance()->SetGamma(gamma);
 		}
 		break;
+
+	case 'x':
+	case 'X':
+		{
+			Engine::GetInstance()->SetWireFrame(!Engine::GetInstance()->GetWireFrame());
+		}
 	}
 	//glutPostRedisplay();
 }
@@ -347,8 +352,12 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 void SimpleCamera::OnUpdate(double elapsedTime)
 {
 	bool bWalk = false, bStrafe = false;
-	float dx = 0, dy = 0;
+	float dx = 0, dy = 0, speed = MOVE_SPEED;
 
+	if (GetAsyncKeyState(VK_SHIFT))
+	{
+		speed *= 3.f;
+	}
 
 	if (GetAsyncKeyState(VK_ESCAPE) & 0x8000)
 	{
@@ -358,25 +367,25 @@ void SimpleCamera::OnUpdate(double elapsedTime)
 
 	if (GetAsyncKeyState(VK_Z) & 0x8000)
 	{
-		dy += (MOVE_SPEED);
+		dy += (speed);
 		bWalk = true;
 	}
 
 	if (GetAsyncKeyState(VK_S) & 0x8000)
 	{
-		dy -= (MOVE_SPEED);
+		dy -= (speed);
 		bWalk = true;
 	}
 
 	if (GetAsyncKeyState(VK_Q) & 0x8000)
 	{
-		dx -= (MOVE_SPEED);
+		dx -= (speed);
 		bStrafe = true;
 	}
 
 	if (GetAsyncKeyState(VK_D) & 0x8000)
 	{
-		dx += (MOVE_SPEED);
+		dx += (speed);
 		bStrafe = true;
 	}
 

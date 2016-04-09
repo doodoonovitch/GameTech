@@ -220,9 +220,11 @@
     <None Include="..\Data\Shaders\light.vs.glsl" />
     <None Include="..\Data\Shaders\grid.vs.glsl" />
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\terrain.gs.glsl" />
     <None Include="..\Data\Shaders\terrain.tcs.glsl" />
     <None Include="..\Data\Shaders\terrain.tes.glsl" />
     <None Include="..\Data\Shaders\terrain.vs.glsl" />
+    <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\tonemapping.fs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.fs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.gs.glsl" />

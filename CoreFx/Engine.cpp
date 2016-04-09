@@ -29,10 +29,10 @@ Engine::Engine()
 	, mGamma(1.0f)
 	, mInvGamma(1.0f)
 	, mAmbientLight(0.1f, 0.1f, 0.1f, 0.f)
-	, mDrawVertexNormalColor(0.41f, 0.f, 1.f, 0.f)
+	, mDrawVertexNormalColor(1.f, 1.f, 0.f, 0.f)
 	, mDrawPointLightColor(1.f, 1.f, 0.f, 0.f)
 	, mDrawDirectionalLightColor(1.f, 0.f, 0.f, 0.f)
-	, mDrawVertexNormalMagnitude(0.2f)
+	, mDrawVertexNormalMagnitude(1.f)
 	, mDrawLightMagnitude(0.6f)
 	, mFirstLightIndexToDraw(0)
 	, mLightToDrawCount(16)
@@ -40,6 +40,7 @@ Engine::Engine()
 	, mIsDrawVertexNormalEnabled(false)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
+	, mWireFrame(false)
 {
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
@@ -65,6 +66,8 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		mViewportHeight = viewportHeight;
 		mGBufferWidth = gBufferWidth;
 		mGBufferHeight = gBufferHeight;
+		mScreenSize.x = (float)mViewportWidth;
+		mScreenSize.y = (float)mViewportHeight;
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -309,6 +312,9 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 	mViewportHeight = viewportHeight;
 	mGBufferWidth = gBufferWidth;
 	mGBufferHeight = gBufferHeight;
+
+	mScreenSize.x = (float)mViewportWidth;
+	mScreenSize.y = (float)mViewportHeight;
 
 	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 }
@@ -571,9 +577,13 @@ void Engine::RenderObjects()
 	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);	
 	assert(buffer != nullptr);
 
+	glm::vec4 eyePos(mCamera->GetFrame()->GetPosition(), 1.f);
+
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
+	memcpy(buffer + mFrameDataUniformOffsets[u_EyePosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ScreenSize], glm::value_ptr(mScreenSize), sizeof(glm::vec2));
 
 	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
@@ -583,6 +593,15 @@ void Engine::RenderObjects()
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER); 
 	// -----------------------------------------------------------------------
+
+	if (GetWireFrame())
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 
 	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -608,6 +627,8 @@ void Engine::RenderObjects()
 	{
 		renderer->DebugRender();
 	});
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// light pass
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); 
@@ -755,16 +776,13 @@ void Engine::InternalCreateTextures()
 			TextureMapping * texMap;
 
 			const TextureInfo & texInfo = *texInfoListIter;
-			switch (texInfo.GetCategory())
+			if (texInfo.GetRendererId() == 0)
 			{
-			case TextureCategory::Diffuse:
-			case TextureCategory::Specular:
 				texMap = &mLightPassTextureMapping;
-				break;
-
-			default:
+			}
+			else
+			{
 				texMap = &renderer->mTextureMapping;
-				break;
 			}
 
 			TextureMappingList::iterator targetIt = std::find_if(texMap->mMapping.begin(), texMap->mMapping.end(), [&texInfo](const TextureMappingItem & item)

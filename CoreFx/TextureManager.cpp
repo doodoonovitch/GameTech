@@ -63,7 +63,7 @@ void TextureManager::ReleaseAllTextureGroup()
 	size_t count = 0;
 	for (TexGroupMap::const_iterator it = mTexGroupMap.begin(); it != mTexGroupMap.end(); ++it)
 	{
-		if (it->second->GetResourceId() != mDefault2D->GetResourceId())
+		//if (it->second->GetResourceId() != mDefaultTexGroup->GetResourceId())
 		{
 			ids[count++] = it->second->GetResourceId();
 		}
@@ -334,5 +334,47 @@ bool TextureManager::KTX_ReadHeader(const char * filename, KTX_header & header)
 	return ret;
 }
 
+TextureGroup const * TextureManager::LoadTexture2DArrayAsTextureGroup(uint16_t rendererId, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, std::string const & filename)
+{
+	KTX_header header;
+	if (!KTX_ReadHeader(filename.c_str(), header))
+	{
+		printf("Error: Cannot load texture group (from a Texture2DArray) : reading header has failed!\n");
+		return mDefaultTexGroup;
+	}
+
+	KTX_error_code err;
+	GLenum target;
+	KTX_dimensions dimensions;
+	GLboolean isMipmapped;
+	GLenum glerr;
+	GLuint id = 0;
+
+	err = ktxLoadTextureN(filename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+	if (id == 0)
+	{
+		PRINT_MESSAGE("[LoadTexture2DArrayAsTextureGroup] Cannot load texture '%s'.\n", filename.c_str());
+		return mDefaultTexGroup;
+	}
+
+	TextureGroupId groupId = TextureInfo::CreateGroupId(rendererId, category, dimensions.width, dimensions.height, wrapS, wrapT);
+
+	TextureGroup * texGroup = new TextureGroup(id, groupId, header.numberOfArrayElements);
+
+	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); 
+
+	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
+	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
+	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAX_LEVEL, header.numberOfMipmapLevels);
+
+	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0); GL_CHECK_ERRORS;
+
+	return texGroup;
+}
 
 } // namespace CoreFx

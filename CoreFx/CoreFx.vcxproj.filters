@@ -239,6 +239,12 @@
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

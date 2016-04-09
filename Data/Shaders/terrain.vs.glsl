@@ -1,6 +1,7 @@
 layout (location = POSITION_ATTRIBUTE) in vec3 in_Position;
 
 uniform ivec2 u_PatchCount;
+uniform ivec2 u_MapSize;
 uniform vec3 u_Scale;
 uniform sampler2DArray u_HeightMap;
 
@@ -8,7 +9,6 @@ out VS_OUT
 {
 	vec2 TexUV;
 	int Layer;
-	int LocalIndex;
 } vs_out;
 
 void main()
@@ -22,11 +22,11 @@ void main()
 	vec2 texUV = (in_Position.xz + vec2(patchIndex.x, patchIndex.y)) / vec2(u_PatchCount.x, u_PatchCount.y);
 
 	float height = texture(u_HeightMap, vec3(texUV, layer)).r;
-	vec3 pos = vec3(in_Position.xyz + vec3(patchIndex.x, height, patchIndex.y)) * u_Scale;
+	vec2 texUV2 = texUV * u_MapSize;
+	vec3 pos = vec3(texUV2.x, 0, texUV2.y) * u_Scale;
 
 	vs_out.TexUV = texUV;
 	vs_out.Layer = layer;
-	vs_out.LocalIndex = localIndex;
 	gl_Position = vec4(pos, 1);
 }
 

@@ -29,12 +29,9 @@ public:
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
 	const TextureInfoList & GetTextureInfoList() const { return mTextures; }
-	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
+	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool onlyForThisRenderer = false);
 
 	const TextureMapping & GetTextureMapping() const { return mTextureMapping; }
-
-	bool GetWireFrame() const { return mWireFrame; }
-	void SetWireFrame(bool value) { mWireFrame = value; }
 
 protected:
 
@@ -42,7 +39,6 @@ protected:
 	GLint mMaterialBaseIndex;
 	TextureInfoList mTextures;
 	TextureMapping mTextureMapping;
-	bool mWireFrame;
 
 };
 
