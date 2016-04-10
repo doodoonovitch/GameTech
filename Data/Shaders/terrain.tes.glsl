@@ -32,8 +32,8 @@ void main()
 	vec3 texCoord = vec3(tc, tes_in[0].Layer);
 	p.y = texture(u_HeightMap, texCoord).r * u_Scale.y;
 
-	float nX = textureOffset(u_HeightMap, texCoord, ivec2(1, 0)).r - textureOffset(u_HeightMap, texCoord, ivec2(-1, 0)).r;
-	float nZ = textureOffset(u_HeightMap, texCoord, ivec2(0, 1)).r - textureOffset(u_HeightMap, texCoord, ivec2(0, -1)).r;
+	float nX = textureOffset(u_HeightMap, texCoord, ivec2(-1, 0)).r - textureOffset(u_HeightMap, texCoord, ivec2(1, 0)).r;
+	float nZ = textureOffset(u_HeightMap, texCoord, ivec2(0, -1)).r - textureOffset(u_HeightMap, texCoord, ivec2(0, 1)).r;
 	vec3 normal = normalize(vec3(nX * u_Scale.y, (u_Scale.x + u_Scale.z), nZ * u_Scale.y));
 
 	gl_Position = vec4(p.xyz, 1);
