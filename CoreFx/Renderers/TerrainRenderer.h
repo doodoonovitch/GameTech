@@ -23,7 +23,7 @@ public:
 
 private:
 
-	void LoadHeightMap(const char * filename);
+	void LoadHeightMap(const char * filename, GLint heightMapTextureWidth, bool invertY);
 
 private:
 

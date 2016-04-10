@@ -583,7 +583,9 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_EyePosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_VertexNormalColor], glm::value_ptr(mDrawVertexNormalColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ScreenSize], glm::value_ptr(mScreenSize), sizeof(glm::vec2));
+	memcpy(buffer + mFrameDataUniformOffsets[u_NormalMagnitude], &mDrawVertexNormalMagnitude, sizeof(glm::vec2));
 
 	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
@@ -620,12 +622,12 @@ void Engine::RenderObjects()
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		renderer->Render();
+		renderer->DebugRender();
 	});
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		renderer->DebugRender();
+		renderer->Render();
 	});
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

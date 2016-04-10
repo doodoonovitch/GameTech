@@ -37,9 +37,7 @@ void DrawNormalShader::LoadShaders()
 
 	const char * uniformNames[__uniforms_count__] =
 	{
-	"u_NormalMagnitude",
-	"u_VertexNormalColor",
-	"perInstanceDataSampler",
+		"perInstanceDataSampler",
 	};
 
 	CreateAndLinkProgram();
@@ -64,10 +62,8 @@ void DrawNormalShader::LoadShaders()
 
 void DrawNormalShader::SetUniformValues() const
 {
-	Engine * engine = Engine::GetInstance();
+	//Engine * engine = Engine::GetInstance();
 
-	glUniform1f(GetUniform(u_NormalMagnitude), engine->GetDrawVertexNormalMagnitude());
-	glUniform4fv(GetUniform(u_VertexNormalColor), 1, glm::value_ptr(engine->GetDrawVertexNormalColor()));
 }
 
 	} // namespace Renderers

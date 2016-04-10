@@ -1,10 +1,7 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-uniform vec4 u_VertexNormalColor;
-uniform float u_NormalMagnitude;
-
-uniform samplerBuffer perInstanceDataSampler;
+//uniform samplerBuffer perInstanceDataSampler;
 
 in TES_OUT
 {
@@ -39,8 +36,8 @@ void main()
 		gs_out.Color = u_VertexNormalColor;
 		EmitVertex();
 
-		vec4 normal = vec4(dqTransformNormal(gs_in[i].Normal.xyz, viewModelDQ), 0);
-		position = (position + (normal * u_NormalMagnitude));
+		position = gl_in[i].gl_Position + vec4(gs_in[i].Normal * u_NormalMagnitude, 0);
+		position = vec4(dqTransformPoint(viewModelDQ, position.xyz), 1);
 		gl_Position = u_ProjMatrix * position;
 		gs_out.Position = position;
 		gs_out.Color = u_VertexNormalColor;

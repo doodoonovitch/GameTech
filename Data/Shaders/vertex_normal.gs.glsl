@@ -1,9 +1,6 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-uniform vec4 u_VertexNormalColor;
-uniform float u_NormalMagnitude;
-
 uniform samplerBuffer perInstanceDataSampler;
 
 in VS_OUT

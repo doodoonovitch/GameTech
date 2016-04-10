@@ -87,7 +87,11 @@ layout (std140, shared) uniform FrameData
 
 	vec4 u_AmbientLight;
 
+	vec4 u_VertexNormalColor;
+
 	vec2 u_ScreenSize;
+
+	float u_NormalMagnitude;
 
 	int u_PointLightCount; 
 	int u_SpotLightCount;

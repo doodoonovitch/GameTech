@@ -63,6 +63,37 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 
 	GL_CHECK_ERRORS;
 
+
+	const char * uniformNames2[__uniforms2_count__] =
+	{
+		"u_NormalMagnitude",
+		"u_VertexNormalColor",
+	};
+
+	mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/terrain.vs.glsl");
+	mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/terrain.tcs.glsl");
+	mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tes.glsl");
+	mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain_vertex_normal.gs.glsl");
+	mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
+	mDrawNormalShader.CreateAndLinkProgram();
+	mDrawNormalShader.Use();
+
+	mDrawNormalShader.AddUniforms(uniformNames, __uniforms_count__);
+	mDrawNormalShader.AddUniforms(uniformNames2, __uniforms2_count__);
+
+	//pass values of constant uniforms at initialization
+	glUniform2iv(mDrawNormalShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
+	glUniform2iv(mDrawNormalShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
+	glUniform3fv(mDrawNormalShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+
+	glUniform1i(mDrawNormalShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
+
+	mDrawNormalShader.SetupFrameDataBlockBinding();
+	mDrawNormalShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+
 	const float epsilon = 0.00001f;
 	const glm::vec3 vertices[] =
 	{
@@ -93,37 +124,9 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 
 	GL_CHECK_ERRORS;
 
-	LoadHeightMap("medias/alps-valley-height-2048.raw");
+	//LoadHeightMap("medias/alps-valley-height-2048.raw", 2048, true);
+	LoadHeightMap("medias/Terrain/Canyon_513x513.r32", 513, true);
 
-
-	const char * uniformNames2[__uniforms2_count__] =
-	{
-		"u_NormalMagnitude",
-		"u_VertexNormalColor",
-		//"perInstanceDataSampler",
-	};
-
-	mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/terrain.vs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/terrain.tcs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tes.glsl");
-	mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain_vertex_normal.gs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
-	mDrawNormalShader.CreateAndLinkProgram();
-	mDrawNormalShader.Use();
-	
-	mDrawNormalShader.AddUniforms(uniformNames, __uniforms_count__);
-	mDrawNormalShader.AddUniforms(uniformNames2, __uniforms2_count__);
-
-	//pass values of constant uniforms at initialization
-	glUniform2iv(mDrawNormalShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
-	glUniform3fv(mDrawNormalShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
-
-	glUniform1i(mDrawNormalShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
-
-	mDrawNormalShader.SetupFrameDataBlockBinding();
-	mDrawNormalShader.UnUse();
-
-	GL_CHECK_ERRORS;
 
 	std::cout << "... TerrainRenderer initialized!" << std::endl << std::endl;
 }
@@ -179,8 +182,10 @@ void TerrainRenderer::DebugRender()
 }
 
 
-void TerrainRenderer::LoadHeightMap(const char * filename)
+void TerrainRenderer::LoadHeightMap(const char * filename, GLint heightMapTextureWidth, bool invertY)
 {
+	assert(heightMapTextureWidth >= mMapSize.x);
+
 	size_t bufferSize = mMapSize.x * mMapSize.y * sizeof(GLfloat);
 	GLfloat * buffer = (GLfloat*)malloc(bufferSize);
 
@@ -188,15 +193,40 @@ void TerrainRenderer::LoadHeightMap(const char * filename)
 
 	if (fopen_s(&filePtr, filename, "rb") == 0)
 	{
-		size_t n = fread(buffer, 1, bufferSize, filePtr);
-		if (n != bufferSize)
-		{
-			char errmsg[200];
-			strerror_s(errmsg, 200, errno);
+		GLfloat * ptr;
+		GLint incY;
 
-			PRINT_MESSAGE("Error: Cannot read heigh map file '%s' : '%s'!\n", filename, errmsg);
-			goto ExitLoadHeightMap;
-		}		
+		if (invertY)
+		{
+			ptr = buffer + (mMapSize.x * (mMapSize.y - 1));
+			incY = -mMapSize.x;
+		}
+		else
+		{
+			ptr = buffer;
+			incY = mMapSize.x;
+		}
+
+		GLint seekCount = (heightMapTextureWidth - mMapSize.x) * sizeof(GLfloat);
+		GLint readCount = mMapSize.x * sizeof(GLfloat);
+
+		for (GLint y = 0; y < mMapSize.y; ++y)
+		{
+			size_t n = fread(ptr, 1, readCount, filePtr);
+			if (n != readCount)
+			{
+				char errmsg[200];
+				strerror_s(errmsg, 200, errno);
+
+				PRINT_MESSAGE("Error: Cannot read heigh map file '%s' : '%s'!\n", filename, errmsg);
+				goto ExitLoadHeightMap;
+			}
+			ptr += incY;
+			if (seekCount > 0)
+			{
+				fseek(filePtr, seekCount, SEEK_CUR);
+			}
+		}
 	}
 	else
 	{

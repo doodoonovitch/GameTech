@@ -32,8 +32,6 @@ private:
 
 	enum EUniformIndex
 	{
-		u_NormalMagnitude,
-		u_VertexNormalColor,
 		perInstanceDataSampler,
 
 		__uniforms_count__

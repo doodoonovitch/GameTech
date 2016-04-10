@@ -145,7 +145,7 @@ void SimpleCamera::OnInit()
 			}
 		}
 
-		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(2048, 2048, glm::vec3(.1f, 50.f, .1f));
+		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(512, 512, glm::vec3(.1f, 10.f, .1f));
 		engine->AttachRenderer(terrain);
 
 		/*
