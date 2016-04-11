@@ -11,7 +11,7 @@ glm::vec3 Camera::UP = glm::vec3(0,1,0);
 
 Camera::Camera(void)
 	: SceneObject(true)
-	, mNearZ(0.1f)
+	, mNearZ(1.f)
 	, mFarZ(1000.0f)
 {  
 }
@@ -34,11 +34,13 @@ void Camera::Update()
 	}
 }
 
-void Camera::SetupProjection(const float fovy, const float aspRatio)
+void Camera::SetupProjection(const float fovy, const float aspRatio, float zNear, float zFar)
 {
-	mProj = glm::perspective(fovy, aspRatio, mNearZ, mFarZ);
+	mNearZ = zNear;
+	mFarZ = zFar;
 	mFov = fovy;
 	mAspectRatio = aspRatio;
+	mProj = glm::perspective(mFov, mAspectRatio, mNearZ, mFarZ);
 } 
 
 const glm::mat4 Camera::GetViewMatrix() const

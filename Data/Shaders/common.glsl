@@ -70,6 +70,15 @@
 #define PI											3.14159265
 
 
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+
+
 struct DualQuat
 {
 	vec4 Qr;
@@ -217,6 +226,16 @@ vec3 dqTransformNormal(vec3 normal, DualQuat dq)
     return normal + 2.0 * cross( dq.Qr.xyz, cross( dq.Qr.xyz, normal ) + dq.Qr.w * normal );
 }
 
+
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+
+
 vec3 GetBumpedNormal(sampler2DArray gNormalMap, vec3 texCoord)
 {
     vec3 bumpMapNormal = texture(gNormalMap, texCoord).xyz;
@@ -242,4 +261,13 @@ vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, sampler2DArray gNormalMap, v
 	vec3 bumpMapNormal = GetBumpedNormal(gNormalMap, texCoord);
 	return ComputeBumpedNormal(normal, tangent, bumpMapNormal);
 }
+
+
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
 

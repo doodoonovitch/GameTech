@@ -78,14 +78,14 @@ void CompMinMaxPoint(vec4 p[4], out vec4 minima, out vec4 maxima)
 	}
 }
 
-#define XMinFrustum -1.1
-#define XMaxFrustum 1.1
+#define XMinFrustum -1.3
+#define XMaxFrustum 1.3
 
-#define YMinFrustum -1.1
-#define YMaxFrustum 1.1
+#define YMinFrustum -1.3
+#define YMaxFrustum 1.3
 
-#define ZMinFrustum -1.1
-#define ZMaxFrustum 1.1
+#define ZMinFrustum -0.3
+#define ZMaxFrustum 1.3
 
 bool IsOffScreen(vec4 minima, vec4 maxima)
 {
@@ -95,8 +95,8 @@ bool IsOffScreen(vec4 minima, vec4 maxima)
 	if (minima.y > YMaxFrustum || YMinFrustum > maxima.y)
 		return true;
 
-	//if (minima.z > ZMaxFrustum || ZMinFrustum > maxima.z)
-	//	return true;
+	if (minima.z > ZMaxFrustum || ZMinFrustum > maxima.z)
+		return true;
 
 	return false;
 }
@@ -116,8 +116,8 @@ void main()
 		vec4 minima, maxima;
 		CompMinMaxPoint(p, minima, maxima);
 
-        //if (p[0].z < 0.0 && p[1].z < 0.0 && p[2].z < 0.0 && p[3].z < 0.0)
-		if (IsOffScreen(minima, maxima))
+        if (p[0].z < 0.0 && p[1].z < 0.0 && p[2].z < 0.0 && p[3].z < 0.0)
+		//if (IsOffScreen(minima, maxima))
 		{
             gl_TessLevelOuter[0] = 0.0;
             gl_TessLevelOuter[1] = 0.0;

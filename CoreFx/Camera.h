@@ -45,7 +45,7 @@ public:
 	inline float GetFarWindowWidth() const;
 	inline float GetFarWindowHeight() const;
 
-	void SetupProjection(const float fovy=45.0f, const float aspectRatio=1.33333f);
+	void SetupProjection(float fovy = 45.0f, float aspectRatio=1.33333f, float zNear = 1.f, float zFar = 1000.f);
 
 	const float GetFOV() const;
 	const float GetAspectRatio() const;

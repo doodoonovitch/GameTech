@@ -44,7 +44,7 @@ void SimpleCamera::SetupViewportAndProjection()
 	if (mCamera != nullptr)
 	{
 		assert(mCamera != nullptr);
-		mCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight);
+		mCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight, mCamera->GetNearZ(), mCamera->GetFarZ());
 	}
 
 	Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
@@ -67,6 +67,20 @@ void SimpleCamera::OnInit()
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
+
+		//const float XStart = 1.f;
+		//const float YStart = 0.f;
+		//const float ZStart = 1.f;
+		//const float XMul = 5.f;
+		//const float YMul = 5.f;
+		//const float ZMul = -200.f;
+
+		const float XStart = 1.5f;
+		const float YStart = 1.0f;
+		const float ZStart = -1.5f;
+		const float XMul = 5.f;
+		const float YMul = 5.f;
+		const float ZMul = -5.f;
 
 		int xCount = 30;
 		int yCount = 30;
@@ -137,7 +151,7 @@ void SimpleCamera::OnInit()
 					glm::quat qZ = glm::angleAxis(zAngle, ZAxis);
 
 					Cube * cube = cubeRenderer->CreateCube(i % materialCount);
-					cube->GetFrame()->SetPosition(glm::vec3(1.5f + 5.f * i, 1.f + 5.f * k, -1.5f + -5.f * j));
+					cube->GetFrame()->SetPosition(glm::vec3(XStart + XMul * i, YStart + YMul * j, ZStart + ZMul * k));
 
 					glm::quat qRot = qX * qY * qZ;
 					cube->GetFrame()->SetRotation(qRot);
@@ -145,8 +159,8 @@ void SimpleCamera::OnInit()
 			}
 		}
 
-		//Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(512, 512, glm::vec3(.1f, 10.f, .1f));
-		//engine->AttachRenderer(terrain);
+		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(512, 512, glm::vec3(.1f, 10.f, .1f));
+		engine->AttachRenderer(terrain);
 
 		/*
 		std::vector<Geometry::MeshData*> meshDataList;
@@ -181,6 +195,27 @@ void SimpleCamera::OnInit()
 	engine->CreateDynamicResources();
 
 	cout << "Initialization successfull" << endl;
+
+
+	//{
+	//	mCamera->Update();
+	//	glm::mat4 mvp = mCamera->GetProjectionMatrix() * mCamera->GetViewMatrix();
+	//	for (auto i = 0; i < xCount; ++i)
+	//	{
+	//		for (auto j = 0; j < yCount; ++j)
+	//		{
+	//			for (auto k = 0; k < zCount; ++k)
+	//			{
+	//				glm::vec4 v(XStart + XMul * i, YStart + YMul * j, ZStart + ZMul * k, 1.0f);
+
+	//				glm::vec4 v2 = mvp * v;
+	//				v2 = v2 / v2.w;
+	//				PRINT_MESSAGE("v(%f, %f, %f) : v2(%f, %f, %f)\n", v.x, v.y, v.z, v2.x, v2.y, v2.z);
+	//			}
+	//		}
+	//	}
+	//}
+
 }
 
 SimpleCamera::SimpleCamera(GameProgram & gameProgram)
