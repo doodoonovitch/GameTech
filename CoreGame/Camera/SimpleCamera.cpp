@@ -145,8 +145,8 @@ void SimpleCamera::OnInit()
 			}
 		}
 
-		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(512, 512, glm::vec3(.1f, 10.f, .1f));
-		engine->AttachRenderer(terrain);
+		//Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(512, 512, glm::vec3(.1f, 10.f, .1f));
+		//engine->AttachRenderer(terrain);
 
 		/*
 		std::vector<Geometry::MeshData*> meshDataList;
