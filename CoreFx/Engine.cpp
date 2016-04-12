@@ -578,8 +578,10 @@ void Engine::RenderObjects()
 	assert(buffer != nullptr);
 
 	glm::vec4 eyePos(mCamera->GetFrame()->GetPosition(), 1.f);
+	glm::mat4 viewMatrix(mCamera->GetViewMatrix());
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(viewMatrix), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));

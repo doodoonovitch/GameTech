@@ -51,6 +51,7 @@ private:
 	enum FrameDataUniforms
 	{
 		u_ProjMatrix,
+		u_ViewMatrix,
 		u_ViewDQ,
 		u_ViewPosition,
 		u_AmbientLight,
@@ -353,6 +354,7 @@ private:
 	const char * mFrameDataUniformNames[__uniforms_count__] =
 	{
 		"u_ProjMatrix",
+		"u_ViewMatrix",
 		"u_ViewDQ.Qr",
 		"u_ViewPosition",
 		"u_AmbientLight",

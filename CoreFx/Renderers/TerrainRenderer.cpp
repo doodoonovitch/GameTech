@@ -94,13 +94,12 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 	GL_CHECK_ERRORS;
 
 
-	const float epsilon = 0.00001f;
 	const glm::vec3 vertices[] =
 	{
-		glm::vec3(0.0f,				0.0f, 0.0f),
-		glm::vec3(1.0f - epsilon,	0.0f, 0.0f),
-		glm::vec3(0.0f,				0.0f, 1.0f - epsilon),
-		glm::vec3(1.0f - epsilon,	0.0f, 1.0f - epsilon)
+		glm::vec3(0.0f,	0.0f, 0.0f),
+		glm::vec3(1.0f,	0.0f, 0.0f),
+		glm::vec3(0.0f,	0.0f, 1.0f),
+		glm::vec3(1.0f,	0.0f, 1.0f)
 	};
 		
 
