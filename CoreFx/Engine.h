@@ -52,7 +52,7 @@ private:
 	{
 		u_ProjMatrix,
 		u_ViewDQ,
-		u_EyePosition,
+		u_ViewPosition,
 		u_AmbientLight,
 		u_VertexNormalColor,
 		u_ScreenSize,
@@ -354,7 +354,7 @@ private:
 	{
 		"u_ProjMatrix",
 		"u_ViewDQ.Qr",
-		"u_EyePosition",
+		"u_ViewPosition",
 		"u_AmbientLight",
 		"u_VertexNormalColor",
 		"u_ScreenSize",

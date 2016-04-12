@@ -2,7 +2,7 @@ layout(location = 0) out vec4 outPosition;
 layout(location = 1) out uvec2 outData;
 
 uniform vec3 u_Scale;
-uniform float u_TexScale = 0.05;
+uniform float u_TexScale = 0.01;
 uniform float u_TriplanarBlendSharpness = 1.0;
 
 uniform sampler2DArray u_HeightMap;

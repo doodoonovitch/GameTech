@@ -1,10 +1,10 @@
 layout (vertices = 4) out;
 
-uniform float u_MinTessDist = 4;
-uniform float u_MaxTessDist = 10;
+uniform float u_MinTessDist = 800;
+uniform float u_MaxTessDist = 1;
 uniform float u_MinTess = 1;
 uniform float u_MaxTess = 64;
-uniform float u_LODfactor = 40;
+//uniform float u_LODfactor = 40;
 
 in VS_OUT
 {
@@ -18,42 +18,15 @@ out TCS_OUT
 	int Layer;
 } tcs_out[];
 
-bool IsOffScreen(vec4 vertex)
-{
-    if(vertex.z < -0.5)
-	{
-        return true;
-    }   
-    return any(lessThan(vertex.xy, vec2(-1.7))) || any(greaterThan(vertex.xy, vec2(1.7)));  
-}
-
-vec2 ScreenSpace(vec4 vertex)
-{
-    return (clamp(vertex.xy, -1.3, 1.3) + 1) * (u_ScreenSize * 0.5);
-}
-
-float TessellationLevel(vec2 v0, vec2 v1)
-{
-     return clamp(distance(v0, v1) / u_LODfactor, u_MinTess, u_MaxTess);
-}
-
 float CompTessFactor(vec4 p1, vec4 p0)
 {
-	vec2 ss0 = ScreenSpace(p0);
-	vec2 ss1 = ScreenSpace(p1);
-
-	return TessellationLevel(ss0, ss1);
+	vec3 p = (p0.xyz + p1.xyz) * 0.5;
+	p = p - u_ViewPosition.xyz;
+	float d = length(p);
+	float s = clamp((u_MinTessDist - d) / (u_MinTessDist - u_MaxTessDist), 0.0, 1.0);
+	//return pow(2, (mix(u_MinTess, u_MaxTess, s)));
+	return mix(u_MinTess, u_MaxTess, s);
 }
-
-
-
-//float CompTessFactor(vec4 p1, vec4 p0)
-//{
-//	float d = length((p1.xy - p0.xy) * u_ScreenSize);
-//	float s = clamp((d - u_MinTessDist) / (u_MinTessDist - u_MaxTessDist), 0.0, 1.0);
-//	//return pow(2, (mix(u_MinTess, u_MaxTess, s)));
-//	return mix(u_MinTess, u_MaxTess, s);
-//}
 
 void CompMinMaxPoint(vec4 p[4], out vec4 minima, out vec4 maxima)
 {
@@ -106,18 +79,17 @@ void main()
 	if (gl_InvocationID == 0)
 	{
 		vec4 p[4];
-        p[0] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[0].gl_Position.xyz), 1.0);
-        p[1] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[1].gl_Position.xyz), 1.0);
-        p[2] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[2].gl_Position.xyz), 1.0);
-        p[3] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[3].gl_Position.xyz), 1.0);	
-		for(int i = 0; i < 4; ++i)
-			p[i] /= p[i].w;
-
-		vec4 minima, maxima;
-		CompMinMaxPoint(p, minima, maxima);
+		p[0] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[0].gl_Position.xyz), 1.0);
+		p[1] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[1].gl_Position.xyz), 1.0);
+		p[2] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[2].gl_Position.xyz), 1.0);
+		p[3] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[3].gl_Position.xyz), 1.0);	
+		//for(int i = 0; i < 4; ++i)
+		//	p[i] /= p[i].w;
+		//vec4 minima, maxima;
+		//CompMinMaxPoint(p, minima, maxima);
+		//if (IsOffScreen(minima, maxima))
 
         if (p[0].z < 0.0 && p[1].z < 0.0 && p[2].z < 0.0 && p[3].z < 0.0)
-		//if (IsOffScreen(minima, maxima))
 		{
             gl_TessLevelOuter[0] = 0.0;
             gl_TessLevelOuter[1] = 0.0;
@@ -126,6 +98,11 @@ void main()
         }
 		else
 		{
+			p[0] = gl_in[0].gl_Position;
+			p[1] = gl_in[1].gl_Position;
+			p[2] = gl_in[2].gl_Position;
+			p[3] = gl_in[3].gl_Position;	
+
             float l0 = CompTessFactor(p[2], p[0]); 
             float l1 = CompTessFactor(p[3], p[2]); 
             float l2 = CompTessFactor(p[3], p[1]); 

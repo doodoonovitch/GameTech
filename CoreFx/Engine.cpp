@@ -581,7 +581,7 @@ void Engine::RenderObjects()
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
-	memcpy(buffer + mFrameDataUniformOffsets[u_EyePosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_VertexNormalColor], glm::value_ptr(mDrawVertexNormalColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ScreenSize], glm::value_ptr(mScreenSize), sizeof(glm::vec2));

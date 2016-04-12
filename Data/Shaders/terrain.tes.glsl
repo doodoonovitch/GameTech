@@ -1,9 +1,8 @@
-layout (quads, fractional_odd_spacing) in;
-//layout (quads, fractional_even_spacing) in;
+//layout (quads, fractional_odd_spacing) in;
+layout (quads, fractional_even_spacing) in;
 //layout (quads, equal_spacing) in;
 
 uniform vec3 u_Scale;
-uniform vec2 u_TexelSize = vec2(1 / 2048);
 
 uniform sampler2DArray u_HeightMap;
 

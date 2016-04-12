@@ -92,7 +92,7 @@ layout (std140, shared) uniform FrameData
 
 	DualQuat u_ViewDQ;
 
-	vec4 u_EyePosition;
+	vec4 u_ViewPosition;
 
 	vec4 u_AmbientLight;
 
