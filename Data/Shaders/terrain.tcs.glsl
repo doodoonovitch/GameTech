@@ -1,9 +1,9 @@
 layout (vertices = 4) out;
 
-uniform float u_MinTessDist = 800;
+uniform float u_MinTessDist = 500;
 uniform float u_MaxTessDist = 1;
 uniform float u_MinTess = 1;
-uniform float u_MaxTess = 64;
+uniform float u_MaxTess = 6;
 //uniform float u_LODfactor = 40;
 
 in VS_OUT
@@ -18,15 +18,26 @@ out TCS_OUT
 	int Layer;
 } tcs_out[];
 
+//float CompTessFactor(vec4 p1, vec4 p0)
+//{
+//	vec3 p = (p0.xyz + p1.xyz) * 0.5;
+//	p = p - u_ViewPosition.xyz;
+//	float d = length(p);
+//	float s = clamp((u_MinTessDist - d) / (u_MinTessDist - u_MaxTessDist), 0.0, 1.0);
+//	//return pow(2, (mix(u_MinTess, u_MaxTess, s)));
+//	return mix(u_MinTess, u_MaxTess, s);
+//}
+
 float CompTessFactor(vec4 p1, vec4 p0)
 {
 	vec3 p = (p0.xyz + p1.xyz) * 0.5;
 	p = p - u_ViewPosition.xyz;
 	float d = length(p);
-	float s = clamp((u_MinTessDist - d) / (u_MinTessDist - u_MaxTessDist), 0.0, 1.0);
-	//return pow(2, (mix(u_MinTess, u_MaxTess, s)));
-	return mix(u_MinTess, u_MaxTess, s);
+	float diffTess = u_MaxTess - u_MinTess;
+	float diffDist = u_MinTessDist - u_MaxTessDist;
+	return pow(2, clamp(round(diffTess * (1 - (d - u_MinTess)/diffDist) + u_MinTess), u_MinTess, u_MaxTess));
 }
+
 
 void CompMinMaxPoint(vec4 p[4], out vec4 minima, out vec4 maxima)
 {
@@ -83,8 +94,8 @@ void main()
 		p[1] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[1].gl_Position.xyz), 1.0);
 		p[2] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[2].gl_Position.xyz), 1.0);
 		p[3] = u_ProjMatrix * vec4(dqTransformPoint(u_ViewDQ, gl_in[3].gl_Position.xyz), 1.0);	
-		//for(int i = 0; i < 4; ++i)
-		//	p[i] /= p[i].w;
+		for(int i = 0; i < 4; ++i)
+			p[i] /= p[i].w;
 		//vec4 minima, maxima;
 		//CompMinMaxPoint(p, minima, maxima);
 		//if (IsOffScreen(minima, maxima))

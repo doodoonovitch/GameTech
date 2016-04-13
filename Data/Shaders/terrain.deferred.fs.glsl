@@ -30,8 +30,8 @@ void main()
 	vec3 uvs = u_TexScale * fs_in.WorldPosition;
 
 	vec4 diffuseY = texture(u_DiffuseMap, vec3(uvs.xz, 2));
-	vec4 diffuseX = texture(u_DiffuseMap, vec3(uvs.zy, 1));
-	vec4 diffuseZ = texture(u_DiffuseMap, vec3(uvs.xy, 1));
+	vec4 diffuseX = texture(u_DiffuseMap, vec3(uvs.zy, 2));
+	vec4 diffuseZ = texture(u_DiffuseMap, vec3(uvs.xy, 2));
 
 	vec4 diffuse = (blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ);
 
