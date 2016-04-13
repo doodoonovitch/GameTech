@@ -2,7 +2,7 @@ layout(location = 0) out vec4 outPosition;
 layout(location = 1) out uvec2 outData;
 
 uniform vec3 u_Scale;
-uniform float u_TexScale = 0.01;
+uniform float u_TexScale = 0.05;
 uniform float u_TriplanarBlendSharpness = 1.0;
 
 uniform sampler2DArray u_HeightMap;
@@ -27,7 +27,11 @@ void main()
 	vec3 blendWeights = pow(abs(normal), vec3(u_TriplanarBlendSharpness));
 	blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
 
-	vec3 uvs = u_TexScale * fs_in.WorldPosition;
+	float d = length(fs_in.WorldPosition);
+	float k = floor(log(d / 7.5) / log(2));
+	float texScale = pow(0.5, k - 2);
+	vec3 uvs = u_TexScale * texScale * fs_in.WorldPosition;
+	//vec3 uvs = u_TexScale * fs_in.WorldPosition;
 
 	vec4 diffuseY = texture(u_DiffuseMap, vec3(uvs.xz, 2));
 	vec4 diffuseX = texture(u_DiffuseMap, vec3(uvs.zy, 2));
