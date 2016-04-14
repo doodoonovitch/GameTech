@@ -50,6 +50,7 @@ public:
 	void LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::vec3 const & up);
 
 	inline const glm::mat4 & GetProjectionMatrix() const;
+	inline const glm::mat4 & GetInverseProjectionMatrix() const;
 
 	inline const Maths::DualQuaternion & GetViewDQ() const;
 
@@ -87,6 +88,7 @@ protected:
 	static glm::vec3 UP;
 
 	glm::mat4 mProj; //projection matrix
+	glm::mat4 mInvProj;
 	Maths::DualQuaternion mViewDQ;
 	glm::vec3 mRight;
 	glm::vec3 mUp;
@@ -190,6 +192,10 @@ inline const glm::mat4 & Camera::GetProjectionMatrix() const
 	return mProj;
 }
 
+inline const glm::mat4 & Camera::GetInverseProjectionMatrix() const
+{
+	return mInvProj;
+}
 
 
 } // namespace Core

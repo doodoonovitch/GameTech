@@ -210,6 +210,7 @@ void Engine::InternalCreateGBuffers()
 	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_PositionBuffer]);
 	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_DataBuffer]);
 	
+
 	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -218,7 +219,7 @@ void Engine::InternalCreateGBuffers()
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DataBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32UI, mGBufferWidth, mGBufferHeight, 0, GL_RG_INTEGER, GL_UNSIGNED_INT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGB_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBuffers[gBuffer_DataBuffer], 0);
@@ -237,7 +238,7 @@ void Engine::InternalCreateGBuffers()
 	PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
 
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
+	glDrawBuffers(__gBuffer_count__, drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "... failed!" << std::endl;
@@ -354,20 +355,21 @@ void Engine::InternalInitializeDeferredPassShader()
 
 	// vertex shader
 	mDeferredShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+	mDeferredShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/light.fs.glsl");
 
-	// fragment shader
-	std::cout << "Loading shader file : shaders/light.fs.glsl" << std::endl;
-	std::vector<std::string> lightFsGlsl(2);
-	Shader::MergeFile(lightFsGlsl[0], "shaders/light.fs.glsl");
-	std::string & textureFuncSource = lightFsGlsl[1];
-	Shader::GenerateTexGetFunction(textureFuncSource, (int)mLightPassTextureMapping.mMapping.size());
-	mDeferredShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
+	//// fragment shader
+	//std::cout << "Loading shader file : shaders/light.fs.glsl" << std::endl;
+	//std::vector<std::string> lightFsGlsl(2);
+	//Shader::MergeFile(lightFsGlsl[0], "shaders/light.fs.glsl");
+	//std::string & textureFuncSource = lightFsGlsl[1];
+	//Shader::GenerateTexGetFunction(textureFuncSource, (int)mLightPassTextureMapping.mMapping.size());
+	//mDeferredShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	const char * uniformNames[__deferred_uniforms_count__] =
 	{
 		"u_gBufferPosition",
 		"u_gBufferData",
-		"u_materialDataSampler",
+		//"u_materialDataSampler",
 		"u_lightDescSampler",
 		"u_lightDataSampler"
 	};
@@ -379,24 +381,23 @@ void Engine::InternalInitializeDeferredPassShader()
 	mDeferredShader.AddUniforms(uniformNames, __deferred_uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferPosition), 0);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferData), 1);
+	glUniform1i(mDeferredShader.GetUniform(u_lightDescSampler), 0);
+	glUniform1i(mDeferredShader.GetUniform(u_lightDataSampler), 1);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferPosition), 2);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferData), 3);
 
-	glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
-	glUniform1i(mDeferredShader.GetUniform(u_lightDescSampler), 3);
-	glUniform1i(mDeferredShader.GetUniform(u_lightDataSampler), 4);
-
-	for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
-	{
-		char uniformName[50];
-		sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
-		int uniformIndex = glGetUniformLocation(mDeferredShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		if (uniformIndex > 0)
-		{
-			glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);	GL_CHECK_ERRORS;
-			std::cout << "\t" << uniformName << " : " << uniformIndex << std::endl;
-		}
-	}
+	//glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
+	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
+	//{
+	//	char uniformName[50];
+	//	sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
+	//	int uniformIndex = glGetUniformLocation(mDeferredShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+	//	if (uniformIndex > 0)
+	//	{
+	//		glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);	GL_CHECK_ERRORS;
+	//		std::cout << "\t" << uniformName << " : " << uniformIndex << std::endl;
+	//	}
+	//}
 
 	mDeferredShader.SetupFrameDataBlockBinding();
 	mDeferredShader.UnUse();
@@ -578,6 +579,7 @@ void Engine::RenderObjects()
 	glm::vec4 bufferViewportSize(mGBufferWidth, mGBufferHeight, mViewportWidth, mViewportHeight);
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(mCamera->GetInverseProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(viewMatrix), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
@@ -644,25 +646,25 @@ void Engine::RenderObjects()
 		glBindVertexArray(mQuad->GetVao());
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
-
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DataBuffer]);
-
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
-
-			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
 
-			glActiveTexture(GL_TEXTURE4);
+			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
 
-			for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
-			{
-				glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
-				glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
-			}
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
+
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DataBuffer]);
+
+			//glActiveTexture(GL_TEXTURE2);
+			//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
+
+			//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
+			//{
+			//	glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
+			//	glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
+			//}
 
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);

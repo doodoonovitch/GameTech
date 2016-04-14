@@ -17,7 +17,7 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool onlyForThisRenderer)
+bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT)
 {
 	assert(filename != nullptr);
 
@@ -28,25 +28,7 @@ bool Renderer::AddTexture(const char * filename, TextureCategory category, Textu
 		return false;
 	}
 
-	uint16_t rendererId;
-	if (onlyForThisRenderer)
-	{
-		rendererId = (uint16_t)GetInstanceId();
-	}
-	else
-	{
-		switch (category)
-		{
-		case TextureCategory::Diffuse:
-		case TextureCategory::Specular:
-			rendererId = 0;
-			break;
-
-		default:
-			rendererId = (uint16_t)GetInstanceId();
-			break;
-		}
-	}
+	uint16_t rendererId = (uint16_t)GetInstanceId();
 
 	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)hd.pixelWidth, (GLsizei)hd.pixelHeight, wrapS, wrapT);
 

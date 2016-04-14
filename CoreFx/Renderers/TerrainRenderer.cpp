@@ -21,13 +21,13 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 	std::cout << std::endl;
 	std::cout << "Initialize TerrainRenderer...." << std::endl;
 
-	AddTexture("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, true);
-	AddTexture("medias/snowstone01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, true);
-	AddTexture("medias/pineforest03.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, true);
+	AddTexture("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat);
+	AddTexture("medias/snowstone01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat);
+	AddTexture("medias/pineforest03.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat);
 
-	AddTexture("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, true);
-	AddTexture("medias/snowstone01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, true);
-	AddTexture("medias/pineforest03_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, true);
+	AddTexture("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
+	AddTexture("medias/snowstone01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
+	AddTexture("medias/pineforest03_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
 
 	const char * uniformNames[__uniforms_count__] =
 	{

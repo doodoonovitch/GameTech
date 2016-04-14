@@ -1,5 +1,5 @@
 layout(location = 0) out vec4 outPosition;
-layout(location = 1) out uvec2 outData;
+layout(location = 1) out uvec3 outData;
 
 uniform vec3 u_Scale;
 uniform float u_TexScale = 0.05;
@@ -20,8 +20,6 @@ in GS_OUT
 
 void main()
 {
-	outPosition = vec4(fs_in.ViewPosition, uintBitsToFloat(CombineRenderIdAndMaterialIndex(TERRAIN_RENDERER_ID, 0)));
-
 	vec3 normal = normalize(fs_in.Normal);
 
 	vec3 blendWeights = pow(abs(normal), vec3(u_TriplanarBlendSharpness));
@@ -33,13 +31,14 @@ void main()
 	vec3 uvs = u_TexScale * texScale * fs_in.WorldPosition;
 	//vec3 uvs = u_TexScale * fs_in.WorldPosition;
 
-	vec4 diffuseY = texture(u_DiffuseMap, vec3(uvs.xz, 2));
-	vec4 diffuseX = texture(u_DiffuseMap, vec3(uvs.zy, 2));
-	vec4 diffuseZ = texture(u_DiffuseMap, vec3(uvs.xy, 2));
+	vec3 diffuseY = texture(u_DiffuseMap, vec3(uvs.xz, 2)).xyz;
+	vec3 diffuseX = texture(u_DiffuseMap, vec3(uvs.zy, 2)).xyz;
+	vec3 diffuseZ = texture(u_DiffuseMap, vec3(uvs.xy, 2)).xyz;
 
-	vec4 diffuse = (blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ);
+	vec3 diffuse = (blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ);
 
-	outData = uvec2(packUnorm4x8(diffuse), packHalf2x16(normalize(fs_in.ViewNormal).xy));
+	outData = uvec3(packUnorm4x8(vec4(diffuse, TERRAIN_RENDERER_ID / 255)), 0, 0);
+	outPosition = vec4( fs_in.ViewPosition, uintBitsToFloat(packHalf2x16(fs_in.ViewNormal.xy)) );
 }
 
 

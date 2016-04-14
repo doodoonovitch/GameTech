@@ -45,6 +45,7 @@ void Camera::SetupProjection(const float fovy, const float aspRatio, float zNear
 	mFarWindowHeight = 2.0f * mFarZ * tanf(0.5f*mFovY);
 
 	mProj = glm::perspective(mFovY, mAspect, mNearZ, mFarZ);
+	mInvProj = glm::inverse(mProj);
 } 
 
 const glm::mat4 Camera::GetViewMatrix() const

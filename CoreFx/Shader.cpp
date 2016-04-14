@@ -240,17 +240,20 @@ void Shader::SetupFrameDataBlockBinding() const
 	GL_CHECK_ERRORS;
 }
 
-void Shader::GenerateTexGetFunction(std::string & generatedSource, int texSamplerCount, const char * samplerUniformVarName)
+void Shader::GenerateTexGetFunction(std::string & generatedSource, int texSamplerCount, const char * functionName, const char * samplerUniformVarName)
 {
-	generatedSource = "vec4 TexGet(int samplerIndex, vec3 p)\r\n{\r\n";
 	const int tmpBufferCount = 200;
 	char tmpBuffer[tmpBufferCount];
+
+	sprintf_s(tmpBuffer, tmpBufferCount, "vec4 %s(int samplerIndex, vec3 p)\r\n{\r\n", functionName);
+	generatedSource.append(tmpBuffer);
+
 	for (int itex = 0; itex < texSamplerCount; ++itex)
 	{
 		sprintf_s(tmpBuffer, tmpBufferCount, "%sif(samplerIndex == %i) { return texture(%s[%i], p); }\r\n", itex == 0 ? "\t" : "\telse ", itex, samplerUniformVarName, itex);
 		generatedSource.append(tmpBuffer);
 	}
-	generatedSource.append("\treturn vec4(0);\r\n}");
+	generatedSource.append("\treturn vec4(0);\r\n}\n");
 }
 
 } // namespace CoreFx

@@ -89,6 +89,7 @@ struct DualQuat
 layout (std140, shared) uniform FrameData
 {
 	mat4 u_ProjMatrix;
+	mat4 u_InvProjMatrix;
 	
 	mat4 u_ViewMatrix;
 

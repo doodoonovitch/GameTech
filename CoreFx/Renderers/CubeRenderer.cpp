@@ -219,7 +219,7 @@ void CubeRenderer::InitializeShader()
 	std::vector<std::string> lightFsGlsl(2);
 	Shader::MergeFile(lightFsGlsl[0], "shaders/cube.deferred.fs.glsl");
 	std::string & textureFuncSource = lightFsGlsl[1];
-	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size(), "u_normalMapSampler");
+	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	const char * uniformNames[__uniforms_count__] =
@@ -244,7 +244,7 @@ void CubeRenderer::InitializeShader()
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
 	{
 		char uniformName[50];
-		sprintf_s(uniformName, 50, "u_normalMapSampler[%i]", i);
+		sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
 		int uniformIndex = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
 		if (uniformIndex > 0)
 		{

@@ -56,7 +56,7 @@ public:
 
 	static bool MergeFile(std::string& buffer, const std::string& filename);
 
-	static void GenerateTexGetFunction(std::string & generatedSource, int texSamplerCount, const char * samplerUniformVarName = "u_textureSampler");
+	static void GenerateTexGetFunction(std::string & generatedSource, int texSamplerCount, const char * functionName = "TexGet", const char * samplerUniformVarName = "u_textureSampler");
 
 protected:
 

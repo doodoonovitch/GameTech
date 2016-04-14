@@ -1,5 +1,5 @@
 layout(location = 0) out vec4 outPosition;
-layout(location = 1) out uvec2 outData;
+layout(location = 1) out uvec3 outData;
 
 in VS_OUT
 {
@@ -10,6 +10,6 @@ in VS_OUT
 
 void main(void)
 {
-	outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(CombineRenderIdAndMaterialIndex(GRID_RENDERER_ID, 0)));
-	outData = uvec2(packHalf2x16(fs_in.TexUV.xy), 0);
+	outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(packHalf2x16(vec2(0))));
+	outData = uvec3(packUnorm4x8(vec4(fs_in.TexUV.xy, 0, GRID_RENDERER_ID / 255)), 0, 0);
 }

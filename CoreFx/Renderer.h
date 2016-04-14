@@ -29,7 +29,7 @@ public:
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
 	const TextureInfoList & GetTextureInfoList() const { return mTextures; }
-	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool onlyForThisRenderer = false);
+	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
 
 	const TextureMapping & GetTextureMapping() const { return mTextureMapping; }
 
