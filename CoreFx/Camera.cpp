@@ -38,9 +38,13 @@ void Camera::SetupProjection(const float fovy, const float aspRatio, float zNear
 {
 	mNearZ = zNear;
 	mFarZ = zFar;
-	mFov = fovy;
-	mAspectRatio = aspRatio;
-	mProj = glm::perspective(mFov, mAspectRatio, mNearZ, mFarZ);
+	mFovY = fovy;
+	mAspect = aspRatio;
+
+	mNearWindowHeight = 2.0f * mNearZ * tanf(0.5f*mFovY);
+	mFarWindowHeight = 2.0f * mFarZ * tanf(0.5f*mFovY);
+
+	mProj = glm::perspective(mFovY, mAspect, mNearZ, mFarZ);
 } 
 
 const glm::mat4 Camera::GetViewMatrix() const

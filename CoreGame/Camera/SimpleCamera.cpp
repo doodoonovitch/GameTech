@@ -192,6 +192,8 @@ void SimpleCamera::OnInit()
 
 	SetupViewportAndProjection();
 
+	mCamera->Update();
+
 	engine->CreateDynamicResources();
 
 	cout << "Initialization successfull" << endl;

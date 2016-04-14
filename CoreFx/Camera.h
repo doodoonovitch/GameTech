@@ -47,9 +47,6 @@ public:
 
 	void SetupProjection(float fovy = 45.0f, float aspectRatio=1.33333f, float zNear = 1.f, float zFar = 1000.f);
 
-	const float GetFOV() const;
-	const float GetAspectRatio() const;
-
 	void LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::vec3 const & up);
 
 	inline const glm::mat4 & GetProjectionMatrix() const;
@@ -94,9 +91,6 @@ protected:
 	glm::vec3 mRight;
 	glm::vec3 mUp;
 	glm::vec3 mLook;
-
-	
-	float mFov, mAspectRatio;
 };
 
 
@@ -189,16 +183,6 @@ inline float Camera::GetFarWindowHeight()const
 inline const Maths::DualQuaternion & Camera::GetViewDQ() const
 {
 	return mViewDQ;
-}
-
-inline const float Camera::GetFOV() const
-{
-	return mFov;
-}
-
-inline const float Camera::GetAspectRatio() const
-{
-	return mAspectRatio;
 }
 
 inline const glm::mat4 & Camera::GetProjectionMatrix() const

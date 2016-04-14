@@ -56,7 +56,8 @@ private:
 		u_ViewPosition,
 		u_AmbientLight,
 		u_VertexNormalColor,
-		u_ScreenSize,
+		u_BufferViewportSize,
+		u_DepthRangeFovYAspect,
 		u_NormalMagnitude,
 		u_PointLightCount,
 		u_SpotLightCount,
@@ -324,7 +325,6 @@ private:
 	GLsizei mGBufferHeight;
 	GLint mViewportX, mViewportY;
 	GLsizei mViewportWidth, mViewportHeight;
-	glm::vec2 mScreenSize;
 
 	float mExposure;
 	float mGamma;
@@ -359,7 +359,8 @@ private:
 		"u_ViewPosition",
 		"u_AmbientLight",
 		"u_VertexNormalColor",
-		"u_ScreenSize",
+		"u_BufferViewportSize",
+		"u_DepthRangeFovYAspect",
 		"u_NormalMagnitude",
 		"u_PointLightCount",
 		"u_SpotLightCount",

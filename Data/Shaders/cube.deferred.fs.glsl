@@ -31,6 +31,7 @@ void main(void)
 	normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
 	
 	outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(CombineRenderIdAndMaterialIndex(CUBE_RENDERER_ID, fs_in.MaterialIndex)));
+	//outPosition = vec4(gl_FragCoord.xyz, uintBitsToFloat(CombineRenderIdAndMaterialIndex(CUBE_RENDERER_ID, fs_in.MaterialIndex)));
 
 	outData = uvec2(packHalf2x16(fs_in.TexUV.xy), packHalf2x16(normal.xy));
 }

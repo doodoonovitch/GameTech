@@ -2,6 +2,7 @@ layout(location = 0) out vec4 vFragColor;
 
 in VS_OUT
 {
+	//vec3 ViewDir;
 	vec2 TexUV;
 } fs_in;
 
@@ -22,11 +23,30 @@ vec4 TexGet(int samplerIndex, vec3 p);
 // GBuffer data extraction helpers
 //
 // ---------------------------------------------------------------------------
+float DepthToZPosition(in float depth) 
+{
+	return u_DepthRangeFovYAspect.x / (u_DepthRangeFovYAspect.y - depth * (u_DepthRangeFovYAspect.y - u_DepthRangeFovYAspect.x)) * u_DepthRangeFovYAspect.y;
+}
 
 void UnpackPositionAndMaterialIdFromGBuffer(out vec3 Position, out int MaterialIndex, out int RendererId)
 {
     vec4 pos = texture(u_gBufferPosition, fs_in.TexUV, 0);
 	Position = pos.xyz;
+	/*
+	float ndcZ = (2.0 * pos.z - u_DepthRangeFovYAspect.x - u_DepthRangeFovYAspect.y) / (u_DepthRangeFovYAspect.y - u_DepthRangeFovYAspect.x);
+	float eyeZ = u_ProjMatrix[3][2] / ((u_ProjMatrix[2][3] * ndcZ) - u_ProjMatrix[2][2]);
+	Position = fs_in.ViewDir * eyeZ;
+	*/
+	/*
+	Position = vec3(
+		((gl_FragCoord.x/u_BufferViewportSize.x)-0.5) * 2.0,
+		((-gl_FragCoord.y/u_BufferViewportSize.y)+0.5) * 2.0 / (u_BufferViewportSize.x/u_BufferViewportSize.y), 
+		DepthToZPosition(pos.z)
+		);
+	Position.x *= Position.z;
+	Position.y *= -Position.z;
+	*/
+
 	uint bitfieldValue = floatBitsToUint(pos.w);
 	MaterialIndex = int(bitfieldValue & Mask_0x00FFFFFF);
 	RendererId = int((bitfieldValue & Mask_0xFF000000) >> 24);

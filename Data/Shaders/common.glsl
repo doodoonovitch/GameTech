@@ -100,7 +100,9 @@ layout (std140, shared) uniform FrameData
 
 	vec4 u_VertexNormalColor;
 
-	vec2 u_ScreenSize;
+	vec4 u_BufferViewportSize;
+	vec4 u_DepthRangeFovYAspect;
+	
 
 	float u_NormalMagnitude;
 
