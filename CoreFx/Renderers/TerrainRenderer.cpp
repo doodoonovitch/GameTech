@@ -29,6 +29,52 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 	AddTexture("medias/snowstone01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
 	AddTexture("medias/pineforest03_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
 
+	const glm::vec3 vertices[] =
+	{
+		glm::vec3(0.0f,	0.0f, 0.0f),
+		glm::vec3(1.0f,	0.0f, 0.0f),
+		glm::vec3(0.0f,	0.0f, 1.0f),
+		glm::vec3(1.0f,	0.0f, 1.0f)
+	};
+		
+
+	//setup vao and vbo stuff
+	glGenVertexArrays(1, &mVaoID);
+	glGenBuffers(mVboCount, mVboIDs);
+
+	glBindVertexArray(mVaoID);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	GL_CHECK_ERRORS;
+
+	glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
+	glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+	GL_CHECK_ERRORS;
+
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
+
+	glBindVertexArray(0);
+
+	GL_CHECK_ERRORS;
+
+	//LoadHeightMap("medias/alps-valley-height-2048.raw", 2048, true);
+	LoadHeightMap("medias/Terrain/Canyon_513x513.r32", 513, true);
+
+	std::cout << "... TerrainRenderer initialized!" << std::endl << std::endl;
+}
+
+
+TerrainRenderer::~TerrainRenderer()
+{
+	glDeleteTextures(1, &mHeightMapTextureId);
+	mHeightMapTextureId = 0;
+}
+
+void TerrainRenderer::LoadShaders()
+{
+	PRINT_MESSAGE("Initialize Terrain Renderer Shaders : \n\n");
+
 	const char * uniformNames[__uniforms_count__] =
 	{
 		"u_PatchCount",
@@ -48,17 +94,17 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 
-		mShader.AddUniforms(uniformNames, __uniforms_count__);
+	mShader.AddUniforms(uniformNames, __uniforms_count__);
 
-		//pass values of constant uniforms at initialization
-		glUniform2iv(mShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
-		glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;		
-		glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	//pass values of constant uniforms at initialization
+	glUniform2iv(mShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
+	glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
+	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 
-		glUniform1i(mShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
-		glUniform1i(mShader.GetUniform(u_DiffuseMap), 1); GL_CHECK_ERRORS;
-		
-		mShader.SetupFrameDataBlockBinding();
+	glUniform1i(mShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_DiffuseMap), 1); GL_CHECK_ERRORS;
+
+	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
@@ -93,52 +139,17 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 
 	GL_CHECK_ERRORS;
 
-
-	const glm::vec3 vertices[] =
-	{
-		glm::vec3(0.0f,	0.0f, 0.0f),
-		glm::vec3(1.0f,	0.0f, 0.0f),
-		glm::vec3(0.0f,	0.0f, 1.0f),
-		glm::vec3(1.0f,	0.0f, 1.0f)
-	};
-		
-
-	//setup vao and vbo stuff
-	glGenVertexArrays(1, &mVaoID);
-	glGenBuffers(mVboCount, mVboIDs);
-
-	glBindVertexArray(mVaoID);
-
-	glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	GL_CHECK_ERRORS;
-
-	glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
-	glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-	GL_CHECK_ERRORS;
-
-	glPatchParameteri(GL_PATCH_VERTICES, 4);
-
-	glBindVertexArray(0);
-
-	GL_CHECK_ERRORS;
-
-	//LoadHeightMap("medias/alps-valley-height-2048.raw", 2048, true);
-	LoadHeightMap("medias/Terrain/Canyon_513x513.r32", 513, true);
-
-
-	std::cout << "... TerrainRenderer initialized!" << std::endl << std::endl;
-}
-
-
-TerrainRenderer::~TerrainRenderer()
-{
-	glDeleteTextures(1, &mHeightMapTextureId);
-	mHeightMapTextureId = 0;
+	PRINT_MESSAGE("... done.\n");
+	PRINT_MESSAGE("-------------------------------------------------\n\n");
 }
  
 void TerrainRenderer::Render()
 {
+	if (!mShader.IsLoaded())
+	{
+		LoadShaders();
+	}
+
 	mShader.Use();
 	glBindVertexArray(mVaoID);
 

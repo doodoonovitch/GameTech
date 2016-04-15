@@ -367,7 +367,7 @@ void CubeRenderer::DeleteCube(Renderables::Cube *& cube)
 	mIsMaterialIndexBufferSet = false;
 }
 
-void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & diffuse, TextureIndex diffuseTextureIndex, const glm::vec3 & specular, int16_t shininess, TextureIndex specularTextureIndex, const glm::vec3 & emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
+void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & diffuse, TextureIndex diffuseTextureIndex, const glm::vec3 & specular, int8_t specularPower, TextureIndex specularTextureIndex, const glm::vec3 & emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
 {
 	assert(materialIndex < mMaterialCount);
 
@@ -383,7 +383,7 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & di
 		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
 		memcpy(prop2, glm::value_ptr(specular), sizeof(GLfloat) * 3);
 
-		GLbitfield shininessBitfield = ((shininess & 0xFFFF) << 16);
+		GLbitfield shininessBitfield = ((specularPower & 0xFFFF) << 16);
 		memcpy(&prop2[3], &shininessBitfield, sizeof(GLfloat));
 
 		GLfloat * prop3 = mMaterials.GetProperty(propertyIndex + 2);
@@ -399,7 +399,7 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & di
 
 void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat)
 {
-	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mShininess, mat.mSpecularTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
+	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mSpecularPower, mat.mSpecularTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
 }
 
 

@@ -19,33 +19,6 @@ public:
 		Property_Per_Material = 3
 	};
 
-	typedef std::uint8_t TextureIndex;
-
-	static constexpr TextureIndex NoTexture = (TextureIndex)-1;
-
-	struct MaterialDesc
-	{
-		MaterialDesc(const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, int16_t shininess, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
-			: mDiffuse(diffuse)
-			, mSpecular(specular)
-			, mEmissive(emissive)
-			, mShininess(shininess)
-			, mDiffuseTextureIndex(diffuseTextureIndex)
-			, mSpecularTextureIndex(specularTextureIndex)
-			, mEmissiveTextureIndex(emissiveTextureIndex)
-			, mNormalTextureIndex(normalTextureIndex)
-		{}
-
-		glm::vec3 mAmbient;
-		glm::vec3 mDiffuse;
-		glm::vec3 mSpecular;
-		glm::vec3 mEmissive;
-		int16_t mShininess;
-		TextureIndex mDiffuseTextureIndex;
-		TextureIndex mSpecularTextureIndex;
-		TextureIndex mNormalTextureIndex;
-		TextureIndex mEmissiveTextureIndex;
-	};
 
 public:
 
@@ -60,7 +33,7 @@ public:
 	Renderables::Cube * CreateCube(std::uint8_t materialIndex);
 	void DeleteCube(Renderables::Cube *& cube);
 
-	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, int16_t shininess, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
+	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
 
 	void SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat);
 

@@ -9,6 +9,24 @@ namespace CoreFx
 	namespace Renderers
 	{
 
+struct TerrainDesc
+{
+	std::string mHeightMap;
+	bool mInvertY = true;
+	glm::vec3 mPosition;
+	glm::quat mRotation;
+};
+
+typedef std::vector<TerrainDesc> TerrainDescList;
+
+struct TerrainRendererDesc
+{
+	GLint mHeightMapWidth;
+	GLint mHeightMapDepth;
+	glm::vec3 mScale;
+
+	TerrainDescList mTerrains;
+};
 
 class TerrainRenderer : public RendererHelper<Renderables::Grid, 1>
 {
@@ -23,6 +41,7 @@ public:
 
 private:
 
+	void LoadShaders();
 	void LoadHeightMap(const char * filename, GLint heightMapTextureWidth, bool invertY);
 
 private:

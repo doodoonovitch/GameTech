@@ -36,6 +36,9 @@ public:
 public:
 	Shader(const char * title);
 	virtual ~Shader(void);
+
+	bool IsLoaded() const { return mProgram != 0; }
+
 	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, bool includeCommon = true);
 	void LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon = true);
 	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, bool includeCommon = true);
