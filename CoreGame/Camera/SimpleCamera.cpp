@@ -180,6 +180,7 @@ void SimpleCamera::OnInit()
 
 	// Setup Lights
 		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
+		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(50.f, 50.f, 50.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(-0.2f, -1.f, 0.f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 0.8f);
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.7f, 1.8f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 0.7f, 0.02f);
