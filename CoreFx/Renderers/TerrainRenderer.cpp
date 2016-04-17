@@ -9,11 +9,11 @@ namespace CoreFx
 
 
 
-TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm::vec3 const & scale)
+TerrainRenderer::TerrainRenderer(const TerrainRendererDesc & desc)
 	: RendererHelper<Renderables::Grid, 1>(0, "TerrainRenderer")
-	, mMapSize(heightMapWidth, heightMapDepth)
-	, mPatchCount(heightMapWidth / 64, heightMapDepth / 64)
-	, mScale(scale)
+	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
+	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
+	, mScale(desc.mScale)
 	, mHeightMapTextureId(0)
 	, mDrawNormalShader("TerrainDrawNormals")
 	, mDiffuseTextures(nullptr)
@@ -58,8 +58,7 @@ TerrainRenderer::TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm
 
 	GL_CHECK_ERRORS;
 
-	//LoadHeightMap("medias/alps-valley-height-2048.raw", 2048, true);
-	LoadHeightMap("medias/Terrain/Canyon_513x513.r32", 513, true);
+	LoadHeightMap(desc.mTerrains);
 
 	std::cout << "... TerrainRenderer initialized!" << std::endl << std::endl;
 }
@@ -192,56 +191,73 @@ void TerrainRenderer::DebugRender()
 }
 
 
-void TerrainRenderer::LoadHeightMap(const char * filename, GLint heightMapTextureWidth, bool invertY)
+void TerrainRenderer::LoadHeightMap(const TerrainDescList & terrainDescList)
 {
-	assert(heightMapTextureWidth >= mMapSize.x);
+	size_t layerBufferSize = mMapSize.x * mMapSize.y;
+	size_t bufferMemorySize = layerBufferSize * terrainDescList.size() * sizeof(GLfloat);
 
-	size_t bufferSize = mMapSize.x * mMapSize.y * sizeof(GLfloat);
-	GLfloat * buffer = (GLfloat*)malloc(bufferSize);
-
-	FILE * filePtr = nullptr;
-
-	if (fopen_s(&filePtr, filename, "rb") == 0)
+	GLfloat * buffer = (GLfloat*)malloc(bufferMemorySize);
+	if (buffer == nullptr)
 	{
-		GLfloat * ptr;
-		GLint incY;
+		PRINT_MESSAGE("Error: Cannot allocate memory to load terrain height maps ! (Needed memory \n");
+		return;
+	}
+	
+	GLfloat * layerBufferPtr = buffer;
 
-		if (invertY)
+	for (TerrainDescList::const_iterator it = terrainDescList.begin(); it != terrainDescList.end(); ++it)
+	{
+		const TerrainDesc & desc = *it;
+
+		assert(desc.mHeightMapTextureWidth >= mMapSize.x);
+
+		FILE * filePtr = nullptr;
+
+		if (fopen_s(&filePtr, desc.mFilename.c_str(), "rb") == 0)
 		{
-			ptr = buffer + (mMapSize.x * (mMapSize.y - 1));
-			incY = -mMapSize.x;
+			GLfloat * ptr;
+			GLint incY;
+
+			if (desc.mInvertY)
+			{
+				ptr = layerBufferPtr + (mMapSize.x * (mMapSize.y - 1));
+				incY = -mMapSize.x;
+			}
+			else
+			{
+				ptr = layerBufferPtr;
+				incY = mMapSize.x;
+			}
+
+			GLint seekCount = (desc.mHeightMapTextureWidth - mMapSize.x) * sizeof(GLfloat);
+			GLint readCount = mMapSize.x * sizeof(GLfloat);
+
+			for (GLint y = 0; y < mMapSize.y; ++y)
+			{
+				size_t n = fread(ptr, 1, readCount, filePtr);
+				if (n != readCount)
+				{
+					char errmsg[200];
+					strerror_s(errmsg, 200, errno);
+
+					PRINT_MESSAGE("Error: Cannot read heigh map file '%s' : '%s'!\n", desc.mFilename.c_str(), errmsg);
+					fclose(filePtr);
+					goto ExitLoadHeightMap;
+				}
+				ptr += incY;
+				if (seekCount > 0)
+				{
+					fseek(filePtr, seekCount, SEEK_CUR);
+				}
+			}
 		}
 		else
 		{
-			ptr = buffer;
-			incY = mMapSize.x;
+			PRINT_MESSAGE("Error: Cannot open heigh map file '%s'!\n", desc.mFilename.c_str());
+			goto ExitLoadHeightMap;
 		}
 
-		GLint seekCount = (heightMapTextureWidth - mMapSize.x) * sizeof(GLfloat);
-		GLint readCount = mMapSize.x * sizeof(GLfloat);
-
-		for (GLint y = 0; y < mMapSize.y; ++y)
-		{
-			size_t n = fread(ptr, 1, readCount, filePtr);
-			if (n != readCount)
-			{
-				char errmsg[200];
-				strerror_s(errmsg, 200, errno);
-
-				PRINT_MESSAGE("Error: Cannot read heigh map file '%s' : '%s'!\n", filename, errmsg);
-				goto ExitLoadHeightMap;
-			}
-			ptr += incY;
-			if (seekCount > 0)
-			{
-				fseek(filePtr, seekCount, SEEK_CUR);
-			}
-		}
-	}
-	else
-	{
-		PRINT_MESSAGE("Error: Cannot open heigh map file '%s'!\n", filename);
-		goto ExitLoadHeightMap;
+		layerBufferPtr += layerBufferSize;
 	}
 
 	glGenTextures(1, &mHeightMapTextureId);
@@ -249,7 +265,7 @@ void TerrainRenderer::LoadHeightMap(const char * filename, GLint heightMapTextur
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
 
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R32F, mMapSize.x, mMapSize.y, 1, 0, GL_RED, GL_FLOAT, buffer);
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R32F, mMapSize.x, mMapSize.y, (GLsizei)terrainDescList.size(), 0, GL_RED, GL_FLOAT, buffer);
 
 	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -257,12 +273,10 @@ void TerrainRenderer::LoadHeightMap(const char * filename, GLint heightMapTextur
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_REPEAT);
-	
+
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
 ExitLoadHeightMap:
-	if (filePtr != nullptr)
-		fclose(filePtr);
 	free(buffer);
 }
 

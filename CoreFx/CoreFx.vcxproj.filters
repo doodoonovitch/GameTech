@@ -114,6 +114,7 @@
     <ClInclude Include="Renderers\TerrainRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="DebugOutput.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -180,6 +181,7 @@
     <ClCompile Include="Renderers\TerrainRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
+    <ClCompile Include="DebugOutput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

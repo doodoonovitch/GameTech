@@ -620,6 +620,8 @@ void Engine::RenderObjects()
 
 	glDepthMask(GL_TRUE); 
 	glEnable(GL_DEPTH_TEST); 
+	glClearColor(0.0f, 0.0f, 0.0f, 1);
+	glClearDepth(1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -685,7 +687,7 @@ void Engine::RenderObjects()
 
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-	mDeferredShader.UnUse();
+	mToneMappingShader.UnUse();
 
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); 
 	//glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); 

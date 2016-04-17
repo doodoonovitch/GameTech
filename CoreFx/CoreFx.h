@@ -53,6 +53,7 @@ namespace CoreFx
 }; // namespace CoreFx
 
 #include "Log\Logger.h"
+#include "DebugOutput.h"
 
 #include "Maths\DualQuaternion.h"
 

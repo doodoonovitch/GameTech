@@ -261,6 +261,8 @@ protected:
 			std::cout << "\tGLEW 4.5 not supported\n ";
 		}
 
+		CoreFx::DebugOutput::GetInstance()->EnableDebugMessage();
+
 		return true;
 	}
 

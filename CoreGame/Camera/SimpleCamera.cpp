@@ -159,8 +159,14 @@ void SimpleCamera::OnInit()
 			}
 		}
 
-		Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(512, 512, glm::vec3(1.f, 100.f, 1.f));
-		engine->AttachRenderer(terrain);
+		{
+
+			Renderers::TerrainRendererDesc terrainRendererDesc(512, 512, glm::vec3(1.f, 100.f, 1.f));
+			terrainRendererDesc.mTerrains.push_back(Renderers::TerrainDesc("medias/Terrain/Canyon_513x513.r32", 513, true));
+			//terrainRendererDesc.mTerrains.push_back(Renderers::TerrainDesc("medias/alps-valley-height-2048.raw", 2048, true));
+			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(terrainRendererDesc);
+			engine->AttachRenderer(terrain);
+		}
 
 		/*
 		std::vector<Geometry::MeshData*> meshDataList;
@@ -353,6 +359,21 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 		{
 			Engine::GetInstance()->SetWireFrame(!Engine::GetInstance()->GetWireFrame());
 		}
+		break;
+
+	case '+':
+		mMoveSpeed += 1.f;
+		break;
+
+	case '-':
+		mMoveSpeed -= 1.f; 
+		if (mMoveSpeed < 0.f)
+			mMoveSpeed = 0.f;
+		break;
+
+	case '*':
+		mMoveSpeed = DEFAULT_MOVE_SPEED;
+		break;
 	}
 	//glutPostRedisplay();
 }
@@ -390,7 +411,7 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 void SimpleCamera::OnUpdate(double elapsedTime)
 {
 	bool bWalk = false, bStrafe = false;
-	float dx = 0, dy = 0, speed = MOVE_SPEED;
+	float dx = 0, dy = 0, speed = mMoveSpeed;
 
 	if (GetAsyncKeyState(VK_SHIFT))
 	{

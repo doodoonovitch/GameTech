@@ -9,18 +9,33 @@ namespace CoreFx
 	namespace Renderers
 	{
 
+
 struct TerrainDesc
 {
-	std::string mHeightMap;
+	TerrainDesc(const char * filename, GLint heightMapTextureWidth, bool invertY)
+		: mFilename(filename)
+		, mHeightMapTextureWidth(heightMapTextureWidth)
+		, mInvertY(invertY)
+	{}
+
+	std::string mFilename;
+	GLint mHeightMapTextureWidth;
 	bool mInvertY = true;
-	glm::vec3 mPosition;
-	glm::quat mRotation;
+
+	//glm::vec3 mPosition;
+	//glm::quat mRotation;
 };
 
 typedef std::vector<TerrainDesc> TerrainDescList;
 
 struct TerrainRendererDesc
 {
+	TerrainRendererDesc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale)
+		: mHeightMapWidth(heightMapWidth)
+		, mHeightMapDepth(heightMapDepth)
+		, mScale(scale)
+	{ }
+
 	GLint mHeightMapWidth;
 	GLint mHeightMapDepth;
 	glm::vec3 mScale;
@@ -31,7 +46,7 @@ struct TerrainRendererDesc
 class TerrainRenderer : public RendererHelper<Renderables::Grid, 1>
 {
 public:
-	TerrainRenderer(GLint heightMapWidth, GLint heightMapDepth, glm::vec3 const & scale);
+	TerrainRenderer(const TerrainRendererDesc & desc);
 	virtual ~TerrainRenderer();
 
 	virtual void Render() override;
@@ -42,7 +57,7 @@ public:
 private:
 
 	void LoadShaders();
-	void LoadHeightMap(const char * filename, GLint heightMapTextureWidth, bool invertY);
+	void LoadHeightMap(const TerrainDescList & terrainDescList);
 
 private:
 

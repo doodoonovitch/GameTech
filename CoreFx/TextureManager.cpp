@@ -139,7 +139,7 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
 {
 	std::string s;
 	s.resize(filename.size());
-	std::transform(filename.begin(), filename.end(), s.begin(), std::tolower);
+	std::transform(filename.begin(), filename.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
 
 	Tex2DIdMap::const_iterator it = m2DTexMap.find(s);
 

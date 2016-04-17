@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CoreFx.h" />
+    <ClInclude Include="DebugOutput.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="Geometry\MaterialData.h" />
@@ -175,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DebugOutput.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Geometry\MaterialData.cpp" />
