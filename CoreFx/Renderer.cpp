@@ -53,7 +53,7 @@ void Renderer::BuildTextureMapping(TextureMapping * lightPassTextureMapping)
 		TextureMapping * texMap;
 
 		const TextureInfo & texInfo = *texInfoListIter;
-		if (texInfo.GetRendererId() == 0)
+		if (texInfo.GetRendererId() == 0 && lightPassTextureMapping != nullptr)
 		{
 			texMap = lightPassTextureMapping;
 		}

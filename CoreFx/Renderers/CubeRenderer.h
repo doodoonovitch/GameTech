@@ -39,8 +39,6 @@ public:
 	virtual void Render() override;
 	virtual void DebugRender() override;
 
-	virtual void UpdateMaterialTextureIndex() override;
-
 	Renderables::Cube * CreateCube(std::uint8_t materialIndex);
 	void DeleteCube(Renderables::Cube *& cube);
 
@@ -106,6 +104,7 @@ private:
 	static void ComputeTangent(GLfloat vertices[], int vertexCount, GLushort indices[], int indexCount);
 
 	void InitializeShader();
+	void UpdateMaterialTextureIndex();
 
 private:
 	

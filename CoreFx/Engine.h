@@ -381,8 +381,7 @@ private:
 	TextureBuffer mMaterialBuffer;
 	std::vector<GLfloat> mMaterials;
 
-	//TextureGroupList mTextureGroupList;
-	TextureMapping mLightPassTextureMapping;
+	//TextureMapping mLightPassTextureMapping;
 
 	bool mWireFrame;
 

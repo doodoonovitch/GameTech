@@ -32,15 +32,25 @@ public:
 
 	typedef std::vector<MapDesc> MapDescList;
 
-	struct MaterialDesc
+	struct MaterialDesc : Renderer::MaterialDesc
 	{
-		MaterialDesc(GLint textureIndex, GLfloat heightMin, GLfloat heightMax)
-			: mTextureIndex(textureIndex)
+		MaterialDesc(GLfloat heightMin, GLfloat heightMax, 
+			const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
+			const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, 
+			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
+			TextureIndex normalTextureIndex)
+			: Renderer::MaterialDesc(diffuse, diffuseTextureIndex, specular, specularPower, specularTextureIndex, emissive, emissiveTextureIndex, normalTextureIndex)
 			, mHeightMin(heightMin)
 			, mHeightMax(heightMax)
 		{}
 
-		GLint mTextureIndex;
+		MaterialDesc(const MaterialDesc & src)
+			: Renderer::MaterialDesc(src)
+			, mHeightMin(src.mHeightMin)
+			, mHeightMax(src.mHeightMax)
+		{
+		}
+
 		GLfloat mHeightMin;
 		GLfloat mHeightMax;
 	};
@@ -76,12 +86,12 @@ public:
 	virtual void Render() override;
 	virtual void DebugRender() override;
 
-	virtual void UpdateMaterialTextureIndex() override;
 
 private:
 
-	void LoadShaders();
+	void LoadShaders(const Desc & desc);
 	void LoadHeightMap(const MapDescList & terrainDescList);
+	void UpdateMaterialTextureIndex(const Desc & desc);
 
 private:
 
@@ -110,6 +120,9 @@ private:
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
 	glm::vec3 mScale;
+	GLfloat mSlowSlopeMax;
+	GLfloat mHiSlopeMin;
+
 	GLuint mHeightMapTextureId;
 	Shader mDrawNormalShader;
 	const TextureGroup * mDiffuseTextures;

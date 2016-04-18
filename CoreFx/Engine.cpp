@@ -186,7 +186,7 @@ void Engine::CreateDynamicResources()
 
 	// material and texture creation
 	// -----------------------------------------------------------------------
-	InternalCreateTextures();
+	//InternalCreateTextures();
 	InternalCreateMaterialBuffer();
 	// -----------------------------------------------------------------------
 	
@@ -770,34 +770,34 @@ bool Engine::DetachRenderer(Renderer* renderer)
 	return mRenderers->Detach(renderer);
 }
 
-void Engine::InternalCreateTextures()
-{
-	assert(mLightPassTextureMapping.mMapping.empty());
-	
-	mRenderers->ForEach([this](Renderer * renderer)
-	{
-		renderer->BuildTextureMapping(&mLightPassTextureMapping);
-		renderer->LoadTextures();
-	});
-
-	for (TextureMappingList::iterator it = mLightPassTextureMapping.mMapping.begin(); it != mLightPassTextureMapping.mMapping.end(); ++it)
-	{
-		std::vector<std::string> textureList;
-		textureList.reserve(it->mTexInfoList.size());
-		for (TexInfoPtrList::const_iterator it2 = it->mTexInfoList.begin(); it2 != it->mTexInfoList.end(); ++it2)
-		{
-			textureList.push_back((*it2)->GetFilename());
-		}
-
-		it->mTexture = mTextureManager->LoadTextureGroup(it->mTexInfoList.front()->GetGroupId(), textureList);
-	}
-
-	mRenderers->ForEach([](Renderer * renderer)
-	{
-		renderer->UpdateMaterialTextureIndex();
-	});
-
-}
+//void Engine::InternalCreateTextures()
+//{
+//	assert(mLightPassTextureMapping.mMapping.empty());
+//	
+//	mRenderers->ForEach([this](Renderer * renderer)
+//	{
+//		renderer->BuildTextureMapping(&mLightPassTextureMapping);
+//		renderer->LoadTextures();
+//	});
+//
+//	for (TextureMappingList::iterator it = mLightPassTextureMapping.mMapping.begin(); it != mLightPassTextureMapping.mMapping.end(); ++it)
+//	{
+//		std::vector<std::string> textureList;
+//		textureList.reserve(it->mTexInfoList.size());
+//		for (TexInfoPtrList::const_iterator it2 = it->mTexInfoList.begin(); it2 != it->mTexInfoList.end(); ++it2)
+//		{
+//			textureList.push_back((*it2)->GetFilename());
+//		}
+//
+//		it->mTexture = mTextureManager->LoadTextureGroup(it->mTexInfoList.front()->GetGroupId(), textureList);
+//	}
+//
+//	mRenderers->ForEach([](Renderer * renderer)
+//	{
+//		renderer->UpdateMaterialTextureIndex();
+//	});
+//
+//}
 	// =======================================================================
 	// =======================================================================
 } // namespace CoreFx

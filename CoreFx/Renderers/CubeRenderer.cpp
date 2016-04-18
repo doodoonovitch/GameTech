@@ -18,6 +18,8 @@ CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
 
 	AddTextures(desc.mTextures);
 	SetMaterials(desc.mMaterials);
+	BuildTextureMapping(nullptr);
+
 
 	const float k = 1.f / 1.5f;
 	
@@ -128,6 +130,9 @@ CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
 
 	PRINT_GEN_TEXTUREBUFFER("[CubeRenderer]", mModelMatrixBuffer);
 	PRINT_GEN_TEXTUREBUFFER("[CubeRenderer]", mMaterialIndexBuffer);
+
+	LoadTextures();
+	UpdateMaterialTextureIndex();
 }
 
 

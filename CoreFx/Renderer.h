@@ -23,7 +23,10 @@ public:
 
 	struct MaterialDesc
 	{
-		MaterialDesc(const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
+		MaterialDesc(const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
+			const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, 
+			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
+			TextureIndex normalTextureIndex)
 			: mDiffuse(diffuse)
 			, mSpecular(specular)
 			, mEmissive(emissive)
@@ -33,6 +36,18 @@ public:
 			, mEmissiveTextureIndex(emissiveTextureIndex)
 			, mNormalTextureIndex(normalTextureIndex)
 		{}
+
+		MaterialDesc(const MaterialDesc & src)
+			: mDiffuse(src.mDiffuse)
+			, mSpecular(src.mSpecular)
+			, mEmissive(src.mEmissive)
+			, mSpecularPower(src.mSpecularPower)
+			, mDiffuseTextureIndex(src.mDiffuseTextureIndex)
+			, mSpecularTextureIndex(src.mSpecularTextureIndex)
+			, mEmissiveTextureIndex(src.mEmissiveTextureIndex)
+			, mNormalTextureIndex(src.mNormalTextureIndex)
+		{
+		}
 
 		glm::vec3 mAmbient;
 		glm::vec3 mDiffuse;
@@ -79,8 +94,6 @@ public:
 	virtual void Render() = 0;
 	virtual void DebugRender() = 0;
 
-	virtual void UpdateMaterialTextureIndex() {}
-
 	const PropertyData & GetMaterials() const {	return mMaterials; }
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
@@ -97,7 +110,7 @@ public:
 
 protected:
 
-	void BuildTextureMapping(TextureMapping * lightPassTextureMapping);
+	void BuildTextureMapping(TextureMapping * lightPassTextureMapping = nullptr);
 	void LoadTextures();
 
 protected:

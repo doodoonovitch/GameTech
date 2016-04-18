@@ -14,6 +14,8 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
 	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
 	, mScale(desc.mScale)
+	, mSlowSlopeMax(desc.mSlowSlopeMax)
+	, mHiSlopeMin(desc.mHiSlopeMin)
 	, mHeightMapTextureId(0)
 	, mDrawNormalShader("TerrainDrawNormals")
 	, mDiffuseTextures(nullptr)
@@ -21,10 +23,9 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	std::cout << std::endl;
 	std::cout << "Initialize TerrainRenderer...." << std::endl;
 
-	for (TextureDescList::const_iterator it = desc.mTextures.begin(); it != desc.mTextures.end(); ++it)
-	{
-		AddTexture(*it);
-	}
+	AddTextures(desc.mTextures);
+	BuildTextureMapping(nullptr);
+	LoadTextures();
 
 	const glm::vec3 vertices[] =
 	{
@@ -57,6 +58,9 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 
 	LoadHeightMap(desc.mTerrains);
 
+	UpdateMaterialTextureIndex(desc);
+	LoadShaders(desc);
+
 	std::cout << "... TerrainRenderer initialized!" << std::endl << std::endl;
 }
 
@@ -67,7 +71,7 @@ TerrainRenderer::~TerrainRenderer()
 	mHeightMapTextureId = 0;
 }
 
-void TerrainRenderer::LoadShaders()
+void TerrainRenderer::LoadShaders(const Desc & /*desc*/)
 {
 	PRINT_MESSAGE("Initialize Terrain Renderer Shaders : \n\n");
 
@@ -141,10 +145,10 @@ void TerrainRenderer::LoadShaders()
  
 void TerrainRenderer::Render()
 {
-	if (!mShader.IsLoaded())
-	{
-		LoadShaders();
-	}
+	//if (!mShader.IsLoaded())
+	//{
+	//	LoadShaders();
+	//}
 
 	mShader.Use();
 	glBindVertexArray(mVaoID);
@@ -277,8 +281,13 @@ ExitLoadHeightMap:
 	free(buffer);
 }
 
-void TerrainRenderer::UpdateMaterialTextureIndex()
+void TerrainRenderer::UpdateMaterialTextureIndex(const Desc & desc)
 {
+	for (MaterialDescList::const_iterator matIt = desc.mLowSlopeMaterials.begin(); matIt != desc.mLowSlopeMaterials.end(); ++matIt)
+	{
+
+	}
+
 	for (TextureMappingList::const_iterator it = mTextureMapping.mMapping.begin(); it != mTextureMapping.mMapping.end(); ++it)
 	{
 		if (it->mTexture->GetCategory() == TextureCategory::Diffuse)
