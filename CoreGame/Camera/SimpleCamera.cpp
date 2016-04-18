@@ -68,103 +68,111 @@ void SimpleCamera::OnInit()
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
 
-		//const float XStart = 1.f;
-		//const float YStart = 0.f;
-		//const float ZStart = 1.f;
-		//const float XMul = 5.f;
-		//const float YMul = 5.f;
-		//const float ZMul = -200.f;
-
-		const float XStart = 1.5f;
-		const float YStart = 1.0f;
-		const float ZStart = -1.5f;
-		const float XMul = 5.f;
-		const float YMul = 5.f;
-		const float ZMul = -5.f;
-
-		int xCount = 30;
-		int yCount = 30;
-		int zCount = 30;
-		const int materialCount = 10;
-		Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(materialCount, xCount * yCount * zCount, 1);
-		engine->AttachRenderer(cubeRenderer);
-
-		cubeRenderer->AddTexture("medias/cube.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 0
-		cubeRenderer->AddTexture("medias/cube2.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 1
-		cubeRenderer->AddTexture("medias/cube_N.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 2
-		cubeRenderer->AddTexture("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 3
-		cubeRenderer->AddTexture("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 4
-		cubeRenderer->AddTexture("medias/bricks.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 5
-		cubeRenderer->AddTexture("medias/bricks_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 6
-		cubeRenderer->AddTexture("medias/bricks1024.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp); // 7
-		cubeRenderer->AddTexture("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp); // 8
-		cubeRenderer->AddTexture("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp); // 9
-
 		{
-			Renderers::CubeRenderer::MaterialDesc mats[materialCount] =
+			//const float XStart = 1.f;
+			//const float YStart = 0.f;
+			//const float ZStart = 1.f;
+			//const float XMul = 5.f;
+			//const float YMul = 5.f;
+			//const float ZMul = -200.f;
+
+			const float XStart = 1.5f;
+			const float YStart = 1.0f;
+			const float ZStart = -1.5f;
+			const float XMul = 5.f;
+			const float YMul = 5.f;
+			const float ZMul = -5.f;
+
+			int xCount = 30;
+			int yCount = 30;
+			int zCount = 30;
+
+			Renderers::CubeRenderer::Desc desc;
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 0
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube2.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 1
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube_N.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 2
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 3
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 4
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 5
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 6
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 7
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp)); // 8
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 9
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(1.f, 1.f, 1.f), 6, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), 5, glm::vec3(1.f, .6f, .2f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6));
+
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 0, Renderers::CubeRenderer::NoTexture, glm::vec3(0.f, 8600.f, 5000.f), 8, 9));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 7, 8, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 9));
+
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 1, glm::vec3(1.f, 1.f, 1.f), 4, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), 1, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+
+			const int materialCount = (int)desc.mMaterials.size();
+
+			Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(desc, xCount * yCount * zCount, 1);
+			engine->AttachRenderer(cubeRenderer);
+
+			const glm::vec3 XAxis(1.f, 0.f, 0.f);
+			const glm::vec3 YAxis(0.f, 1.f, 0.f);
+			const glm::vec3 ZAxis(0.f, 0.f, 1.f);
+
+			for (auto i = 0; i < xCount; ++i)
 			{
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4),
+				float xAngle = (glm::two_pi<float>() * (float)i) / (float)xCount;
+				glm::quat qX = glm::angleAxis(xAngle, XAxis);
 
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(1.f, 1.f, 1.f), 6, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
-
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4),
-
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), 5, glm::vec3(1.f, .6f, .2f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6),
-				
-				
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 0, Renderers::CubeRenderer::NoTexture, glm::vec3(0.f, 8600.f, 5000.f), 8, 9),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 7, 8, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 9),
-
-
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 1, glm::vec3(1.f, 1.f, 1.f), 4, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
-
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
-
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), 1, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2),
-				Renderers::CubeRenderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2)
-			};
-
-			for (int i = 0; i < materialCount; ++i)
-			{
-				cubeRenderer->SetMaterial(i, mats[i]);
-			}
-		}
-
-
-		const glm::vec3 XAxis(1.f, 0.f, 0.f);
-		const glm::vec3 YAxis(0.f, 1.f, 0.f);
-		const glm::vec3 ZAxis(0.f, 0.f, 1.f);
-
-		for (auto i = 0; i < xCount; ++i)
-		{
-			float xAngle = (glm::two_pi<float>() * (float)i) / (float)xCount;
-			glm::quat qX = glm::angleAxis(xAngle, XAxis);
-
-			for (auto j = 0; j < yCount; ++j)
-			{
-				float yAngle = (glm::two_pi<float>() * (float)j) / (float)yCount;
-				glm::quat qY = glm::angleAxis(yAngle, YAxis);
-
-				for (auto k = 0; k < zCount; ++k)
+				for (auto j = 0; j < yCount; ++j)
 				{
-					float zAngle = (glm::two_pi<float>() * (float)k) / (float)zCount;
-					glm::quat qZ = glm::angleAxis(zAngle, ZAxis);
+					float yAngle = (glm::two_pi<float>() * (float)j) / (float)yCount;
+					glm::quat qY = glm::angleAxis(yAngle, YAxis);
 
-					Cube * cube = cubeRenderer->CreateCube(i % materialCount);
-					cube->GetFrame()->SetPosition(glm::vec3(XStart + XMul * i, YStart + YMul * j, ZStart + ZMul * k));
+					for (auto k = 0; k < zCount; ++k)
+					{
+						float zAngle = (glm::two_pi<float>() * (float)k) / (float)zCount;
+						glm::quat qZ = glm::angleAxis(zAngle, ZAxis);
 
-					glm::quat qRot = qX * qY * qZ;
-					cube->GetFrame()->SetRotation(qRot);
+						Cube * cube = cubeRenderer->CreateCube(i % materialCount);
+						cube->GetFrame()->SetPosition(glm::vec3(XStart + XMul * i, YStart + YMul * j, ZStart + ZMul * k));
+
+						glm::quat qRot = qX * qY * qZ;
+						cube->GetFrame()->SetRotation(qRot);
+					}
 				}
 			}
 		}
 
 		{
 
-			Renderers::TerrainRendererDesc terrainRendererDesc(512, 512, glm::vec3(1.f, 100.f, 1.f));
-			terrainRendererDesc.mTerrains.push_back(Renderers::TerrainDesc("medias/Terrain/Canyon_513x513.r32", 513, true));
-			//terrainRendererDesc.mTerrains.push_back(Renderers::TerrainDesc("medias/alps-valley-height-2048.raw", 2048, true));
-			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(terrainRendererDesc);
+			Renderers::TerrainRenderer::Desc desc(512, 512, glm::vec3(1.f, 100.f, 1.f));
+			desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/Terrain/Canyon_513x513.r32", 513, true));
+			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true));
+
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/snowstone01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/pineforest03.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
+
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/snowstone01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/pineforest03_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+
+			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(2, 0.f, 95.f));
+			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(1, 91.f, 100.f));
+			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0, 0.f, 95.f));
+			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(1, 91.f, 100.f));
+
+			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);
 		}
 

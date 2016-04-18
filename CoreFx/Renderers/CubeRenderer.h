@@ -14,6 +14,17 @@ class CubeRenderer : public SceneObjectRenderer<Renderables::Cube, 2>
 {
 public:
 
+	struct Desc : public Renderer::Desc
+	{
+		Desc()
+			: Renderer::Desc()
+		{}
+
+		MaterialDescList mMaterials;
+	};
+
+public:
+
 	enum
 	{
 		Property_Per_Material = 3
@@ -22,7 +33,7 @@ public:
 
 public:
 
-	CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t pageSize = 10);
+	CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize = 10);
 	virtual ~CubeRenderer();
 
 	virtual void Render() override;
@@ -36,6 +47,8 @@ public:
 	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
 
 	void SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat);
+
+	void SetMaterials(const MaterialDescList & materials);
 
 private:
 

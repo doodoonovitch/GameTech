@@ -62,6 +62,7 @@ enum class TextureCategory
 class TextureInfo
 {
 	friend class Engine;
+	friend class Renderer;
 
 public:
 	

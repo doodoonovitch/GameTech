@@ -776,68 +776,8 @@ void Engine::InternalCreateTextures()
 	
 	mRenderers->ForEach([this](Renderer * renderer)
 	{
-		const TextureInfoList & texInfoList = renderer->GetTextureInfoList();
-		for (TextureInfoList::const_iterator texInfoListIter = texInfoList.begin(); texInfoListIter != texInfoList.end(); ++texInfoListIter)
-		{
-			TextureMapping * texMap;
-
-			const TextureInfo & texInfo = *texInfoListIter;
-			if (texInfo.GetRendererId() == 0)
-			{
-				texMap = &mLightPassTextureMapping;
-			}
-			else
-			{
-				texMap = &renderer->mTextureMapping;
-			}
-
-			TextureMappingList::iterator targetIt = std::find_if(texMap->mMapping.begin(), texMap->mMapping.end(), [&texInfo](const TextureMappingItem & item)
-			{
-				return item.mTexInfoList.front()->GetGroupId() == texInfo.GetGroupId();
-			});
-
-			TextureMappingItem * lpti;
-			if (targetIt == texMap->mMapping.end())
-			{
-				texMap->mMapping.push_back(TextureMappingItem());
-				lpti = &texMap->mMapping.back();
-				lpti->mSamplerIndex = texMap->mSamplerCount;
-				++texMap->mSamplerCount;
-			}
-			else
-			{
-				lpti = &(*targetIt);
-			}
-
-			texInfo.mSamplerIndex = lpti->mSamplerIndex;
-
-			TexInfoPtrList::const_iterator it = std::find_if(lpti->mTexInfoList.begin(), lpti->mTexInfoList.end(), [&texInfo](const TextureInfo * item)
-			{
-				return item->GetFilename() == texInfo.GetFilename();
-			});
-
-			if (it == lpti->mTexInfoList.end())
-			{
-				texInfo.mLayerIndex = (GLint)lpti->mTexInfoList.size();
-				lpti->mTexInfoList.push_back(&texInfo);
-			}
-			else
-			{
-				texInfo.mLayerIndex = (*it)->GetLayerIndex();
-			}
-		}
-
-		for (TextureMappingList::iterator it = renderer->mTextureMapping.mMapping.begin(); it != renderer->mTextureMapping.mMapping.end(); ++it)
-		{
-			std::vector<std::string> textureList;
-			textureList.reserve(it->mTexInfoList.size());
-			for (TexInfoPtrList::const_iterator it2 = it->mTexInfoList.begin(); it2 != it->mTexInfoList.end(); ++it2)
-			{
-				textureList.push_back((*it2)->GetFilename());
-			}
-
-			it->mTexture = mTextureManager->LoadTextureGroup(it->mTexInfoList.front()->GetGroupId(), textureList);
-		}
+		renderer->BuildTextureMapping(&mLightPassTextureMapping);
+		renderer->LoadTextures();
 	});
 
 	for (TextureMappingList::iterator it = mLightPassTextureMapping.mMapping.begin(); it != mLightPassTextureMapping.mMapping.end(); ++it)

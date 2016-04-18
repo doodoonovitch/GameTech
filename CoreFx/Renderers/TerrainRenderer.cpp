@@ -9,7 +9,7 @@ namespace CoreFx
 
 
 
-TerrainRenderer::TerrainRenderer(const TerrainRendererDesc & desc)
+TerrainRenderer::TerrainRenderer(const Desc & desc)
 	: RendererHelper<Renderables::Grid, 1>(0, "TerrainRenderer")
 	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
 	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
@@ -21,13 +21,10 @@ TerrainRenderer::TerrainRenderer(const TerrainRendererDesc & desc)
 	std::cout << std::endl;
 	std::cout << "Initialize TerrainRenderer...." << std::endl;
 
-	AddTexture("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat);
-	AddTexture("medias/snowstone01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat);
-	AddTexture("medias/pineforest03.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat);
-
-	AddTexture("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
-	AddTexture("medias/snowstone01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
-	AddTexture("medias/pineforest03_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat);
+	for (TextureDescList::const_iterator it = desc.mTextures.begin(); it != desc.mTextures.end(); ++it)
+	{
+		AddTexture(*it);
+	}
 
 	const glm::vec3 vertices[] =
 	{
@@ -191,7 +188,7 @@ void TerrainRenderer::DebugRender()
 }
 
 
-void TerrainRenderer::LoadHeightMap(const TerrainDescList & terrainDescList)
+void TerrainRenderer::LoadHeightMap(const MapDescList & terrainDescList)
 {
 	size_t layerBufferSize = mMapSize.x * mMapSize.y;
 	size_t bufferMemorySize = layerBufferSize * terrainDescList.size() * sizeof(GLfloat);
@@ -205,9 +202,9 @@ void TerrainRenderer::LoadHeightMap(const TerrainDescList & terrainDescList)
 	
 	GLfloat * layerBufferPtr = buffer;
 
-	for (TerrainDescList::const_iterator it = terrainDescList.begin(); it != terrainDescList.end(); ++it)
+	for (MapDescList::const_iterator it = terrainDescList.begin(); it != terrainDescList.end(); ++it)
 	{
-		const TerrainDesc & desc = *it;
+		const MapDesc & desc = *it;
 
 		assert(desc.mHeightMapTextureWidth >= mMapSize.x);
 

@@ -28,10 +28,16 @@ DebugOutput::~DebugOutput()
 
 void DebugOutput::EnableDebugMessage()
 {
-	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(CoreFx::DebugOutput::Callback, this);
-	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
-	glDebugMessageControl(mSource, mType, mSeverity, 0, NULL, GL_TRUE);
+	GLint major, minor;
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MINOR_VERSION, &minor);
+	if (major > 4 || (major == 4 && minor >= 3))
+	{
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(CoreFx::DebugOutput::Callback, this);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
+		glDebugMessageControl(mSource, mType, mSeverity, 0, NULL, GL_TRUE);
+	}
 }
 
 //if you want you can rename myCallback; This is just an example

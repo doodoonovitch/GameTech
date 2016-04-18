@@ -45,6 +45,31 @@ public:
 		TextureIndex mEmissiveTextureIndex;
 	};
 
+	typedef std::vector<MaterialDesc> MaterialDescList;
+
+	struct TextureDesc
+	{
+		TextureDesc(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT)
+			: mFilename(filename)
+			, mCategory(category)
+			, mWrapS(wrapS)
+			, mWrapT(wrapT)
+		{
+		}
+
+		std::string mFilename;
+		TextureCategory mCategory; 
+		TextureWrap mWrapS;
+		TextureWrap mWrapT;
+	};
+
+	typedef std::vector<TextureDesc> TextureDescList;
+
+	struct Desc
+	{
+		TextureDescList mTextures;
+	};
+
 
 public:
 
@@ -61,8 +86,19 @@ public:
 
 	const TextureInfoList & GetTextureInfoList() const { return mTextures; }
 	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
+	bool AddTexture(const TextureDesc & desc)
+	{
+		return AddTexture(desc.mFilename.c_str(), desc.mCategory, desc.mWrapS, desc.mWrapT);
+	}
+
+	void AddTextures(const TextureDescList & textures);
 
 	const TextureMapping & GetTextureMapping() const { return mTextureMapping; }
+
+protected:
+
+	void BuildTextureMapping(TextureMapping * lightPassTextureMapping);
+	void LoadTextures();
 
 protected:
 

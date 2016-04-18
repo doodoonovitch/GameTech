@@ -10,43 +10,67 @@ namespace CoreFx
 	{
 
 
-struct TerrainDesc
-{
-	TerrainDesc(const char * filename, GLint heightMapTextureWidth, bool invertY)
-		: mFilename(filename)
-		, mHeightMapTextureWidth(heightMapTextureWidth)
-		, mInvertY(invertY)
-	{}
-
-	std::string mFilename;
-	GLint mHeightMapTextureWidth;
-	bool mInvertY = true;
-
-	//glm::vec3 mPosition;
-	//glm::quat mRotation;
-};
-
-typedef std::vector<TerrainDesc> TerrainDescList;
-
-struct TerrainRendererDesc
-{
-	TerrainRendererDesc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale)
-		: mHeightMapWidth(heightMapWidth)
-		, mHeightMapDepth(heightMapDepth)
-		, mScale(scale)
-	{ }
-
-	GLint mHeightMapWidth;
-	GLint mHeightMapDepth;
-	glm::vec3 mScale;
-
-	TerrainDescList mTerrains;
-};
-
 class TerrainRenderer : public RendererHelper<Renderables::Grid, 1>
 {
 public:
-	TerrainRenderer(const TerrainRendererDesc & desc);
+
+	struct MapDesc
+	{
+		MapDesc(const char * filename, GLint heightMapTextureWidth, bool invertY)
+			: mFilename(filename)
+			, mHeightMapTextureWidth(heightMapTextureWidth)
+			, mInvertY(invertY)
+		{}
+
+		std::string mFilename;
+		GLint mHeightMapTextureWidth;
+		bool mInvertY = true;
+
+		//glm::vec3 mPosition;
+		//glm::quat mRotation;
+	};
+
+	typedef std::vector<MapDesc> MapDescList;
+
+	struct MaterialDesc
+	{
+		MaterialDesc(GLint textureIndex, GLfloat heightMin, GLfloat heightMax)
+			: mTextureIndex(textureIndex)
+			, mHeightMin(heightMin)
+			, mHeightMax(heightMax)
+		{}
+
+		GLint mTextureIndex;
+		GLfloat mHeightMin;
+		GLfloat mHeightMax;
+	};
+
+	typedef std::vector<MaterialDesc> MaterialDescList;
+
+	struct Desc : public Renderer::Desc
+	{
+		Desc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale, GLfloat slowSlopeMax = 0.35f, GLfloat hiSlopeMin = 0.30f)
+			: Renderer::Desc()
+			, mHeightMapWidth(heightMapWidth)
+			, mHeightMapDepth(heightMapDepth)
+			, mScale(scale)
+			, mSlowSlopeMax(slowSlopeMax)
+			, mHiSlopeMin(hiSlopeMin)
+		{ }
+
+		GLint mHeightMapWidth;
+		GLint mHeightMapDepth;
+		glm::vec3 mScale;
+		GLfloat mSlowSlopeMax;
+		GLfloat mHiSlopeMin;
+
+		MapDescList mTerrains;
+		MaterialDescList mLowSlopeMaterials;
+		MaterialDescList mHiSlopeMaterials;
+	};
+
+public:
+	TerrainRenderer(const Desc & desc);
 	virtual ~TerrainRenderer();
 
 	virtual void Render() override;
@@ -57,7 +81,7 @@ public:
 private:
 
 	void LoadShaders();
-	void LoadHeightMap(const TerrainDescList & terrainDescList);
+	void LoadHeightMap(const MapDescList & terrainDescList);
 
 private:
 

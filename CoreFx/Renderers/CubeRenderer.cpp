@@ -7,14 +7,17 @@ namespace CoreFx
 	{
 
 
-CubeRenderer::CubeRenderer(std::uint16_t materialCount, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Cube, 2>(materialCount * Property_Per_Material, capacity, pageSize, "CubeRenderer")
-	, mMaterialCount(materialCount)
-	, mMaterialTextureIndexesList(materialCount)
+CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
+	: SceneObjectRenderer<Renderables::Cube, 2>((GLuint)(desc.mMaterials.size() * Property_Per_Material), capacity, pageSize, "CubeRenderer")
+	, mMaterialCount((GLuint)desc.mMaterials.size())
+	, mMaterialTextureIndexesList((GLuint)desc.mMaterials.size())
 	, mIsMaterialIndexBufferSet(false)
 	, mIsMaterialDataBufferSet(false)
 {
 	memset(mMaterials.GetData(), 0, mMaterials.GetDataSize());
+
+	AddTextures(desc.mTextures);
+	SetMaterials(desc.mMaterials);
 
 	const float k = 1.f / 1.5f;
 	
@@ -400,6 +403,14 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & di
 void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat)
 {
 	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mSpecularPower, mat.mSpecularTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
+}
+
+void CubeRenderer::SetMaterials(const MaterialDescList & materials)
+{
+	for (auto i = 0; i < materials.size(); ++i)
+	{
+		SetMaterial((std::uint16_t)i, materials[i]);
+	}
 }
 
 
