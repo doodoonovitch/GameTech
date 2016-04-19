@@ -59,24 +59,24 @@ public:
 
 	struct Desc : public Renderer::Desc
 	{
-		Desc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale, GLfloat slowSlopeMax = 0.35f, GLfloat hiSlopeMin = 0.30f)
+		Desc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale, GLfloat lowSlope = 0.5f, GLfloat highSlope = 0.57f)
 			: Renderer::Desc()
 			, mHeightMapWidth(heightMapWidth)
 			, mHeightMapDepth(heightMapDepth)
 			, mScale(scale)
-			, mLowSlopeMax(slowSlopeMax)
-			, mHiSlopeMin(hiSlopeMin)
+			, mLowSlope(lowSlope)
+			, mHighSlope(highSlope)
 		{ }
 
 		GLint mHeightMapWidth;
 		GLint mHeightMapDepth;
 		glm::vec3 mScale;
-		GLfloat mLowSlopeMax;
-		GLfloat mHiSlopeMin;
+		GLfloat mLowSlope;
+		GLfloat mHighSlope;
 
 		MapDescList mTerrains;
 		MaterialDescList mLowSlopeMaterials;
-		MaterialDescList mHiSlopeMaterials;
+		MaterialDescList mHighSlopeMaterials;
 	};
 
 public:
@@ -89,10 +89,12 @@ public:
 
 private:
 
-	void BuildMaterailShader(std::string & generatedSource, const Desc & desc);
+	void BuildMaterialShader(std::string & generatedSource, const Desc & desc);
+	static void GenerateGetMaterialByHeight(std::string & generatedSource, const MaterialDescList & matDescList, const TextureInfoList & texInfo);
+
 	void LoadShaders(const Desc & desc);
 	void LoadHeightMap(const MapDescList & terrainDescList);
-	void UpdateMaterialTextureIndex(const Desc & desc);
+	//void UpdateMaterialTextureIndex(const Desc & desc);
 
 private:
 
@@ -123,8 +125,8 @@ private:
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
 	glm::vec3 mScale;
-	GLfloat mLowSlopeMax;
-	GLfloat mHiSlopeMin;
+	GLfloat mLowSlope;
+	GLfloat mHighSlope;
 
 	GLuint mHeightMapTextureId;
 	Shader mDrawNormalShader;

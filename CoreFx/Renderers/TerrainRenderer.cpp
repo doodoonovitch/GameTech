@@ -14,8 +14,8 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
 	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
 	, mScale(desc.mScale)
-	, mLowSlopeMax(desc.mLowSlopeMax)
-	, mHiSlopeMin(desc.mHiSlopeMin)
+	, mLowSlope(desc.mLowSlope)
+	, mHighSlope(desc.mHighSlope)
 	, mHeightMapTextureId(0)
 	, mDrawNormalShader("TerrainDrawNormals")
 	//, mDiffuseTextures(nullptr)
@@ -100,7 +100,7 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	std::string & textureFuncSource = lightFsGlsl[1];
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
 	std::string & getMaterialsFuncSource = lightFsGlsl[2];
-	BuildMaterailShader(getMaterialsFuncSource, desc);
+	BuildMaterialShader(getMaterialsFuncSource, desc);
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	mShader.CreateAndLinkProgram();
@@ -168,62 +168,63 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	PRINT_MESSAGE("-------------------------------------------------\n\n");
 }
 
-#define PRINT_CURR_MAT \
-sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseColor = vec3(%f, %f, %f);\r\n", currMat.mDiffuse.r, currMat.mDiffuse.g, currMat.mDiffuse.b); \
-generatedSource.append(tmpBuffer); \
-sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseSamplerIndex = %i;\r\n", texInfo[currMat.mDiffuseTextureIndex].GetSamplerIndex()); \
-generatedSource.append(tmpBuffer); \
-sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseLayerIndex = %i;\r\n", texInfo[currMat.mDiffuseTextureIndex].GetLayerIndex()); \
-generatedSource.append(tmpBuffer);
+#define PRINT_CURRMAT_DIFFUSE_COLOR(varname, mat) \
+{\
+	sprintf_s(tmpBuffer, tmpBufferCount, "\t\t" #varname " = vec3(%f, %f, %f);\r\n", mat.mDiffuse.r, mat.mDiffuse.g, mat.mDiffuse.b); \
+	generatedSource.append(tmpBuffer); \
+	int samplerIndex = texInfo[mat.mDiffuseTextureIndex].GetSamplerIndex(); \
+	int layerIndex = texInfo[mat.mDiffuseTextureIndex].GetLayerIndex(); \
+	if (samplerIndex >= 0)\
+	{\
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseY = texture(u_textureSampler[%i], vec3(uvs.xz, %i)).xyz;\r\n", samplerIndex, layerIndex); \
+		generatedSource.append(tmpBuffer); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseX = texture(u_textureSampler[%i], vec3(uvs.zy, %i)).xyz;\r\n", samplerIndex, layerIndex); \
+		generatedSource.append(tmpBuffer); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseZ = texture(u_textureSampler[%i], vec3(uvs.xy, %i)).xyz;\r\n", samplerIndex, layerIndex); \
+		generatedSource.append(tmpBuffer); \
+		generatedSource.append("\t\t" #varname " = " #varname " * ((blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ));\r\n"); \
+	}\
+}
 
-
-void TerrainRenderer::BuildMaterailShader(std::string & generatedSource, const Desc & desc)
+void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource, const MaterialDescList & matDescList, const TextureInfoList & texInfo)
 {
-	const TextureInfoList & texInfo = GetTextureInfoList();
-
-	const int tmpBufferCount = 200;
+	const int tmpBufferCount = 300;
 	char tmpBuffer[tmpBufferCount];
 
-	// find low slope textures indexes
-	generatedSource.append("void FindLowSlopeTextures(out Material mat, vec3 position)\r\n");
-	generatedSource.append("{\r\n");
-
-	generatedSource.append("\tmat.DiffuseColor2 = vec3(0, 0, 0);\r\n");
-	generatedSource.append("\tmat.DiffuseSamplerIndex2 = -1;\r\n");
-	generatedSource.append("\tmat.DiffuseLayerIndex2 = -1;\r\n");
+	generatedSource.append("\tvec3 diffuseColor = vec3(0, 0, 0);\r\n");
+	generatedSource.append("\tvec3 diffuseColor2 = vec3(0, 0, 0);\r\n");
+	generatedSource.append("\tfloat blend = 0;\r\n");
 	generatedSource.append("\t\r\n");
-	generatedSource.append("\tmat.DiffuseBlend = 0;\r\n");
 
-	if (!desc.mLowSlopeMaterials.empty())
-	{		
-		GLfloat heightMin = desc.mLowSlopeMaterials.front().mHeightMin;
+	generatedSource.append("\tvec3 diffuseX, diffuseY, diffuseZ;\r\n");
+	generatedSource.append("\t\r\n");
 
-		{
-			const MaterialDesc & currMat = desc.mLowSlopeMaterials[0];
-			sprintf_s(tmpBuffer, tmpBufferCount, "\tif (position.y < %f)\r\n", heightMin);
-			generatedSource.append(tmpBuffer);
-			generatedSource.append("\t{\r\n");
+	if (!matDescList.empty())
+	{
+		GLfloat heightMin = matDescList.front().mHeightMin;
 
-			PRINT_CURR_MAT;
-
-			generatedSource.append("\t}\r\n");
-		}
-
-		int count = (int)desc.mLowSlopeMaterials.size();
+		int count = (int)matDescList.size();
 		for (int curr = 0; curr < count; ++curr)
-		{	
-			const MaterialDesc & currMat = desc.mLowSlopeMaterials[curr];
+		{
+			const MaterialDesc & currMat = matDescList[curr];
 			int next = curr + 1;
 
 			if (next < count)
 			{
-				const MaterialDesc & nextMat = desc.mLowSlopeMaterials[next];
+				const MaterialDesc & nextMat = matDescList[next];
 
-				sprintf_s(tmpBuffer, tmpBufferCount, "\telse if (position.y >= %f && position.y < %f)\r\n", heightMin, nextMat.mHeightMin);
+				if (curr == 0)
+				{
+					sprintf_s(tmpBuffer, tmpBufferCount, "\tif (position.y < %f)\r\n", nextMat.mHeightMin);
+				}
+				else
+				{
+					sprintf_s(tmpBuffer, tmpBufferCount, "\telse if (position.y >= %f && position.y < %f)\r\n", heightMin, nextMat.mHeightMin);
+				}
 				generatedSource.append(tmpBuffer);
 				generatedSource.append("\t{\r\n");
-				
-				PRINT_CURR_MAT;
+
+				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor, currMat);
 
 				generatedSource.append("\t}\r\n");
 
@@ -231,18 +232,14 @@ void TerrainRenderer::BuildMaterailShader(std::string & generatedSource, const D
 				generatedSource.append(tmpBuffer);
 				generatedSource.append("\t{\r\n");
 
-				PRINT_CURR_MAT;
+				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor, currMat);
 				generatedSource.append("\t\r\n");
 
-				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseColor2 = vec3(%f, %f, %f);\r\n", nextMat.mDiffuse.r, nextMat.mDiffuse.g, nextMat.mDiffuse.b);
-				generatedSource.append(tmpBuffer);
-				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseSamplerIndex2 = %i;\r\n", texInfo[nextMat.mDiffuseTextureIndex].GetSamplerIndex());
-				generatedSource.append(tmpBuffer);
-				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseLayerIndex2 = %i;\r\n", texInfo[nextMat.mDiffuseTextureIndex].GetLayerIndex());
+
+				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tblend = (position.y - %f) / (%f - %f);\r\n", nextMat.mHeightMin, currMat.mHeightMax, nextMat.mHeightMin);
 				generatedSource.append(tmpBuffer);
 
-				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseBlend = (position.y - %f) / (%f - %f);\r\n", nextMat.mHeightMin, currMat.mHeightMax, nextMat.mHeightMin);
-				generatedSource.append(tmpBuffer);
+				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor2, nextMat);
 
 				generatedSource.append("\t}\r\n");
 
@@ -253,42 +250,65 @@ void TerrainRenderer::BuildMaterailShader(std::string & generatedSource, const D
 				generatedSource.append("\telse\r\n");
 				generatedSource.append("\t{\r\n");
 
-				PRINT_CURR_MAT;
+				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor, currMat);
 
 				generatedSource.append("\t}\r\n");
 			}
 		}
 	}
-	else
-	{
-		generatedSource.append("\tmat.DiffuseColor = vec3(0, 0, 0);\r\n");
-		generatedSource.append("\tmat.DiffuseSamplerIndex = -1;\r\n");
-		generatedSource.append("\tmat.DiffuseLayerIndex = -1;\r\n");
-	}
-	generatedSource.append("}\r\n\r\n");
 
-	generatedSource.append("void GetMaterial(out BlendedMaterial blendedMat, vec3 uvs, vec3 blendWeights, vec3 normal, vec3 position)\r\n");
+	generatedSource.append("\tmat.DiffuseColor = mix(diffuseColor, diffuseColor2, blend);\r\n");
+}
+
+void TerrainRenderer::BuildMaterialShader(std::string & generatedSource, const Desc & desc)
+{
+	const int tmpBufferCount = 300;
+	char tmpBuffer[tmpBufferCount];
+
+	const TextureInfoList & texInfo = GetTextureInfoList();
+
+	// find low slope textures indexes
+	generatedSource.append("void GetLowSlopeMaterial(out Material mat, vec3 uvs, vec3 blendWeights, vec3 position)\r\n");
 	generatedSource.append("{\r\n");
 
-	//sprintf_s(tmpBuffer, tmpBufferCount, "\tif (normal.y < %f)\r\n", desc.mHiSlopeMin);
-	//generatedSource.append(tmpBuffer);
-	//generatedSource.append("\t{\r\n");
+	GenerateGetMaterialByHeight(generatedSource, desc.mLowSlopeMaterials, texInfo);
 
-	generatedSource.append("\t\tMaterial lowSlopeMat;\r\n");
-	generatedSource.append("\t\tFindLowSlopeTextures(lowSlopeMat, position);\r\n\r\n");
+	generatedSource.append("}\r\n\r\n");
 
-	generatedSource.append("\t\tBlendMaterials(blendedMat, lowSlopeMat, uvs, blendWeights);\r\n\r\n");
+	// find low slope textures indexes
+	generatedSource.append("void GetHighSlopeMaterial(out Material mat, vec3 uvs, vec3 blendWeights, vec3 position)\r\n");
+	generatedSource.append("{\r\n");
 
-	//generatedSource.append("\t}\r\n");
-	//sprintf_s(tmpBuffer, tmpBufferCount, "\telse if (normal.y < %f)\r\n", desc.mLowSlopeMax);
-	//generatedSource.append(tmpBuffer);
-	//generatedSource.append("\t{\r\n");
+	GenerateGetMaterialByHeight(generatedSource, desc.mHighSlopeMaterials, texInfo);
 
-	//generatedSource.append("\t}\r\n");
-	//generatedSource.append("\telse\r\n");
-	//generatedSource.append("\t{\r\n");
+	generatedSource.append("}\r\n\r\n");
 
-	//generatedSource.append("\t}\r\n");
+
+	generatedSource.append("void GetMaterial(out Material mat, vec3 uvs, vec3 blendWeights, vec3 normal, vec3 position)\r\n");
+	generatedSource.append("{\r\n");
+
+	sprintf_s(tmpBuffer, tmpBufferCount, "\tif (normal.y > %f)\r\n", desc.mHighSlope);
+	generatedSource.append(tmpBuffer);
+	generatedSource.append("\t{\r\n");
+	generatedSource.append("\t\tGetLowSlopeMaterial(mat, uvs, blendWeights, position);\r\n");
+	generatedSource.append("\t}\r\n");
+
+	sprintf_s(tmpBuffer, tmpBufferCount, "\telse if (normal.y < %f)\r\n", desc.mLowSlope);
+	generatedSource.append(tmpBuffer);
+	generatedSource.append("\t{\r\n");
+	generatedSource.append("\t\tGetHighSlopeMaterial(mat, uvs, blendWeights, position);\r\n");
+	generatedSource.append("\t}\r\n");
+
+	generatedSource.append("\telse\r\n");
+	generatedSource.append("\t{\r\n");
+	generatedSource.append("\t\tMaterial lowSlopeMat, highSlopeMat;\r\n");
+	generatedSource.append("\t\tGetLowSlopeMaterial(lowSlopeMat, uvs, blendWeights, position);\r\n");
+	generatedSource.append("\t\tGetHighSlopeMaterial(highSlopeMat, uvs, blendWeights, position);\r\n");
+	generatedSource.append("\r\n");
+	sprintf_s(tmpBuffer, tmpBufferCount, "\t\tfloat blend = (normal.y - %f) / (%f - %f);\r\n", desc.mLowSlope, desc.mHighSlope, desc.mLowSlope);
+	generatedSource.append(tmpBuffer);
+	generatedSource.append("\t\tBlendMaterial(mat, highSlopeMat, lowSlopeMat, blend);\r\n");
+	generatedSource.append("\t}\r\n");
 
 
 	generatedSource.append("}\r\n");

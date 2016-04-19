@@ -170,8 +170,8 @@ void SimpleCamera::OnInit()
 
 			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
 			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
-			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
-			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
+			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
+			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);

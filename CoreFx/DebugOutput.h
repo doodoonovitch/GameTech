@@ -20,6 +20,12 @@ public:
 	}
 
 	void EnableDebugMessage();
+	void DisableDebugMessage();
+
+	bool IsEnabled() const
+	{
+		return mIsEnabled;
+	}
 
 	//if you want you can rename myCallback; This is just an example
 	static void APIENTRY Callback(GLenum source,
@@ -47,7 +53,7 @@ private:
 	GLenum mSource;
 	GLenum mType;
 	GLenum mSeverity;
-
+	bool mIsEnabled;
 };
 
 

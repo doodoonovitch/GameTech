@@ -19,6 +19,7 @@ DebugOutput::DebugOutput()
 	, mType(GL_DEBUG_TYPE_ERROR)
 	, mSeverity(GL_DEBUG_SEVERITY_HIGH)
 #endif
+	, mIsEnabled(false)
 {
 }
 
@@ -37,6 +38,17 @@ void DebugOutput::EnableDebugMessage()
 		glDebugMessageCallback(CoreFx::DebugOutput::Callback, this);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
 		glDebugMessageControl(mSource, mType, mSeverity, 0, NULL, GL_TRUE);
+		mIsEnabled = true;
+	}
+}
+
+void DebugOutput::DisableDebugMessage()
+{
+	if (mIsEnabled)
+	{
+		mIsEnabled = false;
+		glDisable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(nullptr, nullptr);
 	}
 }
 
@@ -47,16 +59,20 @@ void APIENTRY DebugOutput::Callback(GLenum source,
 	GLenum severity,
 	GLsizei /*length*/,
 	const GLchar *msg,
-	GLvoid * /*data*/)
+	GLvoid * data)
 {
-	//display warnings/errors however you like
-	PRINT_MESSAGE("\n********** Debug Output **************\n");
-	PRINT_MESSAGE("  source: %s.\n", getStringForSource(source));
-	PRINT_MESSAGE("  id: %u.\n", id);
-	PRINT_MESSAGE("  type: %s.\n", getStringForType(type));
-	PRINT_MESSAGE("  severity: %s.\n", getStringForSeverity(severity));
-	PRINT_MESSAGE("  debug call: %s.\n", msg);
-	PRINT_MESSAGE("**************************************\n");
+	DebugOutput * dbg = (DebugOutput*)data;
+	if (dbg->IsEnabled())
+	{
+		//display warnings/errors however you like
+		PRINT_MESSAGE("\n********** Debug Output **************\n");
+		PRINT_MESSAGE("  source: %s.\n", getStringForSource(source));
+		PRINT_MESSAGE("  id: %u.\n", id);
+		PRINT_MESSAGE("  type: %s.\n", getStringForType(type));
+		PRINT_MESSAGE("  severity: %s.\n", getStringForSeverity(severity));
+		PRINT_MESSAGE("  debug call: %s.\n", msg);
+		PRINT_MESSAGE("**************************************\n");
+	}
 }
 
 const char * DebugOutput::getStringForType(GLenum type)
