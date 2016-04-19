@@ -64,14 +64,14 @@ public:
 			, mHeightMapWidth(heightMapWidth)
 			, mHeightMapDepth(heightMapDepth)
 			, mScale(scale)
-			, mSlowSlopeMax(slowSlopeMax)
+			, mLowSlopeMax(slowSlopeMax)
 			, mHiSlopeMin(hiSlopeMin)
 		{ }
 
 		GLint mHeightMapWidth;
 		GLint mHeightMapDepth;
 		glm::vec3 mScale;
-		GLfloat mSlowSlopeMax;
+		GLfloat mLowSlopeMax;
 		GLfloat mHiSlopeMin;
 
 		MapDescList mTerrains;
@@ -89,6 +89,7 @@ public:
 
 private:
 
+	void BuildMaterailShader(std::string & generatedSource, const Desc & desc);
 	void LoadShaders(const Desc & desc);
 	void LoadHeightMap(const MapDescList & terrainDescList);
 	void UpdateMaterialTextureIndex(const Desc & desc);
@@ -102,7 +103,7 @@ private:
 		u_Scale,
 		u_TexScale,
 		u_HeightMap,
-		u_DiffuseMap,
+		//u_DiffuseMap,
 
 		__uniforms_count__
 	};
@@ -116,16 +117,18 @@ private:
 		__uniforms2_count__
 	};
 
+	const int FIRST_TEXTURE_SAMPLER_INDEX = 1;
+
 
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
 	glm::vec3 mScale;
-	GLfloat mSlowSlopeMax;
+	GLfloat mLowSlopeMax;
 	GLfloat mHiSlopeMin;
 
 	GLuint mHeightMapTextureId;
 	Shader mDrawNormalShader;
-	const TextureGroup * mDiffuseTextures;
+	//const TextureGroup * mDiffuseTextures;
 
 };
 

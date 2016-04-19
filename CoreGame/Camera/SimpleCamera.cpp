@@ -154,8 +154,9 @@ void SimpleCamera::OnInit()
 		}
 
 		{
+			float yScale = 100.f;
 
-			Renderers::TerrainRenderer::Desc desc(512, 512, glm::vec3(1.f, 100.f, 1.f));
+			Renderers::TerrainRenderer::Desc desc(512, 512, glm::vec3(1.f, yScale, 1.f));
 			desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/Terrain/Canyon_513x513.r32", 513, true));
 			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true));
 
@@ -167,10 +168,10 @@ void SimpleCamera::OnInit()
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/snowstone01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/pineforest03_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
 
-			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f, 95.f, glm::vec3(1.f), 2, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
-			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(91.f, 100.f, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
-			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f, 95.f, glm::vec3(1.f), 0, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
-			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(91.f, 100.f, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
+			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
+			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
+			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
+			desc.mHiSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture));
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);

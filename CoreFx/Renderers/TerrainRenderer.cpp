@@ -14,11 +14,11 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
 	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
 	, mScale(desc.mScale)
-	, mSlowSlopeMax(desc.mSlowSlopeMax)
+	, mLowSlopeMax(desc.mLowSlopeMax)
 	, mHiSlopeMin(desc.mHiSlopeMin)
 	, mHeightMapTextureId(0)
 	, mDrawNormalShader("TerrainDrawNormals")
-	, mDiffuseTextures(nullptr)
+	//, mDiffuseTextures(nullptr)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize TerrainRenderer...." << std::endl;
@@ -58,7 +58,7 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 
 	LoadHeightMap(desc.mTerrains);
 
-	UpdateMaterialTextureIndex(desc);
+	//UpdateMaterialTextureIndex(desc);
 	LoadShaders(desc);
 
 	std::cout << "... TerrainRenderer initialized!" << std::endl << std::endl;
@@ -71,7 +71,7 @@ TerrainRenderer::~TerrainRenderer()
 	mHeightMapTextureId = 0;
 }
 
-void TerrainRenderer::LoadShaders(const Desc & /*desc*/)
+void TerrainRenderer::LoadShaders(const Desc & desc)
 {
 	PRINT_MESSAGE("Initialize Terrain Renderer Shaders : \n\n");
 
@@ -82,15 +82,27 @@ void TerrainRenderer::LoadShaders(const Desc & /*desc*/)
 		"u_Scale",
 		"u_TexScale",
 		"u_HeightMap",
-		"u_DiffuseMap"
+		//"u_DiffuseMap"
 	};
+
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/terrain.vs.glsl");
 	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/terrain.tcs.glsl");
 	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tes.glsl");
 	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain.gs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/terrain.deferred.fs.glsl");
+
+//	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/terrain.deferred.fs.glsl");
+	PRINT_MESSAGE("Loading shader file : shaders/terrain.deferred.fs.glsl\n");
+	// fragment shader
+	std::vector<std::string> lightFsGlsl(3);
+	Shader::MergeFile(lightFsGlsl[0], "shaders/terrain.deferred.fs.glsl");
+	std::string & textureFuncSource = lightFsGlsl[1];
+	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
+	std::string & getMaterialsFuncSource = lightFsGlsl[2];
+	BuildMaterailShader(getMaterialsFuncSource, desc);
+	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
+
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 
@@ -102,7 +114,20 @@ void TerrainRenderer::LoadShaders(const Desc & /*desc*/)
 	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 
 	glUniform1i(mShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_DiffuseMap), 1); GL_CHECK_ERRORS;
+	//glUniform1i(mShader.GetUniform(u_DiffuseMap), 1); GL_CHECK_ERRORS;
+
+
+	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
+	{
+		char uniformName[50];
+		sprintf_s(uniformName, 50, "u_textureSampler[%i]", i);
+		int uniformIndex = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		if (uniformIndex > 0)
+		{
+			glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);	GL_CHECK_ERRORS;
+			std::cout << "\t" << uniformName << " : " << uniformIndex << std::endl;
+		}
+	}
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -142,6 +167,132 @@ void TerrainRenderer::LoadShaders(const Desc & /*desc*/)
 	PRINT_MESSAGE("... done.\n");
 	PRINT_MESSAGE("-------------------------------------------------\n\n");
 }
+
+#define PRINT_CURR_MAT \
+sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseColor = vec3(%f, %f, %f);\r\n", currMat.mDiffuse.r, currMat.mDiffuse.g, currMat.mDiffuse.b); \
+generatedSource.append(tmpBuffer); \
+sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseSamplerIndex = %i;\r\n", texInfo[currMat.mDiffuseTextureIndex].GetSamplerIndex()); \
+generatedSource.append(tmpBuffer); \
+sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseLayerIndex = %i;\r\n", texInfo[currMat.mDiffuseTextureIndex].GetLayerIndex()); \
+generatedSource.append(tmpBuffer);
+
+
+void TerrainRenderer::BuildMaterailShader(std::string & generatedSource, const Desc & desc)
+{
+	const TextureInfoList & texInfo = GetTextureInfoList();
+
+	const int tmpBufferCount = 200;
+	char tmpBuffer[tmpBufferCount];
+
+	// find low slope textures indexes
+	generatedSource.append("void FindLowSlopeTextures(out Material mat, vec3 position)\r\n");
+	generatedSource.append("{\r\n");
+
+	generatedSource.append("\tmat.DiffuseColor2 = vec3(0, 0, 0);\r\n");
+	generatedSource.append("\tmat.DiffuseSamplerIndex2 = -1;\r\n");
+	generatedSource.append("\tmat.DiffuseLayerIndex2 = -1;\r\n");
+	generatedSource.append("\t\r\n");
+	generatedSource.append("\tmat.DiffuseBlend = 0;\r\n");
+
+	if (!desc.mLowSlopeMaterials.empty())
+	{		
+		GLfloat heightMin = desc.mLowSlopeMaterials.front().mHeightMin;
+
+		{
+			const MaterialDesc & currMat = desc.mLowSlopeMaterials[0];
+			sprintf_s(tmpBuffer, tmpBufferCount, "\tif (position.y < %f)\r\n", heightMin);
+			generatedSource.append(tmpBuffer);
+			generatedSource.append("\t{\r\n");
+
+			PRINT_CURR_MAT;
+
+			generatedSource.append("\t}\r\n");
+		}
+
+		int count = (int)desc.mLowSlopeMaterials.size();
+		for (int curr = 0; curr < count; ++curr)
+		{	
+			const MaterialDesc & currMat = desc.mLowSlopeMaterials[curr];
+			int next = curr + 1;
+
+			if (next < count)
+			{
+				const MaterialDesc & nextMat = desc.mLowSlopeMaterials[next];
+
+				sprintf_s(tmpBuffer, tmpBufferCount, "\telse if (position.y >= %f && position.y < %f)\r\n", heightMin, nextMat.mHeightMin);
+				generatedSource.append(tmpBuffer);
+				generatedSource.append("\t{\r\n");
+				
+				PRINT_CURR_MAT;
+
+				generatedSource.append("\t}\r\n");
+
+				sprintf_s(tmpBuffer, tmpBufferCount, "\telse if (position.y >= %f && position.y < %f)\r\n", nextMat.mHeightMin, currMat.mHeightMax);
+				generatedSource.append(tmpBuffer);
+				generatedSource.append("\t{\r\n");
+
+				PRINT_CURR_MAT;
+				generatedSource.append("\t\r\n");
+
+				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseColor2 = vec3(%f, %f, %f);\r\n", nextMat.mDiffuse.r, nextMat.mDiffuse.g, nextMat.mDiffuse.b);
+				generatedSource.append(tmpBuffer);
+				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseSamplerIndex2 = %i;\r\n", texInfo[nextMat.mDiffuseTextureIndex].GetSamplerIndex());
+				generatedSource.append(tmpBuffer);
+				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseLayerIndex2 = %i;\r\n", texInfo[nextMat.mDiffuseTextureIndex].GetLayerIndex());
+				generatedSource.append(tmpBuffer);
+
+				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tmat.DiffuseBlend = (position.y - %f) / (%f - %f);\r\n", nextMat.mHeightMin, currMat.mHeightMax, nextMat.mHeightMin);
+				generatedSource.append(tmpBuffer);
+
+				generatedSource.append("\t}\r\n");
+
+				heightMin = nextMat.mHeightMin;
+			}
+			else
+			{
+				generatedSource.append("\telse\r\n");
+				generatedSource.append("\t{\r\n");
+
+				PRINT_CURR_MAT;
+
+				generatedSource.append("\t}\r\n");
+			}
+		}
+	}
+	else
+	{
+		generatedSource.append("\tmat.DiffuseColor = vec3(0, 0, 0);\r\n");
+		generatedSource.append("\tmat.DiffuseSamplerIndex = -1;\r\n");
+		generatedSource.append("\tmat.DiffuseLayerIndex = -1;\r\n");
+	}
+	generatedSource.append("}\r\n\r\n");
+
+	generatedSource.append("void GetMaterial(out BlendedMaterial blendedMat, vec3 uvs, vec3 blendWeights, vec3 normal, vec3 position)\r\n");
+	generatedSource.append("{\r\n");
+
+	//sprintf_s(tmpBuffer, tmpBufferCount, "\tif (normal.y < %f)\r\n", desc.mHiSlopeMin);
+	//generatedSource.append(tmpBuffer);
+	//generatedSource.append("\t{\r\n");
+
+	generatedSource.append("\t\tMaterial lowSlopeMat;\r\n");
+	generatedSource.append("\t\tFindLowSlopeTextures(lowSlopeMat, position);\r\n\r\n");
+
+	generatedSource.append("\t\tBlendMaterials(blendedMat, lowSlopeMat, uvs, blendWeights);\r\n\r\n");
+
+	//generatedSource.append("\t}\r\n");
+	//sprintf_s(tmpBuffer, tmpBufferCount, "\telse if (normal.y < %f)\r\n", desc.mLowSlopeMax);
+	//generatedSource.append(tmpBuffer);
+	//generatedSource.append("\t{\r\n");
+
+	//generatedSource.append("\t}\r\n");
+	//generatedSource.append("\telse\r\n");
+	//generatedSource.append("\t{\r\n");
+
+	//generatedSource.append("\t}\r\n");
+
+
+	generatedSource.append("}\r\n");
+}
  
 void TerrainRenderer::Render()
 {
@@ -156,8 +307,14 @@ void TerrainRenderer::Render()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, mDiffuseTextures->GetResourceId());
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D_ARRAY, mDiffuseTextures->GetResourceId());
+
+	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureMapping.mMapping[i].mTexture->GetResourceId());
+	}
 
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y);
 
@@ -281,22 +438,22 @@ ExitLoadHeightMap:
 	free(buffer);
 }
 
-void TerrainRenderer::UpdateMaterialTextureIndex(const Desc & desc)
-{
-	for (MaterialDescList::const_iterator matIt = desc.mLowSlopeMaterials.begin(); matIt != desc.mLowSlopeMaterials.end(); ++matIt)
-	{
-
-	}
-
-	for (TextureMappingList::const_iterator it = mTextureMapping.mMapping.begin(); it != mTextureMapping.mMapping.end(); ++it)
-	{
-		if (it->mTexture->GetCategory() == TextureCategory::Diffuse)
-		{
-			mDiffuseTextures = it->mTexture;
-			break;
-		}			
-	}
-}
+//void TerrainRenderer::UpdateMaterialTextureIndex(const Desc & desc)
+//{
+//	for (MaterialDescList::const_iterator matIt = desc.mLowSlopeMaterials.begin(); matIt != desc.mLowSlopeMaterials.end(); ++matIt)
+//	{
+//
+//	}
+//
+//	for (TextureMappingList::const_iterator it = mTextureMapping.mMapping.begin(); it != mTextureMapping.mMapping.end(); ++it)
+//	{
+//		if (it->mTexture->GetCategory() == TextureCategory::Diffuse)
+//		{
+//			mDiffuseTextures = it->mTexture;
+//			break;
+//		}			
+//	}
+//}
 
 
 	} // namespace Renderers
