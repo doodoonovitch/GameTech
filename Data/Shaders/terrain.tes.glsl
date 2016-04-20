@@ -9,14 +9,14 @@ uniform sampler2DArray u_HeightMap;
 in TCS_OUT
 {
 	vec2 TexUV;
-	int Layer;
+	int MapIndex;
 } tes_in[];
 
 out TES_OUT
 {
 	vec2 TexUV;
 	vec3 Normal;
-	flat int Layer;
+	flat int MapIndex;
 } tes_out;
 
 void main()
@@ -28,7 +28,7 @@ void main()
 	vec4 p2 = mix(gl_in[2].gl_Position,	gl_in[3].gl_Position, gl_TessCoord.x);
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
 
-	vec3 texCoord = vec3(tc, tes_in[0].Layer);
+	vec3 texCoord = vec3(tc, tes_in[0].MapIndex);
 	p.y = texture(u_HeightMap, texCoord).r * u_Scale.y;
 
 	float nX = textureOffset(u_HeightMap, texCoord, ivec2(-1, 0)).r - textureOffset(u_HeightMap, texCoord, ivec2(1, 0)).r;
@@ -37,7 +37,7 @@ void main()
 
 	gl_Position = vec4(p.xyz, 1);
 	tes_out.TexUV = tc;
-	tes_out.Layer = tes_in[0].Layer;
+	tes_out.MapIndex = tes_in[0].MapIndex;
 	tes_out.Normal = normal;
 }
 

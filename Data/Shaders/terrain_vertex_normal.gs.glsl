@@ -1,13 +1,13 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-//uniform samplerBuffer perInstanceDataSampler;
+uniform samplerBuffer u_PerMapDataSampler;
 
 in TES_OUT
 {
 	vec2 TexUV;
 	vec3 Normal;
-	flat int Layer;
+	flat int MapIndex;
 } gs_in[3];
 
 out GS_OUT
@@ -18,13 +18,12 @@ out GS_OUT
 
 void main()
 {  
-	//DualQuat modelDQ;
-	//int index = gs_in[0].Layer * 2;
-	//modelDQ.Qr = texelFetch(perInstanceDataSampler, index);
-	//modelDQ.Qd = texelFetch(perInstanceDataSampler, index + 1);
+	DualQuat modelDQ;
+	int index = gs_in[0].MapIndex * 2;
+	modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
+	modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
 
-	//DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
-	DualQuat viewModelDQ = u_ViewDQ;
+	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{

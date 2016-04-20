@@ -47,7 +47,7 @@ private:
 	static const int MOUSE_HISTORY_BUFFER_SIZE = 10;
 
 	const float MOUSE_FILTER_WEIGHT = 0.75f;
-	const float DEFAULT_MOVE_SPEED = 10.f;
+	const float DEFAULT_MOVE_SPEED = 20.f;
 
 	float mMoveSpeed = DEFAULT_MOVE_SPEED;
 

@@ -9,13 +9,13 @@ uniform float u_MaxTess = 6;
 in VS_OUT
 {
 	vec2 TexUV;
-	int Layer;
+	int MapIndex;
 } tcs_in[];
 
 out TCS_OUT
 {
 	vec2 TexUV;
-	int Layer;
+	int MapIndex;
 } tcs_out[];
 
 //float CompTessFactor(vec4 p1, vec4 p0)
@@ -128,7 +128,7 @@ void main()
 	} 
 
     tcs_out[gl_InvocationID].TexUV = tcs_in[gl_InvocationID].TexUV;
-    tcs_out[gl_InvocationID].Layer = tcs_in[gl_InvocationID].Layer;
+    tcs_out[gl_InvocationID].MapIndex = tcs_in[gl_InvocationID].MapIndex;
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }
 

@@ -9,16 +9,16 @@ namespace CoreFx
 
 
 
-TerrainRenderer::TerrainRenderer(const Desc & desc)
-	: RendererHelper<Renderables::Grid, 1>(0, "TerrainRenderer")
-	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
-	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
-	, mScale(desc.mScale)
-	, mLowSlope(desc.mLowSlope)
-	, mHighSlope(desc.mHighSlope)
-	, mHeightMapTextureId(0)
+		TerrainRenderer::TerrainRenderer(const Desc & desc)
+			: RendererHelper<Renderables::Grid, 1>(0, "TerrainRenderer")
+			, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
+			, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
+			, mScale(desc.mScale)
+			, mLowSlope(desc.mLowSlope)
+			, mHighSlope(desc.mHighSlope)
+			, mHeightMapTextureId(0)
+			, mMapCount(0)
 	, mDrawNormalShader("TerrainDrawNormals")
-	//, mDiffuseTextures(nullptr)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize TerrainRenderer...." << std::endl;
@@ -58,6 +58,14 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 
 	LoadHeightMap(desc.mTerrains);
 
+	PerMapData * modelMatrixBuffer = new PerMapData[mMapCount];
+	for (int i = 0; i < mMapCount; ++i)
+	{
+		modelMatrixBuffer[i].mModelDQ = desc.mTerrains[i].mModelDQ;
+	}
+	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (mMapCount * sizeof(PerMapData)), modelMatrixBuffer);
+
+
 	//UpdateMaterialTextureIndex(desc);
 	LoadShaders(desc);
 
@@ -67,6 +75,7 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 
 TerrainRenderer::~TerrainRenderer()
 {
+	mModelMatrixBuffer.ReleaseResource();
 	glDeleteTextures(1, &mHeightMapTextureId);
 	mHeightMapTextureId = 0;
 }
@@ -82,7 +91,7 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 		"u_Scale",
 		"u_TexScale",
 		"u_HeightMap",
-		//"u_DiffuseMap"
+		"u_PerMapDataSampler",
 	};
 
 
@@ -114,7 +123,7 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 
 	glUniform1i(mShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
-	//glUniform1i(mShader.GetUniform(u_DiffuseMap), 1); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
@@ -159,6 +168,9 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 
 	glUniform1i(mDrawNormalShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
 
+	glUniform1i(mDrawNormalShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
+
+
 	mDrawNormalShader.SetupFrameDataBlockBinding();
 	mDrawNormalShader.UnUse();
 
@@ -176,11 +188,13 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	int layerIndex = texInfo[mat.mDiffuseTextureIndex].GetLayerIndex(); \
 	if (samplerIndex >= 0)\
 	{\
-		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseY = texture(u_textureSampler[%i], vec3(uvs.xz, %i)).xyz;\r\n", samplerIndex, layerIndex); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexCoord = vec3(uvs.xz * %f, %i);\r\n", mat.mTexScale, layerIndex); \
 		generatedSource.append(tmpBuffer); \
-		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseX = texture(u_textureSampler[%i], vec3(uvs.zy, %i)).xyz;\r\n", samplerIndex, layerIndex); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseY = texture(u_textureSampler[%i], texCoord).xyz;\r\n", samplerIndex); \
 		generatedSource.append(tmpBuffer); \
-		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseZ = texture(u_textureSampler[%i], vec3(uvs.xy, %i)).xyz;\r\n", samplerIndex, layerIndex); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseX = texture(u_textureSampler[%i], texCoord).xyz;\r\n", samplerIndex); \
+		generatedSource.append(tmpBuffer); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseZ = texture(u_textureSampler[%i], texCoord).xyz;\r\n", samplerIndex); \
 		generatedSource.append(tmpBuffer); \
 		generatedSource.append("\t\t" #varname " = " #varname " * ((blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ));\r\n"); \
 	}\
@@ -196,7 +210,7 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 	generatedSource.append("\tfloat blend = 0;\r\n");
 	generatedSource.append("\t\r\n");
 
-	generatedSource.append("\tvec3 diffuseX, diffuseY, diffuseZ;\r\n");
+	generatedSource.append("\tvec3 texCoord, diffuseX, diffuseY, diffuseZ;\r\n");
 	generatedSource.append("\t\r\n");
 
 	if (!matDescList.empty())
@@ -327,8 +341,8 @@ void TerrainRenderer::Render()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
 
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D_ARRAY, mDiffuseTextures->GetResourceId());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
 	{
@@ -336,7 +350,7 @@ void TerrainRenderer::Render()
 		glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureMapping.mMapping[i].mTexture->GetResourceId());
 	}
 
-	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y);
+	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 
 	glBindVertexArray(0);
 	mShader.UnUse();
@@ -360,7 +374,10 @@ void TerrainRenderer::DebugRender()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
 
-		glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+
+		glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 
 		glBindVertexArray(0);
 
@@ -371,13 +388,14 @@ void TerrainRenderer::DebugRender()
 
 void TerrainRenderer::LoadHeightMap(const MapDescList & terrainDescList)
 {
+	mMapCount = (GLint)terrainDescList.size();
 	size_t layerBufferSize = mMapSize.x * mMapSize.y;
-	size_t bufferMemorySize = layerBufferSize * terrainDescList.size() * sizeof(GLfloat);
+	size_t bufferMemorySize = layerBufferSize * mMapCount * sizeof(GLfloat);
 
 	GLfloat * buffer = (GLfloat*)malloc(bufferMemorySize);
 	if (buffer == nullptr)
 	{
-		PRINT_MESSAGE("Error: Cannot allocate memory to load terrain height maps ! (Needed memory \n");
+		PRINT_MESSAGE("Error: Cannot allocate memory to load terrain height maps ! (Needed memory : %ld)\n", bufferMemorySize);
 		return;
 	}
 	

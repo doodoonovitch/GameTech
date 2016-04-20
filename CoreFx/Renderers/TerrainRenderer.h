@@ -16,18 +16,19 @@ public:
 
 	struct MapDesc
 	{
-		MapDesc(const char * filename, GLint heightMapTextureWidth, bool invertY)
+		MapDesc(const char * filename, GLint heightMapTextureWidth, bool invertY, const glm::vec3 & origin, const glm::quat & rotation)
 			: mFilename(filename)
 			, mHeightMapTextureWidth(heightMapTextureWidth)
 			, mInvertY(invertY)
-		{}
+		{
+			mModelDQ.SetRotationTranslation(rotation, origin);
+		}
 
 		std::string mFilename;
 		GLint mHeightMapTextureWidth;
 		bool mInvertY = true;
 
-		//glm::vec3 mPosition;
-		//glm::quat mRotation;
+		Maths::DualQuaternion mModelDQ;
 	};
 
 	typedef std::vector<MapDesc> MapDescList;
@@ -38,21 +39,24 @@ public:
 			const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
 			const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, 
 			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
-			TextureIndex normalTextureIndex)
+			TextureIndex normalTextureIndex, GLfloat texScale = 1.f)
 			: Renderer::MaterialDesc(diffuse, diffuseTextureIndex, specular, specularPower, specularTextureIndex, emissive, emissiveTextureIndex, normalTextureIndex)
 			, mHeightMin(heightMin)
 			, mHeightMax(heightMax)
+			, mTexScale(texScale)
 		{}
 
 		MaterialDesc(const MaterialDesc & src)
 			: Renderer::MaterialDesc(src)
 			, mHeightMin(src.mHeightMin)
 			, mHeightMax(src.mHeightMax)
+			, mTexScale(src.mTexScale)
 		{
 		}
 
 		GLfloat mHeightMin;
 		GLfloat mHeightMax;
+		GLfloat mTexScale;
 	};
 
 	typedef std::vector<MaterialDesc> MaterialDescList;
@@ -105,7 +109,7 @@ private:
 		u_Scale,
 		u_TexScale,
 		u_HeightMap,
-		//u_DiffuseMap,
+		u_PerMapDataSampler,
 
 		__uniforms_count__
 	};
@@ -114,12 +118,18 @@ private:
 	{
 		u_NormalMagnitude,
 		u_VertexNormalColor,
-		//perInstanceDataSampler,
 
 		__uniforms2_count__
 	};
 
-	const int FIRST_TEXTURE_SAMPLER_INDEX = 1;
+
+	struct PerMapData
+	{
+		Maths::DualQuaternion mModelDQ;
+	};
+
+
+	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;
 
 
 	glm::ivec2 mMapSize;
@@ -129,9 +139,10 @@ private:
 	GLfloat mHighSlope;
 
 	GLuint mHeightMapTextureId;
-	Shader mDrawNormalShader;
-	//const TextureGroup * mDiffuseTextures;
+	GLint mMapCount;
 
+	Shader mDrawNormalShader;
+	TextureBuffer mModelMatrixBuffer;
 };
 
 
