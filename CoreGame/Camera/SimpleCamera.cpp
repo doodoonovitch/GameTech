@@ -164,17 +164,17 @@ void SimpleCamera::OnInit()
 			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
 			desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true, glm::vec3(-512.f, 0.f, -512.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/snowstone01.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/pineforest03.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_219.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_108.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_104.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/snowstone01_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/pineforest03_n.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/normal_219.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/normal_108.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/normal_104.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
 
-			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.08f));
+			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.1f));
 			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.1f));
-			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.3f));
+			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(1.f), 1, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.1f));
 			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.1f));
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);

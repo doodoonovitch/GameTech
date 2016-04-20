@@ -19,7 +19,7 @@ in GS_OUT
 	vec3 ViewPosition;
 	vec3 Normal;
 	vec3 ViewNormal;
-	flat int Layer;
+	//flat int MapIndex;
 } fs_in;
 
 struct Material
