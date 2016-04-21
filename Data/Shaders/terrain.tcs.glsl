@@ -1,7 +1,7 @@
 layout (vertices = 4) out;
 
-uniform float u_MinTessDist = 500;
-uniform float u_MaxTessDist = 1;
+uniform float u_MinTessDist = 800;
+uniform float u_MaxTessDist = 10;
 uniform float u_MinTess = 1;
 uniform float u_MaxTess = 6;
 //uniform float u_LODfactor = 40;

@@ -63,7 +63,7 @@ public:
 
 	struct Desc : public Renderer::Desc
 	{
-		Desc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale, GLfloat lowSlope = 0.5f, GLfloat highSlope = 0.57f)
+		Desc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale, GLfloat lowSlope = 0.7f, GLfloat highSlope = 0.6f)
 			: Renderer::Desc()
 			, mHeightMapWidth(heightMapWidth)
 			, mHeightMapDepth(heightMapDepth)

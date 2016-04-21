@@ -108,6 +108,7 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	Shader::MergeFile(lightFsGlsl[0], "shaders/terrain.deferred.fs.glsl");
 	std::string & textureFuncSource = lightFsGlsl[1];
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
+	//desc;
 	std::string & getMaterialsFuncSource = lightFsGlsl[2];
 	BuildMaterialShader(getMaterialsFuncSource, desc);
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
@@ -180,23 +181,49 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	PRINT_MESSAGE("-------------------------------------------------\n\n");
 }
 
-#define PRINT_CURRMAT_DIFFUSE_COLOR(varname, mat) \
+#define PRINT_MATERIAL_COLOR(diffuseVar, specularVar, specularPowerVar, mat) \
 {\
-	sprintf_s(tmpBuffer, tmpBufferCount, "\t\t" #varname " = vec3(%f, %f, %f);\r\n", mat.mDiffuse.r, mat.mDiffuse.g, mat.mDiffuse.b); \
+	sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = %i;\r\n", specularPowerVar, mat.mSpecularPower); \
 	generatedSource.append(tmpBuffer); \
-	int samplerIndex = texInfo[mat.mDiffuseTextureIndex].GetSamplerIndex(); \
-	int layerIndex = texInfo[mat.mDiffuseTextureIndex].GetLayerIndex(); \
-	if (samplerIndex >= 0)\
+	int diffuseSamplerIndex = (mat.mDiffuseTextureIndex != Renderer::NoTexture) ? texInfo[mat.mDiffuseTextureIndex].GetSamplerIndex() : -1; \
+	int specularSamplerIndex = (mat.mSpecularTextureIndex != Renderer::NoTexture) ? texInfo[mat.mSpecularTextureIndex].GetSamplerIndex() : -1; \
+	if (diffuseSamplerIndex >= 0 || specularSamplerIndex >= 0)\
 	{\
-		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexCoord = vec3(uvs.xz * %f, %i);\r\n", mat.mTexScale, layerIndex); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexCoord = uvs * %f;\r\n", mat.mTexScale); \
 		generatedSource.append(tmpBuffer); \
-		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseY = texture(u_textureSampler[%i], texCoord).xyz;\r\n", samplerIndex); \
+	}\
+	if (diffuseSamplerIndex >= 0)\
+	{\
+		int layerIndex = texInfo[mat.mDiffuseTextureIndex].GetLayerIndex(); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexColorY = texture(u_textureSampler[%i], vec3(texCoord.xz, %i)).xyz;\r\n", diffuseSamplerIndex, layerIndex); \
 		generatedSource.append(tmpBuffer); \
-		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseX = texture(u_textureSampler[%i], texCoord).xyz;\r\n", samplerIndex); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexColorX = texture(u_textureSampler[%i], vec3(texCoord.zy, %i)).xyz;\r\n", diffuseSamplerIndex, layerIndex); \
 		generatedSource.append(tmpBuffer); \
-		sprintf_s(tmpBuffer, tmpBufferCount, "\t\tdiffuseZ = texture(u_textureSampler[%i], texCoord).xyz;\r\n", samplerIndex); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexColorZ = texture(u_textureSampler[%i], vec3(texCoord.xy, %i)).xyz;\r\n", diffuseSamplerIndex, layerIndex); \
 		generatedSource.append(tmpBuffer); \
-		generatedSource.append("\t\t" #varname " = " #varname " * ((blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ));\r\n"); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = vec3(%f, %f, %f) * ((blendWeights.y * texColorY) + (blendWeights.x * texColorX) + (blendWeights.z * texColorZ));\r\n", diffuseVar, mat.mDiffuse.r, mat.mDiffuse.g, mat.mDiffuse.b); \
+		generatedSource.append(tmpBuffer); \
+	}\
+	else\
+	{\
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = vec3(%f, %f, %f);\r\n", diffuseVar, mat.mDiffuse.r, mat.mDiffuse.g, mat.mDiffuse.b); \
+		generatedSource.append(tmpBuffer); \
+	}\
+	if (specularSamplerIndex >= 0)\
+	{\
+		int layerIndex = texInfo[mat.mSpecularTextureIndex].GetLayerIndex(); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexColorY = texture(u_textureSampler[%i], vec3(texCoord.xz, %i)).xyz;\r\n", specularSamplerIndex, layerIndex); \
+		generatedSource.append(tmpBuffer); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexColorX = texture(u_textureSampler[%i], vec3(texCoord.zy, %i)).xyz;\r\n", specularSamplerIndex, layerIndex); \
+		generatedSource.append(tmpBuffer); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\ttexColorZ = texture(u_textureSampler[%i], vec3(texCoord.xy, %i)).xyz;\r\n", specularSamplerIndex, layerIndex); \
+		generatedSource.append(tmpBuffer); \
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = vec3(%f, %f, %f) * ((blendWeights.y * texColorY) + (blendWeights.x * texColorX) + (blendWeights.z * texColorZ));\r\n", specularVar, mat.mSpecular.r, mat.mSpecular.g, mat.mSpecular.b); \
+		generatedSource.append(tmpBuffer); \
+	}\
+	{\
+		sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = vec3(%f, %f, %f);\r\n", specularVar, mat.mSpecular.r, mat.mSpecular.g, mat.mSpecular.b); \
+		generatedSource.append(tmpBuffer); \
 	}\
 }
 
@@ -207,10 +234,14 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 
 	generatedSource.append("\tvec3 diffuseColor = vec3(0, 0, 0);\r\n");
 	generatedSource.append("\tvec3 diffuseColor2 = vec3(0, 0, 0);\r\n");
+	generatedSource.append("\tvec3 specularColor = vec3(0, 0, 0);\r\n");
+	generatedSource.append("\tvec3 specularColor2 = vec3(0, 0, 0);\r\n");
+	generatedSource.append("\tfloat specularPower = 0;\r\n");
+	generatedSource.append("\tfloat specularPower2 = 0;\r\n");
 	generatedSource.append("\tfloat blend = 0;\r\n");
 	generatedSource.append("\t\r\n");
 
-	generatedSource.append("\tvec3 texCoord, diffuseX, diffuseY, diffuseZ;\r\n");
+	generatedSource.append("\tvec3 texCoord, texColorX, texColorY, texColorZ;\r\n");
 	generatedSource.append("\t\r\n");
 
 	if (!matDescList.empty())
@@ -238,7 +269,7 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 				generatedSource.append(tmpBuffer);
 				generatedSource.append("\t{\r\n");
 
-				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor, currMat);
+				PRINT_MATERIAL_COLOR("mat.DiffuseColor", "mat.SpecularColor", "mat.SpecularPower", currMat);
 
 				generatedSource.append("\t}\r\n");
 
@@ -246,14 +277,18 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 				generatedSource.append(tmpBuffer);
 				generatedSource.append("\t{\r\n");
 
-				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor, currMat);
+				PRINT_MATERIAL_COLOR("diffuseColor", "specularColor", "specularPower", currMat);
 				generatedSource.append("\t\r\n");
 
 
 				sprintf_s(tmpBuffer, tmpBufferCount, "\t\tblend = (position.y - %f) / (%f - %f);\r\n", nextMat.mHeightMin, currMat.mHeightMax, nextMat.mHeightMin);
 				generatedSource.append(tmpBuffer);
 
-				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor2, nextMat);
+				PRINT_MATERIAL_COLOR("diffuseColor2", "specularColor2", "specularPower2", nextMat);
+
+				generatedSource.append("\t\tmat.DiffuseColor = mix(diffuseColor, diffuseColor2, blend);\r\n");
+				generatedSource.append("\t\tmat.SpecularColor = mix(specularColor, specularColor2, blend);\r\n");
+				generatedSource.append("\t\tmat.SpecularPower = mix(specularPower, specularPower2, blend);\r\n");
 
 				generatedSource.append("\t}\r\n");
 
@@ -264,14 +299,13 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 				generatedSource.append("\telse\r\n");
 				generatedSource.append("\t{\r\n");
 
-				PRINT_CURRMAT_DIFFUSE_COLOR(diffuseColor, currMat);
+				PRINT_MATERIAL_COLOR("mat.DiffuseColor", "mat.SpecularColor", "mat.SpecularPower", currMat);
 
 				generatedSource.append("\t}\r\n");
 			}
 		}
 	}
 
-	generatedSource.append("\tmat.DiffuseColor = mix(diffuseColor, diffuseColor2, blend);\r\n");
 }
 
 void TerrainRenderer::BuildMaterialShader(std::string & generatedSource, const Desc & desc)
