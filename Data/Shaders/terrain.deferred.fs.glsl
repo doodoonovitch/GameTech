@@ -80,7 +80,7 @@ void main()
 	Material mat;
 	GetMaterial(mat, uvs, blendWeights, fs_in.Normal, fs_in.WorldPosition);
 
-	outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, TERRAIN_RENDERER_ID / 255)), 0, 0);
+	outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, TERRAIN_RENDERER_ID / 255)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
 	outPosition = vec4( fs_in.ViewPosition, uintBitsToFloat(packHalf2x16(fs_in.ViewNormal.xy)) );
 }
 
