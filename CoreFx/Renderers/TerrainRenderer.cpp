@@ -108,9 +108,9 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	Shader::MergeFile(lightFsGlsl[0], "shaders/terrain.deferred.fs.glsl");
 	std::string & textureFuncSource = lightFsGlsl[1];
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
-	//desc;
-	std::string & getMaterialsFuncSource = lightFsGlsl[2];
-	BuildMaterialShader(getMaterialsFuncSource, desc);
+	desc;
+	//std::string & getMaterialsFuncSource = lightFsGlsl[2];
+	//BuildMaterialShader(getMaterialsFuncSource, desc);
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	mShader.CreateAndLinkProgram();

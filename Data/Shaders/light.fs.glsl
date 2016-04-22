@@ -33,8 +33,10 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 {
     vec4 encPositionNormal = texture(u_gBufferPosition, fs_in.TexUV, 0);
 	fi.Position = encPositionNormal.xyz;
-	fi.Normal.xy = unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
-	fi.Normal.z = sqrt(1 - dot(fi.Normal.xy, fi.Normal.xy));
+	//fi.Normal.xy = unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
+	//fi.Normal.z = sqrt(1 - dot(fi.Normal.xy, fi.Normal.xy));
+	fi.Normal.xy = -unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
+	fi.Normal.z = 1;
 	fi.Normal = normalize(fi.Normal);
 
 	vec4 temp;

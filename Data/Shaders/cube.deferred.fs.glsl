@@ -64,7 +64,7 @@ void main(void)
 	vec3 normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
 	normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
 	
-	outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(packHalf2x16(normal.xy)));
+	outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(packHalf2x16(-normal.xy/normal.z)));
 
 	outData = uvec3(packUnorm4x8(vec4(materialDiffuse, CUBE_RENDERER_ID / 255)), packUnorm4x8(vec4(materialSpecular, materialShininess / 255)), packUnorm4x8(vec4(materialEmissive, 0)));
 }

@@ -27,6 +27,7 @@ struct Material
 	vec3 DiffuseColor;
 	vec3 SpecularColor;
 	float SpecularPower;
+	float Height;
 };
 
 // Project the surface gradient (dhdx, dhdy) onto the surface (n, dpdx, dpdy)
@@ -80,16 +81,35 @@ void main()
 	Material mat;
 	GetMaterial(mat, uvs, blendWeights, fs_in.Normal, fs_in.WorldPosition);
 
+	normal = CalculateSurfaceNormal(fs_in.ViewPosition, fs_in.ViewNormal, mat.Height);
+	//normal = CalculateSurfaceNormal(fs_in.WorldPosition, normal, mat.Height);
+	//normal = dqTransformNormal(normal, u_ViewDQ);
+
 	outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, TERRAIN_RENDERER_ID / 255)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
-	outPosition = vec4( fs_in.ViewPosition, uintBitsToFloat(packHalf2x16(fs_in.ViewNormal.xy)) );
+	//outPosition = vec4( fs_in.ViewPosition, uintBitsToFloat(packHalf2x16(fs_in.ViewNormal.xy)) );
+	outPosition = vec4( fs_in.ViewPosition, uintBitsToFloat(packHalf2x16(normal.xy)) );
 }
 
-//void GetMaterial(out Material blendedMat, vec3 uvs, vec3 blendWeights, vec3 normal, vec3 position)
-//{
-//	vec3 texCoord = uvs * u_TexScale;
-//	vec3 diffuseY = texture(u_textureSampler[0], vec3(texCoord.xz, 2)).xyz;
-//	vec3 diffuseX = texture(u_textureSampler[0], vec3(texCoord.zy, 2)).xyz;
-//	vec3 diffuseZ = texture(u_textureSampler[0], vec3(texCoord.xy, 2)).xyz;
+void GetMaterial(out Material blendedMat, vec3 uvs, vec3 blendWeights, vec3 normal, vec3 position)
+{
+	vec3 texCoord = uvs * u_TexScale;
+	vec3 diffuseY = texture(u_textureSampler[0], vec3(texCoord.xz, 1)).xyz;
+	vec3 diffuseX = texture(u_textureSampler[0], vec3(texCoord.zy, 1)).xyz;
+	vec3 diffuseZ = texture(u_textureSampler[0], vec3(texCoord.xy, 1)).xyz;
 
-//	blendedMat.DiffuseColor = (blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ);
-//}
+	blendedMat.DiffuseColor = (blendWeights.y * diffuseY) + (blendWeights.x * diffuseX) + (blendWeights.z * diffuseZ);
+
+	//blendedMat.SpecularColor = vec3(0);
+	vec3 specularY = texture(u_textureSampler[1], vec3(texCoord.xz, 1)).xyz;
+	vec3 specularX = texture(u_textureSampler[1], vec3(texCoord.zy, 1)).xyz;
+	vec3 specularZ = texture(u_textureSampler[1], vec3(texCoord.xy, 1)).xyz;
+
+	blendedMat.SpecularColor = (blendWeights.y * specularY) + (blendWeights.x * specularX) + (blendWeights.z * specularZ);
+	blendedMat.SpecularPower = 5;
+
+	float heightY = texture(u_textureSampler[2], vec3(texCoord.xz, 1)).x;
+	float heightX = texture(u_textureSampler[2], vec3(texCoord.zy, 1)).x;
+	float heightZ = texture(u_textureSampler[2], vec3(texCoord.xy, 1)).x;
+
+	blendedMat.Height = (blendWeights.y * heightY) + (blendWeights.x * heightX) + (blendWeights.z * heightZ);
+}
