@@ -36,6 +36,7 @@ private:
 	{
 		gBuffer_PositionBuffer,
 		gBuffer_DataBuffer,
+		gBuffer_NormalBuffer,
 		//gBuffer_DepthBuffer,
 
 		__gBuffer_count__
@@ -268,7 +269,7 @@ private:
 	void InternalReleaseHdrBuffers();
 
 	void InternalCreateMaterialBuffer();
-	void InternalCreateTextures();
+	//void InternalCreateTextures();
 
 	void InternalInitializeQuadVAO();
 	void InternalInitializeDeferredPassShader();
@@ -287,6 +288,7 @@ private:
 	{
 		u_gBufferPosition,
 		u_gBufferData,
+		u_gBufferNormal,
 		//u_materialDataSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,

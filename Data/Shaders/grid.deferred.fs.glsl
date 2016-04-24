@@ -1,5 +1,6 @@
-layout(location = 0) out vec4 outPosition;
+layout(location = 0) out vec3 outPosition;
 layout(location = 1) out uvec3 outData;
+layout(location = 2) out vec3 outNormal;
 
 in VS_OUT
 {
@@ -10,6 +11,7 @@ in VS_OUT
 
 void main(void)
 {
-	outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(packHalf2x16(vec2(0))));
+	outPosition = fs_in.Position.xyz;
+	outNormal = vec3(0);
 	outData = uvec3(packUnorm4x8(vec4(fs_in.TexUV.xy, 0, GRID_RENDERER_ID / 255)), 0, 0);
 }

@@ -172,9 +172,9 @@ void SimpleCamera::OnInit()
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_108.ktx", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat));
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_104.ktx", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat));
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/normal_219.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/normal_108.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/normal_104.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_219.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_108.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_104.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat));
 
 			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(1.f), 1, 5, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.1f));
 			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, 4, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture, 0.1f));
@@ -204,7 +204,7 @@ void SimpleCamera::OnInit()
 	// Setup Lights
 		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
 		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(50.f, 50.f, 50.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(-0.2f, -1.f, 0.f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
-		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.2f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 0.5f);
+		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.5f, -0.1f, -0.5f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 30.f, 1.f, 0.7f, 1.8f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 0.7f, 0.02f);
 		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);

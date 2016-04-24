@@ -8,6 +8,7 @@ in VS_OUT
 
 uniform sampler2D u_gBufferPosition;
 uniform usampler2D u_gBufferData;
+uniform sampler2D u_gBufferNormal;
 
 uniform isamplerBuffer u_lightDescSampler;
 uniform samplerBuffer u_lightDataSampler;
@@ -33,11 +34,11 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 {
     vec4 encPositionNormal = texture(u_gBufferPosition, fs_in.TexUV, 0);
 	fi.Position = encPositionNormal.xyz;
+	fi.Normal = texture(u_gBufferNormal, fs_in.TexUV, 0).xyz;
 	//fi.Normal.xy = unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
 	//fi.Normal.z = sqrt(1 - dot(fi.Normal.xy, fi.Normal.xy));
-	fi.Normal.xy = -unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
-	fi.Normal.z = 1;
-	fi.Normal = normalize(fi.Normal);
+	//fi.Normal.xy = -unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
+	//fi.Normal.z = 1;
 
 	vec4 temp;
 	uvec3 data = texture(u_gBufferData, fs_in.TexUV, 0).xyz;
@@ -52,6 +53,10 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 
 	temp = unpackUnorm4x8(data.z);
 	fi.EmissiveMaterial = temp.xyz;
+
+	//float normalZSign = temp.w;
+	//fi.Normal.z = sqrt(1 - dot(fi.Normal.xy, fi.Normal.xy)) * normalZSign;
+	//fi.Normal = normalize(fi.Normal);
 }
 
 
