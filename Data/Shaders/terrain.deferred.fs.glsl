@@ -25,7 +25,7 @@ in GS_OUT
 
 struct Material
 {
-	vec3 Normal;
+	//vec3 Normal;
 	vec3 DiffuseColor;
 	vec3 SpecularColor;
 	float SpecularPower;
