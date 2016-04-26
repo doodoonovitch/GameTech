@@ -7,7 +7,7 @@ uniform sampler2DArray u_HeightMap;
 
 out VS_OUT
 {
-	vec2 TexUV;
+	//vec2 TexUV;
 	int MapIndex;
 } vs_out;
 
@@ -24,7 +24,7 @@ void main()
 	vec2 texUV2 = texUV * u_MapSize;
 	vec3 pos = vec3(texUV2.x, 0, texUV2.y) * u_Scale;
 
-	vs_out.TexUV = texUV;
+	//vs_out.TexUV = texUV;
 	vs_out.MapIndex = layer;
 	gl_Position = vec4(pos, 1);
 }

@@ -1,10 +1,7 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-//uniform int u_MaterialBaseIndex;
-
 uniform samplerBuffer u_PerMapDataSampler;
-//uniform isamplerBuffer u_materialIndexSampler;
 
 
 in TES_OUT
