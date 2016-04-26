@@ -3,6 +3,7 @@ layout (location = POSITION_ATTRIBUTE) in vec3 in_Position;
 uniform ivec2 u_PatchCount;
 uniform ivec2 u_MapSize;
 uniform vec3 u_Scale;
+uniform sampler2DArray u_HeightMap;
 
 out VS_OUT
 {

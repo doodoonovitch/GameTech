@@ -115,6 +115,9 @@
       <Filter>Renderers</Filter>
     </ClInclude>
     <ClInclude Include="DebugOutput.h" />
+    <ClInclude Include="Renderers\DeepOceanRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -182,6 +185,9 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="DebugOutput.cpp" />
+    <ClCompile Include="Renderers\DeepOceanRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -245,6 +251,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\terrain.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\deepOcean.vs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
