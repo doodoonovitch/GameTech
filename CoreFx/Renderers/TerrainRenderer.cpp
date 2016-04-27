@@ -9,15 +9,15 @@ namespace CoreFx
 
 
 
-		TerrainRenderer::TerrainRenderer(const Desc & desc)
-			: RendererHelper<Renderables::Grid, 1>(0, "TerrainRenderer")
-			, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
-			, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
-			, mScale(desc.mScale)
-			, mLowSlope(desc.mLowSlope)
-			, mHighSlope(desc.mHighSlope)
-			, mHeightMapTextureId(0)
-			, mMapCount(0)
+TerrainRenderer::TerrainRenderer(const Desc & desc)
+	: RendererHelper<Renderables::Grid, 1>(0, "TerrainRenderer")
+	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
+	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
+	, mScale(desc.mScale)
+	, mLowSlope(desc.mLowSlope)
+	, mHighSlope(desc.mHighSlope)
+	, mHeightMapTextureId(0)
+	, mMapCount(0)
 	, mDrawNormalShader("TerrainDrawNormals")
 {
 	std::cout << std::endl;

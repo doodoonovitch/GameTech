@@ -28,11 +28,11 @@ public:
 
 	struct Desc : public Renderer::Desc
 	{
-		Desc(GLint mapWidth, GLint mapDepth, const glm::vec3 & scale)
+		Desc(GLint mapWidth, GLint mapDepth, const glm::vec2 & scale)
 			: Renderer::Desc()
 			, mMapWidth(mapWidth)
 			, mMapDepth(mapDepth)
-			, mScale(scale)
+			, mScale(scale.x, 1.0f, scale.y)
 		{ }
 
 		GLint mMapWidth;

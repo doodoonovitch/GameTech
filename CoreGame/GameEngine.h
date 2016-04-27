@@ -22,9 +22,17 @@ public:
 		mGameProgram.PostExitGame(exitCode);
 	}
 
+	double GetDeltaTime() const { return mDeltaTime; }
+	double GetTime() const { return mTime; }
+
+	void SetDeltaTime(double value) { mDeltaTime = value; }
+	void SetTime(double value) { mTime = value; }
+
 protected:
 
 	GameProgram & mGameProgram;
+	double mDeltaTime;
+	double mTime;
 };
 
 

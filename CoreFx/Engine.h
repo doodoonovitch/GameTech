@@ -60,6 +60,7 @@ private:
 		u_VertexNormalColor,
 		u_BufferViewportSize,
 		u_DepthRangeFovYAspect,
+		u_TimeDeltaTime,
 		u_NormalMagnitude,
 		u_PointLightCount,
 		u_SpotLightCount,
@@ -81,6 +82,13 @@ public:
 	static void Release();
 
 	static Engine* GetInstance();
+
+	double GetDeltaTime() const { return mTimeDeltaTime[1]; }
+	double GetTime() const { return mTimeDeltaTime[0]; }
+
+	void SetDeltaTime(double value) { mTimeDeltaTime[1] = value; }
+	void SetTime(double value) { mTimeDeltaTime[0] = value; }
+
 
 	inline TextureManager * GetTextureManager() const 
 	{
@@ -313,6 +321,8 @@ private:
 
 	Camera * mCamera;
 
+	double mTimeDeltaTime[2]; // Time and Delta time
+
 	Renderables::VertexArrayObject<1> * mQuad;
 	Shader mDeferredShader;
 	Shader mToneMappingShader;
@@ -365,6 +375,7 @@ private:
 		"u_VertexNormalColor",
 		"u_BufferViewportSize",
 		"u_DepthRangeFovYAspect",
+		"u_TimeDeltaTime",
 		"u_NormalMagnitude",
 		"u_PointLightCount",
 		"u_SpotLightCount",

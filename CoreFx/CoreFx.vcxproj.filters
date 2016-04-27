@@ -262,6 +262,15 @@
     <None Include="..\Data\Shaders\deepOcean.tes.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\deepOcean.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

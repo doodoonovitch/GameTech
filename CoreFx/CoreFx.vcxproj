@@ -219,9 +219,12 @@
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\cube.gs.glsl" />
     <None Include="..\Data\Shaders\cube.vs.glsl" />
+    <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\deepOcean.gs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.tcs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.tes.glsl" />
     <None Include="..\Data\Shaders\deepOcean.vs.glsl" />
+    <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\grid.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\light.fs.glsl" />
     <None Include="..\Data\Shaders\light.vs.glsl" />

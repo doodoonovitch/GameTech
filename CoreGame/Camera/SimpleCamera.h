@@ -19,8 +19,8 @@ public:
 	void OnInit();
 	void OnShutdown();
 
-	void OnUpdate(double elapsedTime);
-	void OnRender(double elapsedTime);
+	void OnUpdate();
+	void OnRender();
 
 	void OnWindowResize(int nw, int nh);
 
@@ -57,7 +57,6 @@ private:
 	//camera transformation variables
 	int mState = 0, mOldX = 0, mOldY = 0;
 	float mRotX = 0.f, mRotY = 135.f, mDist = 0.f;
-	float mDeltaTime = 0;
 
 	CoreFx::Camera* mCamera;
 

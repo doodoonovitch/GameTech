@@ -49,6 +49,8 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 
 	GL_CHECK_ERRORS;
 
+	mMapCount = (GLint)desc.mMaps.size();
+
 	PerMapData * modelMatrixBuffer = new PerMapData[mMapCount];
 	for (int i = 0; i < mMapCount; ++i)
 	{
@@ -116,7 +118,7 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 	mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
 	mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOceann.tcs.glsl");
 	mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
-	mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain_vertex_normal.gs.glsl");
+	mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean_vertex_normal.gs.glsl");
 	mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
 	mDrawNormalShader.CreateAndLinkProgram();
 	mDrawNormalShader.Use();

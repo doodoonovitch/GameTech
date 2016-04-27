@@ -59,6 +59,7 @@
 #define GRID_RENDERER_ID							3
 #define VERTEX_NORMAL_RENDERER_ID					4
 #define TERRAIN_RENDERER_ID							5
+#define DEEPOCEAN_RENDERER_ID						6
 //
 // ---------------------------------------------------------------------------
 
@@ -104,6 +105,7 @@ layout (std140, shared) uniform FrameData
 	vec4 u_BufferViewportSize;
 	vec4 u_DepthRangeFovYAspect;
 	
+	dvec2 u_TimeDeltaTime;
 
 	float u_NormalMagnitude;
 

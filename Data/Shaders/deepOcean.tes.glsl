@@ -4,12 +4,11 @@ layout (quads, fractional_even_spacing) in;
 
 const int c_MaxWavesToSum = 4;
 
-uniform vec3 u_Direction[c_MaxWavesToSum];
-
-uniform float[c_MaxWavesToSum] u_WaveLength = float[c_MaxWavesToSum](1.000f, 0.620f, 0.280f, 0.500f);
-uniform float[c_MaxWavesToSum] u_Amplitude = float[c_MaxWavesToSum](0.08f, 0.07f, 0.06f, 0.08f);
-uniform float[c_MaxWavesToSum] u_Velocity = float[c_MaxWavesToSum](0.05f, 0.06f, 0.04f, 0.05f);
-uniform float[c_MaxWavesToSum] u_Steepness = float[c_MaxWavesToSum](10.0f, 2.0f, 1.0f, 3.0f);
+uniform vec3 u_Direction[c_MaxWavesToSum] = vec3[](vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+uniform float[c_MaxWavesToSum] u_WaveLength = float[](1.000f, 0.620f, 0.280f, 0.500f);
+uniform float[c_MaxWavesToSum] u_Amplitude = float[](0.08f, 0.07f, 0.06f, 0.08f);
+uniform float[c_MaxWavesToSum] u_Velocity = float[](0.05f, 0.06f, 0.04f, 0.05f);
+uniform float[c_MaxWavesToSum] u_Steepness = float[](10.0f, 2.0f, 1.0f, 3.0f);
 
 
 
@@ -39,7 +38,7 @@ void main()
 	gl_Position = vec4(p.xyz, 1);
 	//tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
-	tes_out.Normal = normal;
+	tes_out.Normal = vec3(0, 1, 0);
 }
 
 

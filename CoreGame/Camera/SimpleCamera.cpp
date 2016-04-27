@@ -13,13 +13,15 @@ namespace CoreGame
 
 
 
-void SimpleCamera::OnRender(double elapsedTime)
+void SimpleCamera::OnRender()
 {
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	mDeltaTime = (float)elapsedTime;
-
 	Engine* engine = Engine::GetInstance();
+
+
+	engine->SetDeltaTime(mDeltaTime);
+	engine->SetTime(mTime);
 
 	engine->UpdateObjects();
 	engine->RenderObjects();
@@ -183,6 +185,13 @@ void SimpleCamera::OnInit()
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);
+		}
+
+		{
+			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f));
+			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(512.f, 0.f, 0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
+			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
+			engine->AttachRenderer(ocean);
 		}
 
 		/*
@@ -425,7 +434,7 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 
 }
 
-void SimpleCamera::OnUpdate(double elapsedTime)
+void SimpleCamera::OnUpdate()
 {
 	bool bWalk = false, bStrafe = false;
 	float dx = 0, dy = 0, speed = mMoveSpeed;
@@ -467,12 +476,12 @@ void SimpleCamera::OnUpdate(double elapsedTime)
 
 	if (bWalk)
 	{
-		mCamera->Walk(dy * mDeltaTime);
+		mCamera->Walk((float)(dy * mDeltaTime));
 	}
 	
 	if (bStrafe)
 	{
-		mCamera->Strafe(dx * mDeltaTime);
+		mCamera->Strafe((float)(dx * mDeltaTime));
 	}
 
 	//if (bWalk || bStrafe)

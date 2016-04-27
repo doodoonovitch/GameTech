@@ -72,9 +72,12 @@ public:
 			{
 				mTimer.Tick([this, &done, &msg]
 				{
-					double elapsedTime = mTimer.GetElapsedSeconds();
-					mGameEngine.OnUpdate(elapsedTime);
-					mGameEngine.OnRender(elapsedTime);
+					mGameEngine.SetDeltaTime(mTimer.GetElapsedSeconds());
+					mGameEngine.SetTime(mTimer.GetTotalSeconds());
+
+					mGameEngine.OnUpdate();
+					mGameEngine.OnRender();
+
 					SwapBuffers(mHDC);
 				});
 			}
