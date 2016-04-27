@@ -189,7 +189,13 @@ void SimpleCamera::OnInit()
 
 		{
 			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f));
-			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(512.f, 0.f, 0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
+
+			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, 1.000f, 10.f * 0.08f, 0.05f, 10.0f);
+			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, 0.620f, 10.f * 0.07f, 0.06f, 2.0f);
+			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(200.0f, 0.280f, 10.f * 0.06f, 0.04f, 1.0f);
+			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(005.0f, 0.500f, 10.f * 0.08f, 0.05f, 3.0f);
+
+			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
 			engine->AttachRenderer(ocean);
 		}

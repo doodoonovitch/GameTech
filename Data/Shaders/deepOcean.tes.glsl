@@ -4,11 +4,13 @@ layout (quads, fractional_even_spacing) in;
 
 const int c_MaxWavesToSum = 4;
 
-uniform vec3 u_Direction[c_MaxWavesToSum] = vec3[](vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
-uniform float[c_MaxWavesToSum] u_WaveLength = float[](1.000f, 0.620f, 0.280f, 0.500f);
-uniform float[c_MaxWavesToSum] u_Amplitude = float[](0.08f, 0.07f, 0.06f, 0.08f);
-uniform float[c_MaxWavesToSum] u_Velocity = float[](0.05f, 0.06f, 0.04f, 0.05f);
-uniform float[c_MaxWavesToSum] u_Steepness = float[](10.0f, 2.0f, 1.0f, 3.0f);
+uniform vec3[c_MaxWavesToSum] u_Direction;
+uniform float[c_MaxWavesToSum] u_WaveLength;
+uniform float[c_MaxWavesToSum] u_Frequency;
+uniform float[c_MaxWavesToSum] u_Amplitude;
+uniform float[c_MaxWavesToSum] u_Velocity;
+uniform float[c_MaxWavesToSum] u_Steepness;
+uniform float[c_MaxWavesToSum] u_Phase;
 
 
 
@@ -34,6 +36,17 @@ void main()
 	vec4 p1 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
 	vec4 p2 = mix(gl_in[2].gl_Position,	gl_in[3].gl_Position, gl_TessCoord.x);
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
+
+	float waveHeight = 0.f;
+	float t = float(u_TimeDeltaTime.x);
+
+	for(int i = 0; i < c_MaxWavesToSum; ++i)
+	{
+		float dirPos = dot(u_Direction[i].xz, p.xz);
+		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
+		waveHeight += u_Amplitude[i] * pow(0.5f * (1.f + sin(S)), u_Steepness[i]);
+	}		 
+	p.y = waveHeight;
 
 	gl_Position = vec4(p.xyz, 1);
 	//tes_out.TexUV = tc;

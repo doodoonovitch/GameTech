@@ -15,10 +15,12 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
 	, mScale(desc.mScale)
 	, mMapCount(0)
-	, mDrawNormalShader("OceanDrawNormals")
 {
 	std::cout << std::endl;
 	std::cout << "Initialize DeepOceanRenderer...." << std::endl;
+
+	memset(mWavePropModified, -1, sizeof(mWavePropModified));
+	memcpy(mWaveProps, desc.mWaveProps, sizeof(mWaveProps));
 
 	const glm::vec3 vertices[] =
 	{
@@ -103,39 +105,41 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 
 
+	for (int i = 0; i < MAX_WAVE_TO_SUM; ++i)
+	{
+		char uniformName[50];
+		sprintf_s(uniformName, 50, "u_Direction[%i]", i);
+		mDirectionUniformIndex[i] = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		PRINT_MESSAGE("\t%s : %i.\n", uniformName, mDirectionUniformIndex[i]);
+
+		sprintf_s(uniformName, 50, "u_WaveLength[%i]", i);
+		mWaveLengthUniformIndex[i] = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		PRINT_MESSAGE("\t%s : %i.\n", uniformName, mWaveLengthUniformIndex[i]);
+
+		sprintf_s(uniformName, 50, "u_Frequency[%i]", i);
+		mFrequencyUniformIndex[i] = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		PRINT_MESSAGE("\t%s : %i.\n", uniformName, mFrequencyUniformIndex[i]);
+
+		sprintf_s(uniformName, 50, "u_Amplitude[%i]", i);
+		mAmplitudeUniformIndex[i] = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		PRINT_MESSAGE("\t%s : %i.\n", uniformName, mAmplitudeUniformIndex[i]);
+
+		sprintf_s(uniformName, 50, "u_Velocity[%i]", i);
+		mVelocityUniformIndex[i] = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		PRINT_MESSAGE("\t%s : %i.\n", uniformName, mVelocityUniformIndex[i]);
+
+		sprintf_s(uniformName, 50, "u_Steepness[%i]", i);
+		mSteepnessUniformIndex[i] = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		PRINT_MESSAGE("\t%s : %i.\n", uniformName, mSteepnessUniformIndex[i]);
+
+		sprintf_s(uniformName, 50, "u_Phase[%i]", i);
+		mPhaseUniformIndex[i] = glGetUniformLocation(mShader.GetProgram(), uniformName); GL_CHECK_ERRORS;
+		PRINT_MESSAGE("\t%s : %i.\n", uniformName, mPhaseUniformIndex[i]);
+	}
+
+
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
-
-	GL_CHECK_ERRORS;
-
-
-	const char * uniformNames2[__uniforms2_count__] =
-	{
-		"u_NormalMagnitude",
-		"u_VertexNormalColor",
-	};
-
-	mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOceann.tcs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
-	mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean_vertex_normal.gs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
-	mDrawNormalShader.CreateAndLinkProgram();
-	mDrawNormalShader.Use();
-
-	mDrawNormalShader.AddUniforms(uniformNames, __uniforms_count__);
-	mDrawNormalShader.AddUniforms(uniformNames2, __uniforms2_count__);
-
-	//pass values of constant uniforms at initialization
-	glUniform2iv(mDrawNormalShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
-	glUniform2iv(mDrawNormalShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	glUniform3fv(mDrawNormalShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
-
-	glUniform1i(mDrawNormalShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
-
-
-	mDrawNormalShader.SetupFrameDataBlockBinding();
-	mDrawNormalShader.UnUse();
 
 	GL_CHECK_ERRORS;
 
@@ -148,6 +152,42 @@ void DeepOceanRenderer::Render()
 	mShader.Use();
 	glBindVertexArray(mVaoID);
 
+	for (int i = 0; i < MAX_WAVE_TO_SUM; ++i)
+	{
+		bool phaseModified = false;
+		if ((mWavePropModified[i] & E_WaveProps_Direction_modified) == E_WaveProps_Direction_modified)
+		{
+			glUniform3fv(mDirectionUniformIndex[i], 1, glm::value_ptr(mWaveProps[i].mDirection)); 
+		}
+		if ((mWavePropModified[i] & E_WaveProps_WaveLength_modified) == E_WaveProps_WaveLength_modified)
+		{
+			//glUniform1f(mWaveLengthUniformIndex[i], mWaveProps[i].mWaveLength);
+			glUniform1f(mFrequencyUniformIndex[i], mWaveProps[i].mFrequency);
+			phaseModified = true;
+		}
+		if ((mWavePropModified[i] & E_WaveProps_Amplitude_modified) == E_WaveProps_Amplitude_modified)
+		{
+			glUniform1f(mAmplitudeUniformIndex[i], mWaveProps[i].mAmplitude);
+		}
+		if ((mWavePropModified[i] & E_WaveProps_Velocity_modified) == E_WaveProps_Velocity_modified)
+		{
+			//glUniform1f(mVelocityUniformIndex[i], mWaveProps[i].mVelocity);
+			phaseModified = true;
+		}
+		if ((mWavePropModified[i] & E_WaveProps_Steepness_modified) == E_WaveProps_Steepness_modified)
+		{
+			glUniform1f(mSteepnessUniformIndex[i], mWaveProps[i].mSteepness);
+		}
+		if (phaseModified)
+		{
+			GLfloat phase = mWaveProps[i].mVelocity * mWaveProps[i].mFrequency;
+			glUniform1f(mPhaseUniformIndex[i], phase);
+		}
+
+		if (mWavePropModified[i] != 0)
+			mWavePropModified[i] = 0;
+	}
+
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
@@ -156,31 +196,10 @@ void DeepOceanRenderer::Render()
 	glBindVertexArray(0);
 	mShader.UnUse();
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void DeepOceanRenderer::DebugRender()
 {
-	Engine * engine = Engine::GetInstance();
-
-	if (engine->IsDrawVertexNormalEnabled())
-	{
-		mDrawNormalShader.Use();
-
-		glUniform1f(mDrawNormalShader.GetUniform(__uniforms_count__ + u_NormalMagnitude), engine->GetDrawVertexNormalMagnitude());
-		glUniform4fv(mDrawNormalShader.GetUniform(__uniforms_count__ + u_VertexNormalColor), 1, glm::value_ptr(engine->GetDrawVertexNormalColor()));
-
-		glBindVertexArray(mVaoID);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
-
-		glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
-
-		glBindVertexArray(0);
-
-		mDrawNormalShader.UnUse();
-	}
 }
 
 

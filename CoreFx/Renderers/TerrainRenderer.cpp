@@ -412,8 +412,6 @@ void TerrainRenderer::Render()
 
 	glBindVertexArray(0);
 	mShader.UnUse();
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void TerrainRenderer::DebugRender()
