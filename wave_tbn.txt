@@ -1,0 +1,36 @@
+B 	= (1, dxdf, 0);	
+	Bx = 1
+	By = dxdf
+	Bz = 0
+	
+T 	= (0, dydf, 1);
+	Tx = 0
+	Ty = dydf
+	Tz = 1
+
+N 	= 	B x T 
+	= 	( By x Tz - Ty x Bz )
+		( Bz x Tx - Tz x Bx )
+		( Bx x Ty - Tx x By )
+		
+	=	( dxdf x 1 - dydf x 0 )
+		( 0 x 0 - 1 x 1 )
+		( 1 x dydf - 0 x dxdf )
+		
+	=	( dxdf )
+		( -1 )
+		( dydf )
+		
+N 	= 	T x B
+	= 	( Ty x Bz - By x Tz )
+		( Tz x Bx - Bz x Tx )
+		( Tx x By - Bx x Ty )
+
+	=	( dydf x 0 - dxdf x 1 )
+		( 1 x 1 - 0 x 0 )
+		( 0 x dxdf - 1 x dydf )
+		
+	=	( - dxdf )
+		( 1 )
+		( - dydf )
+		
