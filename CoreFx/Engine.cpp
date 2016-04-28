@@ -36,10 +36,12 @@ Engine::Engine()
 	, mDrawLightMagnitude(0.6f)
 	, mFirstLightIndexToDraw(0)
 	, mLightToDrawCount(16)
-	, mInitialized(false)
-	, mIsDrawVertexNormalEnabled(false)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
+	, mDrawGBufferNormalGridSpan(50, 50)
+	, mInitialized(false)
+	, mIsDrawVertexNormalEnabled(false)
+	, mIsDrawGBufferNormalEnabled(false)
 	, mWireFrame(false)
 {
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
@@ -67,6 +69,8 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		mGBufferWidth = gBufferWidth;
 		mGBufferHeight = gBufferHeight;
 
+		InternalUpdateDrawGBufferNormalsPatchCount();
+
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		//glFrontFace(GL_CCW);
@@ -87,8 +91,10 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		}
 		
 		mDrawVertexNormalShader.LoadShaders();
+		mDrawGBufferNormalShader.LoadShaders();
 
-		InternalCreateFrameDataBuffer();
+		InternalCreateFrameDataBuffer(mDrawVertexNormalShader.GetProgram());
+		InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
 
 		mInitialized = true;
 	}
@@ -322,6 +328,8 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 	mGBufferHeight = gBufferHeight;
 
 	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+
+	InternalUpdateDrawGBufferNormalsPatchCount();
 }
 
 void Engine::InternalInitializeQuadVAO()
@@ -480,10 +488,8 @@ void Engine::InternalCreateMaterialBuffer()
 	});
 }
 
-void Engine::InternalCreateFrameDataBuffer()
+void Engine::InternalCreateFrameDataBuffer(GLuint program)
 {
-	GLuint program = mDrawVertexNormalShader.GetProgram();
-
 	printf("Getting FrameData uniform block information...\n");
 	glGetUniformIndices(program, __uniforms_count__, mFrameDataUniformNames, mFrameDataUniformIndices); GL_CHECK_ERRORS;
 	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_OFFSET, mFrameDataUniformOffsets); GL_CHECK_ERRORS;
@@ -718,6 +724,30 @@ void Engine::RenderObjects()
 	//{
 	//	renderer->DebugRender();
 	//});
+
+	if (mIsDrawGBufferNormalEnabled)
+	{
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDisable(GL_DEPTH_TEST); 
+
+		mDrawGBufferNormalShader.Use();
+
+		glBindVertexArray(mQuad->GetVao());
+
+		glUniform2iv(mDrawGBufferNormalShader.GetUniform(Renderers::DrawGBufferNormalShader::u_PatchCount), 1, glm::value_ptr(mDrawGBufferNormalPatchCount));
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+
+		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mDrawGBufferNormalPatchCount.x * mDrawGBufferNormalPatchCount.y);
+
+		mDrawGBufferNormalShader.UnUse();
+	}
 }
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
@@ -787,6 +817,17 @@ bool Engine::DetachRenderer(Renderer* renderer)
 	return mRenderers->Detach(renderer);
 }
 
+void Engine::SetupDrawGBufferNormals(GLint drawEveryXPixels, GLint drawEveryYPixels)
+{
+	mDrawGBufferNormalGridSpan.x = drawEveryXPixels;
+	mDrawGBufferNormalGridSpan.y = drawEveryYPixels;
+}
+
+void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
+{
+	mDrawGBufferNormalPatchCount.x = mGBufferWidth / mDrawGBufferNormalGridSpan.x;
+	mDrawGBufferNormalPatchCount.x = mGBufferHeight / mDrawGBufferNormalGridSpan.x;
+}
 //void Engine::InternalCreateTextures()
 //{
 //	assert(mLightPassTextureMapping.mMapping.empty());

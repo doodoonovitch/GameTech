@@ -118,6 +118,9 @@
     <ClInclude Include="Renderers\DeepOceanRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\DrawGBufferNormalShader.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -186,6 +189,9 @@
     </ClCompile>
     <ClCompile Include="DebugOutput.cpp" />
     <ClCompile Include="Renderers\DeepOceanRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DrawGBufferNormalShader.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -269,6 +275,15 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\drawGBufferNormals.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\drawGBufferNormals.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\drawGBufferNormals.forward.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

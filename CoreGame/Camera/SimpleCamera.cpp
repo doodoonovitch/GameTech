@@ -366,6 +366,12 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 		//glutPostRedisplay();
 		break;
 
+	case L'B':
+	case L'b':
+		Engine::GetInstance()->EnableDrawGBufferNormal(!Engine::GetInstance()->IsDrawGBufferNormalEnabled());
+		//glutPostRedisplay();
+		break;
+
 	case 'e':
 		exposureInc = -exposureInc;
 	case 'E':

@@ -144,6 +144,16 @@ public:
 		mIsDrawVertexNormalEnabled = isEnabled;
 	}
 
+	bool IsDrawGBufferNormalEnabled() const
+	{
+		return mIsDrawGBufferNormalEnabled;
+	}
+
+	void EnableDrawGBufferNormal(bool isEnabled)
+	{
+		mIsDrawGBufferNormalEnabled = isEnabled;
+	}
+
 	// Renderers
 public:
 
@@ -258,6 +268,8 @@ public:
 		mWireFrame = value;
 	}
 
+	void SetupDrawGBufferNormals(GLint drawEveryXPixels, GLint drawEveryYPixels);
+
 private:
 
 	typedef InstanceContainer<Renderer> RendererContainer;
@@ -268,7 +280,7 @@ private:
 	void InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	void InternalRelease();
 
-	void InternalCreateFrameDataBuffer();
+	void InternalCreateFrameDataBuffer(GLuint program);
 
 	void InternalCreateGBuffers();
 	void InternalReleaseGBuffers();
@@ -282,6 +294,8 @@ private:
 	void InternalInitializeQuadVAO();
 	void InternalInitializeDeferredPassShader();
 	void InternalInitializeToneMappingShader();
+
+	void InternalUpdateDrawGBufferNormalsPatchCount();
 
 	Engine();
 	~Engine();
@@ -356,9 +370,6 @@ private:
 	GLint mLightToDrawCount;
 	Renderers::DrawNormalShader mDrawVertexNormalShader;
 
-	bool mInitialized;
-	bool mIsDrawVertexNormalEnabled;
-
 	GLsizei mFrameDataSize;
 
 	GLuint mFrameDataUniformIndices[__uniforms_count__];
@@ -396,6 +407,13 @@ private:
 
 	//TextureMapping mLightPassTextureMapping;
 
+	glm::ivec2 mDrawGBufferNormalGridSpan;
+	glm::ivec2 mDrawGBufferNormalPatchCount;
+	Renderers::DrawGBufferNormalShader mDrawGBufferNormalShader;
+
+	bool mInitialized;
+	bool mIsDrawVertexNormalEnabled;
+	bool mIsDrawGBufferNormalEnabled;
 	bool mWireFrame;
 
 };
