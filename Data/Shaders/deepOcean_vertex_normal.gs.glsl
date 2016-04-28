@@ -5,8 +5,8 @@ uniform samplerBuffer u_PerMapDataSampler;
 
 in TES_OUT
 {
-	//vec2 TexUV;
 	vec3 Normal;
+	vec3 Tangent;
 	flat int MapIndex;
 } gs_in[3];
 
@@ -27,18 +27,20 @@ void main()
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{
-		vec4 position = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
-		vec4 projPos = u_ProjMatrix * position;
+		vec4 viewPos = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
+		vec4 projPos = u_ProjMatrix * viewPos;
 
 		gl_Position = projPos;
-		gs_out.Position = position;
+		gs_out.Position = viewPos;
 		gs_out.Color = u_VertexNormalColor;
 		EmitVertex();
 
-		position = gl_in[i].gl_Position + vec4(gs_in[i].Normal * u_NormalMagnitude, 0);
-		position = vec4(dqTransformPoint(viewModelDQ, position.xyz), 1);
-		gl_Position = u_ProjMatrix * position;
-		gs_out.Position = position;
+		//viewPos = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz + gs_in[i].Normal * u_NormalMagnitude), 1);
+		viewPos += vec4(dqTransformNormal(gs_in[i].Normal * u_NormalMagnitude, viewModelDQ), 0);
+		projPos = u_ProjMatrix * viewPos;
+
+		gl_Position = projPos;
+		gs_out.Position = viewPos;
 		gs_out.Color = u_VertexNormalColor;
 		EmitVertex();
 

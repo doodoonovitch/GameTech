@@ -108,7 +108,23 @@ public:
 
 private:
 
+
+	struct WavePropUniformIndex
+	{
+		GLint mDirectionUniformIndex[MAX_WAVE_TO_SUM];
+		GLint mWaveLengthUniformIndex[MAX_WAVE_TO_SUM];
+		GLint mFrequencyUniformIndex[MAX_WAVE_TO_SUM];
+		GLint mAmplitudeUniformIndex[MAX_WAVE_TO_SUM];
+		GLint mVelocityUniformIndex[MAX_WAVE_TO_SUM];
+		GLint mSteepnessUniformIndex[MAX_WAVE_TO_SUM];
+		GLint mPhaseUniformIndex[MAX_WAVE_TO_SUM];
+		GLbyte mWavePropModified[MAX_WAVE_TO_SUM];
+	};
+
+
 	void LoadShaders(const Desc & desc);
+	void GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps);
+	void SetWavePropertyUniformValues(WavePropUniformIndex & waveProps);
 
 private:
 
@@ -120,6 +136,14 @@ private:
 		u_PerMapDataSampler,
 
 		__uniforms_count__
+	};
+
+	enum EUniformIndex2
+	{
+		u_NormalMagnitude,
+		u_VertexNormalColor,
+
+		__uniforms2_count__
 	};
 
 
@@ -146,17 +170,11 @@ private:
 	GLint mMapCount;
 	WaveProps mWaveProps[MAX_WAVE_TO_SUM];
 
+	Shader mDrawNormalShader;
 	TextureBuffer mModelMatrixBuffer;
 
-	GLint mDirectionUniformIndex[MAX_WAVE_TO_SUM];
-	GLint mWaveLengthUniformIndex[MAX_WAVE_TO_SUM];
-	GLint mFrequencyUniformIndex[MAX_WAVE_TO_SUM];
-	GLint mAmplitudeUniformIndex[MAX_WAVE_TO_SUM];
-	GLint mVelocityUniformIndex[MAX_WAVE_TO_SUM];
-	GLint mSteepnessUniformIndex[MAX_WAVE_TO_SUM];
-	GLint mPhaseUniformIndex[MAX_WAVE_TO_SUM];
-	GLbyte mWavePropModified[MAX_WAVE_TO_SUM];
-
+	WavePropUniformIndex mShaderWaveProps;
+	WavePropUniformIndex mDebugShaderWaveProps;
 };
 
 

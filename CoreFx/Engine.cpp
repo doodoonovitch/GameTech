@@ -38,7 +38,7 @@ Engine::Engine()
 	, mLightToDrawCount(16)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
-	, mDrawGBufferNormalGridSpan(50, 50)
+	, mDrawGBufferNormalGridSpan(10, 10)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
 	, mIsDrawGBufferNormalEnabled(false)
@@ -91,10 +91,11 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		}
 		
 		mDrawVertexNormalShader.LoadShaders();
-		mDrawGBufferNormalShader.LoadShaders();
 
 		InternalCreateFrameDataBuffer(mDrawVertexNormalShader.GetProgram());
-		InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
+
+		mDrawGBufferNormalShader.LoadShaders();
+		//InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
 
 		mInitialized = true;
 	}
@@ -730,7 +731,8 @@ void Engine::RenderObjects()
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
-		glDisable(GL_DEPTH_TEST); 
+		glDepthMask(GL_FALSE);
+		glDisable(GL_DEPTH_TEST);
 
 		mDrawGBufferNormalShader.Use();
 
@@ -746,6 +748,7 @@ void Engine::RenderObjects()
 
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mDrawGBufferNormalPatchCount.x * mDrawGBufferNormalPatchCount.y);
 
+		glBindVertexArray(0);
 		mDrawGBufferNormalShader.UnUse();
 	}
 }

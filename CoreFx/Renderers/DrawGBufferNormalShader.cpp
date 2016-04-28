@@ -22,7 +22,7 @@ DrawGBufferNormalShader::~DrawGBufferNormalShader()
 void DrawGBufferNormalShader::LoadShaders()
 {
 	std::cout << std::endl;
-	std::cout << "Load 'draw vertex normal' shader..." << std::endl;
+	std::cout << "Load 'draw GBuffer normal' shader..." << std::endl;
 
 	//setup shader
 	LoadFromFile(GL_VERTEX_SHADER, "shaders/drawGBufferNormals.vs.glsl");
@@ -43,7 +43,7 @@ void DrawGBufferNormalShader::LoadShaders()
 
 		//pass values of constant uniforms at initialization
 		glUniform1i(GetUniform(u_gBufferPosition), 0);
-		glUniform1i(GetUniform(u_gBufferNormal), 0);
+		glUniform1i(GetUniform(u_gBufferNormal), 1);
 
 		SetupFrameDataBlockBinding();
 	UnUse();

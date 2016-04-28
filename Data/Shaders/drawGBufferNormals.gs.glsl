@@ -4,7 +4,7 @@ layout (line_strip, max_vertices = 6) out;
 uniform sampler2D u_gBufferPosition;
 uniform sampler2D u_gBufferNormal;
 
-//in TES_OUT
+//in VS_OUT
 //{
 //	vec2 TexUV;
 //} gs_in[3];

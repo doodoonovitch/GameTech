@@ -38,7 +38,7 @@ void main()
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
 
 	float waveHeight = 0;
-	vec3 dH = vec3(0, 1, 0);
+	vec2 dH = vec2(0);
 	float t = float(u_TimeDeltaTime.x);
 
 	for(int i = 0; i < c_MaxWavesToSum; ++i)
@@ -53,15 +53,16 @@ void main()
 		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * halfOfSinSplusOnePowSteepnessMinusOne * cosS;
 
 		dH.x += u_Direction[i].x * dhCommon;
-		dH.z += u_Direction[i].y * dhCommon;
+		dH.y += u_Direction[i].y * dhCommon;
 	}		 
 	p.y = waveHeight;
+	dH /= c_MaxWavesToSum;
 
 	gl_Position = vec4(p.xyz, 1);
 	//tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
-	tes_out.Normal = normalize(vec3(-dH.x, 1, -dH.z));
-	tes_out.Tangent = normalize(vec3(0, dH.z, 1));
+	tes_out.Normal = normalize(vec3(-dH.y, 1, -dH.x));
+	tes_out.Tangent = normalize(vec3(0, dH.y, 1));
 }
 
 
