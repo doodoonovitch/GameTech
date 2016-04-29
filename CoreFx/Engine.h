@@ -268,7 +268,11 @@ public:
 		mWireFrame = value;
 	}
 
-	void SetupDrawGBufferNormals(GLint drawEveryXPixels, GLint drawEveryYPixels);
+	void SetDrawGBufferNormalGrid(GLint drawEveryXPixels, GLint drawEveryYPixels);
+	const glm::ivec2 & GetDrawGBufferNormalGrid() const 
+	{
+		return mDrawGBufferNormalGridSpan;
+	}
 
 private:
 

@@ -38,7 +38,7 @@ Engine::Engine()
 	, mLightToDrawCount(16)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
-	, mDrawGBufferNormalGridSpan(10, 10)
+	, mDrawGBufferNormalGridSpan(20, 20)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
 	, mIsDrawGBufferNormalEnabled(false)
@@ -698,7 +698,7 @@ void Engine::RenderObjects()
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); 
 	glClear(GL_COLOR_BUFFER_BIT); 
-
+	
 	mToneMappingShader.Use();
 
 		glUniform1f(mToneMappingShader.GetUniform(u_Exposure), mExposure);
@@ -712,7 +712,7 @@ void Engine::RenderObjects()
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	mToneMappingShader.UnUse();
-
+	
 	//glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); 
 	//glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); 
 
@@ -728,9 +728,9 @@ void Engine::RenderObjects()
 
 	if (mIsDrawGBufferNormalEnabled)
 	{
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE);
+		//glEnable(GL_BLEND);
+		//glBlendEquation(GL_FUNC_ADD);
+		//glBlendFunc(GL_ONE, GL_ONE);
 		glDepthMask(GL_FALSE);
 		glDisable(GL_DEPTH_TEST);
 
@@ -820,16 +820,17 @@ bool Engine::DetachRenderer(Renderer* renderer)
 	return mRenderers->Detach(renderer);
 }
 
-void Engine::SetupDrawGBufferNormals(GLint drawEveryXPixels, GLint drawEveryYPixels)
+void Engine::SetDrawGBufferNormalGrid(GLint drawEveryXPixels, GLint drawEveryYPixels)
 {
 	mDrawGBufferNormalGridSpan.x = drawEveryXPixels;
 	mDrawGBufferNormalGridSpan.y = drawEveryYPixels;
+	InternalUpdateDrawGBufferNormalsPatchCount();
 }
 
 void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
 {
 	mDrawGBufferNormalPatchCount.x = mGBufferWidth / mDrawGBufferNormalGridSpan.x;
-	mDrawGBufferNormalPatchCount.x = mGBufferHeight / mDrawGBufferNormalGridSpan.x;
+	mDrawGBufferNormalPatchCount.y = mGBufferHeight / mDrawGBufferNormalGridSpan.x;
 }
 //void Engine::InternalCreateTextures()
 //{

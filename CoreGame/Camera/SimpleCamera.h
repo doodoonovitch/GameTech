@@ -64,6 +64,7 @@ private:
 
 	float mMouseX = 0, mMouseY = 0; //filtered mouse values
 	bool mUseFiltering = true;
+	bool mFreezeTimer = false;
 
 };
 

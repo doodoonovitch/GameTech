@@ -103,7 +103,7 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 	glUniform2iv(mShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
 	glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
 	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 0); GL_CHECK_ERRORS;
 
 	GetWavePropertyUniformIndex(mShader, mShaderWaveProps);
 
@@ -114,36 +114,36 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 
 
 
-	const char * uniformNames2[__uniforms2_count__] =
-	{
-		"u_NormalMagnitude",
-		"u_VertexNormalColor",
-	};
+	//const char * uniformNames2[__uniforms2_count__] =
+	//{
+	//	"u_NormalMagnitude",
+	//	"u_VertexNormalColor",
+	//};
 
-	mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOcean.tcs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
-	mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean_vertex_normal.gs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
-	mDrawNormalShader.CreateAndLinkProgram();
-	mDrawNormalShader.Use();
+	//mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
+	//mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOcean.tcs.glsl");
+	//mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
+	//mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean_vertex_normal.gs.glsl");
+	//mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
+	//mDrawNormalShader.CreateAndLinkProgram();
+	//mDrawNormalShader.Use();
 
-	mDrawNormalShader.AddUniforms(uniformNames, __uniforms_count__);
-	mDrawNormalShader.AddUniforms(uniformNames2, __uniforms2_count__);
+	//mDrawNormalShader.AddUniforms(uniformNames, __uniforms_count__);
+	//mDrawNormalShader.AddUniforms(uniformNames2, __uniforms2_count__);
 
-	//pass values of constant uniforms at initialization
-	glUniform2iv(mDrawNormalShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
-	glUniform2iv(mDrawNormalShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	glUniform3fv(mDrawNormalShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	////pass values of constant uniforms at initialization
+	//glUniform2iv(mDrawNormalShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
+	//glUniform2iv(mDrawNormalShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
+	//glUniform3fv(mDrawNormalShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 
-	glUniform1i(mDrawNormalShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
+	//glUniform1i(mDrawNormalShader.GetUniform(u_PerMapDataSampler), 0); GL_CHECK_ERRORS;
 
-	GetWavePropertyUniformIndex(mDrawNormalShader, mDebugShaderWaveProps);
+	//GetWavePropertyUniformIndex(mDrawNormalShader, mDebugShaderWaveProps);
 
-	mDrawNormalShader.SetupFrameDataBlockBinding();
-	mDrawNormalShader.UnUse();
+	//mDrawNormalShader.SetupFrameDataBlockBinding();
+	//mDrawNormalShader.UnUse();
 
-	GL_CHECK_ERRORS;
+	//GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("... done.\n");
 	PRINT_MESSAGE("-------------------------------------------------\n\n");
@@ -231,7 +231,7 @@ void DeepOceanRenderer::Render()
 
 	SetWavePropertyUniformValues(mShaderWaveProps);
 
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
@@ -243,28 +243,28 @@ void DeepOceanRenderer::Render()
 
 void DeepOceanRenderer::DebugRender()
 {
-	Engine * engine = Engine::GetInstance();
+	//Engine * engine = Engine::GetInstance();
 
-	if (engine->IsDrawVertexNormalEnabled())
-	{
-		mDrawNormalShader.Use();
+	//if (engine->IsDrawVertexNormalEnabled())
+	//{
+	//	mDrawNormalShader.Use();
 
-		SetWavePropertyUniformValues(mDebugShaderWaveProps);
+	//	SetWavePropertyUniformValues(mDebugShaderWaveProps);
 
-		glUniform1f(mDrawNormalShader.GetUniform(__uniforms_count__ + u_NormalMagnitude), engine->GetDrawVertexNormalMagnitude());
-		glUniform4fv(mDrawNormalShader.GetUniform(__uniforms_count__ + u_VertexNormalColor), 1, glm::value_ptr(engine->GetDrawVertexNormalColor()));
+	//	glUniform1f(mDrawNormalShader.GetUniform(__uniforms_count__ + u_NormalMagnitude), engine->GetDrawVertexNormalMagnitude());
+	//	glUniform4fv(mDrawNormalShader.GetUniform(__uniforms_count__ + u_VertexNormalColor), 1, glm::value_ptr(engine->GetDrawVertexNormalColor()));
 
-		glBindVertexArray(mVaoID);
+	//	glBindVertexArray(mVaoID);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
-		glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
+	//	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 
-		glBindVertexArray(0);
+	//	glBindVertexArray(0);
 
-		mDrawNormalShader.UnUse();
-	}
+	//	mDrawNormalShader.UnUse();
+	//}
 }
 
 
