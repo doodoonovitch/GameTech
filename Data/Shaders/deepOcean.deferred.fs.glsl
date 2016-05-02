@@ -20,7 +20,7 @@ in GS_OUT
 {
 	vec3 Position;
 	vec3 ViewPosition;
-	//vec3 Normal;
+	vec3 Normal;
 	//vec3 Tangent;
 	flat DualQuat ViewModelDQ;
 	//flat int MapIndex;
@@ -38,28 +38,35 @@ struct Material
 void main()
 {
 	//vec3 normal = normalize(fs_in.Normal);
+	vec3 dxH = dFdx(fs_in.Position);
+	vec3 dyH = dFdy(fs_in.Position);
+	vec3 normal = cross(dyH, dxH);
 
-	vec2 dH = vec2(0);
-	float t = float(u_TimeDeltaTime.x);
+	//vec2 dH = vec2(0);
+	//float t = float(u_TimeDeltaTime.x);
 	
-	for(int i = 0; i < c_MaxWavesToSum; ++i)
-	{
-		float dirPos = dot(u_Direction[i].xz, fs_in.Position.xz);
-		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
-		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
+	//for(int i = 0; i < c_MaxWavesToSum; ++i)
+	//{
+	//	float dirPos = dot(u_Direction[i].xz, fs_in.Position.xz);
+	//	float S = dirPos * u_Frequency[i] + t * u_Phase[i];
 
-		float cosS = cos(S);
-		float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
-		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * halfOfSinSplusOnePowSteepnessMinusOne * cosS;
+	//	float cosS = cos(S);
+	//	float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
 
-		dH.x += u_Direction[i].x * dhCommon;
-		dH.y += u_Direction[i].z * dhCommon;
-	}		 
-	dH /= c_MaxWavesToSum;
-	//vec3 normal = normalize(vec3(dH.x, 1, -dH.y));
-	vec3 B = normalize(vec3(1, dH.x, 0));
-	vec3 T = normalize(vec3(0, dH.y, 1));
-	vec3 normal = cross(T, B);
+	//	if (u_Steepness[i] > 1)
+	//	{
+	//		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
+	//		float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
+	//		dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
+	//	}
+
+	//	dH.x += u_Direction[i].x * dhCommon;
+	//	dH.y += u_Direction[i].z * dhCommon;
+	//}		 
+	////vec3 normal = normalize(vec3(-dH.x, 1, dH.y));
+	//vec3 B = normalize(vec3(1, dH.x, 0));
+	//vec3 T = normalize(vec3(0, dH.y, -1));
+	//vec3 normal = cross(T, B);
 
 
 	Material mat;

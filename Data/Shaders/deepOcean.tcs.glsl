@@ -1,7 +1,7 @@
 layout (vertices = 4) out;
 
 uniform float u_MinTessDist = 600;
-uniform float u_MaxTessDist = 5;
+uniform float u_MaxTessDist = 10;
 uniform float u_MinTess = 1;
 uniform float u_MaxTess = 6;
 
@@ -21,6 +21,16 @@ out TCS_OUT
 } tcs_out[];
 
 
+//float CompTessFactor(vec4 p1, vec4 p0)
+//{
+//	vec3 p = (p0.xyz + p1.xyz) * 0.5;
+//	p = p - u_ViewPosition.xyz;
+//	float d = length(p);
+//	float diffTess = u_MaxTess - u_MinTess;
+//	float diffDist = u_MinTessDist - u_MaxTessDist;
+//	return pow(2, clamp(diffTess * (1 - (d - u_MinTess)/diffDist) + u_MinTess, u_MinTess, u_MaxTess));
+//}
+
 float CompTessFactor(vec4 p1, vec4 p0)
 {
 	vec3 p = (p0.xyz + p1.xyz) * 0.5;
@@ -28,7 +38,7 @@ float CompTessFactor(vec4 p1, vec4 p0)
 	float d = length(p);
 	float diffTess = u_MaxTess - u_MinTess;
 	float diffDist = u_MinTessDist - u_MaxTessDist;
-	return pow(2, clamp(diffTess * (1 - (d - u_MinTess)/diffDist) + u_MinTess, u_MinTess, u_MaxTess));
+	return pow(2, clamp(round(diffTess * (1 - (d - u_MinTess)/diffDist) + u_MinTess), u_MinTess, u_MaxTess));
 }
 
 

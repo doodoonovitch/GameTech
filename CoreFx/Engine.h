@@ -339,7 +339,7 @@ private:
 
 	Camera * mCamera;
 
-	double mTimeDeltaTime[2]; // Time and Delta time
+	GLdouble mTimeDeltaTime[2]; // Time and Delta time
 
 	Renderables::VertexArrayObject<1> * mQuad;
 	Shader mDeferredShader;

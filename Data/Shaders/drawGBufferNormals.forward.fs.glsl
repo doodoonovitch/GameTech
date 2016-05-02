@@ -8,4 +8,5 @@ in GS_OUT
 void main(void)
 {
 	vFragColor =  fs_in.Color;
+	//vFragColor = u_VertexNormalColor;
 }

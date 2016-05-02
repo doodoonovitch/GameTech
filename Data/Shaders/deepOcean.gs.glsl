@@ -6,16 +6,16 @@ uniform samplerBuffer u_PerMapDataSampler;
 
 in TES_OUT
 {
-	//vec3 Normal;
+	vec3 Normal;
 	//vec3 Tangent;
 	flat int MapIndex;
 } gs_in[3];
 
 out GS_OUT
 {
-	//vec3 Position;
+	vec3 Position;
 	vec3 ViewPosition;
-	//vec3 Normal;
+	vec3 Normal;
 	//vec3 Tangent;
 	flat DualQuat ViewModelDQ;
 	//flat int MapIndex;
@@ -33,8 +33,8 @@ void main()
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
 		//gs_out.TexUV = gs_in[i].TexUV;
-		//gs_out.Position = gl_in[i].gl_Position.xyz;
-		//gs_out.Normal = gs_in[i].Normal;
+		gs_out.Position = gl_in[i].gl_Position.xyz;
+		gs_out.Normal = gs_in[i].Normal;
 		//gs_out.Tangent = gs_in[i].Tangent;
 		//gs_out.WorldPosition = dqTransformPoint(modelDQ, gl_in[i].gl_Position.xyz);
 
