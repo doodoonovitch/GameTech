@@ -65,6 +65,9 @@
 
 #define Mask_0x00FFFFFF								uint(16777215)
 #define Mask_0xFF000000								uint(uint(255) << 24)
+#define Mask_0x00FF0000								uint(uint(255) << 16)
+#define Mask_0x0000FF00								uint(uint(255) << 8)
+#define Mask_0x000000FF								uint(255)
 #define CombineRenderIdAndMaterialIndex(rendererId, materialIndex) uint((rendererId << 24) | (materialIndex & Mask_0x00FFFFFF))
 
 
@@ -277,10 +280,14 @@ vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, sampler2DArray gNormalMap, v
 // ===========================================================================
 
 
-
 uvec3 WriteOutData(int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, int matSpecularPower, vec3 matEmissive)
 {
-	uvec3 outData = uvec3(packUnorm4x8(vec4(matDiffuseColor, 0)), packUnorm4x8(vec4(matSpecularColor, 0)), packUnorm4x8(vec4(matEmissive, 0)));
+	uvec3 matD = uvec3(matDiffuseColor * 255);
+	uint x = (matD.x & Mask_0x000000FF) | ((matD.y & Mask_0x000000FF) << 8) | ((matD.z & Mask_0x000000FF) << 16) | ((rendererId & Mask_0x000000FF) << 24);
+	uvec3 matS = uvec3(matSpecularColor * 255);
+	uint y = (matS.x & Mask_0x000000FF) | ((matS.y & Mask_0x000000FF) << 8) | ((matS.z & Mask_0x000000FF) << 16) | ((matSpecularPower & Mask_0x000000FF) << 24);
+	uvec3 outData = uvec3(x, y, packUnorm4x8(vec4(matEmissive, 0)));
+	//uvec3 outData = uvec3(packUnorm4x8(vec4(matDiffuseColor, 0)), packUnorm4x8(vec4(matSpecularColor, 0)), packUnorm4x8(vec4(matEmissive, 0)));
 	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
 	//outData.y = outData.y | (matSpecularPower << 24);
 	return outData;

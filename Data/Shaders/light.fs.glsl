@@ -44,15 +44,20 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 	uvec3 data = texture(u_gBufferData, fs_in.TexUV, 0).xyz;
 	fi.RendererId = int((data.x >> 24) & 255);
 
-	//data.x = data.x & Mask_0x00FFFFFF;
-	temp = unpackUnorm4x8(data.x);
-	fi.DiffuseMaterial = temp.xyz;
+	uvec3 matD = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
+	fi.DiffuseMaterial = vec3(matD) / 255.f;
+
+	////data.x = data.x & Mask_0x00FFFFFF;
+	//temp = unpackUnorm4x8(data.x);
+	//fi.DiffuseMaterial = temp.xyz;
 
 	fi.MaterialShininess = pow(2, int((data.y >> 24) & 255));
+	uvec3 matS = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
+	fi.SpecularMaterial = vec3(matS) / 255.f;
 
-	//data.y = data.y & Mask_0x00FFFFFF;
-	temp = unpackUnorm4x8(data.y);
-	fi.SpecularMaterial = temp.xyz;
+	////data.y = data.y & Mask_0x00FFFFFF;
+	//temp = unpackUnorm4x8(data.y);
+	//fi.SpecularMaterial = temp.xyz;
 
 	temp = unpackUnorm4x8(data.z);
 	fi.EmissiveMaterial = temp.xyz;
