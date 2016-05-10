@@ -278,3 +278,10 @@ vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, sampler2DArray gNormalMap, v
 
 
 
+uvec3 WriteOutData(int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, int matSpecularPower, vec3 matEmissive)
+{
+	uvec3 outData = uvec3(packUnorm4x8(vec4(matDiffuseColor, 0)), packUnorm4x8(vec4(matSpecularColor, 0)), packUnorm4x8(vec4(matEmissive, 0)));
+	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
+	//outData.y = outData.y | (matSpecularPower << 24);
+	return outData;
+}

@@ -37,10 +37,10 @@ struct Material
 
 void main()
 {
-	//vec3 normal = normalize(fs_in.Normal);
-	vec3 dxH = dFdx(fs_in.Position);
-	vec3 dyH = dFdy(fs_in.Position);
-	vec3 normal = cross(dyH, dxH);
+	vec3 normal = normalize(fs_in.Normal);
+	//vec3 dxH = dFdx(fs_in.Position);
+	//vec3 dyH = dFdy(fs_in.Position);
+	//vec3 normal = cross(dyH, dxH);
 
 	//vec2 dH = vec2(0);
 	//float t = float(u_TimeDeltaTime.x);
@@ -74,7 +74,9 @@ void main()
 	mat.SpecularPower = 64;
 	mat.DiffuseColor = vec3(0.f, 0.f, 1.f);
 
-	outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, DEEPOCEAN_RENDERER_ID / 255)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
+	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, 0)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
+	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
+	outData = WriteOutData(DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, int(mat.SpecularPower), vec3(0));
 	outPosition = fs_in.ViewPosition;
 	outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
 }

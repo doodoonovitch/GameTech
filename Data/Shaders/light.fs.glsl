@@ -42,14 +42,17 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 
 	vec4 temp;
 	uvec3 data = texture(u_gBufferData, fs_in.TexUV, 0).xyz;
+	fi.RendererId = int((data.x >> 24) & 255);
 
+	//data.x = data.x & Mask_0x00FFFFFF;
 	temp = unpackUnorm4x8(data.x);
 	fi.DiffuseMaterial = temp.xyz;
-	fi.RendererId = int(temp.w * 255);
 
+	fi.MaterialShininess = pow(2, int((data.y >> 24) & 255));
+
+	//data.y = data.y & Mask_0x00FFFFFF;
 	temp = unpackUnorm4x8(data.y);
 	fi.SpecularMaterial = temp.xyz;
-	fi.MaterialShininess = pow(2, temp.w * 255);
 
 	temp = unpackUnorm4x8(data.z);
 	fi.EmissiveMaterial = temp.xyz;
@@ -216,6 +219,13 @@ void main(void)
 
 	UnpackFromGBuffer(fi);
 	
-	vFragColor = ADSLight(fi);
+	if (fi.RendererId == DEEPOCEAN_RENDERER_ID)
+	{
+		vFragColor = vec4(fi.Normal, 1);
+	}
+	else
+	{
+		vFragColor = ADSLight(fi);
+	}
 }
 
