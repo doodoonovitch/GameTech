@@ -63,7 +63,7 @@ void main()
 	//	dH.x += u_Direction[i].x * dhCommon;
 	//	dH.y += u_Direction[i].z * dhCommon;
 	//}		 
-	////vec3 normal = normalize(vec3(-dH.x, 1, dH.y));
+	//vec3 normal = normalize(vec3(-dH.x, 1, dH.y));
 	//vec3 B = normalize(vec3(1, dH.x, 0));
 	//vec3 T = normalize(vec3(0, dH.y, -1));
 	//vec3 normal = cross(T, B);
@@ -78,5 +78,6 @@ void main()
 	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
 	outData = WriteOutData(DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, int(mat.SpecularPower), vec3(0));
 	outPosition = fs_in.ViewPosition;
-	outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	//outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	outNormal = normal;
 }

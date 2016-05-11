@@ -49,25 +49,32 @@ void main()
 		H += u_Amplitude[i] * pow(halfOfSinSplusOne, u_Steepness[i]);
 
 		float cosS = cos(S);
-		float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
-		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * halfOfSinSplusOnePowSteepnessMinusOne * cosS;
+		//float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
+		//float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * halfOfSinSplusOnePowSteepnessMinusOne * cosS;
+		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
+
+		if (u_Steepness[i] > 1)
+		{
+			float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
+			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
+		}
 
 		dH.x += u_Direction[i].x * dhCommon;
 		dH.y += u_Direction[i].z * dhCommon;
 	}		 
 	p.y = H;
 
-	vec3 B = normalize(vec3(1, dH.x, 0));
-	vec3 T = normalize(vec3(0, dH.y, -1));
-	vec3 normal = cross(T, B);
+	//vec3 B = normalize(vec3(1, dH.x, 0));
+	//vec3 T = normalize(vec3(0, dH.y, -1));
+	//vec3 normal = cross(T, B);
 
 	gl_Position = p;
 	//tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
-	//tes_out.Normal = normalize(vec3(dH.x, 1, -dH.y));
+	tes_out.Normal = normalize(vec3(dH.x, 1, -dH.y));
 	//tes_out.Tangent = normalize(vec3(0, dH.y, 1));
 	//tes_out.Tangent = T;
-	tes_out.Normal = normal;
+	//tes_out.Normal = normal;
 }
 
 

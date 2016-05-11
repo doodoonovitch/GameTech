@@ -226,7 +226,7 @@ void main(void)
 	
 	if (fi.RendererId == DEEPOCEAN_RENDERER_ID)
 	{
-		vFragColor = vec4(fi.Normal, 1);
+		vFragColor = vec4(fi.Normal * 0.5 + 0.5, 1);
 	}
 	else
 	{
