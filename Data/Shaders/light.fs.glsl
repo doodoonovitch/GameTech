@@ -224,11 +224,11 @@ void main(void)
 
 	UnpackFromGBuffer(fi);
 	
-	if (fi.RendererId == DEEPOCEAN_RENDERER_ID)
-	{
-		vFragColor = vec4(fi.Normal * 0.5 + 0.5, 1);
-	}
-	else
+	//if (fi.RendererId == DEEPOCEAN_RENDERER_ID)
+	//{
+	//	vFragColor = vec4((fi.Normal + 1) * 0.5, 1);
+	//}
+	//else
 	{
 		vFragColor = ADSLight(fi);
 	}
