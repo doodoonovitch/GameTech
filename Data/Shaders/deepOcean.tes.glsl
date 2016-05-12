@@ -2,7 +2,7 @@
 //layout (quads, fractional_even_spacing) in;
 layout (quads, equal_spacing) in;
 
-const int c_MaxWavesToSum = 4;
+const int c_MaxWavesToSum = 1;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -49,9 +49,7 @@ void main()
 		H += u_Amplitude[i] * pow(halfOfSinSplusOne, u_Steepness[i]);
 
 		float cosS = cos(S);
-		//float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
-		//float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * halfOfSinSplusOnePowSteepnessMinusOne * cosS;
-		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
+		float dhCommon = u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
 
 		if (u_Steepness[i] > 1)
 		{
@@ -60,13 +58,15 @@ void main()
 		}
 
 		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
-		normal += vec3(dH.x, 1, dH.y);
+		normal += vec3(-dH.x, -dH.y, 0);
 	}		 
 	p.y = H;
 
 	//vec3 B = normalize(vec3(1, dH.x, 0));
 	//vec3 T = normalize(vec3(0, dH.y, -1));
 	//vec3 normal = cross(B, T);
+
+	normal = vec3(normal.x, 1, -normal.y);
 	normal = normalize(normal);
 
 	gl_Position = p;

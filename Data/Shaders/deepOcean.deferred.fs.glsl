@@ -2,7 +2,7 @@ layout(location = 0) out vec3 outPosition;
 layout(location = 1) out uvec3 outData;
 layout(location = 2) out vec3 outNormal;
 
-const int c_MaxWavesToSum = 4;
+const int c_MaxWavesToSum = 1;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 uniform float[c_MaxWavesToSum] u_WaveLength;
