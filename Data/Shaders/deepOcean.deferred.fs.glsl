@@ -22,7 +22,7 @@ in GS_OUT
 	vec3 ViewPosition;
 	vec3 Normal;
 	//vec3 Tangent;
-	flat DualQuat ViewModelDQ;
+	//flat DualQuat ViewModelDQ;
 	//flat int MapIndex;
 } fs_in;
 
@@ -78,6 +78,7 @@ void main()
 	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
 	outData = WriteOutData(DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, int(mat.SpecularPower), vec3(0));
 	outPosition = fs_in.ViewPosition;
-	outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	//outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	outNormal = (u_ViewMatrix * vec4(normal, 0)).xyz;
 	//outNormal = normal;
 }

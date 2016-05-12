@@ -66,7 +66,7 @@ void main()
 	//vec3 T = normalize(vec3(0, dH.y, -1));
 	//vec3 normal = cross(B, T);
 
-	normal = vec3(normal.x, 1, -normal.y);
+	normal = vec3(normal.x, 1, normal.y);
 	normal = normalize(normal);
 
 	gl_Position = p;
