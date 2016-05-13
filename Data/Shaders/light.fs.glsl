@@ -105,7 +105,8 @@ vec4 ADSLight(FragmentInfo fi)
 
 		vec3 lightDirection = lightPosition.xyz - fi.Position.xyz;
 		float lightDistance = length(lightDirection);
-		lightDirection = lightDirection / lightDistance;
+		//lightDirection = lightDirection / lightDistance;
+		lightDirection = normalize(lightDirection);
 
 		float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
 

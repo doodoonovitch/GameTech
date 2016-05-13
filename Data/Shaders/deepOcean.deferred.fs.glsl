@@ -2,7 +2,7 @@ layout(location = 0) out vec3 outPosition;
 layout(location = 1) out uvec3 outData;
 layout(location = 2) out vec3 outNormal;
 
-const int c_MaxWavesToSum = 1;
+const int c_MaxWavesToSum = 4;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -22,7 +22,7 @@ in GS_OUT
 	vec3 ViewPosition;
 	vec3 Normal;
 	//vec3 Tangent;
-	//flat DualQuat ViewModelDQ;
+	flat DualQuat ViewModelDQ;
 	//flat int MapIndex;
 } fs_in;
 
@@ -77,8 +77,8 @@ void main()
 	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, 0)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
 	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
 	outData = WriteOutData(DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, int(mat.SpecularPower), vec3(0));
+	//outData = WriteOutData(DEEPOCEAN_RENDERER_ID , vec3(0, 0, 0.2 + fs_in.Position.y), mat.SpecularColor, int(mat.SpecularPower), vec3(0));
 	outPosition = fs_in.ViewPosition;
-	//outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
-	outNormal = (u_ViewMatrix * vec4(normal, 0)).xyz;
+	outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
 	//outNormal = normal;
 }

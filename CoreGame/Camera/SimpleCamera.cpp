@@ -195,8 +195,8 @@ void SimpleCamera::OnInit()
 			const float AmpCoef = 10.f;
 			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, 1.000f, AmpCoef * 0.08f, 0.05f, 10.0f);
 			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, 0.620f, AmpCoef * 0.07f, 0.06f, 2.0f);
-			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(200.0f, 0.280f, AmpCoef * 0.06f, 0.04f, 1.0f);
-			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(005.0f, 0.500f, AmpCoef * 0.08f, 0.05f, 3.0f);
+			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, 0.500f, AmpCoef * 0.08f, 0.05f, 3.0f);
+			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(200.0f, 0.280f, AmpCoef * 0.06f, 0.04f, 1.0f);
 
 			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
