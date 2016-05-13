@@ -28,13 +28,14 @@ void main()
 	modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
 	modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
 
-	gs_out.ViewModelDQ = dqMul(u_ViewDQ, modelDQ);
+	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
 		//gs_out.TexUV = gs_in[i].TexUV;
 		gs_out.Position = gl_in[i].gl_Position.xyz;
 		gs_out.Normal = gs_in[i].Normal;
+		gs_out.ViewModelDQ = viewModelDQ;
 		//gs_out.Tangent = gs_in[i].Tangent;
 		//gs_out.WorldPosition = dqTransformPoint(modelDQ, gl_in[i].gl_Position.xyz);
 

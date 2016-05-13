@@ -2,7 +2,7 @@
 //layout (quads, fractional_even_spacing) in;
 layout (quads, equal_spacing) in;
 
-const int c_MaxWavesToSum = 4;
+const int c_MaxWavesToSum = 1;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -45,6 +45,7 @@ void main()
 	{
 		float dirPos = dot(u_Direction[i].xz, p.xz);
 		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
+
 		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
 		H += u_Amplitude[i] * pow(halfOfSinSplusOne, u_Steepness[i]);
 
@@ -61,10 +62,6 @@ void main()
 		normal = normal + vec3(-dH.x, -dH.y, 0);
 	}		 
 	p.y = H;
-
-	//vec3 B = normalize(vec3(1, dH.x, 0));
-	//vec3 T = normalize(vec3(0, dH.y, -1));
-	//vec3 normal = cross(B, T);
 
 	normal.z = 1;
 	normal = normalize(normal);

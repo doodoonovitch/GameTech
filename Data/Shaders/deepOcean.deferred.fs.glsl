@@ -2,7 +2,7 @@ layout(location = 0) out vec3 outPosition;
 layout(location = 1) out uvec3 outData;
 layout(location = 2) out vec3 outNormal;
 
-const int c_MaxWavesToSum = 4;
+const int c_MaxWavesToSum = 1;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -37,37 +37,36 @@ struct Material
 
 void main()
 {
-	vec3 normal = normalize(fs_in.Normal);
+	//vec3 normal = normalize(fs_in.Normal);
 	//vec3 dxH = dFdx(fs_in.Position);
 	//vec3 dyH = dFdy(fs_in.Position);
 	//vec3 normal = cross(dyH, dxH);
 
-	//vec2 dH = vec2(0);
-	//float t = float(u_TimeDeltaTime.x);
+	vec3 normal = vec3(0);
+	float t = float(u_TimeDeltaTime.x);
 	
-	//for(int i = 0; i < c_MaxWavesToSum; ++i)
-	//{
-	//	float dirPos = dot(u_Direction[i].xz, fs_in.Position.xz);
-	//	float S = dirPos * u_Frequency[i] + t * u_Phase[i];
+	for(int i = 0; i < c_MaxWavesToSum; ++i)
+	{
+		float dirPos = dot(u_Direction[i].xz, fs_in.Position.xz);
+		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
 
-	//	float cosS = cos(S);
-	//	float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
+		float cosS = cos(S);
+		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
 
-	//	if (u_Steepness[i] > 1)
-	//	{
-	//		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
-	//		float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
-	//		dhCommon = dhCommon * halfOfSinSplusOnePowSteepnessMinusOne;
-	//	}
+		if (u_Steepness[i] > 1)
+		{
+			float halfOfSinSplusOne = 0.5 * (1 + sin(S));
+			float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
+			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
+		}
 
-	//	dH.x = dH.x + (u_Direction[i].x * dhCommon);
-	//	dH.y = dH.y + (u_Direction[i].z * dhCommon);
-	//}		 
-	////vec3 normal = normalize(vec3(-dH.x, 1, -dH.y));
-	//vec3 B = normalize(vec3(1, dH.x, 0));
-	//vec3 T = normalize(vec3(0, dH.y, -1));
-	//vec3 normal = cross(T, B);
+		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
+		normal = normal + vec3(-dH.x, -dH.y, 0);
+	}		 
 
+	normal.z = 1;
+	normal = normalize(normal);
+	normal = vec3(-normal.x, normal.z, -normal.y);
 
 	Material mat;
 	mat.SpecularColor = vec3(0);
@@ -79,6 +78,6 @@ void main()
 	outData = WriteOutData(DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, int(mat.SpecularPower), vec3(0));
 	//outData = WriteOutData(DEEPOCEAN_RENDERER_ID , vec3(0, 0, 0.2 + fs_in.Position.y), mat.SpecularColor, int(mat.SpecularPower), vec3(0));
 	outPosition = fs_in.ViewPosition;
-	outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ).xyz;
 	//outNormal = normal;
 }
