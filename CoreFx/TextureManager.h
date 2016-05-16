@@ -25,6 +25,8 @@ public:
 
 	void ReleaseTextureGroup(TextureGroup const *& texture);
 
+	Texture2D const * GetDefaultTexture2D()	{ return mDefault2D;	}
+
 public:
 
 	typedef struct KTX_header_t

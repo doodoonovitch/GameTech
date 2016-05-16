@@ -83,14 +83,18 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 		"u_MapSize",
 		"u_Scale",
 		"u_PerMapDataSampler",
+		"u_textureSampler"
 	};
 
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
+
 	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOcean.tcs.glsl");
+
 	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
-	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean.gs.glsl");
+
+	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean.gs.glsl");
 
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/deepOcean.deferred.fs.glsl");
 
@@ -104,6 +108,7 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 	glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
 	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 0); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_textureSampler), 1); GL_CHECK_ERRORS;
 
 	GetWavePropertyUniformIndex(mShader, mShaderWaveProps);
 
@@ -233,6 +238,10 @@ void DeepOceanRenderer::Render()
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());
+	
 
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 

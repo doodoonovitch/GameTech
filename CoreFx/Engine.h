@@ -83,11 +83,11 @@ public:
 
 	static Engine* GetInstance();
 
-	double GetDeltaTime() const { return mTimeDeltaTime[1]; }
-	double GetTime() const { return mTimeDeltaTime[0]; }
+	GLfloat GetDeltaTime() const { return mTimeDeltaTime[1]; }
+	GLfloat GetTime() const { return mTimeDeltaTime[0]; }
 
-	void SetDeltaTime(double value) { mTimeDeltaTime[1] = value; }
-	void SetTime(double value) { mTimeDeltaTime[0] = value; }
+	void SetDeltaTime(GLfloat value) { mTimeDeltaTime[1] = value; }
+	void SetTime(GLfloat value) { mTimeDeltaTime[0] = value; }
 
 
 	inline TextureManager * GetTextureManager() const 
@@ -339,7 +339,7 @@ private:
 
 	Camera * mCamera;
 
-	GLdouble mTimeDeltaTime[2]; // Time and Delta time
+	GLfloat mTimeDeltaTime[2]; // Time and Delta time
 
 	Renderables::VertexArrayObject<1> * mQuad;
 	Shader mDeferredShader;

@@ -607,7 +607,7 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_VertexNormalColor], glm::value_ptr(mDrawVertexNormalColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_BufferViewportSize], glm::value_ptr(bufferViewportSize), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_DepthRangeFovYAspect], glm::value_ptr(depthRangeFovAspect), sizeof(glm::vec4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_TimeDeltaTime], mTimeDeltaTime, sizeof(GLdouble) * 2);
+	memcpy(buffer + mFrameDataUniformOffsets[u_TimeDeltaTime], mTimeDeltaTime, sizeof(GLfloat) * 2);
 	memcpy(buffer + mFrameDataUniformOffsets[u_NormalMagnitude], &mDrawVertexNormalMagnitude, sizeof(GLfloat));
 
 	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };

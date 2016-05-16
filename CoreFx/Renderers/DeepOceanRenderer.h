@@ -135,6 +135,8 @@ private:
 		u_Scale,
 		u_PerMapDataSampler,
 
+		u_textureSampler,
+
 		__uniforms_count__
 	};
 

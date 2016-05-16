@@ -28,7 +28,8 @@ void main()
 	modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
 	modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
 
-	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
+	//DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
+	DualQuat viewModelDQ = u_ViewDQ;
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	

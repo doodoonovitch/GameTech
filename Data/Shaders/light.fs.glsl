@@ -105,8 +105,8 @@ vec4 ADSLight(FragmentInfo fi)
 
 		vec3 lightDirection = lightPosition.xyz - fi.Position.xyz;
 		float lightDistance = length(lightDirection);
-		//lightDirection = lightDirection / lightDistance;
-		lightDirection = normalize(lightDirection);
+		lightDirection = lightDirection / lightDistance;
+		//lightDirection = normalize(lightDirection);
 
 		float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
 
@@ -131,39 +131,45 @@ vec4 ADSLight(FragmentInfo fi)
 		int lightType = GetLightType(lightDesc);
 		int dataIndex = GetLightDataIndex(lightDesc);
 
-		vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
-		vec3 lightColor = lightColorIntensity.xyz;
-		float lightIntensity = lightColorIntensity.w;
-
-
 		vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_POSITION_PROPERTY);
-		vec4 spotDirection = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_DIRECTION_PROPERTY);
-		vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_ATTENUATION_PROPERTY);
-		float innerConeCos = spotDirection.w;
-		float outerConeCos = attenuationCoef.w;
 
 		vec3 lightDirection = lightPosition.xyz - fi.Position.xyz;
 		float lightDistance = length(lightDirection);
 		lightDirection = lightDirection / lightDistance;
 
-		float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
+		float LdotN = dot(fi.Normal, lightDirection);
 
-		vec3 reflectionDirection = reflect(-lightDirection, fi.Normal);
+		//if ((LdotN - 0.000001f) > 0)
+		{
+			vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
+			vec3 lightColor = lightColorIntensity.xyz;
+			float lightIntensity = lightColorIntensity.w;
 
-		float theta = dot(lightDirection, normalize(-spotDirection.xyz)); 
-		float epsilon = (innerConeCos - outerConeCos);
-		float spotIntensity = clamp((theta - outerConeCos) / epsilon, 0.0, 1.0);
+			vec4 spotData = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_DIRECTION_PROPERTY);
+			vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_ATTENUATION_PROPERTY);
+			vec3 spotDirection = normalize(-spotData.xyz);
+			float innerConeCos = spotData.w;
+			float outerConeCos = attenuationCoef.w;
 
-		attenuation = attenuation * spotIntensity;
+			float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
 
-		float ambientFactor = attenuation * lightIntensity;
-		ambientColor += lightColor * ambientFactor;
+			vec3 reflectionDirection = reflect(-lightDirection, fi.Normal);
 
-		float diffuseFactor = max(0, dot(fi.Normal, lightDirection)) * attenuation * lightIntensity;
-		diffuseColor += lightColor * diffuseFactor; 
+			float theta = dot(lightDirection, spotDirection); 
+			float epsilon = (innerConeCos - outerConeCos);
+			float spotIntensity = clamp((theta - outerConeCos) / epsilon, 0.0, 1.0);
 
-		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.MaterialShininess) * attenuation * lightIntensity;
-		specularColor += lightColor * specularFactor;
+			attenuation = attenuation * spotIntensity;
+
+			float ambientFactor = attenuation * lightIntensity;
+			ambientColor += lightColor * ambientFactor;
+
+			float diffuseFactor = max(0, LdotN) * attenuation * lightIntensity;
+			diffuseColor += lightColor * diffuseFactor; 
+
+			float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.MaterialShininess) * attenuation * lightIntensity;
+			specularColor += lightColor * specularFactor;
+		}
 	}
 	
 	// Directional light evaluation
@@ -182,9 +188,10 @@ vec4 ADSLight(FragmentInfo fi)
 		vec3 lightDirection;
 		vec3 reflectionDirection;
 
-		lightDirection = -texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
+		lightDirection = texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
 		reflectionDirection = reflect(lightDirection, fi.Normal);
 
+		lightDirection = -lightDirection;
 		float ambientFactor = lightIntensity;
 		ambientColor += lightColor * ambientFactor;
 

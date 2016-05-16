@@ -10,13 +10,13 @@ uniform samplerBuffer u_PerMapDataSampler;
 
 in VS_OUT
 {
-	//vec2 TexUV;
+	vec2 TexUV;
 	int MapIndex;
 } tcs_in[];
 
 out TCS_OUT
 {
-	//vec2 TexUV;
+	vec2 TexUV;
 	int MapIndex;
 } tcs_out[];
 
@@ -33,6 +33,7 @@ out TCS_OUT
 
 float CompTessFactor(vec4 p1, vec4 p0)
 {
+	//return 64;
 	vec3 p = (p0.xyz + p1.xyz) * 0.5;
 	p = p - u_ViewPosition.xyz;
 	float d = length(p);
@@ -46,12 +47,13 @@ void main()
 {
 	if (gl_InvocationID == 0)
 	{
-		DualQuat modelDQ;
-		int index = tcs_in[gl_InvocationID].MapIndex * 2;
-		modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
-		modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
+		//DualQuat modelDQ;
+		//int index = tcs_in[gl_InvocationID].MapIndex * 2;
+		//modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
+		//modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
 
-		DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
+		//DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
+		DualQuat viewModelDQ = u_ViewDQ;
 
 		vec4 p[4];
 		p[0] = u_ProjMatrix * vec4(dqTransformPoint(viewModelDQ, gl_in[0].gl_Position.xyz), 1.0);
@@ -88,7 +90,7 @@ void main()
         }
 	} 
 
-    //tcs_out[gl_InvocationID].TexUV = tcs_in[gl_InvocationID].TexUV;
+    tcs_out[gl_InvocationID].TexUV = tcs_in[gl_InvocationID].TexUV;
     tcs_out[gl_InvocationID].MapIndex = tcs_in[gl_InvocationID].MapIndex;
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }

@@ -108,7 +108,7 @@ layout (std140, shared) uniform FrameData
 	vec4 u_BufferViewportSize;
 	vec4 u_DepthRangeFovYAspect;
 	
-	dvec2 u_TimeDeltaTime;
+	vec2 u_TimeDeltaTime;
 
 	float u_NormalMagnitude;
 
