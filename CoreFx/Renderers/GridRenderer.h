@@ -10,7 +10,7 @@ namespace CoreFx
 	{
 
 
-class GridRenderer : public RendererHelper<Renderables::Grid, 1>
+class GridRenderer : public RendererHelper<1>
 {
 public:
 	GridRenderer(int width=10, int depth=10);

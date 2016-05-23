@@ -14,6 +14,7 @@ Engine::Engine()
 	: mTextureManager(nullptr)
 	, mRenderers(nullptr)
 	, mCamera(nullptr)
+	, mSkybox(nullptr)
 	, mQuad(nullptr)
 	, mDeferredFBO(0)
 	, mDepthRBO(0)
@@ -76,7 +77,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		//glFrontFace(GL_CCW);
 
 		glEnable(GL_DEPTH_TEST);
-		//glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LEQUAL);
 
 		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 
@@ -657,6 +658,11 @@ void Engine::RenderObjects()
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	if (mSkybox != nullptr)
+	{
+		mSkybox->Render();
+	}
+	
 	// light pass
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); 
 
@@ -819,6 +825,24 @@ bool Engine::DetachRenderer(Renderer* renderer)
 {
 	return mRenderers->Detach(renderer);
 }
+
+bool Engine::AttachSkyboxRenderer(Renderers::SkyboxRenderer * skybox)
+{
+	mSkybox = skybox;
+	return true;
+}
+
+bool Engine::DetachSkyboxRenderer(Renderers::SkyboxRenderer * skybox)
+{
+	if (mSkybox == skybox)
+	{
+		mSkybox = nullptr;
+		return true;
+	}
+
+	return false;
+}
+
 
 void Engine::SetDrawGBufferNormalGrid(GLint drawEveryXPixels, GLint drawEveryYPixels)
 {

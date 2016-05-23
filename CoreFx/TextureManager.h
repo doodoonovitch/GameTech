@@ -14,7 +14,8 @@ class TextureManager
 {
 public:
 
-	Texture2D const * LoadTexture2D(std::string const &filename);
+	Texture2D const * LoadTexture2D(std::string const &ktxFilename);
+	CubeMapTexture const * LoadTextureCubeMap(std::string const &ktxFilename);
 
 	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> filenames);
 
@@ -22,6 +23,7 @@ public:
 
 
 	void ReleaseTexture2D(Texture2D const *& texture);
+	void ReleaseCubeMapTexture(CubeMapTexture const *& texture);
 
 	void ReleaseTextureGroup(TextureGroup const *& texture);
 
@@ -61,10 +63,77 @@ private:
 	void Release();
 
 	void ReleaseAllTexture2D();
+	void ReleaseAllCubeMapTexture();
 	void ReleaseAllTextureGroup();
 
 	TextureManager(TextureManager const &) = delete;
 	TextureManager & operator=(TextureManager const &) = delete;
+
+	template<typename TTexture> 
+	void LoadKtxTexture(std::map<std::string, TTexture*> texMap, GLuint defaultTexture, std::string const & ktxFilename, TTexture *& returnTexture, bool & alreadyDefinedOrDefault)
+	{
+		std::string s;
+		s.resize(ktxFilename.size());
+		std::transform(ktxFilename.begin(), ktxFilename.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+
+		std::map<std::string, TTexture*>::const_iterator it = texMap.find(s);
+
+		if (it != texMap.end())
+		{
+			alreadyDefinedOrDefault = true;
+			returnTexture = it->second;
+		}
+		else
+		{
+			returnTexture = new TTexture(defaultTexture);
+			texMap[s] = returnTexture;
+
+			GLuint id;
+			GLenum target;
+			KTX_dimensions dimensions;
+			GLboolean isMipmapped;
+			GLenum glerr;
+
+			KTX_error_code err = ktxLoadTextureN(ktxFilename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
+
+			if (id != 0)
+			{
+				returnTexture->SetId(id);
+				PRINT_MESSAGE("[LoadTexture] Texture '%s' : %i.\n", ktxFilename.c_str(), id);
+				alreadyDefinedOrDefault = false;
+			}
+			else
+			{
+				PRINT_MESSAGE("[LoadTexture] Cannot load the texture '%s' : %s.", ktxFilename.c_str(), ktxErrorString(err));
+				alreadyDefinedOrDefault = true;
+			}
+		}
+	}
+
+	template<typename TTexture>
+	void ReleaseTextureMap(std::map<std::string, TTexture*> & texMap)
+	{
+		if (texMap.empty())
+			return;
+
+		size_t max = texMap.size();
+		std::vector<GLuint> ids(max);
+		size_t count = 0;
+		for (std::map<std::string, TTexture*>::const_iterator it = texMap.begin(); it != texMap.end(); ++it)
+		{
+			if (it->second->GetResourceId() != mDefault2D->GetResourceId())
+			{
+				ids[count++] = it->second->GetResourceId();
+			}
+
+			delete it->second;
+		}
+
+		texMap.clear();
+
+		glDeleteTextures((GLsizei)count, ids.data());
+	}
+
 
 private:
 
@@ -74,9 +143,11 @@ private:
 	KTX_dimensions mDefault2DDimensions;
 
 	typedef std::map<std::string, Texture2D*> Tex2DIdMap;
+	typedef std::map<std::string, CubeMapTexture*> CubeMapTexIdMap;
 	typedef std::map<TextureGroupId, TextureGroup*> TexGroupMap;
 
 	Tex2DIdMap m2DTexMap;
+	CubeMapTexIdMap mCubeMapTexMap;
 	TexGroupMap mTexGroupMap;
 
 

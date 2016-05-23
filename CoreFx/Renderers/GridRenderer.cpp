@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 GridRenderer::GridRenderer(int width, int depth)
-	: RendererHelper<Renderables::Grid, 1>(0, "GridRenderer")
+	: RendererHelper<1>(0, "GridRenderer")
 {
 	std::cout << std::endl;
 	std::cout << "Initialize GridRenderer...." << std::endl;

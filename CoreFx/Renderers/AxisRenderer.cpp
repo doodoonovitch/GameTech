@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 AxisRenderer::AxisRenderer()
-	: RendererHelper<Renderables::Axis, 1>(0)
+	: RendererHelper<1>(0)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize AxisRenderer...." << std::endl;

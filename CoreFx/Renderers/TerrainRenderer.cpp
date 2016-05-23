@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 TerrainRenderer::TerrainRenderer(const Desc & desc)
-	: RendererHelper<Renderables::Grid, 1>(0, "TerrainRenderer")
+	: RendererHelper<1>(0, "TerrainRenderer")
 	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
 	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
 	, mScale(desc.mScale)

@@ -10,7 +10,7 @@ namespace CoreFx
 	{
 
 
-class TerrainRenderer : public RendererHelper<Renderables::Grid, 1>
+class TerrainRenderer : public RendererHelper<1>
 {
 public:
 

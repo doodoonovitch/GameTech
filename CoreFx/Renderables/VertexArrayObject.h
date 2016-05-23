@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef COREFX_RENDERABLEOBJECT_H
-#define COREFX_RENDERABLEOBJECT_H
+#ifndef COREFX_VERTEXARRAYOBJECT_H
+#define COREFX_VERTEXARRAYOBJECT_H
 
 
 namespace CoreFx
@@ -60,4 +60,4 @@ protected:
 	} // namespace Renderables
 } // namespace CoreFx
 
-#endif // COREFX_RENDERABLEOBJECT_H
+#endif // COREFX_VERTEXARRAYOBJECT_H

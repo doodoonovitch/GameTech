@@ -60,6 +60,7 @@
 #define VERTEX_NORMAL_RENDERER_ID					4
 #define TERRAIN_RENDERER_ID							5
 #define DEEPOCEAN_RENDERER_ID						6
+#define SKYBOX_RENDERER_ID							7
 //
 // ---------------------------------------------------------------------------
 

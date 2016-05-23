@@ -97,6 +97,7 @@ namespace CoreFx
 #include "Renderers\AxisRenderer.h"
 #include "Renderers\TerrainRenderer.h"
 #include "Renderers\DeepOceanRenderer.h"
+#include "Renderers\SkyboxRenderer.h"
 
 
 #endif // COREFX_COREFX_H

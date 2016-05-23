@@ -10,7 +10,8 @@ namespace CoreFx
 
 
 DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
-	: RendererHelper<Renderables::Grid, 1>(0, "DeepOceanRenderer")
+	: RendererHelper<1>(0, "DeepOceanRenderer")
+	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
 	, mScale(desc.mScale)
@@ -83,7 +84,8 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 		"u_MapSize",
 		"u_Scale",
 		"u_PerMapDataSampler",
-		"u_textureSampler"
+		"u_SkyboxCubeMapSampler",
+		"u_textureSampler",
 	};
 
 
@@ -108,7 +110,8 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 	glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
 	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 0); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_textureSampler), 1); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 1); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_textureSampler), 2); GL_CHECK_ERRORS;
 
 	GetWavePropertyUniformIndex(mShader, mShaderWaveProps);
 
@@ -238,10 +241,12 @@ void DeepOceanRenderer::Render()
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());
 	
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, mCubeMapTexture->GetResourceId());
+
+	//glActiveTexture(GL_TEXTURE2);
+	//glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());
 
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 

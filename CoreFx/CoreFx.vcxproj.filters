@@ -121,6 +121,9 @@
     <ClInclude Include="Renderers\DrawGBufferNormalShader.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\SkyboxRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -192,6 +195,9 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\DrawGBufferNormalShader.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\SkyboxRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -284,6 +290,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\drawGBufferNormals.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skybox.deferred.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skybox.vs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

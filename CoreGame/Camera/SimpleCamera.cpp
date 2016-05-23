@@ -190,13 +190,15 @@ void SimpleCamera::OnInit()
 		}
 
 		{
-			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f));
+			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap.ktx");
 
-			const float AmpCoef = 20.f;
-			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, 1.000f, AmpCoef * 0.08f, 0.05f, 10.0f);
-			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, 0.620f, AmpCoef * 0.07f, 0.06f, 2.0f);
-			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, 0.500f, AmpCoef * 0.08f, 0.05f, 3.0f);
-			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(200.0f, 0.280f, AmpCoef * 0.06f, 0.04f, 1.0f);
+			const float AmpCoef = 0.1f;
+			const float WaveLengthCoef = 1.f;
+			const float VelocityCoef = 0.01f;
+			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 10.0f);
+			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 7.0f, VelocityCoef * 6.0f, 2.0f);
+			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 3.0f);
+			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 6.0f, VelocityCoef * 4.0f, 1.0f);
 			//desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, 1.000f, AmpCoef * 0.08f, 0.05f, 10.0f);
 			//desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, 0.620f, AmpCoef * 0.07f, 0.06f, 2.0f);
 			//desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, 0.500f, AmpCoef * 0.08f, 0.05f, 3.0f);
@@ -207,6 +209,10 @@ void SimpleCamera::OnInit()
 			engine->AttachRenderer(ocean);
 		}
 
+		{
+			Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/uvCubeMap.ktx");
+			engine->AttachSkyboxRenderer(skybox);
+		}
 		/*
 		std::vector<Geometry::MeshData*> meshDataList;
 		int loadFailedCount = 0;

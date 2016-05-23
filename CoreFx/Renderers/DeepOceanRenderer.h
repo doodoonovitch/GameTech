@@ -10,7 +10,7 @@ namespace CoreFx
 	{
 
 
-class DeepOceanRenderer : public RendererHelper<Renderables::Grid, 1>
+class DeepOceanRenderer : public RendererHelper<1>
 {
 public:
 
@@ -84,11 +84,12 @@ public:
 
 	struct Desc : public Renderer::Desc
 	{
-		Desc(GLint mapWidth, GLint mapDepth, const glm::vec2 & scale)
+		Desc(GLint mapWidth, GLint mapDepth, const glm::vec2 & scale, const std::string & skyboxCubeMapTextureFilename)
 			: Renderer::Desc()
 			, mMapWidth(mapWidth)
 			, mMapDepth(mapDepth)
 			, mScale(scale.x, 1.0f, scale.y)
+			, mSkyboxCubeMapTextureFilename(skyboxCubeMapTextureFilename)
 		{ }
 
 		GLint mMapWidth;
@@ -96,6 +97,7 @@ public:
 		glm::vec3 mScale;
 		MapDescList mMaps;
 		WaveProps mWaveProps[MAX_WAVE_TO_SUM];
+		std::string mSkyboxCubeMapTextureFilename;
 	};
 
 public:
@@ -135,6 +137,7 @@ private:
 		u_Scale,
 		u_PerMapDataSampler,
 
+		u_SkyboxCubeMapSampler,
 		u_textureSampler,
 
 		__uniforms_count__
@@ -165,6 +168,7 @@ private:
 
 	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;
 
+	CubeMapTexture const * mCubeMapTexture;
 
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;

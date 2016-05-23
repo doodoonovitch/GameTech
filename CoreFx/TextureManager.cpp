@@ -21,6 +21,7 @@ TextureManager::~TextureManager()
 void TextureManager::Release()
 {
 	ReleaseAllTexture2D();
+	ReleaseAllCubeMapTexture();
 	ReleaseAllTextureGroup();
 
 	if (mDefault2D != nullptr)
@@ -32,25 +33,12 @@ void TextureManager::Release()
 
 void TextureManager::ReleaseAllTexture2D()
 {
-	if (m2DTexMap.empty())
-		return;
+	ReleaseTextureMap(m2DTexMap);
+}
 
-	size_t max = m2DTexMap.size();
-	std::vector<GLuint> ids(max);
-	size_t count = 0;
-	for (Tex2DIdMap::const_iterator it = m2DTexMap.begin(); it != m2DTexMap.end(); ++it)
-	{
-		if (it->second->GetResourceId() != mDefault2D->GetResourceId())
-		{
-			ids[count++] = it->second->GetResourceId();
-		}
-
-		delete it->second;
-	}
-
-	m2DTexMap.clear();
-
-	glDeleteTextures((GLsizei)count, ids.data());
+void TextureManager::ReleaseAllCubeMapTexture()
+{
+	ReleaseTextureMap(mCubeMapTexMap);
 }
 
 void TextureManager::ReleaseAllTextureGroup()
@@ -135,46 +123,40 @@ void TextureManager::Initialize()
 	PRINT_MESSAGE("[TextureManager] Texture mDefault2D : %i.\n", id);
 }
 
-Texture2D const * TextureManager::LoadTexture2D(std::string const &filename)
+Texture2D const * TextureManager::LoadTexture2D(std::string const &ktxFilename)
 {
-	std::string s;
-	s.resize(filename.size());
-	std::transform(filename.begin(), filename.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+	Texture2D * returnTexture;
+	bool alreadyDefinedOrDefault;
+	LoadKtxTexture(m2DTexMap, mDefault2D->GetResourceId(), ktxFilename, returnTexture, alreadyDefinedOrDefault);
+	return returnTexture;
+}
 
-	Tex2DIdMap::const_iterator it = m2DTexMap.find(s);
+CubeMapTexture const * TextureManager::LoadTextureCubeMap(std::string const &ktxFilename)
+{
+	CubeMapTexture * returnTexture;
+	bool alreadyDefinedOrDefault;
+	LoadKtxTexture(mCubeMapTexMap, mDefault2D->GetResourceId(), ktxFilename, returnTexture, alreadyDefinedOrDefault);
 
-	if (it != m2DTexMap.end())
+	if (!alreadyDefinedOrDefault)
 	{
-		return it->second;
+		glBindTexture(GL_TEXTURE_CUBE_MAP, returnTexture->GetResourceId());
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
-	else
-	{
-		Texture2D* tex = new Texture2D(mDefault2D->GetResourceId());
-		m2DTexMap[s] = tex;
 
-		GLuint id;
-		GLenum target;
-		KTX_dimensions dimensions;
-		GLboolean isMipmapped;
-		GLenum glerr;
-
-		KTX_error_code err = ktxLoadTextureN(filename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-
-		if (id != 0)
-		{
-			tex->SetId(id);
-			PRINT_MESSAGE("[LoadTexture2D] Texture '%s' : %i.\n", filename.c_str(), id);
-		}
-		else
-		{
-			printf("Cannot load the texture '%s' : %s.", filename.c_str(), ktxErrorString(err));
-		}
-
-		return tex;
-	}
+	return returnTexture;
 }
 
 void TextureManager::ReleaseTexture2D(Texture2D const *& texture)
+{
+	texture = nullptr;
+}
+
+void TextureManager::ReleaseCubeMapTexture(CubeMapTexture const *& texture)
 {
 	texture = nullptr;
 }

@@ -9,7 +9,7 @@ namespace CoreFx
 	class TextureManager;
 	class Engine;
 
-class Texture2D
+class Texture
 {
 public:
 
@@ -20,8 +20,20 @@ public:
 
 protected:
 
-	Texture2D(GLuint id);
-	~Texture2D();
+	enum TextureClass
+	{
+		Texture2D,
+		CubeMapTexture,
+		TextureGroup,
+	};
+
+	Texture(GLuint id, TextureClass texClass);
+	~Texture();
+
+	TextureClass GetTextureClass() const
+	{
+		return mTextureClass;
+	}
 
 	void SetId(GLuint id)
 	{
@@ -31,6 +43,19 @@ protected:
 private:
 
 	GLuint mId;
+	TextureClass mTextureClass;
+
+	friend class TextureManager;
+};
+
+class Texture2D : public Texture
+{
+protected:
+
+	Texture2D(GLuint id);
+	~Texture2D();
+
+private:
 
 	friend class TextureManager;
 };
@@ -178,7 +203,7 @@ typedef std::vector<TextureInfo> TextureInfoList;
 
 
 
-class TextureGroup : public Texture2D
+class TextureGroup : public Texture
 {
 	
 protected:
@@ -212,6 +237,21 @@ private:
 
 typedef std::vector<const TextureGroup *> TextureGroupList;
 
+
+
+class CubeMapTexture : public Texture
+{
+protected:
+
+	CubeMapTexture(GLuint textureId);
+	~CubeMapTexture();
+
+
+private:
+
+	friend class TextureManager;
+	friend class Engine;
+};
 
 typedef std::vector<const TextureInfo *> TexInfoPtrList;
 struct TextureMappingItem

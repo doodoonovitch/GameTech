@@ -12,11 +12,10 @@ uniform float[c_MaxWavesToSum] u_Amplitude;
 uniform float[c_MaxWavesToSum] u_Steepness;
 uniform float[c_MaxWavesToSum] u_Phase;
 
-//uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
-//vec4 TexGet(int samplerIndex, vec3 p);
-
-uniform sampler2D u_textureSampler;
 uniform ivec2 u_MapSize;
+uniform samplerCube u_SkyboxCubeMapSampler;
+//uniform sampler2D u_textureSampler;
+
 
 in TES_OUT
 {
@@ -71,8 +70,12 @@ void main()
 	mat.SpecularColor = vec3(1);
 	mat.SpecularPower = 64;
 	//vec2 texUV = fs_in.TexUV * 64.f;
-	vec2 texUV = fs_in.TexUV;
-	mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;
+	//vec2 texUV = fs_in.TexUV;
+	//mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;
+	vec3 viewDir = fs_in.Position - u_ViewPosition.xyz;
+	viewDir = normalize(viewDir);
+	vec3 R = reflect(viewDir, normal);
+	mat.DiffuseColor = texture(u_SkyboxCubeMapSampler, R).xyz;
 
 	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, 0)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
 	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);

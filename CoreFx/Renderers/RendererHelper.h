@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 
-template<typename T_Object, int T_vbo_count>
+template<int T_vbo_count>
 class RendererHelper : public Renderer
 {
 public:
@@ -63,7 +63,7 @@ protected:
 
 
 template<typename T_Object, int T_vbo_count>
-class SceneObjectRenderer : public RendererHelper<T_Object, T_vbo_count>
+class SceneObjectRenderer : public RendererHelper<T_vbo_count>
 {
 public:
 
@@ -89,7 +89,7 @@ public:
 protected:
 
 	SceneObjectRenderer(GLuint propertyCount, size_t capacity, size_t pageSize, const char * shaderTitle = nullptr)
-		: RendererHelper<T_Object, T_vbo_count>(propertyCount, shaderTitle)
+		: RendererHelper<T_vbo_count>(propertyCount, shaderTitle)
 		, mObjs(capacity, pageSize)
 	{
 

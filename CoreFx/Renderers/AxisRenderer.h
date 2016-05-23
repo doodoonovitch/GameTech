@@ -10,7 +10,7 @@ namespace CoreFx
 	{
 
 
-class AxisRenderer : public RendererHelper<Renderables::Axis, 1>
+class AxisRenderer : public RendererHelper<1>
 {
 public:
 	AxisRenderer();

@@ -20,6 +20,11 @@ namespace CoreFx
 		class DirectionalLight;
 	}
 
+	namespace Renderers
+	{
+		class SkyboxRenderer;
+	}
+
 
 class Engine
 {
@@ -161,6 +166,8 @@ public:
 
 	bool DetachRenderer(Renderer* renderer);
 
+	bool AttachSkyboxRenderer(Renderers::SkyboxRenderer * skybox);
+	bool DetachSkyboxRenderer(Renderers::SkyboxRenderer * skybox);
 
 	// Lights
 public:
@@ -338,6 +345,7 @@ private:
 	LightContainer * mLights[Lights::Light::__light_type_count__];
 
 	Camera * mCamera;
+	Renderers::SkyboxRenderer * mSkybox;
 
 	GLfloat mTimeDeltaTime[2]; // Time and Delta time
 
