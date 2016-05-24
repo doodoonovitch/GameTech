@@ -412,7 +412,7 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const MaterialDesc &
 
 void CubeRenderer::SetMaterials(const MaterialDescList & materials)
 {
-	for (auto i = 0; i < materials.size(); ++i)
+	for (size_t i = 0; i < materials.size(); ++i)
 	{
 		SetMaterial((std::uint16_t)i, materials[i]);
 	}

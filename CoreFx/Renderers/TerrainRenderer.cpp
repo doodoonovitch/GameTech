@@ -487,7 +487,7 @@ void TerrainRenderer::LoadHeightMap(const MapDescList & terrainDescList)
 			for (GLint y = 0; y < mMapSize.y; ++y)
 			{
 				size_t n = fread(ptr, 1, readCount, filePtr);
-				if (n != readCount)
+				if (n != (size_t)readCount)
 				{
 					char errmsg[200];
 					strerror_s(errmsg, 200, errno);

@@ -223,14 +223,14 @@ void Shader::AddUniforms(const char * names[], int count)
 
 GLint Shader::GetAttribute(int index) const
 {
-	assert(index < mAttributeList.size());
-	return index < mAttributeList.size() ? mAttributeList[index] : -1;
+	assert(index < (int)mAttributeList.size());
+	return index < (int)mAttributeList.size() ? mAttributeList[index] : -1;
 }
 
 GLint Shader::GetUniform(int index) const
 {
-	assert(index < mUniformLocationList.size());
-	return index < mUniformLocationList.size() ? mUniformLocationList[index] : -1;
+	assert(index < (int)mUniformLocationList.size());
+	return index < (int)mUniformLocationList.size() ? mUniformLocationList[index] : -1;
 }
 
 void Shader::SetupFrameDataBlockBinding() const
