@@ -188,7 +188,7 @@ void SimpleCamera::OnInit()
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);
 		}
-
+		/*
 		{
 			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap.ktx");
 
@@ -206,6 +206,22 @@ void SimpleCamera::OnInit()
 
 			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
+			engine->AttachRenderer(ocean);
+		}
+		*/
+		{
+			Renderers::ShallowWaterRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap.ktx");
+
+			const float AmpCoef = 0.1f;
+			const float WaveLengthCoef = 1.f;
+			const float VelocityCoef = 0.01f;
+			desc.mWaveProps[0] = Renderers::ShallowWaterRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 10.0f);
+			desc.mWaveProps[1] = Renderers::ShallowWaterRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 7.0f, VelocityCoef * 6.0f, 2.0f);
+			desc.mWaveProps[2] = Renderers::ShallowWaterRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 3.0f);
+			desc.mWaveProps[3] = Renderers::ShallowWaterRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 6.0f, VelocityCoef * 4.0f, 1.0f);
+
+			desc.mMaps.push_back(Renderers::ShallowWaterRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
+			Renderers::ShallowWaterRenderer * ocean = new Renderers::ShallowWaterRenderer(desc);
 			engine->AttachRenderer(ocean);
 		}
 

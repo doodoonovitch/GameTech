@@ -302,6 +302,31 @@ void Engine::InternalCreateHdrBuffers()
 	std::cout << "...complete!" << std::endl;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	std::cout << std::endl;
+	std::cout << "Initialize Fordward framebuffers..." << std::endl;
+
+	glGenFramebuffers(1, &mForwardFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, mForwardFBO);
+
+	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mHdrBuffer, 0);
+	GL_CHECK_ERRORS;
+
+	glBindRenderbuffer(GL_RENDERBUFFER, mDepthRBO);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
+	GL_CHECK_ERRORS;
+
+	PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
+
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "... failed!" << std::endl;
+	std::cout << "...complete!" << std::endl;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Engine::InternalReleaseHdrBuffers()
@@ -310,6 +335,8 @@ void Engine::InternalReleaseHdrBuffers()
 	mHdrBuffer = 0;
 	glDeleteFramebuffers(1, &mHdrFBO);
 	mHdrFBO = 0;
+	glDeleteFramebuffers(1, &mForwardFBO);
+	mForwardFBO = 0;
 }
 
 void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
@@ -655,6 +682,8 @@ void Engine::RenderObjects()
 	{
 		renderer->Render();
 	});
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

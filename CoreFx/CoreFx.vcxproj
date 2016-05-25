@@ -167,6 +167,7 @@
     <ClInclude Include="Renderers\DrawNormalShader.h" />
     <ClInclude Include="Renderers\GridRenderer.h" />
     <ClInclude Include="Renderers\RendererHelper.h" />
+    <ClInclude Include="Renderers\ShallowWaterRenderer.h" />
     <ClInclude Include="Renderers\SkyboxRenderer.h" />
     <ClInclude Include="Renderers\TerrainRenderer.h" />
     <ClInclude Include="SceneObject.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="Renderers\DrawGBufferNormalShader.cpp" />
     <ClCompile Include="Renderers\DrawNormalShader.cpp" />
     <ClCompile Include="Renderers\GridRenderer.cpp" />
+    <ClCompile Include="Renderers\ShallowWaterRenderer.cpp" />
     <ClCompile Include="Renderers\SkyboxRenderer.cpp" />
     <ClCompile Include="Renderers\TerrainRenderer.cpp" />
     <ClCompile Include="SceneObject.cpp" />
@@ -237,6 +239,7 @@
     <None Include="..\Data\Shaders\light.vs.glsl" />
     <None Include="..\Data\Shaders\grid.vs.glsl" />
     <None Include="..\Data\Shaders\skybox.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.vs.glsl" />
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\terrain.gs.glsl" />

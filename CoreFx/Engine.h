@@ -357,6 +357,8 @@ private:
 	GLuint mDepthRBO;
 	GLuint mGBuffers[__gBuffer_count__];
 
+	GLuint mForwardFBO;
+
 	GLuint mHdrFBO;
 	GLuint mHdrBuffer;
 
