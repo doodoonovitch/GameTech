@@ -62,7 +62,7 @@ void main()
 			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
 		}
 
-		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
+		vec2 dH = vec2(u_Direction[i].x * tc.y * dhCommon, u_Direction[i].z * tc.x * dhCommon);
 		normal = normal + vec3(-dH.x, -dH.y, 0);
 	}		 
 	p.y = H;

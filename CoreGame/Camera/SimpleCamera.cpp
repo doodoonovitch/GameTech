@@ -212,7 +212,7 @@ void SimpleCamera::OnInit()
 		{
 			Renderers::ShallowWaterRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap.ktx");
 
-			const float AmpCoef = 0.1f;
+			const float AmpCoef = 0.3f;
 			const float WaveLengthCoef = 1.f;
 			const float VelocityCoef = 0.01f;
 			desc.mWaveProps[0] = Renderers::ShallowWaterRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 10.0f);

@@ -39,8 +39,8 @@ struct Material
 void main()
 {
 	//vec3 normal = vec3(0, 1, 0);
-	//vec3 normal = normalize(fs_in.Normal);
-
+	vec3 normal = normalize(fs_in.Normal);
+	/*
 	vec3 normal = vec3(0);
 	float t = u_TimeDeltaTime.x;
 	
@@ -59,23 +59,25 @@ void main()
 			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
 		}
 
-		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
+		vec2 dH = vec2(u_Direction[i].x * fs_in.TexUV.y * dhCommon, u_Direction[i].z * fs_in.TexUV.x * dhCommon);
 		normal = normal + vec3(-dH.x, -dH.y, 0);
 	}		 
 
 	normal = vec3(normal.x, 1, normal.y);
 	normal = normalize(normal);
-
+	*/
 	Material mat;
 	mat.SpecularColor = vec3(1);
 	mat.SpecularPower = 64;
 	//vec2 texUV = fs_in.TexUV * 64.f;
 	//vec2 texUV = fs_in.TexUV;
 	//mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;
-	vec3 viewDir = fs_in.Position - u_ViewPosition.xyz;
-	viewDir = normalize(viewDir);
-	vec3 R = reflect(viewDir, normal);
-	mat.DiffuseColor = texture(u_SkyboxCubeMapSampler, R).xyz;
+	mat.DiffuseColor = vec3(0, 0.2, 0.8);
+	
+	//vec3 viewDir = fs_in.Position - u_ViewPosition.xyz;
+	//viewDir = normalize(viewDir);
+	//vec3 R = reflect(viewDir, normal);
+	//mat.DiffuseColor = texture(u_SkyboxCubeMapSampler, R).xyz;
 
 	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, 0)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
 	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
