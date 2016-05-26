@@ -6,9 +6,10 @@ namespace CoreFx
 {
 
 
-Renderer::Renderer(GLuint propertyCount)
-	: mMaterials(propertyCount)
-	, mMaterialBaseIndex(0)
+	Renderer::Renderer(GLuint propertyCount, ERenderPass renderPass)
+		: mMaterials(propertyCount)
+		, mMaterialBaseIndex(0)
+		, mRenderPass(renderPass)
 {
 }
 

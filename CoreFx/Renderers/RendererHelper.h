@@ -20,8 +20,8 @@ public:
 
 protected:
 
-	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr)
-		: Renderer(propertyCount)
+	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
+		: Renderer(propertyCount, renderPass)
 		, mVaoID(0)
 		, mShader(shaderTitle)
 	{

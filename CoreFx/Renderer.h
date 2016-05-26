@@ -18,6 +18,12 @@ class Renderer : public ObjectInstance
 
 public:
 
+	enum ERenderPass
+	{
+		Deferred_Pass,
+		Forward_Pass
+	};
+
 	typedef std::uint8_t TextureIndex;
 	static constexpr TextureIndex NoTexture = (TextureIndex)-1;
 
@@ -88,7 +94,7 @@ public:
 
 public:
 
-	Renderer(GLuint propertyCount);
+	Renderer(GLuint propertyCount, ERenderPass renderPass = Deferred_Pass);
 	virtual ~Renderer();
 
 	virtual void Render() = 0;
@@ -119,7 +125,7 @@ protected:
 	GLint mMaterialBaseIndex;
 	TextureInfoList mTextures;
 	TextureMapping mTextureMapping;
-
+	ERenderPass mRenderPass;
 };
 
 

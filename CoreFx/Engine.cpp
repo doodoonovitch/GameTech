@@ -683,15 +683,8 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
-
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	if (mSkybox != nullptr)
-	{
-		mSkybox->Render();
-	}
-	
 	// light pass
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); 
 
@@ -731,9 +724,23 @@ void Engine::RenderObjects()
 		glBindVertexArray(0);
 	mDeferredShader.UnUse();
 
+	// Forward pass
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
+
+	if (mSkybox != nullptr)
+	{
+		mSkybox->Render();
+	}
+
+
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); 
 	glClear(GL_COLOR_BUFFER_BIT); 
-	
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+
 	mToneMappingShader.Use();
 
 		glUniform1f(mToneMappingShader.GetUniform(u_Exposure), mExposure);
