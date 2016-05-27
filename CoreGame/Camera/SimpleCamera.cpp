@@ -70,8 +70,8 @@ void SimpleCamera::OnInit()
 
 		Engine* engine = Engine::GetInstance();
 
-		//Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
-		//engine->AttachRenderer(gridRenderer);
+		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
+		engine->AttachRenderer(gridRenderer);
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
@@ -84,9 +84,9 @@ void SimpleCamera::OnInit()
 			//const float YMul = 5.f;
 			//const float ZMul = -200.f;
 
-			const float XStart = 1.5f;
-			const float YStart = 1.0f;
-			const float ZStart = -1.5f;
+			const float XStart = 1.52f;
+			const float YStart = 1.02f;
+			const float ZStart = -1.52f;
 			const float XMul = 5.f;
 			const float YMul = 5.f;
 			const float ZMul = -5.f;

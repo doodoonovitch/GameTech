@@ -100,6 +100,8 @@ public:
 	virtual void Render() = 0;
 	virtual void DebugRender() = 0;
 
+	ERenderPass GetRenderPass() const { return mRenderPass; }
+
 	const PropertyData & GetMaterials() const {	return mMaterials; }
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 

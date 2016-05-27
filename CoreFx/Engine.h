@@ -300,6 +300,7 @@ private:
 	void InternalReleaseHdrBuffers();
 
 	void InternalCreateMaterialBuffer();
+	static void InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex);
 	//void InternalCreateTextures();
 
 	void InternalInitializeQuadVAO();
@@ -342,6 +343,7 @@ private:
 
 	TextureManager * mTextureManager;
 	RendererContainer * mRenderers;
+	RendererContainer * mForwardRenderers;
 	LightContainer * mLights[Lights::Light::__light_type_count__];
 
 	Camera * mCamera;

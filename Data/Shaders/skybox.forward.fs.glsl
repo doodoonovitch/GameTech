@@ -1,4 +1,4 @@
-layout(location = 0) out vec4 vFragColor;
+layout(location = 0) out vec4 outColor;
 
 uniform samplerCube u_SkyboxCubeMapSampler;
 
@@ -9,5 +9,5 @@ in VS_OUT
 
 void main(void)
 {
-	vFragColor = texture(u_SkyboxCubeMapSampler, fs_in.TexCoords);
+	outColor = texture(u_SkyboxCubeMapSampler, fs_in.TexCoords);
 }

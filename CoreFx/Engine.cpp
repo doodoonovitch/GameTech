@@ -13,6 +13,7 @@ namespace CoreFx
 Engine::Engine()
 	: mTextureManager(nullptr)
 	, mRenderers(nullptr)
+	, mForwardRenderers(nullptr)
 	, mCamera(nullptr)
 	, mSkybox(nullptr)
 	, mQuad(nullptr)
@@ -85,6 +86,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		mTextureManager->Initialize();
 
 		mRenderers = new RendererContainer(64, 16);
+		mForwardRenderers = new RendererContainer(64, 16);
 
 		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{
@@ -112,6 +114,7 @@ void Engine::InternalRelease()
 		SAFE_DELETE(mCamera);
 
 		SAFE_DELETE(mRenderers);
+		SAFE_DELETE(mForwardRenderers);
 
 		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{
@@ -488,21 +491,9 @@ void Engine::InternalInitializeToneMappingShader()
 }
 
 
-void Engine::InternalCreateMaterialBuffer()
+void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
 {
-	int bufferSize = 0;
-	mRenderers->ForEach([&bufferSize](Renderer * renderer)
-	{
-		bufferSize += renderer->mMaterials.GetDataSize();
-	});
-
-	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
-	PRINT_GEN_TEXTUREBUFFER("[Engine]", mMaterialBuffer);
-
-	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId()); GL_CHECK_ERRORS;
-	GLsizeiptr offset = 0;
-	GLint baseIndex = 0;
-	mRenderers->ForEach([&offset, &baseIndex](Renderer * renderer)
+	renderers->ForEach([&offset, &baseIndex](Renderer * renderer)
 	{
 		GLsizei dataSize = renderer->mMaterials.GetDataSize();
 		if (dataSize > 0)
@@ -515,6 +506,30 @@ void Engine::InternalCreateMaterialBuffer()
 			baseIndex += renderer->mMaterials.GetPropertyCount();
 		}
 	});
+}
+
+void Engine::InternalCreateMaterialBuffer()
+{
+	int bufferSize = 0;
+	mRenderers->ForEach([&bufferSize](Renderer * renderer)
+	{
+		bufferSize += renderer->mMaterials.GetDataSize();
+	});
+
+	mForwardRenderers->ForEach([&bufferSize](Renderer * renderer)
+	{
+		bufferSize += renderer->mMaterials.GetDataSize();
+	});
+
+	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+	PRINT_GEN_TEXTUREBUFFER("[Engine]", mMaterialBuffer);
+
+	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId()); GL_CHECK_ERRORS;
+	GLsizeiptr offset = 0;
+	GLint baseIndex = 0;
+
+	InternalCreateMaterialBuffer(mRenderers, offset, baseIndex);
+	InternalCreateMaterialBuffer(mForwardRenderers, offset, baseIndex);
 }
 
 void Engine::InternalCreateFrameDataBuffer(GLuint program)
@@ -735,6 +750,19 @@ void Engine::RenderObjects()
 		mSkybox->Render();
 	}
 
+	glEnable(GL_BLEND);
+
+	mForwardRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->DebugRender();
+	});
+
+	mForwardRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->Render();
+	});
+
+
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); 
 	glClear(GL_COLOR_BUFFER_BIT); 
@@ -854,12 +882,30 @@ void Engine::DeleteLight(Lights::Light * & light)
 
 bool Engine::AttachRenderer(Renderer* renderer)
 {
-	return mRenderers->Attach(renderer);
+	switch (renderer->GetRenderPass())
+	{
+	case Renderer::Deferred_Pass:
+		return mRenderers->Attach(renderer);
+
+	case Renderer::Forward_Pass:
+		return mForwardRenderers->Attach(renderer);
+	}
+
+	return false;
 }
 
 bool Engine::DetachRenderer(Renderer* renderer)
 {
-	return mRenderers->Detach(renderer);
+	switch (renderer->GetRenderPass())
+	{
+	case Renderer::Deferred_Pass:
+		return mRenderers->Detach(renderer);
+
+	case Renderer::Forward_Pass:
+		return mForwardRenderers->Detach(renderer);
+	}
+
+	return false;
 }
 
 bool Engine::AttachSkyboxRenderer(Renderers::SkyboxRenderer * skybox)

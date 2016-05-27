@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 GridRenderer::GridRenderer(int width, int depth)
-	: RendererHelper<1>(0, "GridRenderer")
+	: RendererHelper<1>(0, "GridRenderer", Forward_Pass)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize GridRenderer...." << std::endl;
@@ -22,7 +22,7 @@ GridRenderer::GridRenderer(int width, int depth)
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/grid.vs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid.deferred.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/grid.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 

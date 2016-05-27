@@ -220,6 +220,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Data\Shaders\axis.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\axis.forward.fs.glsl" />
     <None Include="..\Data\Shaders\axis.vs.glsl" />
     <None Include="..\Data\Shaders\common.glsl" />
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
@@ -235,6 +236,7 @@
     <None Include="..\Data\Shaders\drawGBufferNormals.gs.glsl" />
     <None Include="..\Data\Shaders\drawGBufferNormals.vs.glsl" />
     <None Include="..\Data\Shaders\grid.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\grid.forward.fs.glsl" />
     <None Include="..\Data\Shaders\light.fs.glsl" />
     <None Include="..\Data\Shaders\light.vs.glsl" />
     <None Include="..\Data\Shaders\grid.vs.glsl" />

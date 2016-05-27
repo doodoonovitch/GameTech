@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 AxisRenderer::AxisRenderer()
-	: RendererHelper<1>(0)
+	: RendererHelper<1>(0, "AxisRenderer", Renderer::Forward_Pass)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize AxisRenderer...." << std::endl;
@@ -23,7 +23,7 @@ AxisRenderer::AxisRenderer()
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/axis.vs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis.deferred.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/axis.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddAttributes(attributeNames, __attributes_count__);
