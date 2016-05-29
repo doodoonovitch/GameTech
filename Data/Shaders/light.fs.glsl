@@ -236,11 +236,11 @@ void main(void)
 	//{
 	//	vFragColor = vec4((fi.Normal + 1) * 0.5, 1);
 	//}
-	if (fi.RendererId == SKYBOX_RENDERER_ID)
-	{
-		vFragColor = vec4(fi.DiffuseMaterial, 1);
-	}
-	else
+	//if (fi.RendererId == SKYBOX_RENDERER_ID)
+	//{
+	//	vFragColor = vec4(fi.DiffuseMaterial, 1);
+	//}
+	//else
 	{
 		vFragColor = ADSLight(fi);
 	}
