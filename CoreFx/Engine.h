@@ -306,6 +306,7 @@ private:
 	void InternalInitializeQuadVAO();
 	void InternalInitializeDeferredPassShader();
 	void InternalInitializeToneMappingShader();
+	void InternalInitializeWireFramePassShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
 
@@ -339,6 +340,13 @@ private:
 		__tonemapping_uniforms_count__
 	};
 
+	enum EWireFrameShaderUniformIndex
+	{
+		u_WireFrameDrawColor,
+
+		__wireframe_uniforms_count__
+	};
+
 	static Engine* sInstance;
 
 	TextureManager * mTextureManager;
@@ -354,6 +362,7 @@ private:
 	Renderables::VertexArrayObject<1> * mQuad;
 	Shader mDeferredShader;
 	Shader mToneMappingShader;
+	Shader mWireFrameShader;
 
 	GLuint mDeferredFBO;
 	GLuint mDepthRBO;
@@ -377,6 +386,7 @@ private:
 
 	GLuint mBufferIds[__BufferId_Count__];
 
+	glm::vec4 mWireFrameColor;
 	glm::vec4 mDrawVertexNormalColor;
 	glm::vec4 mDrawPointLightColor;
 	glm::vec4 mDrawDirectionalLightColor;

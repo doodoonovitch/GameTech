@@ -39,8 +39,8 @@ struct Material
 void main()
 {
 	//vec3 normal = vec3(0, 1, 0);
-	vec3 normal = normalize(fs_in.Normal);
-	/*
+	//vec3 normal = normalize(fs_in.Normal);
+	
 	vec3 normal = vec3(0);
 	float t = u_TimeDeltaTime.x;
 	
@@ -65,7 +65,7 @@ void main()
 
 	normal = vec3(normal.x, 1, normal.y);
 	normal = normalize(normal);
-	*/
+	
 	Material mat;
 	mat.SpecularColor = vec3(1);
 	mat.SpecularPower = 64;

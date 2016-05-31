@@ -253,6 +253,7 @@
     <None Include="..\Data\Shaders\vertex_normal.fs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.vs.glsl" />
+    <None Include="..\Data\Shaders\wireframe.fs.glsl" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

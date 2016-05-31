@@ -31,6 +31,7 @@ Engine::Engine()
 	, mGamma(1.0f)
 	, mInvGamma(1.0f)
 	, mAmbientLight(0.1f, 0.1f, 0.1f, 0.f)
+	, mWireFrameColor(1.0f, 0.576f, 0.0f, 1.0f)
 	, mDrawVertexNormalColor(1.f, 1.f, 0.f, 0.f)
 	, mDrawPointLightColor(1.f, 1.f, 0.f, 0.f)
 	, mDrawDirectionalLightColor(1.f, 0.f, 0.f, 0.f)
@@ -40,6 +41,7 @@ Engine::Engine()
 	, mLightToDrawCount(16)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
+	, mWireFrameShader("WireFrameShader")
 	, mDrawGBufferNormalGridSpan(20, 20)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
@@ -204,6 +206,7 @@ void Engine::CreateDynamicResources()
 	InternalInitializeQuadVAO();
 	InternalInitializeDeferredPassShader();
 	InternalInitializeToneMappingShader();
+	InternalInitializeWireFramePassShader();
 }
 
 void Engine::InternalCreateGBuffers()
@@ -320,10 +323,10 @@ void Engine::InternalCreateHdrBuffers()
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
 	GL_CHECK_ERRORS;
 
-	PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
+	PRINT_GEN_RENDERBUFFER("[Engine]", mForwardFBO);
 
-	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT2 };
-	glDrawBuffers(2, drawBuffers); GL_CHECK_ERRORS;
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "... failed!" << std::endl;
@@ -490,6 +493,34 @@ void Engine::InternalInitializeToneMappingShader()
 	std::cout << "... done." << std::endl;
 }
 
+void Engine::InternalInitializeWireFramePassShader()
+{
+	std::cout << std::endl;
+	std::cout << "Initialize WireFrame pass shader..." << std::endl;
+
+	//setup shader
+
+	// vertex shader
+	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/wireframe.fs.glsl");
+
+	const char * uniformNames[__wireframe_uniforms_count__] =
+	{
+		"u_WireFrameDrawColor",
+	};
+
+	mWireFrameShader.CreateAndLinkProgram();
+
+	mWireFrameShader.Use();
+
+	mWireFrameShader.AddUniforms(uniformNames, __wireframe_uniforms_count__);
+
+	//mWireFrameShader.SetupFrameDataBlockBinding();
+	mWireFrameShader.UnUse();
+
+	GL_CHECK_ERRORS;
+	std::cout << "... done." << std::endl;
+}
 
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
 {
@@ -662,15 +693,6 @@ void Engine::RenderObjects()
 	glUnmapBuffer(GL_UNIFORM_BUFFER); 
 	// -----------------------------------------------------------------------
 
-	if (GetWireFrame())
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	}
-	else
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-
 	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
 	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -683,10 +705,14 @@ void Engine::RenderObjects()
 	glEnable(GL_CULL_FACE);
 
 	glDepthMask(GL_TRUE); 
-	glEnable(GL_DEPTH_TEST); 
-	glClearColor(0.0f, 0.0f, 0.0f, 1);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	//glDepthFunc(GL_LEQUAL);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glStencilMask(0x00);
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -698,10 +724,11 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+	// -----------------------------------------------------------------------
 	// light pass
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO); 
+	// -----------------------------------------------------------------------
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
 
 	glClear(GL_COLOR_BUFFER_BIT); 
 
@@ -739,11 +766,73 @@ void Engine::RenderObjects()
 		glBindVertexArray(0);
 	mDeferredShader.UnUse();
 
-	// Forward pass
-	glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST);
+	// -----------------------------------------------------------------------
+	// wire frame pass
+	// -----------------------------------------------------------------------
+
+	if (GetWireFrame())
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDeferredFBO);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
+
+		glDepthFunc(GL_LEQUAL);
+		glDepthMask(GL_FALSE);
+
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+		glClearStencil(0);
+		glClear(GL_STENCIL_BUFFER_BIT);
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF);
+
+		mRenderers->ForEach([](Renderer * renderer)
+		{
+			renderer->DebugRender();
+		});
+
+		mRenderers->ForEach([](Renderer * renderer)
+		{
+			renderer->Render();
+		});
+
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		
+		glEnable(GL_BLEND);
+		glEnable(GL_STENCIL_TEST);
+		glDisable(GL_DEPTH_TEST);
+
+		glDepthMask(GL_FALSE);
+
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
+
+		mWireFrameShader.Use();
+			glBindVertexArray(mQuad->GetVao());
+				glUniform4fv(mWireFrameShader.GetUniform(u_WireFrameDrawColor), 1, glm::value_ptr(mWireFrameColor));
+				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			glBindVertexArray(0);
+		mWireFrameShader.UnUse();
+
+		glDisable(GL_STENCIL_TEST);
+	}
+
+	// -----------------------------------------------------------------------
+	// forward pass
+	// -----------------------------------------------------------------------
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 
 	if (mSkybox != nullptr)
 	{
@@ -751,6 +840,7 @@ void Engine::RenderObjects()
 	}
 
 	glEnable(GL_BLEND);
+	glDepthMask(GL_TRUE);
 
 	mForwardRenderers->ForEach([](Renderer * renderer)
 	{
@@ -762,7 +852,9 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
-
+	// -----------------------------------------------------------------------
+	// tone mapping pass
+	// -----------------------------------------------------------------------
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); 
 	glClear(GL_COLOR_BUFFER_BIT); 
@@ -782,19 +874,10 @@ void Engine::RenderObjects()
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	mToneMappingShader.UnUse();
-	
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, mDeferredFBO); 
-	//glBlitFramebuffer(0, 0, mGBufferWidth, mGBufferHeight, 0, 0, mGBufferWidth, mGBufferHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST); 
 
-	////glEnable(GL_BLEND);
-	////glBlendEquation(GL_FUNC_ADD);
-	////glBlendFunc(GL_ONE, GL_ONE);
-	//glEnable(GL_DEPTH_TEST); 
-
-	//mRenderers->ForEach([](Renderer * renderer)
-	//{
-	//	renderer->DebugRender();
-	//});
+	// -----------------------------------------------------------------------
+	// draw normal (from GBuffer) pass
+	// -----------------------------------------------------------------------
 
 	if (mIsDrawGBufferNormalEnabled)
 	{
