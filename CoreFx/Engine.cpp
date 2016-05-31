@@ -224,7 +224,8 @@ void Engine::InternalCreateGBuffers()
 	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_PositionBuffer]);
 	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_DataBuffer]);
 	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_NormalBuffer]);
-	
+	//PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_DepthBuffer]);
+
 
 	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -249,15 +250,14 @@ void Engine::InternalCreateGBuffers()
 
 
 	//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer], 0);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_STENCIL, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, NULL);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer], 0);
 	//GL_CHECK_ERRORS;
 	glGenRenderbuffers(1, &mDepthRBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, mDepthRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mGBufferWidth, mGBufferHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, mGBufferWidth, mGBufferHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
 	GL_CHECK_ERRORS;
-
 	PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
 
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
@@ -319,8 +319,12 @@ void Engine::InternalCreateHdrBuffers()
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mHdrBuffer, 0);
 	GL_CHECK_ERRORS;
 
+	//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer], 0);
+	//GL_CHECK_ERRORS;
+
 	glBindRenderbuffer(GL_RENDERBUFFER, mDepthRBO);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
 	GL_CHECK_ERRORS;
 
 	PRINT_GEN_RENDERBUFFER("[Engine]", mForwardFBO);
@@ -801,6 +805,8 @@ void Engine::RenderObjects()
 			renderer->Render();
 		});
 
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
+
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		
@@ -812,8 +818,6 @@ void Engine::RenderObjects()
 
 		glStencilFunc(GL_EQUAL, 1, 0xFF);
 		glStencilMask(0x00);
-
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
 
 		mWireFrameShader.Use();
 			glBindVertexArray(mQuad->GetVao());

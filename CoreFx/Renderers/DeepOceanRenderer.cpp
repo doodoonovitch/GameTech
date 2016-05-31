@@ -76,7 +76,7 @@ DeepOceanRenderer::~DeepOceanRenderer()
 
 void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 {
-	PRINT_MESSAGE("Initialize Terrain Renderer Shaders : \n\n");
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer Shaders : \n\n");
 
 	const char * uniformNames[__uniforms_count__] =
 	{

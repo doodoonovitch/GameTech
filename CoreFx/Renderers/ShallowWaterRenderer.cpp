@@ -76,7 +76,7 @@ ShallowWaterRenderer::~ShallowWaterRenderer()
 
 void ShallowWaterRenderer::LoadShaders(const Desc & /*desc*/)
 {
-	PRINT_MESSAGE("Initialize Terrain Renderer Shaders : \n\n");
+	PRINT_MESSAGE("Initialize Shallow Water Shaders : \n\n");
 
 	const char * uniformNames[__uniforms_count__] =
 	{

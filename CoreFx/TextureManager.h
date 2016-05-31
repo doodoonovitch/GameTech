@@ -88,7 +88,7 @@ private:
 			returnTexture = new TTexture(defaultTexture);
 			texMap[s] = returnTexture;
 
-			GLuint id;
+			GLuint id = GLuint(-1);
 			GLenum target;
 			KTX_dimensions dimensions;
 			GLboolean isMipmapped;
@@ -96,7 +96,7 @@ private:
 
 			KTX_error_code err = ktxLoadTextureN(ktxFilename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
 
-			if (id != 0)
+			if (err == KTX_SUCCESS)
 			{
 				returnTexture->SetId(id);
 				PRINT_MESSAGE("[LoadTexture] Texture '%s' : %i.\n", ktxFilename.c_str(), id);
