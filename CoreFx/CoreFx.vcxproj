@@ -225,6 +225,7 @@
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\cube.gs.glsl" />
     <None Include="..\Data\Shaders\cube.vs.glsl" />
+    <None Include="..\Data\Shaders\cube.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.gs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.tcs.glsl" />
