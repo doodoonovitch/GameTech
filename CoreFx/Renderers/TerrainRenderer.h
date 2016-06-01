@@ -88,7 +88,7 @@ public:
 	virtual ~TerrainRenderer();
 
 	virtual void Render() override;
-	virtual void DebugRender() override;
+	virtual void RenderWireFrame() override;
 
 
 private:

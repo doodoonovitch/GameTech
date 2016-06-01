@@ -98,7 +98,7 @@ public:
 	virtual ~Renderer();
 
 	virtual void Render() = 0;
-	virtual void DebugRender() = 0;
+	virtual void RenderWireFrame() = 0;
 
 	ERenderPass GetRenderPass() const { return mRenderPass; }
 

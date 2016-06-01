@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 AxisRenderer::AxisRenderer()
-	: RendererHelper<1>(0, "AxisRenderer", Renderer::Forward_Pass)
+	: RendererHelper<1>(0, "AxisRenderer", "AxisWireFrameRenderer", Renderer::Forward_Pass)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize AxisRenderer...." << std::endl;
@@ -76,7 +76,7 @@ AxisRenderer::~AxisRenderer()
 {
 }
  
-void AxisRenderer::DebugRender()
+void AxisRenderer::Render()
 {
 	mShader.Use();
 		glBindVertexArray(mVaoID);
@@ -85,6 +85,10 @@ void AxisRenderer::DebugRender()
 	mShader.UnUse();
 }
 
+void AxisRenderer::RenderWireFrame()
+{
+	Render();
+}
 
 
 	} // namespace Renderers

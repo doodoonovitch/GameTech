@@ -8,7 +8,7 @@ namespace CoreFx
 
 
 CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Cube, 2>((GLuint)(desc.mMaterials.size() * Property_Per_Material), capacity, pageSize, "CubeRenderer")
+	: SceneObjectRenderer<Renderables::Cube, 2>((GLuint)(desc.mMaterials.size() * Property_Per_Material), capacity, pageSize, "CubeRenderer", "CubeWireFrameRenderer")
 	, mMaterialCount((GLuint)desc.mMaterials.size())
 	, mMaterialTextureIndexesList((GLuint)desc.mMaterials.size())
 	, mIsMaterialIndexBufferSet(false)
@@ -212,7 +212,13 @@ void CubeRenderer::ComputeTangent(GLfloat vertices[], int vertexCount, GLushort 
 	}
 }
 
-void CubeRenderer::InitializeShader()
+void CubeRenderer::InitializeShaders()
+{
+	InitializeMainShader();
+	InitializeWireFrameShader();
+}
+
+void CubeRenderer::InitializeMainShader()
 {
 	std::cout << std::endl;
 	std::cout << "Initialize CubeRenderer shader...." << std::endl;
@@ -230,7 +236,7 @@ void CubeRenderer::InitializeShader()
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
-	const char * uniformNames[__uniforms_count__] =
+	const char * uniformNames[(int)EMainShaderUniformIndex::__uniforms_count__] =
 	{
 		"u_MaterialBaseIndex",
 		"u_perInstanceDataSampler",
@@ -241,12 +247,12 @@ void CubeRenderer::InitializeShader()
 	mShader.CreateAndLinkProgram();
 
 	mShader.Use();
-	mShader.AddUniforms(uniformNames, __uniforms_count__);
+	mShader.AddUniforms(uniformNames, (int)EMainShaderUniformIndex::__uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(mShader.GetUniform(u_perInstanceDataSampler), 0);
-	glUniform1i(mShader.GetUniform(u_materialIndexSampler), 1);
-	glUniform1i(mShader.GetUniform(u_materialDataSampler), 2);
+	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_perInstanceDataSampler), 0);
+	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_materialIndexSampler), 1);
+	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_materialDataSampler), 2);
 
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
@@ -267,18 +273,51 @@ void CubeRenderer::InitializeShader()
 	GL_CHECK_ERRORS;
 
 	std::cout << "... CubeRenderer shader initialized!" << std::endl << std::endl;
-
 }
 
-void CubeRenderer::Render()
+void CubeRenderer::InitializeWireFrameShader()
+{
+	std::cout << std::endl;
+	std::cout << "Initialize CubeRenderer (wire frame) shader...." << std::endl;
+
+	//setup shader
+	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube.vs.glsl");
+	mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/cube.gs.glsl");
+	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube.wireframe.fs.glsl");
+
+	const char * uniformNames[(int)EWireFrameShaderUniformIndex::__uniforms_count__] =
+	{
+		"u_MaterialBaseIndex",
+		"u_perInstanceDataSampler",
+		"u_materialIndexSampler"
+	};
+
+	mWireFrameShader.CreateAndLinkProgram();
+
+	mWireFrameShader.Use();
+	mWireFrameShader.AddUniforms(uniformNames, (int)EWireFrameShaderUniformIndex::__uniforms_count__);
+
+	//pass values of constant uniforms at initialization
+	glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_perInstanceDataSampler), 0);
+	glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_materialIndexSampler), 1);
+
+	mShader.SetupFrameDataBlockBinding();
+	mShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	std::cout << "... CubeRenderer (wire frame) shader initialized!" << std::endl << std::endl;
+}
+
+void CubeRenderer::UpdateShaderData()
 {
 	if (!mIsMaterialIndexBufferSet)
 	{
 		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetBufferId());
 
-		std::uint8_t * matIndexBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY); 
+		std::uint8_t * matIndexBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 		assert(matIndexBuffer != nullptr);
-		
+
 		if (matIndexBuffer != nullptr)
 		{
 			mObjs.ForEach([this, matIndexBuffer](Renderables::Cube* obj)
@@ -304,6 +343,11 @@ void CubeRenderer::Render()
 		buffer += sizeof(PerInstanceData);
 	});
 	glUnmapBuffer(GL_TEXTURE_BUFFER);
+}
+
+void CubeRenderer::Render()
+{
+	UpdateShaderData();
 
 	mShader.Use();
 		glBindVertexArray(mVaoID);
@@ -322,36 +366,56 @@ void CubeRenderer::Render()
 				glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureMapping.mMapping[i].mTexture->GetResourceId());
 			}
 
-			glUniform1i(mShader.GetUniform(u_MaterialBaseIndex), GetMaterialBaseIndex());
+			glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
 			glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 		glBindVertexArray(0);
 	mShader.UnUse();
-
 }
 
-void CubeRenderer::DebugRender() 
+//void CubeRenderer::DebugRender() 
+//{
+//	Engine * engine = Engine::GetInstance();
+//
+//	if (engine->IsDrawVertexNormalEnabled())
+//	{
+//		const DrawNormalShader & drawVertexNormalShader = engine->GetDrawVertexNormal();
+//		drawVertexNormalShader.Use();
+//
+//		drawVertexNormalShader.SetUniformValues();
+//
+//		glBindVertexArray(mVaoID);
+//
+//		glActiveTexture(GL_TEXTURE0);
+//		glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+//		
+//		glDrawElementsInstanced(GL_TRIANGLE_STRIP, mIndexCount, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
+//		glBindVertexArray(0);
+//		drawVertexNormalShader.UnUse();
+//	}
+//}
+
+void CubeRenderer::RenderWireFrame()
 {
-	Engine * engine = Engine::GetInstance();
+	UpdateShaderData();
 
-	if (engine->IsDrawVertexNormalEnabled())
-	{
-		const DrawNormalShader & drawVertexNormalShader = engine->GetDrawVertexNormal();
-		drawVertexNormalShader.Use();
-
-		drawVertexNormalShader.SetUniformValues();
-
+	mWireFrameShader.Use();
 		glBindVertexArray(mVaoID);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
-		
-		glDrawElementsInstanced(GL_TRIANGLE_STRIP, mIndexCount, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetTextureId());
+
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_BUFFER, Engine::GetInstance()->GetMaterialDataBuffer().GetTextureId());
+
+			glUniform1i(mWireFrameShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
+
+			glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_SHORT, 0, (GLsizei)mObjs.GetCount());
 		glBindVertexArray(0);
-		drawVertexNormalShader.UnUse();
-	}
+		mWireFrameShader.UnUse();
 }
-
 
 Renderables::Cube * CubeRenderer::CreateCube(std::uint8_t materialIndex)
 {
@@ -449,7 +513,7 @@ void CubeRenderer::UpdateMaterialTextureIndex()
 		memcpy(&prop3[3], &emissiveNormalIndexes, sizeof(GLfloat));
 	}
 
-	InitializeShader();
+	InitializeShaders();
 }
 
 

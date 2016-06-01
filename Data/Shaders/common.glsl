@@ -104,6 +104,7 @@ layout (std140, shared) uniform FrameData
 
 	vec4 u_AmbientLight;
 
+	vec4 u_WireFrameDrawColor;
 	vec4 u_VertexNormalColor;
 
 	vec4 u_BufferViewportSize;

@@ -157,7 +157,6 @@
     <ClInclude Include="Renderables\Cube.h" />
     <ClInclude Include="Renderables\Grid.h" />
     <ClInclude Include="Renderables\Mesh.h" />
-    <ClInclude Include="Renderables\RenderableObject.h" />
     <ClInclude Include="Renderables\VertexArrayObject.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Renderers\AxisRenderer.h" />

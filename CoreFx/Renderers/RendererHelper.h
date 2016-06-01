@@ -20,10 +20,11 @@ public:
 
 protected:
 
-	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
+	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
 		: Renderer(propertyCount, renderPass)
 		, mVaoID(0)
 		, mShader(shaderTitle)
+		, mWireFrameShader(wireFramShaderTitle)
 	{
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
 	}
@@ -32,6 +33,7 @@ protected:
 	{
 		//Destroy shader
 		mShader.DeleteShaderProgram();
+		mWireFrameShader.DeleteShaderProgram();
 
 		// Release buffers (vao & vbo)
 		ReleaseBuffers();
@@ -58,6 +60,7 @@ protected:
 	GLuint mVaoID;
 	GLuint mVboIDs[mVboCount];	
 	Shader mShader;
+	Shader mWireFrameShader;
 };
 
 
@@ -88,8 +91,8 @@ public:
 
 protected:
 
-	SceneObjectRenderer(GLuint propertyCount, size_t capacity, size_t pageSize, const char * shaderTitle = nullptr)
-		: RendererHelper<T_vbo_count>(propertyCount, shaderTitle)
+	SceneObjectRenderer(GLuint propertyCount, size_t capacity, size_t pageSize, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
+		: RendererHelper<T_vbo_count>(propertyCount, shaderTitle, wireFramShaderTitle, renderPass)
 		, mObjs(capacity, pageSize)
 	{
 

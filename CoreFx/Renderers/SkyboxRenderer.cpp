@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 	SkyboxRenderer::SkyboxRenderer(const std::string & skyboxCubeMapTextureFilename)
-		: RendererHelper<1>(0, "SkyboxRenderer", Renderer::Forward_Pass)
+		: RendererHelper<1>(0, "SkyboxRenderer", "SkyboxWireFrameRenderer", Renderer::Forward_Pass)
 		, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(skyboxCubeMapTextureFilename))
 {
 	std::cout << std::endl;
@@ -120,7 +120,7 @@ void SkyboxRenderer::Render()
 	mShader.UnUse();
 }
  
-void SkyboxRenderer::DebugRender()
+void SkyboxRenderer::RenderWireFrame()
 {
 }
 

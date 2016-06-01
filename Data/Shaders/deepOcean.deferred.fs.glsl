@@ -46,7 +46,7 @@ void main()
 	
 	for(int i = 0; i < c_MaxWavesToSum; ++i)
 	{
-		float dirPos = dot(u_Direction[i].xz, fs_in.TexUV.yx);
+		float dirPos = dot(u_Direction[i].xz, fs_in.TexUV.xy);
 		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
 
 		float cosS = cos(S);
@@ -59,7 +59,7 @@ void main()
 			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
 		}
 
-		vec2 dH = vec2(u_Direction[i].x * fs_in.TexUV.y * dhCommon, u_Direction[i].z * fs_in.TexUV.x * dhCommon);
+		vec2 dH = vec2(u_Direction[i].x /* fs_in.TexUV.y*/ * dhCommon, u_Direction[i].z /* fs_in.TexUV.x*/ * dhCommon);
 		normal = normal + vec3(-dH.x, -dH.y, 0);
 	}		 
 

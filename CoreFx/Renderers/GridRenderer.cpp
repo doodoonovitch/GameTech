@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 GridRenderer::GridRenderer(int width, int depth)
-	: RendererHelper<1>(0, "GridRenderer", Forward_Pass)
+	: RendererHelper<1>(0, "GridRenderer", "GridWireFrameRenderer", Forward_Pass)
 {
 	std::cout << std::endl;
 	std::cout << "Initialize GridRenderer...." << std::endl;
@@ -84,7 +84,7 @@ GridRenderer::~GridRenderer()
 {
 }
  
-void GridRenderer::DebugRender()
+void GridRenderer::Render()
 {
 	mShader.Use();
 	glBindVertexArray(mVaoID);
@@ -93,6 +93,10 @@ void GridRenderer::DebugRender()
 	mShader.UnUse();
 }
 
+void GridRenderer::RenderWireFrame()
+{
+	Render();
+}
 
 
 	} // namespace Renderers

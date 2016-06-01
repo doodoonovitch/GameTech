@@ -62,6 +62,7 @@ private:
 		u_ViewDQ,
 		u_ViewPosition,
 		u_AmbientLight,
+		u_WireFrameDrawColor,
 		u_VertexNormalColor,
 		u_BufferViewportSize,
 		u_DepthRangeFovYAspect,
@@ -340,13 +341,6 @@ private:
 		__tonemapping_uniforms_count__
 	};
 
-	enum EWireFrameShaderUniformIndex
-	{
-		u_WireFrameDrawColor,
-
-		__wireframe_uniforms_count__
-	};
-
 	static Engine* sInstance;
 
 	TextureManager * mTextureManager;
@@ -362,7 +356,6 @@ private:
 	Renderables::VertexArrayObject<1> * mQuad;
 	Shader mDeferredShader;
 	Shader mToneMappingShader;
-	Shader mWireFrameShader;
 
 	GLuint mDeferredFBO;
 	GLuint mDepthRBO;
@@ -409,6 +402,7 @@ private:
 		"u_ViewDQ.Qr",
 		"u_ViewPosition",
 		"u_AmbientLight",
+		"u_WireFrameDrawColor",
 		"u_VertexNormalColor",
 		"u_BufferViewportSize",
 		"u_DepthRangeFovYAspect",

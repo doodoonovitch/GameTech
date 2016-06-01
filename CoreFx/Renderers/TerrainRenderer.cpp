@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 TerrainRenderer::TerrainRenderer(const Desc & desc)
-	: RendererHelper<1>(0, "TerrainRenderer")
+	: RendererHelper<1>(0, "TerrainRenderer", "TerrainWireRenderer")
 	, mMapSize(desc.mHeightMapWidth, desc.mHeightMapDepth)
 	, mPatchCount(desc.mHeightMapWidth / 64, desc.mHeightMapDepth / 64)
 	, mScale(desc.mScale)
@@ -414,31 +414,8 @@ void TerrainRenderer::Render()
 	mShader.UnUse();
 }
 
-void TerrainRenderer::DebugRender()
+void TerrainRenderer::RenderWireFrame()
 {
-	Engine * engine = Engine::GetInstance();
-
-	if (engine->IsDrawVertexNormalEnabled())
-	{
-		mDrawNormalShader.Use();
-
-		glUniform1f(mDrawNormalShader.GetUniform(__uniforms_count__ + u_NormalMagnitude), engine->GetDrawVertexNormalMagnitude());
-		glUniform4fv(mDrawNormalShader.GetUniform(__uniforms_count__ + u_VertexNormalColor), 1, glm::value_ptr(engine->GetDrawVertexNormalColor()));
-
-		glBindVertexArray(mVaoID);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
-
-		glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
-
-		glBindVertexArray(0);
-
-		mDrawNormalShader.UnUse();
-	}
 }
 
 

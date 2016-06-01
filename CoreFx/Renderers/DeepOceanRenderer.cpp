@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
-	: RendererHelper<1>(0, "DeepOceanRenderer")
+	: RendererHelper<1>(0, "DeepOceanRenderer", "DeepOceanWireFrameRenderer")
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
@@ -255,30 +255,8 @@ void DeepOceanRenderer::Render()
 
 }
 
-void DeepOceanRenderer::DebugRender()
+void DeepOceanRenderer::RenderWireFrame()
 {
-	//Engine * engine = Engine::GetInstance();
-
-	//if (engine->IsDrawVertexNormalEnabled())
-	//{
-	//	mDrawNormalShader.Use();
-
-	//	SetWavePropertyUniformValues(mDebugShaderWaveProps);
-
-	//	glUniform1f(mDrawNormalShader.GetUniform(__uniforms_count__ + u_NormalMagnitude), engine->GetDrawVertexNormalMagnitude());
-	//	glUniform4fv(mDrawNormalShader.GetUniform(__uniforms_count__ + u_VertexNormalColor), 1, glm::value_ptr(engine->GetDrawVertexNormalColor()));
-
-	//	glBindVertexArray(mVaoID);
-
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
-
-	//	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
-
-	//	glBindVertexArray(0);
-
-	//	mDrawNormalShader.UnUse();
-	//}
 }
 
 

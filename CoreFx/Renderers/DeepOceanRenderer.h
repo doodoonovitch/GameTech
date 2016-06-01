@@ -105,7 +105,7 @@ public:
 	virtual ~DeepOceanRenderer();
 
 	virtual void Render() override;
-	virtual void DebugRender() override;
+	virtual void RenderWireFrame() override;
 
 
 private:

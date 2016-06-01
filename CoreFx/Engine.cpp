@@ -41,7 +41,6 @@ Engine::Engine()
 	, mLightToDrawCount(16)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
-	, mWireFrameShader("WireFrameShader")
 	, mDrawGBufferNormalGridSpan(20, 20)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
@@ -206,7 +205,6 @@ void Engine::CreateDynamicResources()
 	InternalInitializeQuadVAO();
 	InternalInitializeDeferredPassShader();
 	InternalInitializeToneMappingShader();
-	InternalInitializeWireFramePassShader();
 }
 
 void Engine::InternalCreateGBuffers()
@@ -497,35 +495,6 @@ void Engine::InternalInitializeToneMappingShader()
 	std::cout << "... done." << std::endl;
 }
 
-void Engine::InternalInitializeWireFramePassShader()
-{
-	std::cout << std::endl;
-	std::cout << "Initialize WireFrame pass shader..." << std::endl;
-
-	//setup shader
-
-	// vertex shader
-	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
-	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/wireframe.fs.glsl");
-
-	const char * uniformNames[__wireframe_uniforms_count__] =
-	{
-		"u_WireFrameDrawColor",
-	};
-
-	mWireFrameShader.CreateAndLinkProgram();
-
-	mWireFrameShader.Use();
-
-	mWireFrameShader.AddUniforms(uniformNames, __wireframe_uniforms_count__);
-
-	//mWireFrameShader.SetupFrameDataBlockBinding();
-	mWireFrameShader.UnUse();
-
-	GL_CHECK_ERRORS;
-	std::cout << "... done." << std::endl;
-}
-
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
 {
 	renderers->ForEach([&offset, &baseIndex](Renderer * renderer)
@@ -682,6 +651,7 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_WireFrameDrawColor], glm::value_ptr(mWireFrameColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_VertexNormalColor], glm::value_ptr(mDrawVertexNormalColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_BufferViewportSize], glm::value_ptr(bufferViewportSize), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_DepthRangeFovYAspect], glm::value_ptr(depthRangeFovAspect), sizeof(glm::vec4));
@@ -695,6 +665,12 @@ void Engine::RenderObjects()
 	}
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER); 
+	// -----------------------------------------------------------------------
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	// -----------------------------------------------------------------------
+	// Geometry pass
 	// -----------------------------------------------------------------------
 
 	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
@@ -717,11 +693,6 @@ void Engine::RenderObjects()
 	glClearDepth(1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glStencilMask(0x00);
-
-	mRenderers->ForEach([](Renderer * renderer)
-	{
-		renderer->DebugRender();
-	});
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
@@ -771,65 +742,6 @@ void Engine::RenderObjects()
 	mDeferredShader.UnUse();
 
 	// -----------------------------------------------------------------------
-	// wire frame pass
-	// -----------------------------------------------------------------------
-
-	if (GetWireFrame())
-	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDeferredFBO);
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_STENCIL_TEST);
-
-		glDepthFunc(GL_LEQUAL);
-		glDepthMask(GL_FALSE);
-
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-		glClearStencil(0);
-		glClear(GL_STENCIL_BUFFER_BIT);
-
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-		glStencilMask(0xFF);
-
-		mRenderers->ForEach([](Renderer * renderer)
-		{
-			renderer->DebugRender();
-		});
-
-		mRenderers->ForEach([](Renderer * renderer)
-		{
-			renderer->Render();
-		});
-
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
-
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		
-		glEnable(GL_BLEND);
-		glEnable(GL_STENCIL_TEST);
-		glDisable(GL_DEPTH_TEST);
-
-		glDepthMask(GL_FALSE);
-
-		glStencilFunc(GL_EQUAL, 1, 0xFF);
-		glStencilMask(0x00);
-
-		mWireFrameShader.Use();
-			glBindVertexArray(mQuad->GetVao());
-				glUniform4fv(mWireFrameShader.GetUniform(u_WireFrameDrawColor), 1, glm::value_ptr(mWireFrameColor));
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
-		mWireFrameShader.UnUse();
-
-		glDisable(GL_STENCIL_TEST);
-	}
-
-	// -----------------------------------------------------------------------
 	// forward pass
 	// -----------------------------------------------------------------------
 
@@ -848,13 +760,26 @@ void Engine::RenderObjects()
 
 	mForwardRenderers->ForEach([](Renderer * renderer)
 	{
-		renderer->DebugRender();
-	});
-
-	mForwardRenderers->ForEach([](Renderer * renderer)
-	{
 		renderer->Render();
 	});
+
+	// -----------------------------------------------------------------------
+	// wire frame pass
+	// -----------------------------------------------------------------------
+
+	glDepthMask(GL_FALSE);
+
+	if (GetWireFrame())
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		mRenderers->ForEach([](Renderer * renderer)
+		{
+			renderer->RenderWireFrame();
+		});
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 
 	// -----------------------------------------------------------------------
 	// tone mapping pass

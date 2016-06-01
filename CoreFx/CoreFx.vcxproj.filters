@@ -40,9 +40,6 @@
     <ClInclude Include="targetver.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="Renderables\RenderableObject.h">
-      <Filter>Renderables</Filter>
-    </ClInclude>
     <ClInclude Include="Renderables\Grid.h">
       <Filter>Renderables</Filter>
     </ClInclude>

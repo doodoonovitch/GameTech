@@ -105,7 +105,7 @@ public:
 	virtual ~ShallowWaterRenderer();
 
 	virtual void Render() override;
-	virtual void DebugRender() override;
+	virtual void RenderWireFrame() override;
 
 
 private:

@@ -37,7 +37,7 @@ public:
 	virtual ~CubeRenderer();
 
 	virtual void Render() override;
-	virtual void DebugRender() override;
+	virtual void RenderWireFrame() override;
 
 	Renderables::Cube * CreateCube(std::uint8_t materialIndex);
 	void DeleteCube(Renderables::Cube *& cube);
@@ -50,12 +50,21 @@ public:
 
 private:
 
-	enum EUniformIndex
+	enum class EMainShaderUniformIndex
 	{
 		u_MaterialBaseIndex,
 		u_perInstanceDataSampler,
 		u_materialIndexSampler,
 		u_materialDataSampler,
+
+		__uniforms_count__
+	};
+
+	enum class EWireFrameShaderUniformIndex 
+	{
+		u_MaterialBaseIndex,
+		u_perInstanceDataSampler,
+		u_materialIndexSampler,
 
 		__uniforms_count__
 	};
@@ -103,8 +112,12 @@ private:
 
 	static void ComputeTangent(GLfloat vertices[], int vertexCount, GLushort indices[], int indexCount);
 
-	void InitializeShader();
+	void InitializeShaders();
+	void InitializeMainShader();
+	void InitializeWireFrameShader();
 	void UpdateMaterialTextureIndex();
+
+	void UpdateShaderData();
 
 private:
 	
