@@ -231,6 +231,7 @@
     <None Include="..\Data\Shaders\deepOcean.tcs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.tes.glsl" />
     <None Include="..\Data\Shaders\deepOcean.vs.glsl" />
+    <None Include="..\Data\Shaders\deepOcean.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\drawGBufferNormals.forward.fs.glsl" />
     <None Include="..\Data\Shaders\drawGBufferNormals.gs.glsl" />
@@ -243,11 +244,13 @@
     <None Include="..\Data\Shaders\skybox.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.vs.glsl" />
+    <None Include="..\Data\Shaders\skybox.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\terrain.gs.glsl" />
     <None Include="..\Data\Shaders\terrain.tcs.glsl" />
     <None Include="..\Data\Shaders\terrain.tes.glsl" />
     <None Include="..\Data\Shaders\terrain.vs.glsl" />
+    <None Include="..\Data\Shaders\terrain.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\tonemapping.fs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.fs.glsl" />

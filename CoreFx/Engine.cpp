@@ -767,16 +767,19 @@ void Engine::RenderObjects()
 	// wire frame pass
 	// -----------------------------------------------------------------------
 
-	glDepthMask(GL_FALSE);
-
 	if (GetWireFrame())
 	{
+		glDepthMask(GL_FALSE);
+		glDepthFunc(GL_LEQUAL);
+
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		mRenderers->ForEach([](Renderer * renderer)
 		{
 			renderer->RenderWireFrame();
 		});
+
+		mSkybox->RenderWireFrame();
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}

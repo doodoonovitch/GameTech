@@ -36,6 +36,17 @@ namespace CoreFx
 
 	GL_CHECK_ERRORS;
 
+	//setup shader
+	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/skybox.vs.glsl");
+	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.wireframe.fs.glsl");
+	mWireFrameShader.CreateAndLinkProgram();
+	mWireFrameShader.Use();
+	mWireFrameShader.SetupFrameDataBlockBinding();
+	mWireFrameShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+
 	GLfloat skyboxVertices[] = 
 	{
 		// Positions          
@@ -110,18 +121,21 @@ SkyboxRenderer::~SkyboxRenderer()
 void SkyboxRenderer::Render()
 {
 	mShader.Use();
-		glDepthMask(GL_FALSE);
-			glBindVertexArray(mVaoID);
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, mCubeMapTexture->GetResourceId());
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-			glBindVertexArray(0);
-		glDepthMask(GL_TRUE);
+		glBindVertexArray(mVaoID);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, mCubeMapTexture->GetResourceId());
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
 	mShader.UnUse();
 }
  
 void SkyboxRenderer::RenderWireFrame()
 {
+	mWireFrameShader.Use();
+		glBindVertexArray(mVaoID);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+	mWireFrameShader.UnUse();
 }
 
 

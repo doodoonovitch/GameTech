@@ -125,6 +125,8 @@ private:
 
 
 	void LoadShaders(const Desc & desc);
+	void LoadMainShader(const Desc & desc);
+	void LoadWireFrameShader(const Desc & desc);
 	void GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps);
 	void SetWavePropertyUniformValues(WavePropUniformIndex & waveProps);
 
@@ -142,15 +144,6 @@ private:
 
 		__uniforms_count__
 	};
-
-	enum EUniformIndex2
-	{
-		u_NormalMagnitude,
-		u_VertexNormalColor,
-
-		__uniforms2_count__
-	};
-
 
 	struct PerMapData
 	{
@@ -180,7 +173,7 @@ private:
 	TextureBuffer mModelMatrixBuffer;
 
 	WavePropUniformIndex mShaderWaveProps;
-	WavePropUniformIndex mDebugShaderWaveProps;
+	WavePropUniformIndex mWireFrameShaderWaveProps;
 };
 
 

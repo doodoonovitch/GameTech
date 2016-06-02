@@ -97,6 +97,8 @@ private:
 	static void GenerateGetMaterialByHeight(std::string & generatedSource, const MaterialDescList & matDescList, const TextureInfoList & texInfo);
 
 	void LoadShaders(const Desc & desc);
+	void LoadMainShader(const Desc & desc);
+	void LoadWireFrameShader(const Desc & desc);
 	void LoadHeightMap(const MapDescList & terrainDescList);
 	//void UpdateMaterialTextureIndex(const Desc & desc);
 
@@ -112,14 +114,6 @@ private:
 		u_PerMapDataSampler,
 
 		__uniforms_count__
-	};
-
-	enum EUniformIndex2
-	{
-		u_NormalMagnitude,
-		u_VertexNormalColor,
-
-		__uniforms2_count__
 	};
 
 
@@ -141,7 +135,6 @@ private:
 	GLuint mHeightMapTextureId;
 	GLint mMapCount;
 
-	Shader mDrawNormalShader;
 	TextureBuffer mModelMatrixBuffer;
 };
 

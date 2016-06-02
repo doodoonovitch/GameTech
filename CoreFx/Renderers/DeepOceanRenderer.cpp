@@ -22,7 +22,7 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 	std::cout << "Initialize DeepOceanRenderer...." << std::endl;
 
 	memset(mShaderWaveProps.mWavePropModified, -1, sizeof(mShaderWaveProps.mWavePropModified));
-	memset(mDebugShaderWaveProps.mWavePropModified, -1, sizeof(mDebugShaderWaveProps.mWavePropModified));
+	memset(mWireFrameShaderWaveProps.mWavePropModified, -1, sizeof(mWireFrameShaderWaveProps.mWavePropModified));
 	memcpy(mWaveProps, desc.mWaveProps, sizeof(mWaveProps));
 
 	const glm::vec3 vertices[] =
@@ -74,7 +74,13 @@ DeepOceanRenderer::~DeepOceanRenderer()
 	mModelMatrixBuffer.ReleaseResource();
 }
 
-void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
+void DeepOceanRenderer::LoadShaders(const Desc & desc)
+{
+	LoadMainShader(desc);
+	LoadWireFrameShader(desc);
+}
+
+void DeepOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 {
 	PRINT_MESSAGE("Initialize Deep Ocean Renderer Shaders : \n\n");
 
@@ -120,38 +126,51 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 
 	GL_CHECK_ERRORS;
 
+	PRINT_MESSAGE("... done.\n");
+	PRINT_MESSAGE("-------------------------------------------------\n\n");
+}
+
+void DeepOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
+{
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer (Wire Frame) Shaders : \n\n");
+
+	const char * uniformNames[] =
+	{
+		"u_PatchCount",
+		"u_MapSize",
+		"u_Scale",
+		"u_PerMapDataSampler",
+	};
 
 
-	//const char * uniformNames2[__uniforms2_count__] =
-	//{
-	//	"u_NormalMagnitude",
-	//	"u_VertexNormalColor",
-	//};
+	//setup shader
+	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
 
-	//mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
-	//mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOcean.tcs.glsl");
-	//mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
-	//mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean_vertex_normal.gs.glsl");
-	//mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
-	//mDrawNormalShader.CreateAndLinkProgram();
-	//mDrawNormalShader.Use();
+	mWireFrameShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOcean.tcs.glsl");
 
-	//mDrawNormalShader.AddUniforms(uniformNames, __uniforms_count__);
-	//mDrawNormalShader.AddUniforms(uniformNames2, __uniforms2_count__);
+	mWireFrameShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
 
-	////pass values of constant uniforms at initialization
-	//glUniform2iv(mDrawNormalShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
-	//glUniform2iv(mDrawNormalShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	//glUniform3fv(mDrawNormalShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	//mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/deepOcean.gs.glsl");
 
-	//glUniform1i(mDrawNormalShader.GetUniform(u_PerMapDataSampler), 0); GL_CHECK_ERRORS;
+	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/deepOcean.wireframe.fs.glsl");
 
-	//GetWavePropertyUniformIndex(mDrawNormalShader, mDebugShaderWaveProps);
+	mWireFrameShader.CreateAndLinkProgram();
+	mWireFrameShader.Use();
 
-	//mDrawNormalShader.SetupFrameDataBlockBinding();
-	//mDrawNormalShader.UnUse();
+	mWireFrameShader.AddUniforms(uniformNames, 4);
 
-	//GL_CHECK_ERRORS;
+	//pass values of constant uniforms at initialization
+	glUniform2iv(mWireFrameShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
+	glUniform2iv(mWireFrameShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
+	glUniform3fv(mWireFrameShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	glUniform1i(mWireFrameShader.GetUniform(u_PerMapDataSampler), 0); GL_CHECK_ERRORS;
+
+	GetWavePropertyUniformIndex(mWireFrameShader, mWireFrameShaderWaveProps);
+
+	mWireFrameShader.SetupFrameDataBlockBinding();
+	mWireFrameShader.UnUse();
+
+	GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("... done.\n");
 	PRINT_MESSAGE("-------------------------------------------------\n\n");
@@ -159,7 +178,6 @@ void DeepOceanRenderer::LoadShaders(const Desc & /*desc*/)
 
 void DeepOceanRenderer::GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps)
 {
-
 	for (int i = 0; i < MAX_WAVE_TO_SUM; ++i)
 	{
 		char uniformName[50];
@@ -235,28 +253,39 @@ void DeepOceanRenderer::SetWavePropertyUniformValues(WavePropUniformIndex & wave
 void DeepOceanRenderer::Render()
 {
 	mShader.Use();
-	glBindVertexArray(mVaoID);
+		glBindVertexArray(mVaoID);
 
-	SetWavePropertyUniformValues(mShaderWaveProps);
+			SetWavePropertyUniformValues(mShaderWaveProps);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 	
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mCubeMapTexture->GetResourceId());
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, mCubeMapTexture->GetResourceId());
 
-	//glActiveTexture(GL_TEXTURE2);
-	//glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());
+			//glActiveTexture(GL_TEXTURE2);
+			//glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());
 
-	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
+			glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 
-	glBindVertexArray(0);
+		glBindVertexArray(0);
 	mShader.UnUse();
-
 }
 
 void DeepOceanRenderer::RenderWireFrame()
 {
+	mWireFrameShader.Use();
+		glBindVertexArray(mVaoID);
+
+			SetWavePropertyUniformValues(mWireFrameShaderWaveProps);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+
+			glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
+
+		glBindVertexArray(0);
+	mWireFrameShader.UnUse();
 }
 
 

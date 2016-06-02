@@ -18,7 +18,6 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	, mHighSlope(desc.mHighSlope)
 	, mHeightMapTextureId(0)
 	, mMapCount(0)
-	, mDrawNormalShader("TerrainDrawNormals")
 {
 	std::cout << std::endl;
 	std::cout << "Initialize TerrainRenderer...." << std::endl;
@@ -81,6 +80,12 @@ TerrainRenderer::~TerrainRenderer()
 }
 
 void TerrainRenderer::LoadShaders(const Desc & desc)
+{
+	LoadMainShader(desc);
+	LoadWireFrameShader(desc);
+}
+
+void TerrainRenderer::LoadMainShader(const Desc & desc)
 {
 	PRINT_MESSAGE("Initialize Terrain Renderer Shaders : \n\n");
 
@@ -145,37 +150,50 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 	GL_CHECK_ERRORS;
 
 
-	const char * uniformNames2[__uniforms2_count__] =
+	PRINT_MESSAGE("... done.\n");
+	PRINT_MESSAGE("-------------------------------------------------\n\n");
+}
+
+void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
+{
+	PRINT_MESSAGE("Initialize Terrain Renderer (Wire Frame) Shaders : \n\n");
+
+	const char * uniformNames[__uniforms_count__] =
 	{
-		"u_NormalMagnitude",
-		"u_VertexNormalColor",
+		"u_PatchCount",
+		"u_MapSize",
+		"u_Scale",
+		"u_TexScale",
+		"u_HeightMap",
+		"u_PerMapDataSampler",
 	};
 
-	mDrawNormalShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/terrain.vs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/terrain.tcs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tes.glsl");
-	mDrawNormalShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain_vertex_normal.gs.glsl");
-	mDrawNormalShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/vertex_normal.fs.glsl");
-	mDrawNormalShader.CreateAndLinkProgram();
-	mDrawNormalShader.Use();
 
-	mDrawNormalShader.AddUniforms(uniformNames, __uniforms_count__);
-	mDrawNormalShader.AddUniforms(uniformNames2, __uniforms2_count__);
+	//setup shader
+	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/terrain.vs.glsl");
+	mWireFrameShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/terrain.tcs.glsl");
+	mWireFrameShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tes.glsl");
+	mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain.gs.glsl");
+	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/terrain.wireframe.fs.glsl");
+
+	mWireFrameShader.CreateAndLinkProgram();
+	mWireFrameShader.Use();
+
+	mWireFrameShader.AddUniforms(uniformNames, __uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform2iv(mDrawNormalShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
-	glUniform2iv(mDrawNormalShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	glUniform3fv(mDrawNormalShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	glUniform2iv(mWireFrameShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
+	glUniform2iv(mWireFrameShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
+	glUniform3fv(mWireFrameShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 
-	glUniform1i(mDrawNormalShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
+	glUniform1i(mWireFrameShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
+	glUniform1i(mWireFrameShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 
-	glUniform1i(mDrawNormalShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
-
-
-	mDrawNormalShader.SetupFrameDataBlockBinding();
-	mDrawNormalShader.UnUse();
+	mWireFrameShader.SetupFrameDataBlockBinding();
+	mWireFrameShader.UnUse();
 
 	GL_CHECK_ERRORS;
+
 
 	PRINT_MESSAGE("... done.\n");
 	PRINT_MESSAGE("-------------------------------------------------\n\n");
@@ -416,6 +434,19 @@ void TerrainRenderer::Render()
 
 void TerrainRenderer::RenderWireFrame()
 {
+	mWireFrameShader.Use();
+	glBindVertexArray(mVaoID);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+
+	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
+
+	glBindVertexArray(0);
+	mWireFrameShader.UnUse();
 }
 
 

@@ -47,7 +47,7 @@ void main()
 
 	for(int i = 0; i < c_MaxWavesToSum; ++i)
 	{
-		float dirPos = dot(u_Direction[i].xz, tc.yx);
+		float dirPos = dot(u_Direction[i].xz, tc.xy);
 		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
 
 		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
@@ -62,7 +62,7 @@ void main()
 			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
 		}
 
-		vec2 dH = vec2(u_Direction[i].x * tc.y * dhCommon, u_Direction[i].z * tc.x * dhCommon);
+		vec2 dH = vec2(u_Direction[i].x * tc.x * dhCommon, u_Direction[i].z * tc.y * dhCommon);
 		normal = normal + vec3(-dH.x, -dH.y, 0);
 	}		 
 	p.y = H;
