@@ -195,9 +195,9 @@ void SimpleCamera::OnInit()
 			const float AmpCoef = 0.1f;
 			const float WaveLengthCoef = 1.f;
 			const float VelocityCoef = 0.01f;
-			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 10.0f);
+			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 28.0f, VelocityCoef * 5.0f, 10.0f);
 			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 7.0f, VelocityCoef * 6.0f, 2.0f);
-			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 3.0f);
+			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 18.0f, VelocityCoef * 5.0f, 3.0f);
 			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 6.0f, VelocityCoef * 4.0f, 1.0f);
 
 			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
@@ -244,10 +244,10 @@ void SimpleCamera::OnInit()
 	// Setup Lights
 		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
 		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 15.f, -15.f), glm::vec3(1.f, 1.f, 1.f), 400.f, glm::normalize(glm::vec3(.1f, -0.1f, 1.f)), glm::radians(15.f), glm::radians(25.f), 0.5f, 0.06f, .06f);
-		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), .6f);
+		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), .6f);
 		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(0.f, 5.f, 0.f), glm::vec3(1.f, 0.4f, 0.7f), 40.f, 1.f, 0.4f, 0.05f);
-		//Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(20.f, 7.f, 8.f), glm::vec3(1.f, 1.f, 1.f), 1.f, 1.f, 0.7f, 0.02f);
+		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 500.f, .5f, 0.07f, 0.02f);
 		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);
 
 	//setup camera

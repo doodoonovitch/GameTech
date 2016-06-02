@@ -60,10 +60,10 @@ void main()
 		}
 
 		vec2 dH = vec2(u_Direction[i].x /* fs_in.TexUV.y*/ * dhCommon, u_Direction[i].z /* fs_in.TexUV.x*/ * dhCommon);
-		normal = normal + vec3(-dH.x, -dH.y, 0);
+		normal = normal + vec3(dH.x, dH.y, 0);
 	}		 
 
-	normal = vec3(normal.x, 1, normal.y);
+	normal = vec3(-normal.x, 1, -normal.y);
 	normal = normalize(normal);
 	
 	Material mat;

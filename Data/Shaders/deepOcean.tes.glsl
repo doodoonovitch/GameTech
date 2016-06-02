@@ -63,11 +63,11 @@ void main()
 		}
 
 		vec2 dH = vec2(u_Direction[i].x * tc.x * dhCommon, u_Direction[i].z * tc.y * dhCommon);
-		normal = normal + vec3(-dH.x, -dH.y, 0);
+		normal = normal + vec3(dH.x, dH.y, 0);
 	}		 
 	p.y = H;
 
-	normal = vec3(normal.x, 1, normal.y);
+	normal = vec3(-normal.x, 1, -normal.y);
 	normal = normalize(normal);
 
 	vec4 viewPos = u_ViewMatrix * p;
