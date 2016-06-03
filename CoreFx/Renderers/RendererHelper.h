@@ -12,7 +12,7 @@ namespace CoreFx
 
 
 template<int T_vbo_count>
-class RendererHelper : public Renderer
+class RendererHelperBase : public Renderer
 {
 public:
 
@@ -20,21 +20,15 @@ public:
 
 protected:
 
-	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
+	RendererHelperBase(GLuint propertyCount, ERenderPass renderPass = Deferred_Pass)
 		: Renderer(propertyCount, renderPass)
 		, mVaoID(0)
-		, mShader(shaderTitle)
-		, mWireFrameShader(wireFramShaderTitle)
 	{
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
 	}
 
-	virtual ~RendererHelper(void)
+	virtual ~RendererHelperBase(void)
 	{
-		//Destroy shader
-		mShader.DeleteShaderProgram();
-		mWireFrameShader.DeleteShaderProgram();
-
 		// Release buffers (vao & vbo)
 		ReleaseBuffers();
 	}
@@ -59,6 +53,30 @@ protected:
 
 	GLuint mVaoID;
 	GLuint mVboIDs[mVboCount];	
+};
+
+template<int T_vbo_count>
+class RendererHelper : public RendererHelperBase<T_vbo_count>
+{
+protected:
+
+	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
+		: RendererHelperBase<T_vbo_count>(propertyCount, renderPass)
+		, mShader(shaderTitle)
+		, mWireFrameShader(wireFramShaderTitle)
+	{
+		std::memset(mVboIDs, 0, sizeof(mVboIDs));
+	}
+
+	virtual ~RendererHelper(void)
+	{
+		//Destroy shader
+		mShader.DeleteShaderProgram();
+		mWireFrameShader.DeleteShaderProgram();
+	}
+
+protected:
+
 	Shader mShader;
 	Shader mWireFrameShader;
 };

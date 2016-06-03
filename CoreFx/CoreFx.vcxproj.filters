@@ -124,6 +124,9 @@
     <ClInclude Include="Renderers\ShallowWaterRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\BasicTessSphereShader.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -201,6 +204,9 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\ShallowWaterRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\BasicTessSphereShader.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -323,6 +329,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\skybox.wireframe.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\BasicTessSphereShader.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\BasicTessSphereShader.tcs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\BasicTessSphereShader.tes.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\BasicTessSphereShader.forward.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
