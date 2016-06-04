@@ -55,7 +55,7 @@ protected:
 	GLuint mVboIDs[mVboCount];	
 };
 
-template<int T_vbo_count>
+template<int T_vbo_count, typename T_MainShader = Shader, typename T_WireFrameShader = Shader>
 class RendererHelper : public RendererHelperBase<T_vbo_count>
 {
 protected:
@@ -77,8 +77,8 @@ protected:
 
 protected:
 
-	Shader mShader;
-	Shader mWireFrameShader;
+	T_MainShader mShader;
+	T_WireFrameShader mWireFrameShader;
 };
 
 

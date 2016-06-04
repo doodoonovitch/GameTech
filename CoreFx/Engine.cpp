@@ -349,24 +349,28 @@ void Engine::InternalReleaseHdrBuffers()
 
 void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
 {
-	bool recreateGBuffers = mGBufferWidth != gBufferWidth || mGBufferHeight != gBufferHeight;
-
-	if (recreateGBuffers)
+	if (mInitialized)
 	{
-		InternalReleaseGBuffers();
-		InternalReleaseHdrBuffers();
+
+		bool recreateGBuffers = mGBufferWidth != gBufferWidth || mGBufferHeight != gBufferHeight;
+
+		if (recreateGBuffers)
+		{
+			InternalReleaseGBuffers();
+			InternalReleaseHdrBuffers();
+		}
+
+		mViewportX = viewportX;
+		mViewportY = viewportY;
+		mViewportWidth = viewportWidth;
+		mViewportHeight = viewportHeight;
+		mGBufferWidth = gBufferWidth;
+		mGBufferHeight = gBufferHeight;
+
+		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+
+		InternalUpdateDrawGBufferNormalsPatchCount();
 	}
-
-	mViewportX = viewportX;
-	mViewportY = viewportY;
-	mViewportWidth = viewportWidth;
-	mViewportHeight = viewportHeight;
-	mGBufferWidth = gBufferWidth;
-	mGBufferHeight = gBufferHeight;
-
-	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
-
-	InternalUpdateDrawGBufferNormalsPatchCount();
 }
 
 void Engine::InternalInitializeQuadVAO()
