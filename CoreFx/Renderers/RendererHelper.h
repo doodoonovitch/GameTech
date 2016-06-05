@@ -49,6 +49,16 @@ protected:
 		mVaoID = 0;
 	}
 
+	GLuint GetVaoID() const
+	{
+		return mVaoID;
+	}
+
+	const GLuint* GetVboIDs() const
+	{
+		return mVboIDs;
+	}
+
 protected:
 
 	GLuint mVaoID;
@@ -77,14 +87,14 @@ protected:
 
 protected:
 
-	T_MainShader mShader;
-	T_WireFrameShader mWireFrameShader;
+	typename T_MainShader mShader;
+	typename T_WireFrameShader mWireFrameShader;
 };
 
 
 
-template<typename T_Object, int T_vbo_count>
-class SceneObjectRenderer : public RendererHelper<T_vbo_count>
+template<typename T_Object, int T_vbo_count, typename T_MainShader = Shader, typename T_WireFrameShader = Shader>
+class SceneObjectRenderer : public RendererHelper<T_vbo_count, T_MainShader, T_WireFrameShader>
 {
 public:
 

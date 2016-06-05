@@ -9,8 +9,8 @@ namespace CoreFx
 
 
 
-BasicTessSphereShader::BasicTessSphereShader()
-	: Shader("BasicTessSphereShader")
+BasicTessSphereShader::BasicTessSphereShader(const char * shaderTitle)
+	: Shader(shaderTitle)
 {
 }
 

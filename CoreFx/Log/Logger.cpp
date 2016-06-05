@@ -10,6 +10,16 @@ namespace Log
 
 void PrintMessage(const char * messageFormat, ...)
 {
+	Logger::GetInstance()->Print("[Info] ");
+	va_list args;
+	va_start(args, messageFormat);
+	Logger::GetInstance()->Print(messageFormat, args);
+	va_end(args);
+}
+
+void PrintError(const char * messageFormat, ...)
+{
+	Logger::GetInstance()->Print("[Error] ");
 	va_list args;
 	va_start(args, messageFormat);
 	Logger::GetInstance()->Print(messageFormat, args);

@@ -23,10 +23,10 @@ public:
 	};
 
 public:
-	BasicTessSphereShader();
+	BasicTessSphereShader(const char * shaderTitle = "BasicTessSphereShader");
 	~BasicTessSphereShader();
 
-	virtual void LoadShaders();
+	void LoadShaders();
 
 private:
 

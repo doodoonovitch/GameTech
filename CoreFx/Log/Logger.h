@@ -39,6 +39,7 @@ protected:
 
 
 extern void PrintMessage(const char * messageFormat, ...);
+extern void PrintError(const char * messageFormat, ...);
 
 // =======================================================================
 // =======================================================================

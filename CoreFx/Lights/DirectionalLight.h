@@ -13,7 +13,7 @@ namespace CoreFx
 
 class DirectionalLight : public Light
 {
-	template<typename T_Object, int T_vbo_count> friend class Renderers::SceneObjectRenderer;
+	template<typename T_Object, int T_vbo_count, typename T_MainShader = Shader, typename T_WireFrameShader = Shader> friend class Renderers::SceneObjectRenderer;
 	friend class Engine;
 
 
