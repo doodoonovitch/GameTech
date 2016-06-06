@@ -78,6 +78,7 @@ public:
 		SetIsModified(true);
 	}
 
+	GLfloat GetAttenuationDistance() const;
 
 protected:
 

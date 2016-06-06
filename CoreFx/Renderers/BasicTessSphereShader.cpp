@@ -27,7 +27,7 @@ void BasicTessSphereShader::LoadShaders()
 	//setup shader
 	LoadFromFile(GL_VERTEX_SHADER, "shaders/BasicTessSphereShader.vs.glsl");
 	LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/BasicTessSphereShader.tcs.glsl");
-	LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/BasicTessSphereShader.tcs.glsl");
+	LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/BasicTessSphereShader.tes.glsl");
 	LoadFromFile(GL_FRAGMENT_SHADER, "shaders/BasicTessSphereShader.forward.fs.glsl");
 
 	const char * uniformNames[__uniforms_count__] =

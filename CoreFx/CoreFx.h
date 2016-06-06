@@ -69,6 +69,7 @@ namespace CoreFx
 #include "Renderers\DrawGBufferNormalShader.h"
 #include "Renderers\BasicTessSphereShader.h"
 #include "Renderers\RendererHelper.h"
+#include "Renderers\BasicTessSphereRenderer.h"
 
 #include "TextureBuffer.h"
 
@@ -99,6 +100,5 @@ namespace CoreFx
 #include "Renderers\DeepOceanRenderer.h"
 #include "Renderers\ShallowWaterRenderer.h"
 #include "Renderers\SkyboxRenderer.h"
-#include "Renderers\BasicTessSphereRenderer.h"
 
 #endif // COREFX_COREFX_H

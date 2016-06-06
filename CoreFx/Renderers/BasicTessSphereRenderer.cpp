@@ -53,10 +53,10 @@ void BasicTessSphereRendererBase::UpdateVertexArrayBuffer(std::uint8_t * buffer,
 	}
 	else
 	{
-		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		if (lightDataBuffer != nullptr)
+		std::uint8_t * dataBuffer = (std::uint8_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		if (dataBuffer != nullptr)
 		{
-			memcpy(lightDataBuffer, buffer, sizeof(GLfloat) * 4 * vertexCount);
+			memcpy(dataBuffer, buffer, sizeof(GLfloat) * 4 * vertexCount);
 			glUnmapBuffer(GL_ARRAY_BUFFER);
 		}
 		else

@@ -1,4 +1,4 @@
-layout (vertices = 1) out;
+layout (vertices = 4) out;
 
 uniform float u_TessFactor;
 
@@ -12,7 +12,7 @@ out TCS_OUT
 {
 	vec3 Center;
 	float Radius;
-} tcs_out;
+} tcs_out[];
 
 
 void main()
@@ -24,10 +24,10 @@ void main()
     gl_TessLevelInner[0] = u_TessFactor;
     gl_TessLevelInner[1] = u_TessFactor;
 
-    tcs_out.Center = tcs_in[0].Center
-    tcs_out.Radius = tcs_in[0].Radius;
+    tcs_out[gl_InvocationID].Center = tcs_in[gl_InvocationID].Center
+    tcs_out[gl_InvocationID].Radius = tcs_in[gl_InvocationID].Radius;
 
-	gl_out[gl_InvocationID].gl_Position = gl_in[0].gl_Position;
+	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 }
 
 
