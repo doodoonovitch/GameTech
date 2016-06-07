@@ -1,6 +1,6 @@
 //layout (quads, fractional_odd_spacing) in;
 //layout (quads, fractional_even_spacing) in;
-layout (quads, equal_spacing, point_mode) in;
+layout (quads, equal_spacing) in;
 
 
 

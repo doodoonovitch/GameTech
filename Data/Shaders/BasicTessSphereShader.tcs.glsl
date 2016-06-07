@@ -1,4 +1,4 @@
-layout (vertices = 1) out;
+layout (vertices = 4) out;
 
 uniform float u_TessFactor;
 
@@ -17,12 +17,15 @@ out TCS_OUT
 
 void main()
 {
-    gl_TessLevelOuter[0] = 2;
-    gl_TessLevelOuter[1] = u_TessFactor;
-    gl_TessLevelOuter[2] = 2;
-    gl_TessLevelOuter[3] = u_TessFactor;
-    gl_TessLevelInner[0] = u_TessFactor;
-    gl_TessLevelInner[1] = u_TessFactor;
+	if (gl_InvocationID == 0)
+	{
+		gl_TessLevelOuter[0] = 2;
+		gl_TessLevelOuter[1] = u_TessFactor;
+		gl_TessLevelOuter[2] = 2;
+		gl_TessLevelOuter[3] = u_TessFactor;
+		gl_TessLevelInner[0] = u_TessFactor;
+		gl_TessLevelInner[1] = u_TessFactor;
+	}
 
     tcs_out[gl_InvocationID].Center = tcs_in[gl_InvocationID].Center
     tcs_out[gl_InvocationID].Radius = tcs_in[gl_InvocationID].Radius;
