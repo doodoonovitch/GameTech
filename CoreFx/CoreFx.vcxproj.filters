@@ -325,16 +325,19 @@
     <None Include="..\Data\Shaders\skybox.wireframe.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\BasicTessSphereShader.vs.glsl">
+    <None Include="..\Data\Shaders\IcosahedronShader.forward.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\BasicTessSphereShader.tcs.glsl">
+    <None Include="..\Data\Shaders\IcosahedronShader.tcs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\BasicTessSphereShader.tes.glsl">
+    <None Include="..\Data\Shaders\IcosahedronShader.tes.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\BasicTessSphereShader.forward.fs.glsl">
+    <None Include="..\Data\Shaders\IcosahedronShader.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.gs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
