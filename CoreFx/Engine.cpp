@@ -46,7 +46,6 @@ Engine::Engine()
 	, mIsDrawVertexNormalEnabled(false)
 	, mIsDrawGBufferNormalEnabled(false)
 	, mWireFrame(false)
-	, mPointLightHelperRenderer(20)
 {
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
@@ -103,8 +102,6 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		//InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
 
 		PRINT_MESSAGE("Initializing PointLightHelper Renderer...\n");
-		mPointLightHelperRenderer.Initialize();
-		glUniform1f(mPointLightHelperRenderer.mShader.GetUniform(Renderers::BasicTessSphereShader::u_TessFactor), 3.f);
 		PRINT_MESSAGE("... end.\n");
 
 		mInitialized = true;
@@ -773,7 +770,7 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
-	mPointLightHelperRenderer.Render();
+	//mPointLightHelperRenderer.Render();
 
 	// -----------------------------------------------------------------------
 	// wire frame pass
@@ -793,7 +790,7 @@ void Engine::RenderObjects()
 
 		mSkybox->RenderWireFrame();
 
-		mPointLightHelperRenderer.RenderWireFrame();
+		//mPointLightHelperRenderer.RenderWireFrame();
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
@@ -859,7 +856,7 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::v
 	{
 		Lights::PointLight *light = new Lights::PointLight(position, color, intensity, constantAttenuation, linearAttenuation, quadraticAttenuation);
 		mLights[lightType]->Attach(light);
-		mPointLightHelperRenderer.mVboUpdateNeeded = true;
+		//mPointLightHelperRenderer.mVboUpdateNeeded = true;
 		return light;
 	}
 	else
@@ -996,74 +993,74 @@ void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
 //	});
 //
 //}
-
-Engine::PointLightHelperRenderer::PointLightHelperRenderer(GLuint maxSphereCount)
-	: BasicTessSphereRendererBase(maxSphereCount)
-	, mVboUpdateNeeded(false)
-{
-	Initialize();
-}
-
-Engine::PointLightHelperRenderer::~PointLightHelperRenderer()
-{
-
-}
-
-#define VertexDataSize (GLuint)(sizeof(GLfloat) * 4)
-
-void Engine::PointLightHelperRenderer::Render()
-{
-	Engine * engine = Engine::GetInstance();
-
-	LightContainer * lights = engine->mLights[Lights::Light::Point_Light];
-	GLuint vertexCount = (GLuint)lights->GetCount();
-
-	mShader.Use();
-	glBindVertexArray(mVaoID);
-
-	if (mVboUpdateNeeded)
-	{
-		if (lights->GetCapacity() > mVertexArrayCapacity)
-		{
-			mVertexArrayCapacity = (GLuint)lights->GetCapacity();
-
-			glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[0]);
-			glBufferData(GL_ARRAY_BUFFER, mVertexArrayCapacity * VertexDataSize, nullptr, GL_STATIC_DRAW);
-		}
-
-
-		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		if (lightDataBuffer != nullptr)
-		{
-			lights->ForEach([&lightDataBuffer](Lights::Light * light)
-			{
-				Lights::PointLight * pointLight = (Lights::PointLight *)light;
-				
-				glm::vec4 p = pointLight->GetPosition();
-				p.w = 0.5f;
-
-				memcpy(lightDataBuffer, glm::value_ptr(p), VertexDataSize);
-				lightDataBuffer += VertexDataSize;
-			});
-
-			glUnmapBuffer(GL_ARRAY_BUFFER);
-		}
-		else
-		{
-			PRINT_ERROR("PointLightHelperRenderer has failed to map vertex array buffer.");
-		}
-
-
-		mVboUpdateNeeded = false;
-	}
-
-	glDrawArrays(GL_PATCHES, 0, vertexCount);
-	glBindVertexArray(0);
-	mShader.UnUse();
-
-}
-
-#undef vertexDataSize
+//
+//Engine::PointLightHelperRenderer::PointLightHelperRenderer(GLuint maxSphereCount)
+//	: BasicTessSphereRendererBase(maxSphereCount)
+//	, mVboUpdateNeeded(false)
+//{
+//	Initialize();
+//}
+//
+//Engine::PointLightHelperRenderer::~PointLightHelperRenderer()
+//{
+//
+//}
+//
+//#define VertexDataSize (GLuint)(sizeof(GLfloat) * 4)
+//
+//void Engine::PointLightHelperRenderer::Render()
+//{
+//	Engine * engine = Engine::GetInstance();
+//
+//	LightContainer * lights = engine->mLights[Lights::Light::Point_Light];
+//	GLuint vertexCount = (GLuint)lights->GetCount();
+//
+//	mShader.Use();
+//	glBindVertexArray(mVaoID);
+//
+//	if (mVboUpdateNeeded)
+//	{
+//		if (lights->GetCapacity() > mVertexArrayCapacity)
+//		{
+//			mVertexArrayCapacity = (GLuint)lights->GetCapacity();
+//
+//			glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[0]);
+//			glBufferData(GL_ARRAY_BUFFER, mVertexArrayCapacity * VertexDataSize, nullptr, GL_STATIC_DRAW);
+//		}
+//
+//
+//		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+//		if (lightDataBuffer != nullptr)
+//		{
+//			lights->ForEach([&lightDataBuffer](Lights::Light * light)
+//			{
+//				Lights::PointLight * pointLight = (Lights::PointLight *)light;
+//				
+//				glm::vec4 p = pointLight->GetPosition();
+//				p.w = 0.5f;
+//
+//				memcpy(lightDataBuffer, glm::value_ptr(p), VertexDataSize);
+//				lightDataBuffer += VertexDataSize;
+//			});
+//
+//			glUnmapBuffer(GL_ARRAY_BUFFER);
+//		}
+//		else
+//		{
+//			PRINT_ERROR("PointLightHelperRenderer has failed to map vertex array buffer.");
+//		}
+//
+//
+//		mVboUpdateNeeded = false;
+//	}
+//
+//	glDrawArrays(GL_PATCHES, 0, vertexCount);
+//	glBindVertexArray(0);
+//	mShader.UnUse();
+//
+//}
+//
+//#undef vertexDataSize
 
 	// =======================================================================
 	// =======================================================================

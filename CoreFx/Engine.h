@@ -435,22 +435,6 @@ private:
 	bool mIsDrawVertexNormalEnabled;
 	bool mIsDrawGBufferNormalEnabled;
 	bool mWireFrame;
-
-	class PointLightHelperRenderer : public Renderers::BasicTessSphereRendererBase
-	{
-		friend class Engine;
-	public:
-		PointLightHelperRenderer(GLuint maxSphereCount);
-		~PointLightHelperRenderer();
-
-		virtual void Render() override;
-		virtual void RenderWireFrame() override { Render(); }
-
-		bool mVboUpdateNeeded;
-	};
-	friend class PointLightHelperRenderer;
-
-	PointLightHelperRenderer mPointLightHelperRenderer;
 };
 
 
