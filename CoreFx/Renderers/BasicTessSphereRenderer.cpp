@@ -37,6 +37,8 @@ void BasicTessSphereRendererBase::Initialize()
 	glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
 	GL_CHECK_ERRORS;
 
+	glPatchParameteri(GL_PATCH_VERTICES, 1);
+
 	glBindVertexArray(0);
 
 	GL_CHECK_ERRORS;
@@ -101,7 +103,7 @@ void BasicTessSphereRenderer::Render()
 		mIsModified = false;
 	}
 
-	glDrawArrays(GL_POINT, 0, (GLuint)mSphereList.size());
+	glDrawArrays(GL_PATCHES, 0, (GLuint)mSphereList.size());
 	glBindVertexArray(0);
 	mShader.UnUse();
 }

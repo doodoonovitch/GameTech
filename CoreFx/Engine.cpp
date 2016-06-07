@@ -1057,7 +1057,7 @@ void Engine::PointLightHelperRenderer::Render()
 		mVboUpdateNeeded = false;
 	}
 
-	glDrawArrays(GL_POINT, 0, vertexCount);
+	glDrawArrays(GL_PATCHES, 0, vertexCount);
 	glBindVertexArray(0);
 	mShader.UnUse();
 

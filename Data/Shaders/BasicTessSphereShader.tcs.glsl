@@ -1,4 +1,4 @@
-layout (vertices = 4) out;
+layout (vertices = 1) out;
 
 uniform float u_TessFactor;
 
