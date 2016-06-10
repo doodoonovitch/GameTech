@@ -38,7 +38,6 @@ Engine::Engine()
 	, mDrawVertexNormalMagnitude(0.2f)
 	, mDrawLightMagnitude(0.6f)
 	, mFirstLightIndexToDraw(0)
-	, mLightToDrawCount(16)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
 	, mDrawGBufferNormalGridSpan(20, 20)
@@ -46,6 +45,7 @@ Engine::Engine()
 	, mIsDrawVertexNormalEnabled(false)
 	, mIsDrawGBufferNormalEnabled(false)
 	, mWireFrame(false)
+	, mIsDrawLightPositionEnabled(false)
 {
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
@@ -130,6 +130,7 @@ void Engine::InternalRelease()
 		}
 		mLightDescBuffer.ReleaseResource();
 		mLightDataBuffer.ReleaseResource();
+		mLightWorlPositionBuffer.ReleaseResource();
 
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
@@ -196,6 +197,16 @@ void Engine::CreateDynamicResources()
 
 		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
 		PRINT_GEN_TEXTUREBUFFER("[Engine]", mLightDataBuffer);
+	}
+
+	// Point Light world position buffer
+	// -----------------------------------------------------------------------
+	assert(!mLightWorlPositionBuffer.IsCreated());
+	{
+		GLsizeiptr bufferSize = mLights[Lights::Light::Point_Light]->GetCount() * sizeof(glm::vec4);
+
+		mLightWorlPositionBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+		PRINT_GEN_TEXTUREBUFFER("[Engine]", mLightWorlPositionBuffer);
 	}
 	// -----------------------------------------------------------------------
 
@@ -640,6 +651,22 @@ void Engine::RenderObjects()
 	// -----------------------------------------------------------------------
 
 
+	// Fill light world position buffer 
+	// -----------------------------------------------------------------------
+	if (mIsDrawLightPositionEnabled)
+	{
+		glBindBuffer(GL_TEXTURE_BUFFER, mLightWorlPositionBuffer.GetBufferId()); GL_CHECK_ERRORS;
+		std::uint8_t * ptr = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);	GL_CHECK_ERRORS;
+		mLights[Lights::Light::Point_Light]->ForEach([&ptr](Lights::Light * light)
+		{
+			Lights::PointLight * pointLight = (Lights::PointLight *)light;
+			memcpy(ptr, glm::value_ptr(pointLight->GetPosition()), sizeof(glm::vec4));
+			ptr += sizeof(glm::vec4);
+		});
+	}
+	// -----------------------------------------------------------------------
+
+
 	// Frame data buffer
 	// -----------------------------------------------------------------------
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); 
@@ -770,7 +797,10 @@ void Engine::RenderObjects()
 		renderer->Render();
 	});
 
-	//mPointLightHelperRenderer.Render();
+	if (mIsDrawLightPositionEnabled)
+	{
+		mPointLightPositionRenderer.Render();
+	}
 
 	// -----------------------------------------------------------------------
 	// wire frame pass
@@ -790,7 +820,10 @@ void Engine::RenderObjects()
 
 		mSkybox->RenderWireFrame();
 
-		//mPointLightHelperRenderer.RenderWireFrame();
+		if (mIsDrawLightPositionEnabled)
+		{
+			mPointLightPositionRenderer.Render();
+		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
@@ -993,74 +1026,29 @@ void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
 //	});
 //
 //}
-//
-//Engine::PointLightHelperRenderer::PointLightHelperRenderer(GLuint maxSphereCount)
-//	: BasicTessSphereRendererBase(maxSphereCount)
-//	, mVboUpdateNeeded(false)
-//{
-//	Initialize();
-//}
-//
-//Engine::PointLightHelperRenderer::~PointLightHelperRenderer()
-//{
-//
-//}
-//
-//#define VertexDataSize (GLuint)(sizeof(GLfloat) * 4)
-//
-//void Engine::PointLightHelperRenderer::Render()
-//{
-//	Engine * engine = Engine::GetInstance();
-//
-//	LightContainer * lights = engine->mLights[Lights::Light::Point_Light];
-//	GLuint vertexCount = (GLuint)lights->GetCount();
-//
-//	mShader.Use();
-//	glBindVertexArray(mVaoID);
-//
-//	if (mVboUpdateNeeded)
-//	{
-//		if (lights->GetCapacity() > mVertexArrayCapacity)
-//		{
-//			mVertexArrayCapacity = (GLuint)lights->GetCapacity();
-//
-//			glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[0]);
-//			glBufferData(GL_ARRAY_BUFFER, mVertexArrayCapacity * VertexDataSize, nullptr, GL_STATIC_DRAW);
-//		}
-//
-//
-//		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-//		if (lightDataBuffer != nullptr)
-//		{
-//			lights->ForEach([&lightDataBuffer](Lights::Light * light)
-//			{
-//				Lights::PointLight * pointLight = (Lights::PointLight *)light;
-//				
-//				glm::vec4 p = pointLight->GetPosition();
-//				p.w = 0.5f;
-//
-//				memcpy(lightDataBuffer, glm::value_ptr(p), VertexDataSize);
-//				lightDataBuffer += VertexDataSize;
-//			});
-//
-//			glUnmapBuffer(GL_ARRAY_BUFFER);
-//		}
-//		else
-//		{
-//			PRINT_ERROR("PointLightHelperRenderer has failed to map vertex array buffer.");
-//		}
-//
-//
-//		mVboUpdateNeeded = false;
-//	}
-//
-//	glDrawArrays(GL_PATCHES, 0, vertexCount);
-//	glBindVertexArray(0);
-//	mShader.UnUse();
-//
-//}
-//
-//#undef vertexDataSize
+
+Engine::PointLightPositionRenderer::PointLightPositionRenderer()
+	: Renderers::IcosahedronRendererBase()
+{
+
+}
+
+Engine::PointLightPositionRenderer::~PointLightPositionRenderer()
+{
+
+}
+
+void Engine::PointLightPositionRenderer::Render()
+{
+	Engine * engine = Engine::GetInstance();
+	InternalRender((GLuint)engine->mLights[Lights::Light::Point_Light]->GetCount(), engine->mLightWorlPositionBuffer.GetTextureId());
+}
+
+void Engine::PointLightPositionRenderer::RenderWireFrame()
+{
+	Render();
+}
+
 
 	// =======================================================================
 	// =======================================================================

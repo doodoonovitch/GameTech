@@ -9,9 +9,8 @@ namespace CoreFx
 
 
 
-IcosahedronRendererBase::IcosahedronRendererBase(GLuint capacity)
-	: RendererHelper<2>(0, "IcosahedronRenderer", "IcosahedronWireFrameRendererBase", Renderer::Forward_Pass)
-	, mVertexArrayCapacity(capacity)
+IcosahedronRendererBase::IcosahedronRendererBase(const char * shaderTitle, const char * wireFramShaderTitle)
+	: RendererHelper<2>(0, shaderTitle, wireFramShaderTitle, Renderer::Forward_Pass)
 	, mIndexCount(0)
 {
 }
@@ -20,18 +19,20 @@ IcosahedronRendererBase::~IcosahedronRendererBase()
 {
 }
 
-void IcosahedronRendererBase::LoadShaders()
+void IcosahedronRendererBase::LoadShaders(const char * vs, const char * tcs, const char * tes, const char * gs, const char * fs)
 {
 	//setup shader
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/IcosahedronShader.vs.glsl");
-	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/IcosahedronShader.tcs.glsl");
-	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/IcosahedronShader.tes.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/IcosahedronShader.forward.fs.glsl");
+	mShader.LoadFromFile(GL_VERTEX_SHADER, vs);
+	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, tcs);
+	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, tes);
+	mShader.LoadFromFile(GL_GEOMETRY_SHADER, gs);
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, fs);
 
 	const char * uniformNames[__uniforms_count__] =
 	{
 		"u_InnerTessLevel",
 		"u_OuterTessLevel",
+		"u_perInstanceDataSampler",
 		"u_DrawColor",
 	};
 
@@ -40,6 +41,7 @@ void IcosahedronRendererBase::LoadShaders()
 	mShader.Use();
 	mShader.AddUniforms(uniformNames, __uniforms_count__);
 
+	glUniform1i(mShader.GetUniform(u_perInstanceDataSampler), 0);
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -47,9 +49,9 @@ void IcosahedronRendererBase::LoadShaders()
 	GL_CHECK_ERRORS;
 }
 
-void IcosahedronRendererBase::Initialize()
+void IcosahedronRendererBase::Initialize(const char * vs, const char * tcs, const char * tes, const char * gs, const char * fs)
 {
-	LoadShaders();
+	LoadShaders(vs, tcs, tes, gs, fs);
 
 	const int Faces[] = 
 	{
@@ -116,12 +118,30 @@ void IcosahedronRendererBase::Initialize()
 	GL_CHECK_ERRORS;
 }
 
+void IcosahedronRendererBase::InternalRender(GLuint instanceCount, GLuint instanceDataBufferId)
+{
+	mShader.Use();
+	glBindVertexArray(mVaoID);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_BUFFER, instanceDataBufferId);
+
+	glDrawArrays(GL_PATCHES, 0, instanceCount);
+
+	glBindVertexArray(0);
+	mShader.UnUse();
+}
+void IcosahedronRendererBase::InternalRenderWireFrame(GLuint instanceCount, GLuint instanceDataBufferId)
+{
+	InternalRender(instanceCount, instanceDataBufferId);
+}
+
 
 
 IcosahedronRenderer::IcosahedronRenderer(GLuint capacity)
-	: IcosahedronRendererBase(capacity)
+	: IcosahedronRendererBase()
 {
-	mSphereList.reserve(mVertexArrayCapacity);
+	mSphereList.reserve(capacity);
 
 	std::cout << std::endl;
 	std::cout << "Initialize BasicTessSphereRenderer...." << std::endl;
@@ -138,12 +158,6 @@ IcosahedronRenderer::~IcosahedronRenderer()
 
 void IcosahedronRenderer::Render()
 {
-	mShader.Use();
-	glBindVertexArray(mVaoID);
-
-	glDrawArrays(GL_PATCHES, 0, (GLuint)mSphereList.size());
-	glBindVertexArray(0);
-	mShader.UnUse();
 }
 
 void IcosahedronRenderer::RenderWireFrame()

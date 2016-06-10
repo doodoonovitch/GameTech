@@ -425,6 +425,13 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 		}
 		break;
 
+	case 'l':
+	case 'L':
+	{
+		Engine::GetInstance()->SetIsDrawLightPositionEnabled(!Engine::GetInstance()->IsDrawLightPositionEnabled());
+	}
+	break;
+
 	case '+':
 		mMoveSpeed += 1.f;
 		break;

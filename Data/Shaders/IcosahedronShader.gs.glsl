@@ -1,7 +1,7 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-uniform samplerBuffer u_PerMapDataSampler;
+uniform samplerBuffer u_perInstanceDataSampler;
 
 //in TES_OUT
 //{
@@ -17,8 +17,8 @@ void main()
 {  
 	DualQuat modelDQ;
 	int index = gs_in[0].MapIndex * 2;
-	modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
-	modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
+	modelDQ.Qr = texelFetch(u_perInstanceDataSampler, index);
+	modelDQ.Qd = texelFetch(u_perInstanceDataSampler, index + 1);
 
 	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 

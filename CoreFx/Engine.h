@@ -257,13 +257,6 @@ public:
 		mFirstLightIndexToDraw = value;
 	}
 
-	GLint GetLightToDrawCount() const { return mLightToDrawCount; }
-
-	void SetLightToDrawCount(GLint value)
-	{
-		mLightToDrawCount = value;
-	}
-	
 	// ---------------------------------------------------------------------------
 
 
@@ -280,6 +273,12 @@ public:
 	const glm::ivec2 & GetDrawGBufferNormalGrid() const 
 	{
 		return mDrawGBufferNormalGridSpan;
+	}
+
+	bool IsDrawLightPositionEnabled() const { return mIsDrawLightPositionEnabled; }
+	void SetIsDrawLightPositionEnabled(bool value)
+	{
+		mIsDrawLightPositionEnabled = value;
 	}
 
 private:
@@ -413,6 +412,21 @@ private:
 		"u_DirectionalLightCount",
 	};
 
+
+	class PointLightPositionRenderer : Renderers::IcosahedronRendererBase
+	{
+		friend class Engine;
+
+	public:
+		PointLightPositionRenderer();
+		virtual ~PointLightPositionRenderer();
+
+		virtual void Render() override;
+		virtual void RenderWireFrame() override;
+
+	};
+	friend class PointLightPositionRenderer;
+
 	// Light description buffer : 
 	//	- index 0 : light count (same value with u_LightCount)
 	//  - index 1 - n : light description with the following incoding
@@ -421,6 +435,9 @@ private:
 	//		bits 4 - 15 : reserved 
 	TextureBuffer mLightDescBuffer;
 	TextureBuffer mLightDataBuffer;
+
+	TextureBuffer mLightWorlPositionBuffer;
+	PointLightPositionRenderer mPointLightPositionRenderer;
 
 	TextureBuffer mMaterialBuffer;
 	std::vector<GLfloat> mMaterials;
@@ -435,6 +452,7 @@ private:
 	bool mIsDrawVertexNormalEnabled;
 	bool mIsDrawGBufferNormalEnabled;
 	bool mWireFrame;
+	bool mIsDrawLightPositionEnabled;
 };
 
 

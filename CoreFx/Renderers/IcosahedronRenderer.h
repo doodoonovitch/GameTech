@@ -13,7 +13,7 @@ namespace CoreFx
 class IcosahedronRendererBase : public RendererHelper<2>
 {
 public:
-	IcosahedronRendererBase(GLuint capacity);
+	IcosahedronRendererBase(const char * shaderTitle = "IcosahedronRenderer", const char * wireFramShaderTitle = "IcosahedronWireFrameRendererBase");
 	virtual ~IcosahedronRendererBase();
 
 public:
@@ -22,6 +22,7 @@ public:
 	{
 		u_InnerTessLevel,
 		u_OuterTessLevel,
+		u_perInstanceDataSampler,
 		u_DrawColor,
 
 		__uniforms_count__
@@ -35,13 +36,16 @@ public:
 
 protected:
 
-	virtual void LoadShaders();
+	virtual void LoadShaders(const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl", const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl");
 
-	void Initialize();
+	void Initialize(const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl", const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl");
+
+	void InternalRender(GLuint instanceCount, GLuint instanceDataBufferId);
+	void InternalRenderWireFrame(GLuint instanceCount, GLuint instanceDataBufferId);
+
 
 protected:
 
-	GLuint mVertexArrayCapacity;
 	GLuint mIndexCount;
 };
 
