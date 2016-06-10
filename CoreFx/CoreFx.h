@@ -68,6 +68,7 @@ namespace CoreFx
 #include "Renderers\DrawNormalShader.h"
 #include "Renderers\DrawGBufferNormalShader.h"
 #include "Renderers\RendererHelper.h"
+#include "Renderers\IcosahedronRenderer.h"
 
 #include "TextureBuffer.h"
 
