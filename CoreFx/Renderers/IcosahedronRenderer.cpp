@@ -120,7 +120,7 @@ void IcosahedronRendererBase::InitializeVertexBuffer()
 	GL_CHECK_ERRORS;
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIDs[VBO_Index]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * mIndexCount, &Faces[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Faces), Faces, GL_STATIC_DRAW);
 	GL_CHECK_ERRORS;
 
 	glPatchParameteri(GL_PATCH_VERTICES, 3);

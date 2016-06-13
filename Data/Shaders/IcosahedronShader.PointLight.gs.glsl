@@ -21,11 +21,8 @@ void main()
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
-		//vec4 viewPos = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
-		//gs_out.ViewPosition = viewPos.xyz;
-		//vec4 viewPos = dqTransformPoint(u_viewDQ, (gl_in[i].gl_Position + t).xyz);
-		//vec4 viewPos = gl_in[i].gl_Position + t;
-		vec4 viewPos = (gl_in[i].gl_Position * vec4(2.f, 2.f, 2.f, 1.f)) + t;
+		vec4 viewPos = gl_in[i].gl_Position + t;
+		//vec4 viewPos = (gl_in[i].gl_Position * vec4(2.f, 2.f, 2.f, 1.f)) + t;
 		viewPos = vec4(dqTransformPoint(u_ViewDQ, viewPos.xyz), 1.f);
 		gl_Position = u_ProjMatrix * viewPos;
 
