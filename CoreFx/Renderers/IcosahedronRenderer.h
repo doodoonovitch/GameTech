@@ -36,10 +36,13 @@ public:
 
 protected:
 
-	virtual void LoadShaders(const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl", const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl");
+	virtual void LoadShaders(Shader & shader, const glm::vec4 & uDrawColor, const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl", const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl");
+	void InitializeVertexBuffer();
 
-	void Initialize(const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl", const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl");
 
+	void Initialize(const glm::vec4 & uDrawColor, const glm::vec4 & uWireFrameDrawColor, const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl", const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl");
+
+	void InternalRender(Shader & shader, GLsizei instanceCount, GLuint instanceDataBufferId);
 	void InternalRender(GLsizei instanceCount, GLuint instanceDataBufferId);
 	void InternalRenderWireFrame(GLsizei instanceCount, GLuint instanceDataBufferId);
 

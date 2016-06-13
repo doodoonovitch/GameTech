@@ -40,6 +40,7 @@ Engine::Engine()
 	, mFirstLightIndexToDraw(0)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
+	, mPointLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
@@ -65,6 +66,8 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 {
 	if (!mInitialized)
 	{
+		mPointLightPositionRenderer = new PointLightPositionRenderer();
+
 		mViewportX = viewportX;
 		mViewportY = viewportY;
 		mViewportWidth = viewportWidth;
@@ -112,6 +115,8 @@ void Engine::InternalRelease()
 {
 	if (mInitialized)
 	{
+		SAFE_DELETE(mPointLightPositionRenderer);
+
 		glDeleteBuffers(__BufferId_Count__, mBufferIds);
 		memset(mBufferIds, 0, sizeof(mBufferIds));
 
@@ -800,7 +805,7 @@ void Engine::RenderObjects()
 
 	if (mIsDrawLightPositionEnabled)
 	{
-		mPointLightPositionRenderer.Render();
+		mPointLightPositionRenderer->Render();
 	}
 
 	// -----------------------------------------------------------------------
@@ -823,7 +828,7 @@ void Engine::RenderObjects()
 
 		if (mIsDrawLightPositionEnabled)
 		{
-			mPointLightPositionRenderer.Render();
+			mPointLightPositionRenderer->RenderWireFrame();
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1031,7 +1036,8 @@ void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
 Engine::PointLightPositionRenderer::PointLightPositionRenderer()
 	: Renderers::IcosahedronRendererBase()
 {
-	Initialize("shaders/IcosahedronShader.PointLight.gs.glsl");
+	glm::vec4 uDrawColor(0.576f, 1.0f, 0.0f, 1.0f);
+	Initialize(uDrawColor, Engine::GetInstance()->mWireFrameColor, "shaders/IcosahedronShader.PointLight.gs.glsl");
 }
 
 Engine::PointLightPositionRenderer::~PointLightPositionRenderer()
@@ -1047,7 +1053,8 @@ void Engine::PointLightPositionRenderer::Render()
 
 void Engine::PointLightPositionRenderer::RenderWireFrame()
 {
-	Render();
+	Engine * engine = Engine::GetInstance();
+	InternalRenderWireFrame((GLsizei)engine->mLights[Lights::Light::Point_Light]->GetCount(), engine->mLightWorlPositionBuffer.GetTextureId());
 }
 
 

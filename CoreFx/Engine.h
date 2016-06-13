@@ -269,6 +269,15 @@ public:
 		mWireFrame = value;
 	}
 
+	const glm::vec4 & GetWireFrameColor() const
+	{
+		return mWireFrameColor;
+	}
+	void SetWireFrameColor(const glm::vec4 & value)
+	{
+		mWireFrameColor = value;
+	}
+
 	void SetDrawGBufferNormalGrid(GLint drawEveryXPixels, GLint drawEveryYPixels);
 	const glm::ivec2 & GetDrawGBufferNormalGrid() const 
 	{
@@ -437,7 +446,7 @@ private:
 	TextureBuffer mLightDataBuffer;
 
 	TextureBuffer mLightWorlPositionBuffer;
-	PointLightPositionRenderer mPointLightPositionRenderer;
+	PointLightPositionRenderer * mPointLightPositionRenderer;
 
 	TextureBuffer mMaterialBuffer;
 	std::vector<GLfloat> mMaterials;

@@ -19,14 +19,14 @@ IcosahedronRendererBase::~IcosahedronRendererBase()
 {
 }
 
-void IcosahedronRendererBase::LoadShaders(const char * gs, const char * fs, const char * vs, const char * tcs, const char * tes)
+void IcosahedronRendererBase::LoadShaders(Shader & shader, const glm::vec4 & uDrawColor, const char * gs, const char * fs, const char * vs, const char * tcs, const char * tes)
 {
 	//setup shader
-	mShader.LoadFromFile(GL_VERTEX_SHADER, vs);
-	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, tcs);
-	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, tes);
-	mShader.LoadFromFile(GL_GEOMETRY_SHADER, gs);
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, fs);
+	shader.LoadFromFile(GL_VERTEX_SHADER, vs);
+	shader.LoadFromFile(GL_TESS_CONTROL_SHADER, tcs);
+	shader.LoadFromFile(GL_TESS_EVALUATION_SHADER, tes);
+	shader.LoadFromFile(GL_GEOMETRY_SHADER, gs);
+	shader.LoadFromFile(GL_FRAGMENT_SHADER, fs);
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -36,25 +36,33 @@ void IcosahedronRendererBase::LoadShaders(const char * gs, const char * fs, cons
 		"u_DrawColor",
 	};
 
-	mShader.CreateAndLinkProgram();
+	shader.CreateAndLinkProgram();
 
-	mShader.Use();
-	mShader.AddUniforms(uniformNames, __uniforms_count__);
+	shader.Use();
+	shader.AddUniforms(uniformNames, __uniforms_count__);
 
-	glUniform1i(mShader.GetUniform(u_perInstanceDataSampler), 0);
-	glUniform1f(mShader.GetUniform(u_InnerTessLevel), 1.f);
-	glUniform1f(mShader.GetUniform(u_OuterTessLevel), 2.f);
+	glUniform1i(shader.GetUniform(u_perInstanceDataSampler), 0);
+	glUniform1f(shader.GetUniform(u_InnerTessLevel), 1.f);
+	glUniform1f(shader.GetUniform(u_OuterTessLevel), 2.f);
 
-	mShader.SetupFrameDataBlockBinding();
-	mShader.UnUse();
+	glUniform4fv(shader.GetUniform(u_DrawColor), 1, glm::value_ptr(uDrawColor));
+	
+	shader.SetupFrameDataBlockBinding();
+	shader.UnUse();
 
 	GL_CHECK_ERRORS;
 }
 
-void IcosahedronRendererBase::Initialize(const char * gs, const char * fs, const char * vs, const char * tcs, const char * tes)
+void IcosahedronRendererBase::Initialize(const glm::vec4 & uDrawColor, const glm::vec4 & uWireFrameDrawColor, const char * gs, const char * fs, const char * vs, const char * tcs, const char * tes)
 {
-	LoadShaders(gs, fs, vs, tcs, tes);
+	LoadShaders(mShader, uDrawColor, gs, fs, vs, tcs, tes);
+	LoadShaders(mWireFrameShader, uWireFrameDrawColor, gs, fs, vs, tcs, tes);
+	InitializeVertexBuffer();
+}
 
+
+void IcosahedronRendererBase::InitializeVertexBuffer()
+{
 	const GLushort Faces[] = 
 	{
 		2, 1, 0,
@@ -122,9 +130,9 @@ void IcosahedronRendererBase::Initialize(const char * gs, const char * fs, const
 	GL_CHECK_ERRORS;
 }
 
-void IcosahedronRendererBase::InternalRender(GLsizei  instanceCount, GLuint instanceDataBufferId)
+void IcosahedronRendererBase::InternalRender(Shader & shader, GLsizei instanceCount, GLuint instanceDataBufferId)
 {
-	mShader.Use();
+	shader.Use();
 	glBindVertexArray(mVaoID);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -133,11 +141,16 @@ void IcosahedronRendererBase::InternalRender(GLsizei  instanceCount, GLuint inst
 	glDrawElementsInstanced(GL_PATCHES, mIndexCount, GL_UNSIGNED_SHORT, 0, instanceCount);
 
 	glBindVertexArray(0);
-	mShader.UnUse();
+	shader.UnUse();
+}
+
+void IcosahedronRendererBase::InternalRender(GLsizei  instanceCount, GLuint instanceDataBufferId)
+{
+	InternalRender(mShader, instanceCount, instanceDataBufferId);
 }
 void IcosahedronRendererBase::InternalRenderWireFrame(GLsizei instanceCount, GLuint instanceDataBufferId)
 {
-	InternalRender(instanceCount, instanceDataBufferId);
+	InternalRender(mWireFrameShader, instanceCount, instanceDataBufferId);
 }
 
 
@@ -150,7 +163,9 @@ IcosahedronRenderer::IcosahedronRenderer(GLsizei capacity)
 	std::cout << std::endl;
 	std::cout << "Initialize BasicTessSphereRenderer...." << std::endl;
 
-	Initialize();
+	const glm::vec4 uWireFrameColor = Engine::GetInstance()->GetWireFrameColor();
+	glm::vec4 uDrawColor(uWireFrameColor.g, uWireFrameColor.r, uWireFrameColor.b, uWireFrameColor.a);
+	Initialize(uDrawColor, uWireFrameColor);
 
 	std::cout << "... BasicTessSphereRenderer initialized!" << std::endl << std::endl;
 }
@@ -166,7 +181,6 @@ void IcosahedronRenderer::Render()
 
 void IcosahedronRenderer::RenderWireFrame()
 {
-	Render();
 }
 
 
