@@ -19,7 +19,7 @@ IcosahedronRendererBase::~IcosahedronRendererBase()
 {
 }
 
-void IcosahedronRendererBase::LoadShaders(const char * vs, const char * tcs, const char * tes, const char * gs, const char * fs)
+void IcosahedronRendererBase::LoadShaders(const char * gs, const char * fs, const char * vs, const char * tcs, const char * tes)
 {
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, vs);
@@ -42,6 +42,8 @@ void IcosahedronRendererBase::LoadShaders(const char * vs, const char * tcs, con
 	mShader.AddUniforms(uniformNames, __uniforms_count__);
 
 	glUniform1i(mShader.GetUniform(u_perInstanceDataSampler), 0);
+	glUniform1f(mShader.GetUniform(u_InnerTessLevel), 1.f);
+	glUniform1f(mShader.GetUniform(u_OuterTessLevel), 2.f);
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -49,11 +51,11 @@ void IcosahedronRendererBase::LoadShaders(const char * vs, const char * tcs, con
 	GL_CHECK_ERRORS;
 }
 
-void IcosahedronRendererBase::Initialize(const char * vs, const char * tcs, const char * tes, const char * gs, const char * fs)
+void IcosahedronRendererBase::Initialize(const char * gs, const char * fs, const char * vs, const char * tcs, const char * tes)
 {
-	LoadShaders(vs, tcs, tes, gs, fs);
+	LoadShaders(gs, fs, vs, tcs, tes);
 
-	const int Faces[] = 
+	const GLushort Faces[] = 
 	{
 		2, 1, 0,
 		3, 2, 0,
@@ -77,7 +79,7 @@ void IcosahedronRendererBase::Initialize(const char * vs, const char * tcs, cons
 		1, 6, 10 
 	};
 
-	const float Verts[] = 
+	const GLfloat Verts[] =
 	{
 		0.000f,  0.000f,  1.000f,
 		0.894f,  0.000f,  0.447f,
@@ -113,12 +115,14 @@ void IcosahedronRendererBase::Initialize(const char * vs, const char * tcs, cons
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * mIndexCount, &Faces[0], GL_STATIC_DRAW);
 	GL_CHECK_ERRORS;
 
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
+
 	glBindVertexArray(0);
 
 	GL_CHECK_ERRORS;
 }
 
-void IcosahedronRendererBase::InternalRender(GLuint instanceCount, GLuint instanceDataBufferId)
+void IcosahedronRendererBase::InternalRender(GLsizei  instanceCount, GLuint instanceDataBufferId)
 {
 	mShader.Use();
 	glBindVertexArray(mVaoID);
@@ -126,19 +130,19 @@ void IcosahedronRendererBase::InternalRender(GLuint instanceCount, GLuint instan
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER, instanceDataBufferId);
 
-	glDrawArrays(GL_PATCHES, 0, instanceCount);
+	glDrawElementsInstanced(GL_PATCHES, mIndexCount, GL_UNSIGNED_SHORT, 0, instanceCount);
 
 	glBindVertexArray(0);
 	mShader.UnUse();
 }
-void IcosahedronRendererBase::InternalRenderWireFrame(GLuint instanceCount, GLuint instanceDataBufferId)
+void IcosahedronRendererBase::InternalRenderWireFrame(GLsizei instanceCount, GLuint instanceDataBufferId)
 {
 	InternalRender(instanceCount, instanceDataBufferId);
 }
 
 
 
-IcosahedronRenderer::IcosahedronRenderer(GLuint capacity)
+IcosahedronRenderer::IcosahedronRenderer(GLsizei capacity)
 	: IcosahedronRendererBase()
 {
 	mSphereList.reserve(capacity);

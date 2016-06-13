@@ -346,6 +346,9 @@
     <None Include="..\Data\Shaders\IcosahedronShader.gs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.PointLight.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

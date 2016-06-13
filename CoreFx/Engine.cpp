@@ -663,6 +663,7 @@ void Engine::RenderObjects()
 			memcpy(ptr, glm::value_ptr(pointLight->GetPosition()), sizeof(glm::vec4));
 			ptr += sizeof(glm::vec4);
 		});
+		glUnmapBuffer(GL_TEXTURE_BUFFER);
 	}
 	// -----------------------------------------------------------------------
 
@@ -1030,7 +1031,7 @@ void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
 Engine::PointLightPositionRenderer::PointLightPositionRenderer()
 	: Renderers::IcosahedronRendererBase()
 {
-
+	Initialize("shaders/IcosahedronShader.PointLight.gs.glsl");
 }
 
 Engine::PointLightPositionRenderer::~PointLightPositionRenderer()
@@ -1041,7 +1042,7 @@ Engine::PointLightPositionRenderer::~PointLightPositionRenderer()
 void Engine::PointLightPositionRenderer::Render()
 {
 	Engine * engine = Engine::GetInstance();
-	InternalRender((GLuint)engine->mLights[Lights::Light::Point_Light]->GetCount(), engine->mLightWorlPositionBuffer.GetTextureId());
+	InternalRender((GLsizei)engine->mLights[Lights::Light::Point_Light]->GetCount(), engine->mLightWorlPositionBuffer.GetTextureId());
 }
 
 void Engine::PointLightPositionRenderer::RenderWireFrame()
