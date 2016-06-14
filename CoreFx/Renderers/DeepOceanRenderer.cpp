@@ -35,8 +35,9 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 		
 
 	//setup vao and vbo stuff
-	glGenVertexArrays(1, &mVaoID);
-	glGenBuffers(mVboCount, mVboIDs);
+	CreateBuffers();
+	//glGenVertexArrays(1, &mVaoID);
+	//glGenBuffers(mVboCount, mVboIDs);
 
 	glBindVertexArray(mVaoID);
 

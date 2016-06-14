@@ -57,9 +57,8 @@ GridRenderer::GridRenderer(int width, int depth)
 	}
 
 	//setup vao and vbo stuff
-	glGenVertexArrays(1, &mVaoID);
-	glGenBuffers(mVboCount, mVboIDs);
-	 
+	CreateBuffers();
+
 	glBindVertexArray(mVaoID);
 
 		glBindBuffer (GL_ARRAY_BUFFER, mVboIDs[0]);

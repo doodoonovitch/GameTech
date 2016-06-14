@@ -35,8 +35,7 @@ ShallowWaterRenderer::ShallowWaterRenderer(const Desc & desc)
 		
 
 	//setup vao and vbo stuff
-	glGenVertexArrays(1, &mVaoID);
-	glGenBuffers(mVboCount, mVboIDs);
+	CreateBuffers();
 
 	glBindVertexArray(mVaoID);
 
