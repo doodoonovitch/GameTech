@@ -49,7 +49,7 @@ protected:
 
 protected:
 
-	GLuint mIndexCount;
+	const GLuint mIndexCount = 60;
 };
 
 

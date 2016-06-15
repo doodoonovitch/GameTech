@@ -425,6 +425,7 @@ void TerrainRenderer::Render()
 		glBindTexture(GL_TEXTURE_2D_ARRAY, mTextureMapping.mMapping[i].mTexture->GetResourceId());
 	}
 
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 
 	glBindVertexArray(0);
@@ -442,6 +443,7 @@ void TerrainRenderer::RenderWireFrame()
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 
 	glBindVertexArray(0);

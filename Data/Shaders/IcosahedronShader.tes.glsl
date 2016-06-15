@@ -1,4 +1,4 @@
-layout (triangles, equal_spacing, ccw) in;
+layout (triangles, equal_spacing, cw) in;
 
 
 

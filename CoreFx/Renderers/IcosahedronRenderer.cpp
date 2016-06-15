@@ -11,7 +11,6 @@ namespace CoreFx
 
 IcosahedronRendererBase::IcosahedronRendererBase(const char * shaderTitle, const char * wireFramShaderTitle)
 	: RendererHelper<2>(0, shaderTitle, wireFramShaderTitle, Renderer::Forward_Pass)
-	, mIndexCount(0)
 {
 }
 
@@ -43,7 +42,7 @@ void IcosahedronRendererBase::LoadShaders(Shader & shader, const glm::vec4 & uDr
 
 	glUniform1i(shader.GetUniform(u_perInstanceDataSampler), 0);
 	glUniform1f(shader.GetUniform(u_InnerTessLevel), 1.f);
-	glUniform1f(shader.GetUniform(u_OuterTessLevel), 2.f);
+	glUniform1f(shader.GetUniform(u_OuterTessLevel), 1.f);
 
 	glUniform4fv(shader.GetUniform(u_DrawColor), 1, glm::value_ptr(uDrawColor));
 	
@@ -63,7 +62,8 @@ void IcosahedronRendererBase::Initialize(const glm::vec4 & uDrawColor, const glm
 
 void IcosahedronRendererBase::InitializeVertexBuffer()
 {
-	const GLushort Faces[] = 
+	
+	const GLuint Faces[] =
 	{
 		2, 1, 0,
 		3, 2, 0,
@@ -90,24 +90,90 @@ void IcosahedronRendererBase::InitializeVertexBuffer()
 		1, 6, 10 
 	};
 
-	const GLfloat Verts[] =
+	const GLfloat Verts[] = 
 	{
-		0.000f,  0.000f,  1.000f,
-		0.894f,  0.000f,  0.447f,
-		0.276f,  0.851f,  0.447f,
-		-0.724f,  0.526f,  0.447f,
-		-0.724f, -0.526f,  0.447f,
-		0.276f, -0.851f,  0.447f,
-		0.724f,  0.526f, -0.447f,
-		-0.276f,  0.851f, -0.447f,
-		-0.894f,  0.000f, -0.447f,
-		-0.276f, -0.851f, -0.447f,
-		0.724f, -0.526f, -0.447f,
-		0.000f,  0.000f, -1.000f 
+		0.000f,  0.000f,  1.000f, // 0
+		0.894f,  0.000f,  0.447f, // 1
+		0.276f,  0.851f,  0.447f, // 2
+		-0.724f,  0.526f,  0.447f, // 3
+		-0.724f, -0.526f,  0.447f, // 4
+		0.276f, -0.851f,  0.447f, // 5
+
+		0.724f,  0.526f, -0.447f, // 6
+		-0.276f,  0.851f, -0.447f, // 7
+		-0.894f,  0.000f, -0.447f, // 8
+		-0.276f, -0.851f, -0.447f, // 9
+		0.724f, -0.526f, -0.447f, // 10
+		0.000f,  0.000f, -1.000f  // 11
+	};
+	
+
+	/*
+	const GLushort Faces[] =
+	{
+		0, 2, 1,
+		0, 3, 2,
+		0, 4, 3,
+		0, 5, 4,
+		0, 1, 5,
+
+		1, 2, 7,
+		2, 3, 8,
+		3, 4, 9,
+		4, 5, 10,
+		5, 1, 6,
+
+		1, 7, 6,
+		2, 8, 7,
+		3, 9, 8,
+		4, 10, 9,
+		5, 6, 10,
+
+		6, 7, 11,
+		7, 8, 11,
+		8, 9, 11,
+		9, 10, 11,
+		10, 6, 11
 	};
 
+	const int VertexCount = 12 * 3;
+	GLfloat Verts[VertexCount];
 
-	mIndexCount = sizeof(Faces) / sizeof(Faces[0]);
+	double theta = glm::radians(26.56505117707799);
+
+	double stheta = std::sin(theta);
+	double ctheta = std::cos(theta);
+
+	GLfloat * vertexPtr = Verts;
+	*vertexPtr = 0.0f; ++vertexPtr;
+	*vertexPtr = 0.0f; ++vertexPtr;
+	*vertexPtr = -1.0f; ++vertexPtr;
+
+	// the lower pentagon
+	double phi = glm::pi<double>() / 5.0;
+	for (int i = 1; i < 6; ++i) 
+	{
+		*vertexPtr = (GLfloat)(ctheta * glm::cos(phi)); ++vertexPtr;
+		*vertexPtr = (GLfloat)(ctheta * glm::sin(phi)); ++vertexPtr;
+		*vertexPtr = (GLfloat)(-stheta); ++vertexPtr;
+		phi += glm::two_pi<double>() / 5.0;
+	}
+
+	// the upper pentagon
+	phi = 0.0;
+	for (int i = 6; i < 11; ++i) 
+	{
+		*vertexPtr = (GLfloat)(ctheta * glm::cos(phi)); ++vertexPtr;
+		*vertexPtr = (GLfloat)(ctheta * glm::sin(phi)); ++vertexPtr;
+		*vertexPtr = (GLfloat)(stheta); ++vertexPtr;
+		phi += glm::two_pi<double>() / 5.0;
+	}
+
+	*vertexPtr = 0.0f; ++vertexPtr;
+	*vertexPtr = 0.0f; ++vertexPtr;
+	*vertexPtr = 1.0f; ++vertexPtr;
+	assert(vertexPtr == &Verts[VertexCount]);
+	*/
 
 	//setup vao and vbo stuff
 	CreateBuffers();
@@ -135,16 +201,19 @@ void IcosahedronRendererBase::InitializeVertexBuffer()
 
 void IcosahedronRendererBase::InternalRender(Shader & shader, GLsizei instanceCount, GLuint instanceDataBufferId)
 {
+	glDisable(GL_CULL_FACE);
 	shader.Use();
 	glBindVertexArray(mVaoID);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_BUFFER, instanceDataBufferId);
 
-	glDrawElementsInstanced(GL_PATCHES, mIndexCount, GL_UNSIGNED_SHORT, 0, instanceCount);
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
+	glDrawElementsInstanced(GL_PATCHES, 4 * 3 /*mIndexCount*/, GL_UNSIGNED_SHORT, 0, instanceCount);
 
 	glBindVertexArray(0);
 	shader.UnUse();
+	glEnable(GL_CULL_FACE);
 }
 
 void IcosahedronRendererBase::InternalRender(GLsizei  instanceCount, GLuint instanceDataBufferId)

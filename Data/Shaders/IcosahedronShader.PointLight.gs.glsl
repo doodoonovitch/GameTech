@@ -23,7 +23,8 @@ void main()
 	{	
 		vec4 viewPos = gl_in[i].gl_Position + t;
 		//vec4 viewPos = (gl_in[i].gl_Position * vec4(2.f, 2.f, 2.f, 1.f)) + t;
-		viewPos = vec4(dqTransformPoint(u_ViewDQ, viewPos.xyz), 1.f);
+		//viewPos = vec4(dqTransformPoint(u_ViewDQ, viewPos.xyz), 1.f);
+		viewPos = u_ViewMatrix * viewPos;
 		gl_Position = u_ProjMatrix * viewPos;
 
 		EmitVertex();
