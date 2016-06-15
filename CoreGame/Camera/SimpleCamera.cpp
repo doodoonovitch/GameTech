@@ -246,13 +246,14 @@ void SimpleCamera::OnInit()
 		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 15.f, -15.f), glm::vec3(1.f, 1.f, 1.f), 400.f, glm::normalize(glm::vec3(.1f, -0.1f, 1.f)), glm::radians(15.f), glm::radians(25.f), 0.5f, 0.06f, .06f);
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), .6f);
 		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(7.f, 5.f, 5.f), glm::vec3(1.f, 0.4f, 0.7f), 40.f, 1.f, 0.4f, 0.05f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 5.f), glm::vec3(1.f, 0.4f, 0.7f), 40.f, 1.f, 0.4f, 0.05f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 500.f, .5f, 0.07f, 0.02f);
 		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);
 
 	//setup camera
 	mCamera = new Camera();
-	mCamera->LookAt(glm::vec3(10, 6.f, 20.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
+	//mCamera->LookAt(glm::vec3(10, 6.f, 20.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
+	mCamera->LookAt(glm::vec3(10, 10.f, 20.f), glm::vec3(10.f, 10.f, 5.f), glm::vec3(0, 1, 0));
 	engine->SetCamera(mCamera);
 
 	SetupViewportAndProjection();

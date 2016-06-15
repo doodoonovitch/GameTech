@@ -107,74 +107,6 @@ void IcosahedronRendererBase::InitializeVertexBuffer()
 		0.000f,  0.000f, -1.000f  // 11
 	};
 	
-
-	/*
-	const GLushort Faces[] =
-	{
-		0, 2, 1,
-		0, 3, 2,
-		0, 4, 3,
-		0, 5, 4,
-		0, 1, 5,
-
-		1, 2, 7,
-		2, 3, 8,
-		3, 4, 9,
-		4, 5, 10,
-		5, 1, 6,
-
-		1, 7, 6,
-		2, 8, 7,
-		3, 9, 8,
-		4, 10, 9,
-		5, 6, 10,
-
-		6, 7, 11,
-		7, 8, 11,
-		8, 9, 11,
-		9, 10, 11,
-		10, 6, 11
-	};
-
-	const int VertexCount = 12 * 3;
-	GLfloat Verts[VertexCount];
-
-	double theta = glm::radians(26.56505117707799);
-
-	double stheta = std::sin(theta);
-	double ctheta = std::cos(theta);
-
-	GLfloat * vertexPtr = Verts;
-	*vertexPtr = 0.0f; ++vertexPtr;
-	*vertexPtr = 0.0f; ++vertexPtr;
-	*vertexPtr = -1.0f; ++vertexPtr;
-
-	// the lower pentagon
-	double phi = glm::pi<double>() / 5.0;
-	for (int i = 1; i < 6; ++i) 
-	{
-		*vertexPtr = (GLfloat)(ctheta * glm::cos(phi)); ++vertexPtr;
-		*vertexPtr = (GLfloat)(ctheta * glm::sin(phi)); ++vertexPtr;
-		*vertexPtr = (GLfloat)(-stheta); ++vertexPtr;
-		phi += glm::two_pi<double>() / 5.0;
-	}
-
-	// the upper pentagon
-	phi = 0.0;
-	for (int i = 6; i < 11; ++i) 
-	{
-		*vertexPtr = (GLfloat)(ctheta * glm::cos(phi)); ++vertexPtr;
-		*vertexPtr = (GLfloat)(ctheta * glm::sin(phi)); ++vertexPtr;
-		*vertexPtr = (GLfloat)(stheta); ++vertexPtr;
-		phi += glm::two_pi<double>() / 5.0;
-	}
-
-	*vertexPtr = 0.0f; ++vertexPtr;
-	*vertexPtr = 0.0f; ++vertexPtr;
-	*vertexPtr = 1.0f; ++vertexPtr;
-	assert(vertexPtr == &Verts[VertexCount]);
-	*/
-
 	//setup vao and vbo stuff
 	CreateBuffers();
 
@@ -209,7 +141,7 @@ void IcosahedronRendererBase::InternalRender(Shader & shader, GLsizei instanceCo
 	glBindTexture(GL_TEXTURE_BUFFER, instanceDataBufferId);
 
 	glPatchParameteri(GL_PATCH_VERTICES, 3);
-	glDrawElementsInstanced(GL_PATCHES, 4 * 3 /*mIndexCount*/, GL_UNSIGNED_SHORT, 0, instanceCount);
+	glDrawElementsInstanced(GL_PATCHES, 6 * 3 /*mIndexCount*/, GL_UNSIGNED_SHORT, 0, instanceCount);
 
 	glBindVertexArray(0);
 	shader.UnUse();

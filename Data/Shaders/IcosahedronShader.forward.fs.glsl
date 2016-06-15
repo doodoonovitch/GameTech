@@ -4,7 +4,8 @@ uniform vec4 u_DrawColor;
 
 in GS_OUT
 {
-	vec3 Normal;
+	//vec3 Normal;
+	vec4 Color;
 } fs_in;
 
 
@@ -13,6 +14,7 @@ in GS_OUT
 
 void main(void)
 {
-	outColor = u_DrawColor;
+	//outColor = u_DrawColor;
+	outColor = fs_in.Color;
 }
 

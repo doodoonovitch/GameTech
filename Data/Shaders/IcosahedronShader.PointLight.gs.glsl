@@ -9,10 +9,11 @@ in TES_OUT
 	flat int InstanceId;
 } gs_in[3];
 
-//out GS_OUT
-//{
+out GS_OUT
+{
 //	vec3 Position;
-//} gs_out;
+	vec4 Color;
+} gs_out;
 
 void main()
 {  
@@ -26,6 +27,7 @@ void main()
 		//viewPos = vec4(dqTransformPoint(u_ViewDQ, viewPos.xyz), 1.f);
 		viewPos = u_ViewMatrix * viewPos;
 		gl_Position = u_ProjMatrix * viewPos;
+		gs_out.Color = gl_in[i].gl_Position;
 
 		EmitVertex();
 	}
