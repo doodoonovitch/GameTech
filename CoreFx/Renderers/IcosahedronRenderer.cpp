@@ -63,7 +63,7 @@ void IcosahedronRendererBase::Initialize(const glm::vec4 & uDrawColor, const glm
 void IcosahedronRendererBase::InitializeVertexBuffer()
 {
 	
-	const GLuint Faces[] =
+	const GLushort Faces[] =
 	{
 		2, 1, 0,
 		3, 2, 0,
@@ -141,7 +141,7 @@ void IcosahedronRendererBase::InternalRender(Shader & shader, GLsizei instanceCo
 	glBindTexture(GL_TEXTURE_BUFFER, instanceDataBufferId);
 
 	glPatchParameteri(GL_PATCH_VERTICES, 3);
-	glDrawElementsInstanced(GL_PATCHES, 6 * 3 /*mIndexCount*/, GL_UNSIGNED_SHORT, 0, instanceCount);
+	glDrawElementsInstanced(GL_PATCHES, mIndexCount, GL_UNSIGNED_SHORT, 0, instanceCount);
 
 	glBindVertexArray(0);
 	shader.UnUse();

@@ -14,7 +14,7 @@ in GS_OUT
 
 void main(void)
 {
-	//outColor = u_DrawColor;
-	outColor = fs_in.Color;
+	outColor = u_DrawColor;
+	//outColor = fs_in.Color;
 }
 
