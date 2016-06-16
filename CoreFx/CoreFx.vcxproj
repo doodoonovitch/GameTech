@@ -242,10 +242,12 @@
     <None Include="..\Data\Shaders\grid.forward.fs.glsl" />
     <None Include="..\Data\Shaders\IcosahedronShader.forward.fs.glsl" />
     <None Include="..\Data\Shaders\IcosahedronShader.gs.glsl" />
+    <None Include="..\Data\Shaders\IcosahedronShader.PointLight.forward.fs.glsl" />
     <None Include="..\Data\Shaders\IcosahedronShader.PointLight.gs.glsl" />
     <None Include="..\Data\Shaders\IcosahedronShader.tcs.glsl" />
     <None Include="..\Data\Shaders\IcosahedronShader.tes.glsl" />
     <None Include="..\Data\Shaders\IcosahedronShader.vs.glsl" />
+    <None Include="..\Data\Shaders\IcosahedronShader.WireFrame.forward.fs.glsl" />
     <None Include="..\Data\Shaders\light.fs.glsl" />
     <None Include="..\Data\Shaders\light.vs.glsl" />
     <None Include="..\Data\Shaders\grid.vs.glsl" />

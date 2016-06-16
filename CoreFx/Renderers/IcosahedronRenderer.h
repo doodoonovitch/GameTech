@@ -18,56 +18,34 @@ public:
 
 public:
 
-	enum EUniformIndex
-	{
-		u_InnerTessLevel,
-		u_OuterTessLevel,
-		u_perInstanceDataSampler,
-		u_DrawColor,
+	//enum EUniformIndex
+	//{
+	//	u_InnerTessLevel,
+	//	u_OuterTessLevel,
 
-		__uniforms_count__
-	};
+	//	__uniforms_count__
+	//};
+
+	const GLuint mIndexCount = 60;
+
+protected:
+
+	void LoadShaders(Shader & shader, const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl", const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl");
+	void InitializeVertexBuffer();
+	//void InitializeUniforms(Shader & shader);
+
+	//void InternalRender(Shader & shader, GLsizei instanceCount, GLuint instanceDataBufferId);
+	//void InternalRender(GLsizei instanceCount, GLuint instanceDataBufferId);
+	//void InternalRenderWireFrame(GLsizei instanceCount, GLuint instanceDataBufferId);
+
+
+protected:
 
 	enum VBOIndex
 	{
 		VBO_Vertex = 0,
 		VBO_Index = 1,
 	};
-
-protected:
-
-	virtual void LoadShaders(Shader & shader, const glm::vec4 & uDrawColor, const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl", const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl");
-	void InitializeVertexBuffer();
-
-
-	void Initialize(const glm::vec4 & uDrawColor, const glm::vec4 & uWireFrameDrawColor, const char * gs = "shaders/IcosahedronShader.gs.glsl", const char * fs = "shaders/IcosahedronShader.forward.fs.glsl", const char * vs = "shaders/IcosahedronShader.vs.glsl", const char * tcs = "shaders/IcosahedronShader.tcs.glsl", const char * tes = "shaders/IcosahedronShader.tes.glsl");
-
-	void InternalRender(Shader & shader, GLsizei instanceCount, GLuint instanceDataBufferId);
-	void InternalRender(GLsizei instanceCount, GLuint instanceDataBufferId);
-	void InternalRenderWireFrame(GLsizei instanceCount, GLuint instanceDataBufferId);
-
-
-protected:
-
-	const GLuint mIndexCount = 60;
-};
-
-
-class IcosahedronRenderer : IcosahedronRendererBase
-{
-public:
-	IcosahedronRenderer(GLsizei capacity);
-	virtual ~IcosahedronRenderer();
-
-	virtual void Render() override;
-	virtual void RenderWireFrame() override;
-
-
-protected:
-
-	typedef std::vector<glm::vec4> Vec4StdVector;
-
-	Vec4StdVector mSphereList;
 };
 
 

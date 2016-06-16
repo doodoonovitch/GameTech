@@ -1,33 +1,38 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-uniform samplerBuffer u_perInstanceDataSampler;
+uniform isamplerBuffer u_LightDescSampler;
+uniform samplerBuffer u_LightDataSampler;
+uniform int u_LightOffset;
 
 in TES_OUT
 {
-	//vec3 PatchDistance;
 	flat int InstanceId;
 } gs_in[3];
 
 out GS_OUT
 {
-//	vec3 Position;
 	vec4 Color;
 } gs_out;
 
 void main()
 {  
-	int index = gs_in[0].InstanceId;
-	vec4 t = vec4(texelFetch(u_perInstanceDataSampler, index).xyz, 0.f);
+	int index = gs_in[0].InstanceId + u_LightOffset;
+	int lightDesc = texelFetch(u_LightDescSampler, index).x;
+
+	int dataIndex = GetLightDataIndex(lightDesc);
+
+	vec4 lightColorIntensity = texelFetch(u_LightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
+	vec4 lightColor = vec4(lightColorIntensity.xyz * lightColorIntensity.w, 1.f);
+
+	vec4 lightPosition = texelFetch(u_LightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
+
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
-		vec4 viewPos = gl_in[i].gl_Position + t;
-		//vec4 viewPos = (gl_in[i].gl_Position * vec4(2.f, 2.f, 2.f, 1.f)) + t;
-		//viewPos = vec4(dqTransformPoint(u_ViewDQ, viewPos.xyz), 1.f);
-		viewPos = u_ViewMatrix * viewPos;
+		vec4 viewPos = gl_in[i].gl_Position + lightPosition;
 		gl_Position = u_ProjMatrix * viewPos;
-		gs_out.Color = gl_in[i].gl_Position;
+		gs_out.Color = lightColor;
 
 		EmitVertex();
 	}

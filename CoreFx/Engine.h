@@ -433,6 +433,24 @@ private:
 		virtual void Render() override;
 		virtual void RenderWireFrame() override;
 
+	protected:
+
+
+		enum EUniformIndex
+		{
+			u_InnerTessLevel,
+			u_OuterTessLevel,
+			u_LightDescSampler,
+			u_LightDataSampler,
+			u_LightOffset,
+
+			__uniforms_count__
+		};
+
+
+		void InitializeUniforms(Shader & shader);
+		void InternalRender(Shader & shader, GLsizei instanceCount, GLint lightOffset, GLuint lightDescBufferId, GLuint lightDataBufferId);
+
 	};
 	friend class PointLightPositionRenderer;
 
