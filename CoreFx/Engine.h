@@ -355,6 +355,7 @@ private:
 	RendererContainer * mRenderers;
 	RendererContainer * mForwardRenderers;
 	LightContainer * mLights[Lights::Light::__light_type_count__];
+	GLint mLightDescIndexOffsets[Lights::Light::__light_type_count__];
 
 	Camera * mCamera;
 	Renderers::SkyboxRenderer * mSkybox;
@@ -454,6 +455,35 @@ private:
 	};
 	friend class PointLightPositionRenderer;
 
+	class SpotLightPositionRenderer : Renderers::ConeRendererBase
+	{
+		friend class Engine;
+
+	public:
+		SpotLightPositionRenderer(GLuint numStrips = 18);
+		virtual ~SpotLightPositionRenderer();
+
+		virtual void Render() override;
+		virtual void RenderWireFrame() override;
+
+	protected:
+
+
+		enum EUniformIndex
+		{
+			u_LightDescSampler,
+			u_LightDataSampler,
+			u_LightOffset,
+
+			__uniforms_count__
+		};
+
+
+		void InitializeUniforms(Shader & shader);
+		void InternalRender(Shader & shader, GLsizei instanceCount, GLint lightOffset, GLuint lightDescBufferId, GLuint lightDataBufferId);
+	};
+	friend class SpotLightPositionRenderer;
+
 	// Light description buffer : 
 	//	- index 0 : light count (same value with u_LightCount)
 	//  - index 1 - n : light description with the following incoding
@@ -463,8 +493,9 @@ private:
 	TextureBuffer mLightDescBuffer;
 	TextureBuffer mLightDataBuffer;
 
-	TextureBuffer mLightWorlPositionBuffer;
+
 	PointLightPositionRenderer * mPointLightPositionRenderer;
+	SpotLightPositionRenderer * mSpotLightPositionRenderer;
 
 	TextureBuffer mMaterialBuffer;
 	std::vector<GLfloat> mMaterials;

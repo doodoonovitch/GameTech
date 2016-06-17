@@ -127,6 +127,9 @@
     <ClInclude Include="Renderers\IcosahedronRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\ConeRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -207,6 +210,9 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\IcosahedronRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\ConeRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -353,6 +359,15 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\IcosahedronShader.WireFrame.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\ConeShader.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\ConeShader.PointLight.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\ConeShader.PointLight.forward.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

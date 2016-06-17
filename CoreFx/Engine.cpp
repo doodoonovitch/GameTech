@@ -41,6 +41,7 @@ Engine::Engine()
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
 	, mPointLightPositionRenderer(nullptr)
+	, mSpotLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
 	, mInitialized(false)
 	, mIsDrawVertexNormalEnabled(false)
@@ -67,6 +68,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 	if (!mInitialized)
 	{
 		mPointLightPositionRenderer = new PointLightPositionRenderer();
+		mSpotLightPositionRenderer = new SpotLightPositionRenderer();
 
 		mViewportX = viewportX;
 		mViewportY = viewportY;
@@ -116,6 +118,7 @@ void Engine::InternalRelease()
 	if (mInitialized)
 	{
 		SAFE_DELETE(mPointLightPositionRenderer);
+		SAFE_DELETE(mSpotLightPositionRenderer);
 
 		glDeleteBuffers(__BufferId_Count__, mBufferIds);
 		memset(mBufferIds, 0, sizeof(mBufferIds));
@@ -135,7 +138,6 @@ void Engine::InternalRelease()
 		}
 		mLightDescBuffer.ReleaseResource();
 		mLightDataBuffer.ReleaseResource();
-		mLightWorlPositionBuffer.ReleaseResource();
 
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
@@ -174,6 +176,7 @@ void Engine::CreateDynamicResources()
 		GLuint lightDataIndex = 0;
 		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{
+			mLightDescIndexOffsets[i] = index;
 			mLights[i]->ForEach([&index, &lightDataIndex, &lightDescBuffer](Lights::Light * light)
 			{
 				light->SetDataIndex(lightDataIndex);
@@ -202,16 +205,6 @@ void Engine::CreateDynamicResources()
 
 		mLightDataBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
 		PRINT_GEN_TEXTUREBUFFER("[Engine]", mLightDataBuffer);
-	}
-
-	// Point Light world position buffer
-	// -----------------------------------------------------------------------
-	assert(!mLightWorlPositionBuffer.IsCreated());
-	{
-		GLsizeiptr bufferSize = mLights[Lights::Light::Point_Light]->GetCount() * sizeof(glm::vec4);
-
-		mLightWorlPositionBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
-		PRINT_GEN_TEXTUREBUFFER("[Engine]", mLightWorlPositionBuffer);
 	}
 	// -----------------------------------------------------------------------
 
@@ -656,23 +649,6 @@ void Engine::RenderObjects()
 	// -----------------------------------------------------------------------
 
 
-	// Fill light world position buffer 
-	// -----------------------------------------------------------------------
-	if (mIsDrawLightPositionEnabled)
-	{
-		glBindBuffer(GL_TEXTURE_BUFFER, mLightWorlPositionBuffer.GetBufferId()); GL_CHECK_ERRORS;
-		std::uint8_t * ptr = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);	GL_CHECK_ERRORS;
-		mLights[Lights::Light::Point_Light]->ForEach([&ptr](Lights::Light * light)
-		{
-			Lights::PointLight * pointLight = (Lights::PointLight *)light;
-			memcpy(ptr, glm::value_ptr(pointLight->GetPosition()), sizeof(glm::vec4));
-			ptr += sizeof(glm::vec4);
-		});
-		glUnmapBuffer(GL_TEXTURE_BUFFER);
-	}
-	// -----------------------------------------------------------------------
-
-
 	// Frame data buffer
 	// -----------------------------------------------------------------------
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); 
@@ -806,6 +782,7 @@ void Engine::RenderObjects()
 	if (mIsDrawLightPositionEnabled)
 	{
 		mPointLightPositionRenderer->Render();
+		mSpotLightPositionRenderer->Render();
 	}
 
 	// -----------------------------------------------------------------------
@@ -829,6 +806,7 @@ void Engine::RenderObjects()
 		if (mIsDrawLightPositionEnabled)
 		{
 			mPointLightPositionRenderer->RenderWireFrame();
+			mSpotLightPositionRenderer->RenderWireFrame();
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1033,6 +1011,17 @@ void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
 //
 //}
 
+
+
+
+
+// =======================================================================
+// =======================================================================
+// =======================================================================
+
+
+
+
 Engine::PointLightPositionRenderer::PointLightPositionRenderer()
 	: Renderers::IcosahedronRendererBase()
 {
@@ -1099,15 +1088,98 @@ void Engine::PointLightPositionRenderer::Render()
 {
 	Engine * engine = Engine::GetInstance();
 	auto lights = engine->mLights[Lights::Light::Point_Light];
-	InternalRender(mShader, (GLsizei)lights->GetCount(), 1, engine->mLightDescBuffer.GetTextureId(), engine->mLightDataBuffer.GetTextureId());
+	InternalRender(mShader, (GLsizei)lights->GetCount(), engine->mLightDescIndexOffsets[Lights::Light::Point_Light], engine->mLightDescBuffer.GetTextureId(), engine->mLightDataBuffer.GetTextureId());
 }
 
 void Engine::PointLightPositionRenderer::RenderWireFrame()
 {
 	Engine * engine = Engine::GetInstance();
 	auto lights = engine->mLights[Lights::Light::Point_Light];
-	InternalRender(mWireFrameShader, (GLsizei)lights->GetCount(), 1, engine->mLightDescBuffer.GetTextureId(), engine->mLightDataBuffer.GetTextureId());
+	InternalRender(mWireFrameShader, (GLsizei)lights->GetCount(), engine->mLightDescIndexOffsets[Lights::Light::Point_Light], engine->mLightDescBuffer.GetTextureId(), engine->mLightDataBuffer.GetTextureId());
 }
+
+
+
+
+
+// =======================================================================
+// =======================================================================
+// =======================================================================
+
+
+
+
+Engine::SpotLightPositionRenderer::SpotLightPositionRenderer(GLuint numStrips)
+	: Renderers::ConeRendererBase()
+{
+	InitializeVertexBuffer(numStrips);
+	LoadShaders(mShader, "shaders/ConeShader.PointLight.gs.glsl", "shaders/ConeShader.PointLight.forward.fs.glsl");
+	InitializeUniforms(mShader);
+	LoadShaders(mWireFrameShader, "shaders/ConeShader.PointLight.gs.glsl", "shaders/IcosahedronShader.WireFrame.forward.fs.glsl");
+	InitializeUniforms(mWireFrameShader);
+}
+
+Engine::SpotLightPositionRenderer::~SpotLightPositionRenderer()
+{
+
+}
+
+void Engine::SpotLightPositionRenderer::InitializeUniforms(Shader & shader)
+{
+	const char * uniformNames[__uniforms_count__] =
+	{
+		"u_LightDescSampler",
+		"u_LightDataSampler",
+		"u_LightOffset",
+	};
+
+	shader.Use();
+	shader.AddUniforms(uniformNames, __uniforms_count__);
+
+	glUniform1i(shader.GetUniform(u_LightDescSampler), 0);
+	glUniform1i(shader.GetUniform(u_LightDataSampler), 1);
+
+	shader.SetupFrameDataBlockBinding();
+	shader.UnUse();
+
+	GL_CHECK_ERRORS;
+}
+
+void Engine::SpotLightPositionRenderer::InternalRender(Shader & shader, GLsizei instanceCount, GLint lightOffset, GLuint lightDescBufferId, GLuint lightDataBufferId)
+{
+	glDisable(GL_CULL_FACE);
+	shader.Use();
+	glBindVertexArray(mVaoID);
+
+	glUniform1i(shader.GetUniform(u_LightOffset), lightOffset);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_BUFFER, lightDescBufferId);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, lightDataBufferId);
+
+	glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, mIndexCount, instanceCount);
+
+	glBindVertexArray(0);
+	shader.UnUse();
+	glEnable(GL_CULL_FACE);
+}
+
+void Engine::SpotLightPositionRenderer::Render()
+{
+	Engine * engine = Engine::GetInstance();
+	auto lights = engine->mLights[Lights::Light::Spot_Light];
+	InternalRender(mShader, (GLsizei)lights->GetCount(), engine->mLightDescIndexOffsets[Lights::Light::Spot_Light], engine->mLightDescBuffer.GetTextureId(), engine->mLightDataBuffer.GetTextureId());
+}
+
+void Engine::SpotLightPositionRenderer::RenderWireFrame()
+{
+	Engine * engine = Engine::GetInstance();
+	auto lights = engine->mLights[Lights::Light::Spot_Light];
+	InternalRender(mWireFrameShader, (GLsizei)lights->GetCount(), engine->mLightDescIndexOffsets[Lights::Light::Spot_Light], engine->mLightDescBuffer.GetTextureId(), engine->mLightDataBuffer.GetTextureId());
+}
+
 
 
 	// =======================================================================
