@@ -25,6 +25,8 @@ public:
 		Position_Property = Light::__Common_Property_Count__,
 		Direction_Property,
 		Attenuation_Property,
+		World_Position_Property,
+		World_Direction_Property,
 
 		__property_count__
 	};
@@ -32,31 +34,26 @@ public:
 
 	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
 
-	const glm::vec4 & GetPosition() const
+	glm::vec3 GetPosition() const
 	{
-		return mWorldPosition;
+		const GLfloat * p = GetProperty(World_Position_Property);
+		return glm::vec3(p[0], p[1], p[2]);
 	}
 
 	void SetPosition(const glm::vec3& position)
 	{
-		mWorldPosition.x = position.x;
-		mWorldPosition.y = position.y;
-		mWorldPosition.z = position.z;
-		SetIsModified(true);
+		SetProperty(glm::vec4(position, 1.0f), World_Position_Property);
 	}
 
-
-	const glm::vec4 & GetDirection() const
+	glm::vec3 GetDirection() const
 	{
-		return mWorldDirection;
+		const GLfloat * p = GetProperty(World_Direction_Property);
+		return glm::vec3(p[0], p[1], p[2]);
 	}
 
 	void SetDirection(const glm::vec3& direction)
 	{
-		mWorldDirection.x = direction.x;
-		mWorldDirection.y = direction.y;
-		mWorldDirection.z = direction.z;
-		SetIsModified(true);
+		SetProperty(glm::vec4(direction, 0.0f), World_Direction_Property);
 	}
 	
 	GLfloat GetConstantAttenuation() const
@@ -114,8 +111,6 @@ protected:
 
 protected:
 
-	glm::vec4 mWorldPosition;
-	glm::vec4 mWorldDirection;
 	float mInnerConeAngle;
 	float mOuterConeAngle;
 	//float mInnerConeCos;

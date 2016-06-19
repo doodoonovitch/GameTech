@@ -2,7 +2,7 @@ layout (location = POSITION_ATTRIBUTE) in vec3 in_Position;
 
 out VS_OUT
 {
-	int InstanceId;
+	flat int InstanceId;
 } vs_out;
 
 void main()

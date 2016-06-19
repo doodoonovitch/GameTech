@@ -5,7 +5,7 @@ uniform isamplerBuffer u_LightDescSampler;
 uniform samplerBuffer u_LightDataSampler;
 uniform int u_LightOffset;
 
-in TES_OUT
+in VS_OUT
 {
 	flat int InstanceId;
 } gs_in[3];
@@ -25,13 +25,14 @@ void main()
 	vec4 lightColorIntensity = texelFetch(u_LightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
 	vec4 lightColor = vec4(lightColorIntensity.xyz * lightColorIntensity.w, 1.f);
 
-	vec4 lightPosition = texelFetch(u_LightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
+	vec4 lightPosition = texelFetch(u_LightDataSampler, dataIndex + SPOT_LIGHT_WORLD_POSITION_PROPERTY);
 
+	mat4 m = u_ProjMatrix * u_ViewMatrix;
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
 		vec4 viewPos = gl_in[i].gl_Position + lightPosition;
-		gl_Position = u_ProjMatrix * viewPos;
+		gl_Position = m * viewPos;
 		gs_out.Color = lightColor;
 
 		EmitVertex();

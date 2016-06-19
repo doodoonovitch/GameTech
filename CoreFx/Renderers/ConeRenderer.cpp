@@ -30,20 +30,21 @@ void ConeRendererBase::LoadShaders(Shader & shader, const char * gs, const char 
 
 void ConeRendererBase::InitializeVertexBuffer(GLuint numStrips)
 {
-	mIndexCount = numStrips + 1;
+	mIndexCount = numStrips + 2;
 	std::vector<GLfloat> verts;
 	verts.reserve(mIndexCount * 3);
 
 	verts.push_back(0.f);
 	verts.push_back(1.f);
 	verts.push_back(0.f);
-	for (GLuint i = 0; i < numStrips; i++)
+	for (GLuint i = 0; i <= numStrips; i++)
 	{
-		float angle = (float)i * glm::two_pi<float>() / (float)numStrips;
+		float angle = glm::mod<float>((float)i * glm::two_pi<float>() / (float)numStrips, glm::two_pi<float>());
 		verts.push_back(0.5f * glm::cos(angle));
 		verts.push_back(0.f);
 		verts.push_back(0.5f * glm::sin(angle));
-	}
+	}
+
 	//setup vao and vbo stuff
 	CreateBuffers();
 

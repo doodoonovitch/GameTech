@@ -39,7 +39,7 @@ public:
 		assert(propertyIndex < mPropertyCount);
 		return &mData[Element_Per_Property * propertyIndex];
 	}
-
+	
 	inline bool GetIsModified() const
 	{
 		return mIsModified;

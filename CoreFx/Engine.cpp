@@ -1113,9 +1113,9 @@ Engine::SpotLightPositionRenderer::SpotLightPositionRenderer(GLuint numStrips)
 	: Renderers::ConeRendererBase()
 {
 	InitializeVertexBuffer(numStrips);
-	LoadShaders(mShader, "shaders/ConeShader.PointLight.gs.glsl", "shaders/ConeShader.PointLight.forward.fs.glsl");
+	LoadShaders(mShader, "shaders/ConeShader.Light.gs.glsl", "shaders/ConeShader.Light.forward.fs.glsl");
 	InitializeUniforms(mShader);
-	LoadShaders(mWireFrameShader, "shaders/ConeShader.PointLight.gs.glsl", "shaders/IcosahedronShader.WireFrame.forward.fs.glsl");
+	LoadShaders(mWireFrameShader, "shaders/ConeShader.Light.gs.glsl", "shaders/IcosahedronShader.WireFrame.forward.fs.glsl");
 	InitializeUniforms(mWireFrameShader);
 }
 

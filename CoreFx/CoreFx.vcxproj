@@ -226,8 +226,8 @@
     <None Include="..\Data\Shaders\axis.forward.fs.glsl" />
     <None Include="..\Data\Shaders\axis.vs.glsl" />
     <None Include="..\Data\Shaders\common.glsl" />
-    <None Include="..\Data\Shaders\ConeShader.PointLight.forward.fs.glsl" />
-    <None Include="..\Data\Shaders\ConeShader.PointLight.gs.glsl" />
+    <None Include="..\Data\Shaders\ConeShader.Light.forward.fs.glsl" />
+    <None Include="..\Data\Shaders\ConeShader.Light.gs.glsl" />
     <None Include="..\Data\Shaders\ConeShader.vs.glsl" />
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\cube.gs.glsl" />
