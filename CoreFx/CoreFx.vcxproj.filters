@@ -370,6 +370,15 @@
     <None Include="..\Data\Shaders\ConeShader.Light.gs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\SpotLightShader.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SpotLightShader.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\SpotLightShader.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">
