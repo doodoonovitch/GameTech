@@ -7,13 +7,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdParty\ktx\include;$(SolutionDir)packages\glm.0.9.7.1\build\native\include;$(SolutionDir)packages\nupengl.core.0.1.0.1\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdParty\ktx\include;$(SolutionDir)packages\glm.0.9.7.1\build\native\include;$(SolutionDir)packages\assimp.v140.3.2\build\native\include;$(SolutionDir)packages\nupengl.core.0.1.0.1\build\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>KTX_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>freeglut.lib;glew32.lib;glfw3dll.lib;libktx.gl.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)3rdParty\ktx\lib\$(Platform)\$(Configuration);$(SolutionDir)packages\nupengl.core.0.1.0.1\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rdParty\ktx\lib\$(Platform)\$(Configuration);$(SolutionDir)packages\assimp.v140.3.2\build\native\lib\Win32\$(Configuration);$(SolutionDir)packages\nupengl.core.0.1.0.1\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />

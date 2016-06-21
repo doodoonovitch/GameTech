@@ -105,6 +105,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc140-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,6 +120,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc140-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -137,6 +139,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,6 +158,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -189,6 +193,8 @@
     <Import Project="..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets" Condition="Exists('..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets')" />
     <Import Project="..\..\packages\libpng.redist.1.6.20.1\build\native\libpng.redist.targets" Condition="Exists('..\..\packages\libpng.redist.1.6.20.1\build\native\libpng.redist.targets')" />
     <Import Project="..\..\packages\libpng.1.6.20.1\build\native\libpng.targets" Condition="Exists('..\..\packages\libpng.1.6.20.1\build\native\libpng.targets')" />
+    <Import Project="..\..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets" Condition="Exists('..\..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets')" />
+    <Import Project="..\..\packages\assimp.v140.3.2\build\native\assimp.v140.targets" Condition="Exists('..\..\packages\assimp.v140.3.2\build\native\assimp.v140.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -205,5 +211,7 @@
     <Error Condition="!Exists('..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets'))" />
     <Error Condition="!Exists('..\..\packages\libpng.redist.1.6.20.1\build\native\libpng.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\libpng.redist.1.6.20.1\build\native\libpng.redist.targets'))" />
     <Error Condition="!Exists('..\..\packages\libpng.1.6.20.1\build\native\libpng.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\libpng.1.6.20.1\build\native\libpng.targets'))" />
+    <Error Condition="!Exists('..\..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets'))" />
+    <Error Condition="!Exists('..\..\packages\assimp.v140.3.2\build\native\assimp.v140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\assimp.v140.3.2\build\native\assimp.v140.targets'))" />
   </Target>
 </Project>
