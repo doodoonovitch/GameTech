@@ -173,6 +173,15 @@ DualQuat dqFromTranslation(in vec3 translation)
 	return d;
 }
 
+DualQuat dqFromRotationTranslation(in vec4 qRotation, in vec3 translation)
+{
+	DualQuat d;
+	d.Qr = qRotation;
+	d.Qd = vec4(0.5f * translation, 0) * qRotation;
+	return d;
+}
+
+
 DualQuat dqConjugate(in DualQuat q)
 {
 	DualQuat result;
@@ -243,6 +252,42 @@ vec3 dqTransformNormal(vec3 normal, DualQuat dq)
 
 
 
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+
+
+vec4 qRotationBetweenVectors(in vec3 start, in vec3 dest)
+{
+	float cosTheta = dot(start, dest);
+	vec3 rotationAxis;
+
+	if (cosTheta < (-1 + 0.001f))
+	{
+		// special case when vectors in opposite directions:
+		// there is no "ideal" rotation axis
+		// So guess one; any will do as long as it's perpendicular to start
+		rotationAxis = cross(vec3(0.0f, 0.0f, 1.0f), start);
+		if (length(rotationAxis) < 0.01 ) 
+		{	// bad luck, they were parallel, try again!
+			rotationAxis = cross(vec3(1.0f, 0.0f, 0.0f), start);
+		}
+
+		rotationAxis = normalize(rotationAxis);
+		return qAngleAxis(PI, rotationAxis);
+	}
+
+	rotationAxis = cross(start, dest);
+
+	float s = sqrt( (1 + cosTheta) * 2 );
+	float invs = 1 / s;
+
+	return vec4(rotationAxis.xyz * invs, s * 0.5f);
+}
+
+
 
 // ===========================================================================
 // ===========================================================================
@@ -297,3 +342,4 @@ uvec3 WriteOutData(int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, 
 	//outData.y = outData.y | (matSpecularPower << 24);
 	return outData;
 }
+
