@@ -78,6 +78,10 @@
 #define PI											3.14159265
 #define TWO_PI										6.28318531
 
+#define saturate(x) clamp(x, 0, 1);
+#define saturate2(v) clamp(v, vec2(0), vec2(1))
+#define saturate3(v) clamp(v, vec3(0), vec3(1))
+#define saturate4(v) clamp(v, vec4(0), vec4(1))
 
 
 // ===========================================================================
@@ -342,4 +346,14 @@ uvec3 WriteOutData(int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, 
 	//outData.y = outData.y | (matSpecularPower << 24);
 	return outData;
 }
+
+
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+
 

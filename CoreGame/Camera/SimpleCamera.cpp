@@ -107,9 +107,9 @@ void SimpleCamera::OnInit()
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp)); // 8
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 9
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 5, glm::vec3(1.f, 1.f, 1.f), 12, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 5, glm::vec3(1.f, 1.f, 1.f), 4, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6));
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(1.f, 1.f, 1.f), 6, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(0.664f, 0.824f, 0.850f), 6, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
 
 			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4));
 
@@ -249,9 +249,9 @@ void SimpleCamera::OnInit()
 
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), .6f);
 		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 5.f), glm::vec3(1.f, 0.4f, 0.7f), 40.f, 1.f, 0.4f, 0.05f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 40.f, 1.f, 0.4f, 0.05f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 500.f, .5f, 0.07f, 0.02f);
-		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);
 
 	//setup camera
 	mCamera = new Camera();
@@ -525,7 +525,7 @@ void SimpleCamera::OnUpdate()
 		return;
 	}
 
-	if (GetAsyncKeyState(VK_Z) & 0x8000)
+	if ((GetAsyncKeyState(VK_Z) & 0x8000) || (GetAsyncKeyState(VK_W) & 0x8000))
 	{
 		dy += (speed);
 		bWalk = true;
@@ -537,7 +537,7 @@ void SimpleCamera::OnUpdate()
 		bWalk = true;
 	}
 
-	if (GetAsyncKeyState(VK_Q) & 0x8000)
+	if ((GetAsyncKeyState(VK_Q) & 0x8000) || (GetAsyncKeyState(VK_A) & 0x8000))
 	{
 		dx -= (speed);
 		bStrafe = true;

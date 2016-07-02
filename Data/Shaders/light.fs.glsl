@@ -21,7 +21,7 @@ struct FragmentInfo
 	vec3 DiffuseMaterial;
 	vec3 SpecularMaterial;
 	vec3 EmissiveMaterial;
-	float MaterialShininess;
+	float GlossPower;
 	int RendererId;
 };
 
@@ -51,7 +51,7 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 	//temp = unpackUnorm4x8(data.x);
 	//fi.DiffuseMaterial = temp.xyz;
 
-	fi.MaterialShininess = pow(2, int((data.y >> 24) & 255));
+	fi.GlossPower = pow(2, int((data.y >> 24) & 255));
 	uvec3 matS = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
 	fi.SpecularMaterial = vec3(matS) / 255.f;
 
@@ -73,9 +73,131 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 
 
 // ---------------------------------------------------------------------------
+// BRDF Dpl(n, h)
+//	alpha = pow(8192, glossPower)
+// ---------------------------------------------------------------------------
+float BRDF_Dpl(in float NdotH, in float alpha)
+{
+	return ((alpha + 2) / 8) * pow(NdotH, alpha);
+}
+
+
+//
+// ---------------------------------------------------------------------------
+
+
+
+// ---------------------------------------------------------------------------
+// BRDF F(rf0, l, h)
+//
+// ---------------------------------------------------------------------------
+vec3 BRDF_F(in vec3 rf0, in float HdotV)
+{
+	return rf0 + (vec3(1) - rf0) * pow(1 - HdotV, 5);
+}
+
+
+//
+// ---------------------------------------------------------------------------
+
+
+
+
+// ---------------------------------------------------------------------------
+// BRDF V(l, v, n)
+//
+// ---------------------------------------------------------------------------
+float BRDF_V(in float NdotL, in float NdotV, in float alpha)
+{
+	float k = 2 / sqrt(PI * (alpha + 2));
+	float oneMinusK = 1 - k;
+	return 1 / ((NdotL * oneMinusK + k) * (NdotV * oneMinusK + k));
+}
+
+
+//
+// ---------------------------------------------------------------------------
+
+
+
+
+// ---------------------------------------------------------------------------
+// BRDF(rf0, l, h, v, n, glossPower)
+//
+// ---------------------------------------------------------------------------
+vec3 BRDF_Specular(in vec3 rf0, in float NdotL, in float NdotV, in float NdotH, in float HdotV, in float glossPower)
+{
+	float alpha = pow(2, glossPower);
+	return BRDF_Dpl(NdotH, alpha) * BRDF_V(NdotL, NdotV, alpha) * BRDF_F(rf0, HdotV);
+}
+
+// ---------------------------------------------------------------------------
+// BRDF(rf0, l, h, v, n, glossPower)
+//
+// ---------------------------------------------------------------------------
+vec3 BRDF_Diffuse(in vec3 Kd)
+{
+	return Kd / PI;
+}
+
+
+//
+// ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
 // Renderers
 //
 // ---------------------------------------------------------------------------
+vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
+{
+	int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
+	int dataIndex = GetLightDataIndex(lightDesc);
+
+	vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
+	vec3 lightColor = lightColorIntensity.xyz;
+	float lightIntensity = lightColorIntensity.w;
+
+	vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
+	vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
+
+	vec3 l = lightPosition.xyz - fi.Position.xyz;
+	float lightDistance = length(l);
+	l = l / lightDistance;
+	
+	float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
+
+	vec3 h = normalize(l + v);
+
+	float NdotL = saturate(dot(fi.Normal, l));
+	float NdotV = saturate(dot(fi.Normal, v));
+	float NdotH = saturate(dot(fi.Normal, h));
+	float HdotV = saturate(dot(h, v));
+
+	vec3 brdf = BRDF_Diffuse(fi.DiffuseMaterial) + BRDF_Specular(fi.SpecularMaterial, NdotL, NdotV, NdotH, HdotV, fi.GlossPower);
+
+	brdf = brdf * lightColor * lightIntensity * NdotL * attenuation;
+
+	return brdf;
+}
+
+vec4 BRDFLight(FragmentInfo fi)
+{
+	vec3 v = normalize(-fi.Position);
+	int lightIndex = 1;
+
+	vec3 color = vec3(0);
+
+	// point light evaluation
+	for(int pointLight = 0; pointLight < u_PointLightCount; ++pointLight)
+	{
+		color += BRDF_PointLight(v, fi, lightIndex);
+		++lightIndex;
+	}
+
+	return vec4(color, 1);
+}
+
 
 vec4 ADSLight(FragmentInfo fi)
 {
@@ -118,7 +240,7 @@ vec4 ADSLight(FragmentInfo fi)
 		float diffuseFactor = max(0, dot(fi.Normal, lightDirection)) * attenuation * lightIntensity;
 		diffuseColor += lightColor * diffuseFactor; 
 
-		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.MaterialShininess) * attenuation * lightIntensity;	
+		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.GlossPower) * attenuation * lightIntensity;	
 		specularColor += lightColor * specularFactor;
 	}
 	
@@ -167,7 +289,7 @@ vec4 ADSLight(FragmentInfo fi)
 			float diffuseFactor = max(0, LdotN) * attenuation * lightIntensity;
 			diffuseColor += lightColor * diffuseFactor; 
 
-			float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.MaterialShininess) * attenuation * lightIntensity;
+			float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.GlossPower) * attenuation * lightIntensity;
 			specularColor += lightColor * specularFactor;
 		}
 	}
@@ -198,7 +320,7 @@ vec4 ADSLight(FragmentInfo fi)
 		float diffuseFactor = max(0, dot(fi.Normal, lightDirection)) * lightIntensity;
 		diffuseColor += lightColor * diffuseFactor; 
 
-		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.MaterialShininess) * lightIntensity;	
+		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.GlossPower) * lightIntensity;	
 		specularColor += lightColor * specularFactor;
 	}
 	
@@ -242,7 +364,8 @@ void main(void)
 	//}
 	//else
 	{
-		vFragColor = ADSLight(fi);
+		//vFragColor = ADSLight(fi);
+		vFragColor = BRDFLight(fi);
 	}
 }
 

@@ -200,7 +200,7 @@ void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 
 #define PRINT_MATERIAL_COLOR(diffuseVar, specularVar, specularPowerVar, heightVar, mat) \
 {\
-	sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = %i;\r\n", specularPowerVar, mat.mSpecularPower); \
+	sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = %i;\r\n", specularPowerVar, mat.mGlossPower); \
 	generatedSource.append(tmpBuffer); \
 	int diffuseSamplerIndex = (mat.mDiffuseTextureIndex != Renderer::NoTexture) ? texInfo[mat.mDiffuseTextureIndex].GetSamplerIndex() : -1; \
 	int specularSamplerIndex = (mat.mSpecularTextureIndex != Renderer::NoTexture) ? texInfo[mat.mSpecularTextureIndex].GetSamplerIndex() : -1; \
