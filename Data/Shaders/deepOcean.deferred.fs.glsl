@@ -52,7 +52,7 @@ void main()
 		float cosS = cos(S);
 		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
 
-		if (u_Steepness[i] > 1)
+		if (u_Steepness[i] != 1)
 		{
 			float halfOfSinSplusOne = 0.5 * (1 + sin(S));
 			float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
@@ -60,15 +60,15 @@ void main()
 		}
 
 		vec2 dH = vec2(u_Direction[i].x /* fs_in.TexUV.y*/ * dhCommon, u_Direction[i].z /* fs_in.TexUV.x*/ * dhCommon);
-		normal = normal + vec3(dH.x, dH.y, 0);
+		normal = normal + vec3(-dH.x, 1, -dH.y);
 	}		 
 
-	normal = vec3(-normal.x, 1, -normal.y);
+	//normal = vec3(-normal.x, 1, normal.y);
 	normal = normalize(normal);
 	
 	Material mat;
-	mat.SpecularColor = vec3(1);
-	mat.SpecularPower = 64;
+	mat.SpecularColor = vec3(0.2);
+	mat.SpecularPower = 1;
 	//vec2 texUV = fs_in.TexUV * 64.f;
 	//vec2 texUV = fs_in.TexUV;
 	//mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;
