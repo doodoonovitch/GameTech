@@ -21,7 +21,8 @@ struct FragmentInfo
 	vec3 DiffuseMaterial;
 	vec3 SpecularMaterial;
 	vec3 EmissiveMaterial;
-	float GlossPower;
+	float Roughness;
+	//float GlossPower;
 	int RendererId;
 };
 
@@ -51,7 +52,8 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 	//temp = unpackUnorm4x8(data.x);
 	//fi.DiffuseMaterial = temp.xyz;
 
-	fi.GlossPower = pow(2, int((data.y >> 24) & 255));
+	//fi.GlossPower = pow(2, int((data.y >> 24) & 255));
+	fi.Roughness = float((data.y >> 24) & 255) / 255.f;
 	uvec3 matS = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
 	fi.SpecularMaterial = vec3(matS) / 255.f;
 
@@ -71,7 +73,7 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 //
 // ---------------------------------------------------------------------------
 
-
+/*
 // ---------------------------------------------------------------------------
 // BRDF Dpl(n, h)
 //	alpha = pow(8192, glossPower)
@@ -130,9 +132,10 @@ vec3 BRDF_Specular(in vec3 rf0, in float NdotL, in float NdotV, in float NdotH, 
 	float alpha = pow(2, glossPower);
 	return BRDF_Dpl(NdotH, alpha) * BRDF_V(NdotL, NdotV, alpha) * BRDF_F(rf0, HdotV);
 }
+*/
 
 // ---------------------------------------------------------------------------
-// BRDF(rf0, l, h, v, n, glossPower)
+// BRDF(Kd)
 //
 // ---------------------------------------------------------------------------
 vec3 BRDF_Diffuse(in vec3 Kd)
@@ -141,6 +144,55 @@ vec3 BRDF_Diffuse(in vec3 Kd)
 }
 
 
+
+// ===============================================================================
+// Calculates the Fresnel factor using Schlick's approximation
+//
+//		float LdotH = saturate(dot(l, h));
+// ===============================================================================
+vec3 BRDF_Fresnel(in vec3 specAlbedo, in float LdotH)
+{
+	return specAlbedo + (1.0f - specAlbedo) * pow((1.0f - LdotH), 5.0f);
+}
+// ===============================================================================
+// Helper for computing the GGX visibility term
+// ===============================================================================
+float GGX_V1(in float m2, in float NdotX)
+{
+	return 1.0f / (NdotX + sqrt(m2 + (1 - m2) * NdotX * NdotX));
+}
+// ===============================================================================
+// Computes the specular term using a GGX microfacet distribution, with a matching
+// geometry factor and visibility term. m is roughness, n is the surface normal,
+// h is the half vector, l is the direction to the light source, and specAlbedo is
+// the RGB specular albedo
+//
+//	float NdotL = saturate(dot(n, l));
+//	float NdotH = saturate(dot(n, h));
+//	float NdotV = max(dot(n, v), 0.0001f);
+//	float LdotH = saturate(dot(l, h));
+// ===============================================================================
+vec3 GGX_Specular(in vec3 specAlbedo, in float m, in float NdotL, in float NdotH, in float NdotV, in float LdotH)
+{
+	if(NdotL <= 0.0f)
+		return vec3(0.0f);
+
+	float NdotH2 = NdotH * NdotH;
+	float m2 = m * m;
+	
+	// Calculate the distribution term
+	float d = m2 / (PI * pow(NdotH2 * (m2 - 1) + 1, 2.0f));
+
+	// Calculate the matching visibility term
+	float v1i = GGX_V1(m2, NdotL);
+	float v1o = GGX_V1(m2, NdotV);
+	float vis = v1i * v1o;
+
+	// Calculate the fresnel term
+	vec3 f = BRDF_Fresnel(specAlbedo, LdotH);
+	// Put it all together
+	return d * f * vis;
+}
 //
 // ---------------------------------------------------------------------------
 
@@ -154,29 +206,33 @@ vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
 	int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
 	int dataIndex = GetLightDataIndex(lightDesc);
 
-	vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
-	vec3 lightColor = lightColorIntensity.xyz;
-	float lightIntensity = lightColorIntensity.w;
+	vec4 data = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
+	vec3 lightColorIntensity = data.xyz;
+	float lightRadius = data.w;
 
 	vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
-	vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
 
 	vec3 l = lightPosition.xyz - fi.Position.xyz;
 	float lightDistance = length(l);
 	l = l / lightDistance;
 	
-	float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
+	//float att = saturate(1 - pow(lightDistance / lightRadius, 4));
+	//float attenuation = att * att;
+	float dist2 = lightDistance * lightDistance;
+	float attenuation = 1 / max(dist2, 0.01 * 0.01);
 
 	vec3 h = normalize(l + v);
 
 	float NdotL = saturate(dot(fi.Normal, l));
-	float NdotV = saturate(dot(fi.Normal, v));
+	float NdotV = max(dot(fi.Normal, v), 0.0001f);
 	float NdotH = saturate(dot(fi.Normal, h));
-	float HdotV = saturate(dot(h, v));
+	float LdotH = saturate(dot(l, h));
 
-	vec3 brdf = BRDF_Diffuse(fi.DiffuseMaterial) + BRDF_Specular(fi.SpecularMaterial, NdotL, NdotV, NdotH, HdotV, fi.GlossPower);
+	vec3 brdf = BRDF_Diffuse(fi.DiffuseMaterial) + 
+		GGX_Specular(fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH);
+	//BRDF_Specular(fi.SpecularMaterial, NdotL, NdotV, NdotH, HdotV, fi.Roughness);
 
-	brdf = brdf * lightColor * lightIntensity * NdotL * attenuation;
+	brdf = brdf * lightColorIntensity * NdotL * attenuation;
 
 	return brdf;
 }
@@ -198,7 +254,7 @@ vec4 BRDFLight(FragmentInfo fi)
 	return vec4(color, 1);
 }
 
-
+/*
 vec4 ADSLight(FragmentInfo fi)
 {
 	vec3 ambientColor = u_AmbientLight.xyz;
@@ -326,6 +382,7 @@ vec4 ADSLight(FragmentInfo fi)
 	
 	return vec4(fi.DiffuseMaterial * (ambientColor *.5 + diffuseColor) + fi.SpecularMaterial * specularColor + fi.EmissiveMaterial, 1);
 }
+*/
 
 //vec4 GridRenderer(vec3 Position, int MaterialIndex)
 //{

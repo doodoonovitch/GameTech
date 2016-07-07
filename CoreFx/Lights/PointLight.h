@@ -23,7 +23,6 @@ public:
 	enum PropertyIndex
 	{
 		Position_Property = Light::__Common_Property_Count__,
-		Attenuation_Property,
 		World_Position_Property,
 
 		__property_count__
@@ -43,46 +42,10 @@ public:
 		SetProperty(glm::vec4(position, 1.0f), World_Position_Property);
 	}
 
-	GLfloat GetConstantAttenuation() const
-	{
-		return GetProperty(Attenuation_Property)[0];
-	}
-
-	GLfloat GetLinearAttenuation() const
-	{
-		return GetProperty(Attenuation_Property)[1];
-	}
-
-	GLfloat GetQuadraticAttenuation() const
-	{
-		return GetProperty(Attenuation_Property)[2];
-	}
-
-
-	void SetConstantAttenuation(GLfloat value)
-	{
-		GetProperty(Attenuation_Property)[0] = value;
-		SetIsModified(true);
-	}
-
-	void SetLinearAttenuation(GLfloat value)
-	{
-		GetProperty(Attenuation_Property)[1] = value;
-		SetIsModified(true);
-	}
-
-	void SetQuadraticAttenuation(GLfloat value) 
-	{
-		GetProperty(Attenuation_Property)[2] = value;
-		SetIsModified(true);
-	}
-
-	GLfloat GetAttenuationDistance() const;
-
 protected:
 
 
-	PointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
+	PointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat radius);
 	virtual ~PointLight();
 
 protected:

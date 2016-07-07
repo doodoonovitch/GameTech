@@ -68,7 +68,7 @@ void main()
 	
 	Material mat;
 	mat.SpecularColor = vec3(0.2);
-	mat.SpecularPower = 1;
+	mat.SpecularPower = .2;
 	//vec2 texUV = fs_in.TexUV * 64.f;
 	//vec2 texUV = fs_in.TexUV;
 	//mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;

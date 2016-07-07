@@ -8,12 +8,15 @@ namespace CoreFx
 
 
 
-Light::Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat intensity)
+Light::Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat intensity, GLfloat radius)
 	: SceneObject(true)
 	, mLightDesc( ((GLuint)lightType) & LIGHT_TYPE_MASK )
 	, mPropertyData(propertyCount)
+	, mColor(color)
+	, mIntensity(intensity)
 {
-	SetProperty(glm::vec4(color, intensity), ColorIntensity_Property);
+	glm::vec3 colorIntensity(color * intensity);
+	SetProperty(glm::vec4(colorIntensity, radius), ColorIntensity_Property);
 }
 
 

@@ -42,7 +42,7 @@ public:
 	Renderables::Cube * CreateCube(std::uint8_t materialIndex);
 	void DeleteCube(Renderables::Cube *& cube);
 
-	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
+	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, GLfloat roughness, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
 
 	void SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat);
 
@@ -87,9 +87,9 @@ private:
 		__declspec(align(4)) GLfloat mDiffuse[3];
 		__declspec(align(4)) GLbitfield mDiffuseSpecularIndexes;	// diffuse, specular sampler and texture index
 		__declspec(align(4)) GLfloat mSpecular[3];
-		__declspec(align(4)) float mShininess;
+		__declspec(align(4)) GLfloat mRoughness;
 		__declspec(align(4)) GLfloat mEmissive[3];
-		__declspec(align(4)) float mEmissiveNormalIndex;
+		__declspec(align(4)) GLfloat mEmissiveNormalIndex;
 	};
 
 	struct MaterialTextureIndexes

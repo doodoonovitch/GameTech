@@ -200,7 +200,7 @@ void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 
 #define PRINT_MATERIAL_COLOR(diffuseVar, specularVar, specularPowerVar, heightVar, mat) \
 {\
-	sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = %i;\r\n", specularPowerVar, mat.mGlossPower); \
+	sprintf_s(tmpBuffer, tmpBufferCount, "\t\t%s = %f;\r\n", specularPowerVar, mat.mRoughness); \
 	generatedSource.append(tmpBuffer); \
 	int diffuseSamplerIndex = (mat.mDiffuseTextureIndex != Renderer::NoTexture) ? texInfo[mat.mDiffuseTextureIndex].GetSamplerIndex() : -1; \
 	int specularSamplerIndex = (mat.mSpecularTextureIndex != Renderer::NoTexture) ? texInfo[mat.mSpecularTextureIndex].GetSamplerIndex() : -1; \
@@ -308,7 +308,7 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 				generatedSource.append(tmpBuffer);
 				generatedSource.append("\t{\r\n");
 
-				PRINT_MATERIAL_COLOR("mat.DiffuseColor", "mat.SpecularColor", "mat.SpecularPower", "mat.Height", currMat);
+				PRINT_MATERIAL_COLOR("mat.DiffuseColor", "mat.SpecularColor", "mat.Roughness", "mat.Height", currMat);
 
 				generatedSource.append("\t}\r\n");
 
@@ -328,7 +328,7 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 				generatedSource.append("\r\n");
 				generatedSource.append("\t\tmat.DiffuseColor = mix(diffuseColor, diffuseColor2, blend);\r\n");
 				generatedSource.append("\t\tmat.SpecularColor = mix(specularColor, specularColor2, blend);\r\n");
-				generatedSource.append("\t\tmat.SpecularPower = mix(specularPower, specularPower2, blend);\r\n");
+				generatedSource.append("\t\tmat.Roughness = mix(specularPower, specularPower2, blend);\r\n");
 				generatedSource.append("\t\tmat.Height = mix(height, height2, blend);\r\n");
 
 				generatedSource.append("\t}\r\n");
@@ -340,7 +340,7 @@ void TerrainRenderer::GenerateGetMaterialByHeight(std::string & generatedSource,
 				generatedSource.append("\telse\r\n");
 				generatedSource.append("\t{\r\n");
 
-				PRINT_MATERIAL_COLOR("mat.DiffuseColor", "mat.SpecularColor", "mat.SpecularPower", "mat.Height", currMat);
+				PRINT_MATERIAL_COLOR("mat.DiffuseColor", "mat.SpecularColor", "mat.Roughness", "mat.Height", currMat);
 
 				generatedSource.append("\t}\r\n");
 			}

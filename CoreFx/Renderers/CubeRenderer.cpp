@@ -439,7 +439,7 @@ void CubeRenderer::DeleteCube(Renderables::Cube *& cube)
 	mIsMaterialIndexBufferSet = false;
 }
 
-void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & diffuse, TextureIndex diffuseTextureIndex, const glm::vec3 & specular, int8_t mGlossPower, TextureIndex specularTextureIndex, const glm::vec3 & emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
+void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & diffuse, TextureIndex diffuseTextureIndex, const glm::vec3 & specular, GLfloat roughness, TextureIndex specularTextureIndex, const glm::vec3 & emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
 {
 	assert(materialIndex < mMaterialCount);
 
@@ -455,8 +455,9 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & di
 		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
 		memcpy(prop2, glm::value_ptr(specular), sizeof(GLfloat) * 3);
 
-		GLbitfield shininessBitfield = ((mGlossPower & 0xFFFF) << 16);
-		memcpy(&prop2[3], &shininessBitfield, sizeof(GLfloat));
+		//GLbitfield shininessBitfield = ((roughness & 0xFFFF) << 16);
+		//memcpy(&prop2[3], &shininessBitfield, sizeof(GLfloat));
+		prop2[3] = roughness;
 
 		GLfloat * prop3 = mMaterials.GetProperty(propertyIndex + 2);
 		memcpy(prop3, glm::value_ptr(emissive), sizeof(GLfloat) * 3);
@@ -471,7 +472,7 @@ void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & di
 
 void CubeRenderer::SetMaterial(std::uint16_t materialIndex, const MaterialDesc & mat)
 {
-	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mGlossPower, mat.mSpecularTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
+	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mRoughness, mat.mSpecularTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
 }
 
 void CubeRenderer::SetMaterials(const MaterialDescList & materials)

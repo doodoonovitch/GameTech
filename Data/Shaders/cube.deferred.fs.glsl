@@ -33,8 +33,7 @@ void main(void)
 
 	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 1);
 	vec3 materialSpecular = matData.xyz;
-	bitfieldValue = floatBitsToUint(matData.w);
-	int materialShininess = int((bitfieldValue >> 16) & uint(65535));
+	float roughness = matData.w;
 
 	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 2);
 	vec3 materialEmissive = matData.xyz;
@@ -70,6 +69,6 @@ void main(void)
 	outNormal = normal.xyz;
 
 	//outData = uvec3(packUnorm4x8(vec4(materialDiffuse, CUBE_RENDERER_ID / 255)), packUnorm4x8(vec4(materialSpecular, materialShininess / 255)), packUnorm4x8(vec4(materialEmissive, 0)));
-	outData = WriteOutData(CUBE_RENDERER_ID , materialDiffuse, materialSpecular, materialShininess, materialEmissive);
+	outData = WriteOutData(CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);
 
 }

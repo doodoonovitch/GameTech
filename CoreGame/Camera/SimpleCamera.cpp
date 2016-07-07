@@ -107,26 +107,27 @@ void SimpleCamera::OnInit()
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp)); // 8
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 9
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 5, glm::vec3(1.f, 1.f, 1.f), 4, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.7f, .7f, .7f), 5, glm::vec3(0.664f, 0.824f, 0.850f), 0.1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6)); // zinc
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(0.664f, 0.824f, 0.850f), 6, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
-
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(1.f, 1.f, 1.f), 1, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4));
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), 5, glm::vec3(1.f, .6f, .2f), 2, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(0.664f, 0.824f, 0.850f), 0.1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2)); // zinc
 
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 0, Renderers::CubeRenderer::NoTexture, glm::vec3(0.f, 8600.f, 5000.f), 8, 9));
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.5f, .5f, .5f), 1, 8, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 9));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(0.045f, 0.045f, 0.045f), 0.8f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), 5, glm::vec3(0.955f, 0.638f, 0.538f), 0.1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6));
 
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 1, glm::vec3(1.f, 1.f, 1.f), 4, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.1f, .1f, .1f), 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0.f, 8600.f, 5000.f), 8, 9));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.2f, .2f, .2f), .9f, 
+				8, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 9));
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
 
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), 1, glm::vec3(1.f, 1.f, 1.f), 7, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), 0, glm::vec3(1.f, 1.f, 1.f), 8, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 1, glm::vec3(.1f, .1f, .1f), 0.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), 0, glm::vec3(.02f, .02f, .02f), 0.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), 1, glm::vec3(.05f, .05f, .05f), .3f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
+			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), 0, glm::vec3(.08f, .08f, .08f), .2f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
 
 			const int materialCount = (int)desc.mMaterials.size();
 
@@ -157,7 +158,7 @@ void SimpleCamera::OnInit()
 				}
 			}
 		}
-
+		
 		{
 			float yScale = 100.f;
 
@@ -181,10 +182,10 @@ void SimpleCamera::OnInit()
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_108.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 7
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_104.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 8
 
-			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(1.f), 1, 5, glm::vec3(0), Renderer::NoTexture, 8, 0.1f));
-			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, 4, glm::vec3(0), Renderer::NoTexture, 7, 0.1f));
-			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(1.f), 1, 3, glm::vec3(0), Renderer::NoTexture, 6, 0.1f));
-			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(1.f), 7, 4, glm::vec3(0), Renderer::NoTexture, 7, 0.1f));
+			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(.1f), 1, 5, glm::vec3(0), Renderer::NoTexture, 8, 0.1f));
+			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(.1f), 1, 4, glm::vec3(0), Renderer::NoTexture, 7, 0.1f));
+			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(.1f), 1, 3, glm::vec3(0), Renderer::NoTexture, 6, 0.1f));
+			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(.1f), 1, 4, glm::vec3(0), Renderer::NoTexture, 7, 0.1f));
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);
@@ -245,14 +246,15 @@ void SimpleCamera::OnInit()
 	// Setup Lights
 		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
 
-		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 15.f, -15.f), glm::vec3(1.f, 1.f, 1.f), 400.f, glm::normalize(glm::vec3(.1f, -0.1f, 1.f)), glm::radians(15.f), glm::radians(25.f), 0.5f, 0.06f, .06f);
-		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(30.f, 15.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 400.f, glm::normalize(glm::vec3(.5f, -0.5f, 1.f)), glm::radians(15.f), glm::radians(25.f), 0.5f, 0.06f, .06f);
+		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 15.f, -15.f), glm::vec3(1.f, 1.f, 1.f), 400.f, 20.f, glm::normalize(glm::vec3(.1f, -0.1f, 1.f)), glm::radians(15.f), glm::radians(25.f));
+		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(30.f, 15.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 400.f, 10.f, glm::normalize(glm::vec3(.5f, -0.5f, 1.f)), glm::radians(15.f), glm::radians(25.f));
 
 		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), .6f);
 		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 40.f, 1.f, 0.4f, 0.05f);
-		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 500.f, .5f, 0.07f, 0.02f);
-		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 1.f, 0.14f, 0.07f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 900.f, 15.f);
+		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 100.f, 100.f);
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 30.f);
+		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 50.f, 250.f);
 
 	//setup camera
 	mCamera = new Camera();

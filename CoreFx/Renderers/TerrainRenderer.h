@@ -37,10 +37,10 @@ public:
 	{
 		MaterialDesc(GLfloat heightMin, GLfloat heightMax, 
 			const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
-			const glm::vec3& specular, int8_t specularPower, TextureIndex specularTextureIndex, 
+			const glm::vec3& specular, GLfloat roughness, TextureIndex specularTextureIndex, 
 			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
 			TextureIndex normalTextureIndex, GLfloat texScale = 1.f)
-			: Renderer::MaterialDesc(diffuse, diffuseTextureIndex, specular, specularPower, specularTextureIndex, emissive, emissiveTextureIndex, normalTextureIndex)
+			: Renderer::MaterialDesc(diffuse, diffuseTextureIndex, specular, roughness, specularTextureIndex, emissive, emissiveTextureIndex, normalTextureIndex)
 			, mHeightMin(heightMin)
 			, mHeightMax(heightMax)
 			, mTexScale(texScale)

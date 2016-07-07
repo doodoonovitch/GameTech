@@ -866,12 +866,12 @@ void Engine::RenderObjects()
 	}
 }
 
-Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat radius)
 {
 	const int lightType = (int)Lights::Light::Point_Light;
 	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::PointLight *light = new Lights::PointLight(position, color, intensity, constantAttenuation, linearAttenuation, quadraticAttenuation);
+		Lights::PointLight *light = new Lights::PointLight(position, color, intensity, radius);
 		mLights[lightType]->Attach(light);
 		//mPointLightHelperRenderer.mVboUpdateNeeded = true;
 		return light;
@@ -883,12 +883,12 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::v
 	}
 }
 
-Lights::SpotLight * Engine::CreateSpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation)
+Lights::SpotLight * Engine::CreateSpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat radius, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle)
 {
 	const int lightType = (int)Lights::Light::Spot_Light;
 	if (mLights[lightType]->GetCount() < MAX_LIGHT_COUNT)
 	{
-		Lights::SpotLight *light = new Lights::SpotLight(position, color, intensity, direction, innerConeAngle, outerConeAngle, constantAttenuation, linearAttenuation, quadraticAttenuation);
+		Lights::SpotLight *light = new Lights::SpotLight(position, color, intensity, radius, direction, innerConeAngle, outerConeAngle);
 		mLights[lightType]->Attach(light);
 		return light;
 	}

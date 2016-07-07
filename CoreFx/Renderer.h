@@ -30,13 +30,13 @@ public:
 	struct MaterialDesc
 	{
 		MaterialDesc(const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
-			const glm::vec3& specular, int8_t glossPower, TextureIndex specularTextureIndex, 
+			const glm::vec3& specular, GLfloat roughness, TextureIndex specularTextureIndex,
 			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
 			TextureIndex normalTextureIndex)
 			: mDiffuse(diffuse)
 			, mSpecular(specular)
 			, mEmissive(emissive)
-			, mGlossPower(glossPower)
+			, mRoughness(roughness)
 			, mDiffuseTextureIndex(diffuseTextureIndex)
 			, mSpecularTextureIndex(specularTextureIndex)
 			, mEmissiveTextureIndex(emissiveTextureIndex)
@@ -47,7 +47,7 @@ public:
 			: mDiffuse(src.mDiffuse)
 			, mSpecular(src.mSpecular)
 			, mEmissive(src.mEmissive)
-			, mGlossPower(src.mGlossPower)
+			, mRoughness(src.mRoughness)
 			, mDiffuseTextureIndex(src.mDiffuseTextureIndex)
 			, mSpecularTextureIndex(src.mSpecularTextureIndex)
 			, mEmissiveTextureIndex(src.mEmissiveTextureIndex)
@@ -59,7 +59,7 @@ public:
 		glm::vec3 mDiffuse;
 		glm::vec3 mSpecular;
 		glm::vec3 mEmissive;
-		int8_t mGlossPower;
+		GLfloat mRoughness;
 		TextureIndex mDiffuseTextureIndex;
 		TextureIndex mSpecularTextureIndex;
 		TextureIndex mNormalTextureIndex;

@@ -28,7 +28,7 @@ struct Material
 	//vec3 Normal;
 	vec3 DiffuseColor;
 	vec3 SpecularColor;
-	float SpecularPower;
+	float Roughness;
 	float Height;
 };
 
@@ -100,7 +100,7 @@ void BlendMaterial(out Material blendedMat, Material lowSlopeMat, Material highS
 {
 	blendedMat.DiffuseColor = mix(lowSlopeMat.DiffuseColor, highSlopeMat.DiffuseColor, blend);
 	blendedMat.SpecularColor = mix(lowSlopeMat.SpecularColor, highSlopeMat.SpecularColor, blend);
-	blendedMat.SpecularPower = mix(lowSlopeMat.SpecularPower, highSlopeMat.SpecularPower, blend);
+	blendedMat.Roughness = mix(lowSlopeMat.Roughness, highSlopeMat.Roughness, blend);
 }
 
 void main()
@@ -126,7 +126,8 @@ void main()
 
 	//normal = fs_in.ViewNormal;
 
-	outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, TERRAIN_RENDERER_ID / 255)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
+	outData = WriteOutData(TERRAIN_RENDERER_ID, mat.DiffuseColor, mat.SpecularColor, mat.Roughness, vec3(0));
+	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, TERRAIN_RENDERER_ID / 255)), packUnorm4x8(vec4(mat.SpecularColor, mat.Roughness / 255)), 0);
 	outPosition = fs_in.ViewPosition;
 	outNormal = normal;
 }

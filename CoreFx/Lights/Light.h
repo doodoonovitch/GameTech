@@ -75,29 +75,29 @@ public:
 
 	void SetColor(const glm::vec3 & value)
 	{
-		SetProperty(value, ColorIntensity_Property);
+		mColor = value;
+		UpdateColorIntensity();
 	}
 	const glm::vec3 & GetColor() const
 	{
-		return *(glm::vec3 *)GetProperty(ColorIntensity_Property);
+		return mColor;;
 	}
 
 	void SetIntensity(GLfloat value)
 	{
-		GLfloat * prop = GetProperty(ColorIntensity_Property);
-		prop[3] = value;
-		SetIsModified(true);
+		mIntensity = value;
+		UpdateColorIntensity();
 	}
 	GLfloat GetIntensity() const
 	{
-		return GetProperty(ColorIntensity_Property)[3];
+		return mIntensity;
 	}
 
 
 protected:
 
 	
-	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat intensity);
+	Light(LightType lightType, GLuint propertyCount, glm::vec3 const & color, GLfloat intensity, GLfloat radius);
 	virtual ~Light();
 
 	GLfloat * GetProperty(GLuint propertyIndex) 
@@ -118,11 +118,19 @@ private:
 		mLightDesc = (mLightDesc & LIGHT_TYPE_MASK) | ((index << LIGHT_DATA_INDEX_SHIFT) & LIGHT_DATA_INDEX_MASK);
 	}
 
+	void UpdateColorIntensity()
+	{
+		glm::vec3 colorIntensity = mColor * mIntensity;
+		SetProperty(colorIntensity, ColorIntensity_Property);
+	}
+
 
 private:
 
 	GLuint mLightDesc;
 	PropertyData mPropertyData;
+	glm::vec3 mColor;
+	GLfloat mIntensity;
 };
 
 

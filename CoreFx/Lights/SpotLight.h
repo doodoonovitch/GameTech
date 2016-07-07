@@ -24,7 +24,6 @@ public:
 	{
 		Position_Property = Light::__Common_Property_Count__,
 		Direction_Property,
-		Attenuation_Property,
 		World_Position_Property,
 		World_Direction_Property,
 
@@ -55,40 +54,6 @@ public:
 	{
 		SetProperty(glm::vec4(direction, 0.0f), World_Direction_Property);
 	}
-	
-	GLfloat GetConstantAttenuation() const
-	{
-		return GetProperty(Attenuation_Property)[0];
-	}
-
-	GLfloat GetLinearAttenuation() const
-	{
-		return GetProperty(Attenuation_Property)[1];
-	}
-
-	GLfloat GetQuadraticAttenuation() const
-	{
-		return GetProperty(Attenuation_Property)[2];
-	}
-
-
-	void SetConstantAttenuation(GLfloat value)
-	{
-		GetProperty(Attenuation_Property)[0] = value;
-		SetIsModified(true);
-	}
-
-	void SetLinearAttenuation(GLfloat value)
-	{
-		GetProperty(Attenuation_Property)[1] = value;
-		SetIsModified(true);
-	}
-
-	void SetQuadraticAttenuation(GLfloat value) 
-	{
-		GetProperty(Attenuation_Property)[2] = value;
-		SetIsModified(true);
-	}
 
 	float GetInnerConeAngle() const
 	{
@@ -106,7 +71,7 @@ public:
 protected:
 
 
-	SpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, const glm::vec3 & direction, float innerConeAngle, float outerConeAngle, GLfloat constantAttenuation, GLfloat linearAttenuation, GLfloat quadraticAttenuation);
+	SpotLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat radius, const glm::vec3 & direction, GLfloat innerConeAngle, GLfloat outerConeAngle);
 	virtual ~SpotLight();
 
 protected:
