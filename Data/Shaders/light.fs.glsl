@@ -196,30 +196,71 @@ vec3 GGX_Specular(in vec3 specAlbedo, in float m, in float NdotL, in float NdotH
 //
 // ---------------------------------------------------------------------------
 
+float AngleAttenuation(in vec3 lightDirection, in vec3 spotDirection, in float innerConeCos, in float outerConeCos)
+{
+	float theta = dot(lightDirection, spotDirection); 
+	float epsilon = max(innerConeCos - outerConeCos, 0.001);
+	float spotIntensity = clamp((theta - outerConeCos) / epsilon, 0.0, 1.0);
+	return spotIntensity;
+}
+
+float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
+{
+	//float lightDistance = length(unnormalizedLightVector);
+	//float fact1 = saturate(1 - pow(lightDistance / lightRadius, 4));
+	//float fact2 = 1 / (lightDistance * lightDistance + 1);
+	//float attenuation = fact1 * fact1 * fact2;
+
+	float dist2 = dot(unnormalizedLightVector, unnormalizedLightVector);
+	float invDist2 = 1 / max(dist2, 0.01 * 0.01);
+	int N = 4;
+	float lightRadiusN = pow(lightRadius, N);
+	float distN = pow(dist2, N /2);
+	float fact2 = saturate(1 - (distN / lightRadiusN));
+	float attenuation = invDist2 * fact2 * fact2;
+	return attenuation;
+}
 
 // ---------------------------------------------------------------------------
 // Renderers
 //
 // ---------------------------------------------------------------------------
-vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
+vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughness, 
+	in float NdotL, in float NdotH, in float NdotV, in float LdotH, 
+	in vec3 lightColorIntensity, in float attenuation)
+{
+	vec3 brdf = BRDF_Diffuse(diffuseMaterial) + 
+		GGX_Specular(specularMaterial, roughness, NdotL, NdotH, NdotV, LdotH);
+	//BRDF_Specular(fi.SpecularMaterial, NdotL, NdotV, NdotH, HdotV, fi.Roughness);
+
+	brdf = brdf * lightColorIntensity * NdotL * attenuation;
+
+	return brdf;
+}
+
+void GetCommonLightProperties(in int lightIndex, out int dataIndex, out vec3 lightColorIntensity, out float lightRadius)
 {
 	int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
-	int dataIndex = GetLightDataIndex(lightDesc);
+	dataIndex = GetLightDataIndex(lightDesc);
 
 	vec4 data = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
-	vec3 lightColorIntensity = data.xyz;
-	float lightRadius = data.w;
+	lightColorIntensity = data.xyz;
+	lightRadius = data.w;
+}
+
+vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
+{
+	int dataIndex;
+	vec3 lightColorIntensity;
+	float lightRadius;
+	GetCommonLightProperties(lightIndex, dataIndex, lightColorIntensity, lightRadius);
 
 	vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
 
-	vec3 l = lightPosition.xyz - fi.Position.xyz;
-	float lightDistance = length(l);
-	l = l / lightDistance;
+	vec3 unnormalizedLightVector = lightPosition.xyz - fi.Position.xyz;
+	vec3 l = normalize(unnormalizedLightVector);
 	
-	//float att = saturate(1 - pow(lightDistance / lightRadius, 4));
-	//float attenuation = att * att;
-	float dist2 = lightDistance * lightDistance;
-	float attenuation = 1 / max(dist2, 0.01 * 0.01);
+	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
 
 	vec3 h = normalize(l + v);
 
@@ -228,14 +269,59 @@ vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
 	float NdotH = saturate(dot(fi.Normal, h));
 	float LdotH = saturate(dot(l, h));
 
-	vec3 brdf = BRDF_Diffuse(fi.DiffuseMaterial) + 
-		GGX_Specular(fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH);
-	//BRDF_Specular(fi.SpecularMaterial, NdotL, NdotV, NdotH, HdotV, fi.Roughness);
-
-	brdf = brdf * lightColorIntensity * NdotL * attenuation;
-
-	return brdf;
+	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH, lightColorIntensity, attenuation);
 }
+
+vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
+{
+	int dataIndex;
+	vec3 lightColorIntensity;
+	float lightRadius;
+	GetCommonLightProperties(lightIndex, dataIndex, lightColorIntensity, lightRadius);
+
+	vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_POSITION_PROPERTY);
+	float outerConeCos = lightPosition.w;
+	lightPosition.w = 1.0;
+
+	vec3 unnormalizedLightVector = lightPosition.xyz - fi.Position.xyz;
+	vec3 l = normalize(unnormalizedLightVector);
+
+	vec4 spotData = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_DIRECTION_PROPERTY);
+	vec3 spotDirection = normalize(-spotData.xyz);
+	float innerConeCos = spotData.w;
+	
+	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
+	attenuation *= AngleAttenuation(l, spotDirection, innerConeCos, outerConeCos);
+
+	vec3 h = normalize(l + v);
+
+	float NdotL = saturate(dot(fi.Normal, l));
+	float NdotV = max(dot(fi.Normal, v), 0.0001f);
+	float NdotH = saturate(dot(fi.Normal, h));
+	float LdotH = saturate(dot(l, h));
+
+	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH, lightColorIntensity, attenuation);
+}
+
+vec3 BRDF_DirectionalLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
+{
+	int dataIndex;
+	vec3 lightColorIntensity;
+	float lightRadius;
+	GetCommonLightProperties(lightIndex, dataIndex, lightColorIntensity, lightRadius);
+
+	vec3 l = texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
+
+	vec3 h = normalize(l + v);
+
+	float NdotL = saturate(dot(fi.Normal, l));
+	float NdotV = max(dot(fi.Normal, v), 0.0001f);
+	float NdotH = saturate(dot(fi.Normal, h));
+	float LdotH = saturate(dot(l, h));
+
+	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH, lightColorIntensity, 1.0);
+}
+
 
 vec4 BRDFLight(FragmentInfo fi)
 {
@@ -251,6 +337,20 @@ vec4 BRDFLight(FragmentInfo fi)
 		++lightIndex;
 	}
 
+	// spot light evaluation
+	for(int spotLight = 0; spotLight < u_SpotLightCount; ++spotLight)
+	{
+		color += BRDF_SpotLight(v, fi, lightIndex);
+		++lightIndex;
+	}
+
+	// directional light evaluation
+	for(int directionalLight = 0; directionalLight < u_DirectionalLightCount; ++directionalLight)
+	{
+		color += BRDF_DirectionalLight(v, fi, lightIndex);
+		++lightIndex;
+	}
+	
 	return vec4(color, 1);
 }
 

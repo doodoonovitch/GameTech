@@ -50,6 +50,7 @@ void SpotLight::SetInnerConeAngle(float value)
 	mInnerConeAngle = value;
 	GLfloat * posProp = GetProperty(Direction_Property);
 	posProp[3] = glm::cos(mInnerConeAngle);
+	SetIsModified(true);
 }
 
 void SpotLight::SetOuterConeAngle(float value)
@@ -57,6 +58,7 @@ void SpotLight::SetOuterConeAngle(float value)
 	mOuterConeAngle = value;
 	GLfloat * prop = GetProperty(Position_Property);
 	prop[3] = glm::cos(mOuterConeAngle);
+	SetIsModified(true);
 }
 
 
