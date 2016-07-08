@@ -135,12 +135,21 @@ vec3 BRDF_Specular(in vec3 rf0, in float NdotL, in float NdotV, in float NdotH, 
 */
 
 // ---------------------------------------------------------------------------
-// BRDF(Kd)
+// BRDF_LambertDiffuse(Kd)
 //
 // ---------------------------------------------------------------------------
-vec3 BRDF_Diffuse(in vec3 Kd)
+vec3 BRDF_LambertDiffuse(in vec3 Kd)
 {
 	return Kd / PI;
+}
+
+// ---------------------------------------------------------------------------
+// BRDF_Diffuse(Kd, LdotH)
+//
+// ---------------------------------------------------------------------------
+vec3 BRDF_Diffuse(in vec3 Kd, in vec3 fresnel)
+{
+	return (vec3(1) -  fresnel) * Kd / PI;
 }
 
 
@@ -196,6 +205,39 @@ vec3 GGX_Specular(in vec3 specAlbedo, in float m, in float NdotL, in float NdotH
 //
 // ---------------------------------------------------------------------------
 
+vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughness, 
+	in float NdotL, in float NdotH, in float NdotV, in float LdotH, 
+	in vec3 lightColorIntensity, in float attenuation)
+{
+	if(NdotL <= 0.0f)
+		return vec3(0.0f);
+
+	float NdotH2 = NdotH * NdotH;
+	float m2 = roughness * roughness;
+	
+	// Calculate the distribution term
+	float d = m2 / (PI * pow(NdotH2 * (m2 - 1) + 1, 2.0f));
+
+	// Calculate the matching visibility term
+	float v1i = GGX_V1(m2, NdotL);
+	float v1o = GGX_V1(m2, NdotV);
+	float vis = v1i * v1o;
+
+	// Calculate the fresnel term
+	vec3 f = BRDF_Fresnel(specularMaterial, LdotH);
+	//vec3 f2 = BRDF_Fresnel(diffuseMaterial, LdotH);
+
+	//vec3 brdf = BRDF_Diffuse(diffuseMaterial, f2) 
+	vec3 brdf = BRDF_LambertDiffuse(diffuseMaterial)
+		+ d * f * vis;
+
+	brdf = brdf * lightColorIntensity * NdotL * attenuation;
+
+	return brdf;
+}
+
+
+
 float AngleAttenuation(in vec3 lightDirection, in vec3 spotDirection, in float innerConeCos, in float outerConeCos)
 {
 	float theta = dot(lightDirection, spotDirection); 
@@ -225,18 +267,6 @@ float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
 // Renderers
 //
 // ---------------------------------------------------------------------------
-vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughness, 
-	in float NdotL, in float NdotH, in float NdotV, in float LdotH, 
-	in vec3 lightColorIntensity, in float attenuation)
-{
-	vec3 brdf = BRDF_Diffuse(diffuseMaterial) + 
-		GGX_Specular(specularMaterial, roughness, NdotL, NdotH, NdotV, LdotH);
-	//BRDF_Specular(fi.SpecularMaterial, NdotL, NdotV, NdotH, HdotV, fi.Roughness);
-
-	brdf = brdf * lightColorIntensity * NdotL * attenuation;
-
-	return brdf;
-}
 
 void GetCommonLightProperties(in int lightIndex, out int dataIndex, out vec3 lightColorIntensity, out float lightRadius)
 {
