@@ -14,45 +14,24 @@ class TextureManager
 {
 public:
 
-	Texture2D const * LoadTexture2D(std::string const &ktxFilename);
-	CubeMapTexture const * LoadTextureCubeMap(std::string const &ktxFilename);
-
-	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> filenames);
-
-	TextureGroup const * LoadTexture2DArrayAsTextureGroup(uint16_t rendererId, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, std::string const & filename);
-
+	Texture2D const * LoadTexture2D(std::string const &tiffFilename, bool generateMipMap = true);
+	CubeMapTexture const * LoadTextureCubeMap(std::string const & prefixFilename, bool generateMipMap = true);
+	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> filenames, bool generateMipMap = true);
 
 	void ReleaseTexture2D(Texture2D const *& texture);
 	void ReleaseCubeMapTexture(CubeMapTexture const *& texture);
 
 	void ReleaseTextureGroup(TextureGroup const *& texture);
 
-	Texture2D const * GetDefaultTexture2D()	{ return mDefault2D;	}
+	Texture2D const * GetDefaultTexture2D()	{ return mDefault2D; }
 
 public:
+	
+	static bool LoadTiffImage(std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth = nullptr, uint32_t * desiredHeight = nullptr, bool invertY = true);
 
-	typedef struct KTX_header_t
-	{
-		uint8_t  identifier[12];
-		uint32_t endianness;
-		uint32_t glType;
-		uint32_t glTypeSize;
-		uint32_t glFormat;
-		uint32_t glInternalFormat;
-		uint32_t glBaseInternalFormat;
-		uint32_t pixelWidth;
-		uint32_t pixelHeight;
-		uint32_t pixelDepth;
-		uint32_t numberOfArrayElements;
-		uint32_t numberOfFaces;
-		uint32_t numberOfMipmapLevels;
-		uint32_t bytesOfKeyValueData;
-	} KTX_header;
+	static bool GetTiffImageSize(std::string const &tiffFilename, uint32_t & imgWidth, uint32_t & imgHeight);
 
-
-
-	static bool KTX_ReadHeader(FILE* f, KTX_header & header);
-	static bool KTX_ReadHeader(const char * filename, KTX_header & header);
+	static GLsizei GetNumberOfMipMapLevels(uint32_t imgWidth, uint32_t imgHeight);
 
 private:
 
@@ -68,47 +47,6 @@ private:
 
 	TextureManager(TextureManager const &) = delete;
 	TextureManager & operator=(TextureManager const &) = delete;
-
-	template<typename TTexture> 
-	void LoadKtxTexture(std::map<std::string, TTexture*> texMap, GLuint defaultTexture, std::string const & ktxFilename, TTexture *& returnTexture, bool & alreadyDefinedOrDefault)
-	{
-		std::string s;
-		s.resize(ktxFilename.size());
-		std::transform(ktxFilename.begin(), ktxFilename.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-
-		std::map<std::string, TTexture*>::const_iterator it = texMap.find(s);
-
-		if (it != texMap.end())
-		{
-			alreadyDefinedOrDefault = true;
-			returnTexture = it->second;
-		}
-		else
-		{
-			returnTexture = new TTexture(defaultTexture);
-			texMap[s] = returnTexture;
-
-			GLuint id = GLuint(-1);
-			GLenum target;
-			KTX_dimensions dimensions;
-			GLboolean isMipmapped;
-			GLenum glerr;
-
-			KTX_error_code err = ktxLoadTextureN(ktxFilename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-
-			if (err == KTX_SUCCESS)
-			{
-				returnTexture->SetId(id);
-				PRINT_MESSAGE("[LoadTexture] Texture '%s' : %i.\n", ktxFilename.c_str(), id);
-				alreadyDefinedOrDefault = false;
-			}
-			else
-			{
-				PRINT_MESSAGE("[LoadTexture] Cannot load the texture '%s' : %s.", ktxFilename.c_str(), ktxErrorString(err));
-				alreadyDefinedOrDefault = true;
-			}
-		}
-	}
 
 	template<typename TTexture>
 	void ReleaseTextureMap(std::map<std::string, TTexture*> & texMap)
@@ -134,13 +72,14 @@ private:
 		glDeleteTextures((GLsizei)count, ids.data());
 	}
 
+	bool LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, bool generateMipMap = true);
+	bool LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::string tiffFilenames[6], bool generateMipMap = true);
 
 private:
 
 	Texture2D * mDefault2D;
+	CubeMapTexture * mDefaultCubeMap;
 	TextureGroup * mDefaultTexGroup;
-
-	KTX_dimensions mDefault2DDimensions;
 
 	typedef std::map<std::string, Texture2D*> Tex2DIdMap;
 	typedef std::map<std::string, CubeMapTexture*> CubeMapTexIdMap;

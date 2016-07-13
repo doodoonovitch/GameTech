@@ -59,7 +59,7 @@ void main()
 			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
 		}
 
-		vec2 dH = vec2(u_Direction[i].x /* fs_in.TexUV.y*/ * dhCommon, u_Direction[i].z /* fs_in.TexUV.x*/ * dhCommon);
+		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
 		normal = normal + vec3(-dH.x, 1, -dH.y);
 	}		 
 

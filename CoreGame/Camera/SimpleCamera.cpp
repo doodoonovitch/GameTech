@@ -69,6 +69,7 @@ void SimpleCamera::OnInit()
 	}
 
 		Engine* engine = Engine::GetInstance();
+		engine->GetTextureManager()->LoadTexture2D("medias/compass.tif");
 
 		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
 		engine->AttachRenderer(gridRenderer);
@@ -96,16 +97,16 @@ void SimpleCamera::OnInit()
 			int zCount = 30;
 
 			Renderers::CubeRenderer::Desc desc;
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 0
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube2.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 1
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube_N.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 2
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 3
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 4
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 5
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 6
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024.ktx", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 7
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_s.ktx", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp)); // 8
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_n.ktx", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 9
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 0
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube2.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 1
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube_N.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 2
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 3
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01_n.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 4
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 5
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks_n.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 6
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 7
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_s.tif", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp)); // 8
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_n.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 9
 
 			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.7f, .7f, .7f), 5, glm::vec3(0.664f, 0.824f, 0.850f), 0.1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6)); // zinc
 
@@ -170,17 +171,17 @@ void SimpleCamera::OnInit()
 			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
 			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true, glm::vec3(-512.f, 0.f, -512.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_219.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 0
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_108.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 1
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_104.ktx", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 2
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_219.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 0
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_108.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 1
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_104.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 2
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_219.ktx", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 3
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_108.ktx", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 4
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_104.ktx", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 5
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_219.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 3
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_108.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 4
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_104.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 5
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_219.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 6
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_108.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 7
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_104.ktx", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 8
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_219.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 6
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_108.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 7
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_104.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 8
 
 			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(.1f), 1, 5, glm::vec3(0), Renderer::NoTexture, 8, 0.1f));
 			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(.1f), 1, 4, glm::vec3(0), Renderer::NoTexture, 7, 0.1f));
@@ -192,15 +193,15 @@ void SimpleCamera::OnInit()
 		}
 		
 		{
-			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap.ktx");
+			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
 			const float AmpCoef = 0.1f;
 			const float WaveLengthCoef = 1.f;
 			const float VelocityCoef = 0.01f;
 			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 28.0f, VelocityCoef * 5.0f, 10.0f);
-			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 7.0f, VelocityCoef * 6.0f, 2.0f);
-			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 18.0f, VelocityCoef * 5.0f, 3.0f);
-			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 6.0f, VelocityCoef * 4.0f, 1.0f);
+			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 7.0f, VelocityCoef * 6.0f, 3.0f);
+			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 18.0f, VelocityCoef * 5.0f, 4.0f);
+			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 6.0f, VelocityCoef * 4.0f, 2.0f);
 
 			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
@@ -208,7 +209,7 @@ void SimpleCamera::OnInit()
 		}
 		/*
 		{
-			Renderers::ShallowWaterRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap.ktx");
+			Renderers::ShallowWaterRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
 			const float AmpCoef = 0.2f;
 			const float WaveLengthCoef = 1.f;
@@ -224,8 +225,14 @@ void SimpleCamera::OnInit()
 		}
 		*/
 		{
-			Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/uvCubeMap.ktx");
-			engine->AttachSkyboxRenderer(skybox);
+			//Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/uvCubeMap");
+			//engine->AttachSkyboxRenderer(skybox);
+			Renderers::SkydomeRenderer * skydome = new Renderers::SkydomeRenderer("medias/CubeMaps/skybox1");
+			engine->AttachSkydomeRenderer(skydome);
+		}
+		{
+			Renderers::CompassRenderer * compass = new Renderers::CompassRenderer();
+			engine->AttachRenderer(compass);
 		}
 		/*
 		std::vector<Geometry::MeshData*> meshDataList;

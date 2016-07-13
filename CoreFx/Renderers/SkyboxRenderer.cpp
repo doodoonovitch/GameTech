@@ -122,7 +122,7 @@ void SkyboxRenderer::Render()
 	mShader.Use();
 		glBindVertexArray(mVaoID);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, mCubeMapTexture->GetResourceId());
+			glBindTexture(mCubeMapTexture->GetTarget(), mCubeMapTexture->GetResourceId());
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 	mShader.UnUse();

@@ -22,16 +22,14 @@ bool Renderer::AddTexture(const char * filename, TextureCategory category, Textu
 {
 	assert(filename != nullptr);
 
-	TextureManager::KTX_header hd;
-	if (!TextureManager::KTX_ReadHeader(filename, hd))
-	{
-		printf("Error: Cannot load texture header for '%s'.\n", filename);
-		return false;
-	}
+	uint32_t width = 128;
+	uint32_t height = 128;
+
+	TextureManager::GetTiffImageSize(filename, width, height);
 
 	uint16_t rendererId = (uint16_t)GetInstanceId();
 
-	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)hd.pixelWidth, (GLsizei)hd.pixelHeight, wrapS, wrapT);
+	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)width, (GLsizei)height, wrapS, wrapT);
 
 	mTextures.push_back(textureInfo);
 

@@ -1,15 +1,29 @@
 #include "stdafx.h"
 #include "CoreFx.h"
+#include "tiffio.h"
 
 namespace CoreFx
 {
 
+	void OnLibTIFFWarning(const char* title, const char* msgFmt, va_list args)
+	{
+		PRINT_WARNING("[Lib tiff] : %s.", title);
+		PRINT_WARNING_VA(msgFmt, args);
+	}
 
+	void OnLibTIFFError(const char* title, const char* msgFmt, va_list args)
+	{
+		PRINT_ERROR("[Lib tiff] : %s", title);
+		PRINT_ERROR_VA(msgFmt, args);
+	}
 
 TextureManager::TextureManager()
 	: mDefault2D(nullptr)
+	, mDefaultCubeMap(nullptr)
 	, mDefaultTexGroup(nullptr)
 {
+	TIFFSetWarningHandler(OnLibTIFFWarning);
+	TIFFSetErrorHandler(OnLibTIFFError);
 }
 
 
@@ -75,19 +89,13 @@ struct RGBA
 
 void TextureManager::Initialize()
 {
-	const std::string filename("medias/uvtemplate.ktx");
+	const std::string filename("medias/uvtemplate.tif");
 
 	GLuint id = 0;
 	GLenum target;
-	GLboolean isMipmapped;
-	GLenum glerr;
 
-	KTX_error_code err = ktxLoadTextureN(filename.c_str(), &id, &target, &mDefault2DDimensions, &isMipmapped, &glerr, nullptr, nullptr);
-
-	if (err != KTX_SUCCESS || id == 0)
+	if (!LoadTiffTex2D(id, target, filename, true))
 	{
-		printf("Cannot load the texture '%s' : %s.", filename.c_str(), ktxErrorString(err));
-
 		GLsizei w = 128, h = 128;
 		GLubyte* pData = (GLubyte*)malloc(w * h * 4);
 
@@ -102,6 +110,8 @@ void TextureManager::Initialize()
 				*ptr++ = RGBA(c, c, 255, a);
 			}
 		}
+
+		target = GL_TEXTURE_2D;
 
 		glGenTextures(1, &id);
 		glActiveTexture(GL_TEXTURE0);
@@ -118,36 +128,253 @@ void TextureManager::Initialize()
 		free(pData);
 	}
 
-	mDefault2D = new Texture2D(id);
+	mDefault2D = new Texture2D(id, target);
 
 	PRINT_MESSAGE("[TextureManager] Texture mDefault2D : %i.\n", id);
+
+	id = 0;
+	target = GL_TEXTURE_CUBE_MAP;
+	const std::string prefixFilename("medias/CubeMaps/uvCubeMap");
+	std::string filenames[6];
+	filenames[0] = prefixFilename + "_+X.tif";
+	filenames[1] = prefixFilename + "_-X.tif";
+	filenames[2] = prefixFilename + "_+Y.tif";
+	filenames[3] = prefixFilename + "_-Y.tif";
+	filenames[4] = prefixFilename + "_+Z.tif";
+	filenames[5] = prefixFilename + "_-Z.tif";
+
+	if (!LoadTiffTexCubeMap(id, target, filenames, true))
+	{
+		target = GL_TEXTURE_CUBE_MAP;
+		glGenTextures(1, &id);
+		glBindTexture(target, id);
+
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+		const uint32_t colors[] = 
+		{
+			0xFFFF6A00,
+			0xFFFFB27F,
+			0xFF0094FF,
+			0xFF7F3F5B,
+			0xFF00FF90,
+			0xFFB200FF
+		};
+
+		uint32_t buffer[4];
+
+		for (int i = 0; i < 6; ++i)
+		{
+			memset(buffer, colors[i], sizeof(buffer));
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+		}
+
+		glBindTexture(target, 0);
+	}
+	mDefaultCubeMap = new CubeMapTexture(id, target);
+
 }
 
-Texture2D const * TextureManager::LoadTexture2D(std::string const &ktxFilename)
+bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, bool generateMipMap)
 {
-	Texture2D * returnTexture;
-	bool alreadyDefinedOrDefault;
-	LoadKtxTexture(m2DTexMap, mDefault2D->GetResourceId(), ktxFilename, returnTexture, alreadyDefinedOrDefault);
+	id = 0;
+	target = GL_TEXTURE_2D;
+	bool loaded = LoadTiffImage(tiffFilename, [&id, target, generateMipMap](uint32_t w, uint32_t h, const uint32_t * raster)
+	{
+		glGenTextures(1, &id);
+		glBindTexture(target, id);
+
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		if (generateMipMap)
+			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		else
+			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+		glTexImage2D(target, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, raster);
+
+		if (generateMipMap)
+			glGenerateMipmap(target);
+
+		glBindTexture(target, 0);
+	});
+
+	return loaded;
+}
+
+Texture2D const * TextureManager::LoadTexture2D(std::string const &tiffFilename, bool generateMipMap)
+{
+	Texture2D * returnTexture = nullptr;
+
+	std::string s;
+	s.resize(tiffFilename.size());
+	std::transform(tiffFilename.begin(), tiffFilename.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+
+	Tex2DIdMap::const_iterator it = m2DTexMap.find(s);
+
+	if (it != m2DTexMap.end())
+	{
+		returnTexture = it->second;
+	}
+	else
+	{
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_2D;
+
+		if (LoadTiffTex2D(id, target, tiffFilename, generateMipMap))
+		{
+			returnTexture = new Texture2D(id, target);
+		}
+		else
+		{
+			returnTexture = new Texture2D(mDefault2D->GetResourceId(), mDefault2D->GetTarget());
+		}
+		m2DTexMap[s] = returnTexture;
+	}
+
 	return returnTexture;
 }
 
-CubeMapTexture const * TextureManager::LoadTextureCubeMap(std::string const &ktxFilename)
+bool TextureManager::LoadTiffImage(std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth, uint32_t * desiredHeight, bool invertY)
 {
-	CubeMapTexture * returnTexture;
-	bool alreadyDefinedOrDefault;
-	LoadKtxTexture(mCubeMapTexMap, mDefault2D->GetResourceId(), ktxFilename, returnTexture, alreadyDefinedOrDefault);
+	bool loaded = false;
 
-	if (!alreadyDefinedOrDefault)
+	TIFF* tif = TIFFOpen(tiffFilename.c_str(), "r");
+	if (tif)
 	{
-		glBindTexture(GL_TEXTURE_CUBE_MAP, returnTexture->GetResourceId());
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		uint32_t w, h;
+		size_t npixels;
+		uint32_t * raster;
+		if (desiredWidth != nullptr)
+			w = *desiredWidth;
+		else
+			TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+		if (desiredHeight != nullptr)
+			h = *desiredHeight;
+		else
+			TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+		npixels = w * h;
+		raster = (uint32*)_TIFFmalloc(npixels * sizeof(uint32));
+		if (raster != NULL)
+		{
+			if (TIFFReadRGBAImageOriented(tif, w, h, raster, invertY ? ORIENTATION_TOPLEFT : ORIENTATION_BOTLEFT, 0))
+			{
+				if(func != nullptr)
+					func(w, h, raster);
+				loaded = true;
+			}
+			else
+			{
+				PRINT_ERROR("Loading texture '%s' has failed : cannot read the image data.\n", tiffFilename.c_str())
+			}
+			_TIFFfree(raster);
+		}
+		else
+		{
+			PRINT_ERROR("Loading texture '%s' has failed : cannot allocate memory.\n", tiffFilename.c_str())
+		}
+		TIFFClose(tif);
+	}
+	else
+	{
+		PRINT_ERROR("Loading texture '%s' has failed : cannot open the file.\n", tiffFilename.c_str())
 	}
 
+	return loaded;
+}
+
+bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::string tiffFilenames[6], bool generateMipMap)
+{
+	target = GL_TEXTURE_CUBE_MAP;
+	glGenTextures(1, &id);
+	glBindTexture(target, id);
+
+	for (int i = 0; i < 6; ++i)
+	{
+		uint32_t desiredW = 0, desiredH = 0;
+		GLenum trg = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+		bool loaded = LoadTiffImage(tiffFilenames[i], [trg, &desiredW, &desiredH](uint32_t w, uint32_t h, const uint32_t * raster)
+		{
+			glTexImage2D(trg, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, raster);
+			if (desiredW == 0)
+				desiredW = w;
+			if (desiredH == 0)
+				desiredH = h;
+		}, desiredW != 0 ? &desiredW : nullptr, desiredH != 0 ? &desiredH : nullptr);
+		if(!loaded)
+		{
+			glDeleteTextures(1, &id);
+			id = 0;
+			return false;
+		}
+	}
+	
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	if (generateMipMap)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	else
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	if (generateMipMap)
+		glGenerateMipmap(target);
+
+	glBindTexture(target, 0);
+
+	return true;
+}
+
+CubeMapTexture const * TextureManager::LoadTextureCubeMap(std::string const & prefixFilename, bool generateMipMap)
+{
+	CubeMapTexture * returnTexture = nullptr;
+	std::string s;
+	s.resize(prefixFilename.size());
+	std::transform(prefixFilename.begin(), prefixFilename.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+
+	CubeMapTexIdMap::const_iterator it = mCubeMapTexMap.find(s);
+
+	if (it != mCubeMapTexMap.end())
+	{
+		returnTexture = it->second;
+	}
+	else
+	{
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_CUBE_MAP;
+
+		std::string filenames[6];
+		filenames[0] = prefixFilename + "_+X.tif";
+		filenames[1] = prefixFilename + "_-X.tif";
+		filenames[2] = prefixFilename + "_+Y.tif";
+		filenames[3] = prefixFilename + "_-Y.tif";
+		filenames[4] = prefixFilename + "_+Z.tif";
+		filenames[5] = prefixFilename + "_-Z.tif";
+
+		if (LoadTiffTexCubeMap(id, target, filenames, generateMipMap))
+		{
+			returnTexture = new CubeMapTexture(id, target);
+		}
+		else
+		{
+			returnTexture = new CubeMapTexture(mDefaultCubeMap->GetResourceId(), mDefaultCubeMap->GetTarget());
+		}
+		mCubeMapTexMap[s] = returnTexture;
+	}
+	
 	return returnTexture;
 }
 
@@ -166,7 +393,7 @@ void TextureManager::ReleaseTextureGroup(TextureGroup const *& texture)
 	texture = nullptr;
 }
 
-TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> tex2DFilenameList)
+TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> tex2DFilenameList, bool generateMipMap)
 {
 	TexGroupMap::const_iterator it = mTexGroupMap.find(groupId);
 	if (it != mTexGroupMap.end())
@@ -174,90 +401,62 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 	if (tex2DFilenameList.empty())
 	{
-		printf("Error: Cannot load texture group : tex2DFilenameList is empty!\n");
+		PRINT_ERROR("Cannot load texture group : tex2DFilenameList is empty!\n");
 		return mDefaultTexGroup;
 	}
 
-	KTX_error_code err;
-	GLenum target;
-	KTX_dimensions dimensions;
-	GLboolean isMipmapped;
-	GLenum glerr;
-	GLuint id = 0;
+	uint32_t width = TextureInfo::GetWidthFromGroupId(groupId);
+	uint32_t height = TextureInfo::GetHeightFromGroupId(groupId);
+	size_t npixels = width * height;
 
-
-	KTX_header header;
-	if (!KTX_ReadHeader(tex2DFilenameList[0].c_str(), header))
-	{
-		printf("Error: Cannot load texture group : reading header has failed!\n");
-		return mDefaultTexGroup;
-	}
+	GLsizei mipMapCount = generateMipMap ? GetNumberOfMipMapLevels(width, height) : 1;
 
 	GLint layerCount = (GLint)tex2DFilenameList.size();
 
-	GLuint fbo = 0;
-	glGenFramebuffers(1, &fbo); GL_CHECK_ERRORS;
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo); GL_CHECK_ERRORS;
+	GLuint id = 0;
+	GLenum target = GL_TEXTURE_2D_ARRAY;
 
 	glGenTextures(1, &id); GL_CHECK_ERRORS;
-	glBindTexture(GL_TEXTURE_2D_ARRAY, id); GL_CHECK_ERRORS;
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, header.numberOfMipmapLevels, header.glInternalFormat, header.pixelWidth, header.pixelHeight, layerCount); GL_CHECK_ERRORS;
-	
-	TextureGroup * texGroup = new TextureGroup(id, groupId, layerCount);
+	glBindTexture(target, id); GL_CHECK_ERRORS;
+	glTexStorage3D(target, mipMapCount, GL_RGBA8, width, height, layerCount); GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("[LoadTextureGroup] Texture group '%I64x' (Cat=%i) : %i.\n", groupId, (int)TextureInfo::GetCategoryFromGroupId(groupId), id);
 
 	for (int index = 0; index < layerCount; ++index)
 	{
-		GLuint srcId = 0;
-		const std::string & filename = tex2DFilenameList[index];
-		err = ktxLoadTextureN(filename.c_str(), &srcId, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-		if (srcId == 0)
+		bool loaded = LoadTiffImage(tex2DFilenameList[index], [target, index](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
-			srcId = mDefault2D->GetResourceId();
-			PRINT_MESSAGE("[LoadTextureGroup] Add mDefault texture in layer %i.\n", index);
-		}
-		else
+			glTexSubImage3D(target, 0, 0, 0, index, w, h, 1, GL_RGBA, GL_UNSIGNED_BYTE, raster); GL_CHECK_ERRORS;
+		}, &width, &height);
+		if (!loaded)
 		{
-			PRINT_MESSAGE("[LoadTextureGroup] Add texture '%i' in layer %i.\n", srcId, index);
-		}
-
-		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcId, 0); GL_CHECK_ERRORS;
-		glReadBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
-
-		glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, id, 0, index); GL_CHECK_ERRORS;
-		glDrawBuffer(GL_COLOR_ATTACHMENT1); GL_CHECK_ERRORS;
-
-		glBlitFramebuffer(0, 0, dimensions.width, dimensions.height, 0, 0, header.pixelWidth, header.pixelHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR); GL_CHECK_ERRORS;
-
-		glReadBuffer(GL_NONE); GL_CHECK_ERRORS;
-		glDrawBuffer(GL_NONE); GL_CHECK_ERRORS;
-
-		if (srcId != mDefault2D->GetResourceId())
-		{
-			PRINT_MESSAGE("[LoadTextureGroup] Delete texture %i.\n", srcId);
-			glDeleteTextures(1, &srcId);
+			uint32_t * ptr = new uint32_t[npixels];
+			memset(ptr, 0xFFFF00DC, npixels * sizeof(uint32_t));
+			glTexSubImage3D(target, 0, 0, 0, index, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, ptr); GL_CHECK_ERRORS;
+			delete[] ptr;
 		}
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDeleteFramebuffers(1, &fbo); GL_CHECK_ERRORS;
-
-	glGenerateMipmap(GL_TEXTURE_2D_ARRAY); GL_CHECK_ERRORS;
+	TextureGroup * texGroup = new TextureGroup(id, groupId, target, layerCount);
 
 	TextureWrap wrapS = TextureInfo::GetWrapSFromGroupId(texGroup->GetGroupId());
 	TextureWrap wrapT = TextureInfo::GetWrapTFromGroupId(texGroup->GetGroupId());
 
-	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if(generateMipMap)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	else
+		glTexParameterf(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
+	glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_REPEAT);
 
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, header.numberOfMipmapLevels);
+	glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, mipMapCount);
+	
+	glGenerateMipmap(target); GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D_ARRAY, 0); GL_CHECK_ERRORS;
+	glBindTexture(target, 0); GL_CHECK_ERRORS;
 
 	mTexGroupMap[groupId] = texGroup;
 
@@ -266,97 +465,27 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 
 
-bool TextureManager::KTX_ReadHeader(FILE* f, KTX_header & header)
+GLsizei TextureManager::GetNumberOfMipMapLevels(uint32_t imgWidth, uint32_t imgHeight)
 {
-	static const char ktxIdentifierRef[12] = { '«', 'K', 'T', 'X', ' ', '1', '1', '»', '\r', '\n', '\x1A', '\n' };
-	static const uint32_t ktxEndianRef = 0x04030201;
-	static const uint32_t ktxEndianRefReverse = 0x01020304;
-
-	if (fread(&header, 1, sizeof(KTX_header), f) != sizeof(KTX_header))
-	{
-		printf("Error: Cannot read KTX file header !\n");
-		return false;
-	}
-
-	if (memcmp(&header.identifier, ktxIdentifierRef, sizeof(ktxIdentifierRef)) != 0)
-	{
-		printf("Error: Cannot read KTX file header : file identifier not found !\n");
-		return false;
-	}
-
-	if (header.endianness == ktxEndianRefReverse)
-	{
-
-	}
-
-	if (header.endianness != ktxEndianRef)
-	{
-		printf("Error: Cannot read KTX file header : wrong endianness!\n");
-		return false;
-	}
-
-	return true;
+	return (GLsizei)(1 + floorf(log((float)max(imgWidth, imgHeight)) / log(2.f)));
 }
 
-bool TextureManager::KTX_ReadHeader(const char * filename, KTX_header & header)
+bool TextureManager::GetTiffImageSize(std::string const &tiffFilename, uint32_t & imgWidth, uint32_t & imgHeight)
 {
-	FILE * f;
-	bool ret = false;
+	bool loaded = false;
 
-	if (fopen_s(&f, filename, "rb") == 0)
+	TIFF* tif = TIFFOpen(tiffFilename.c_str(), "r");
+	if (tif)
 	{
-		ret = KTX_ReadHeader(f, header);
-		fclose(f);
-	}
-	else
-	{
-		printf("Error: Cannot open file '%s'!\n", filename);
-	}
+		TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &imgWidth);
+		TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &imgHeight);
 
-	return ret;
-}
+		TIFFClose(tif);
 
-TextureGroup const * TextureManager::LoadTexture2DArrayAsTextureGroup(uint16_t rendererId, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, std::string const & filename)
-{
-	KTX_header header;
-	if (!KTX_ReadHeader(filename.c_str(), header))
-	{
-		printf("Error: Cannot load texture group (from a Texture2DArray) : reading header has failed!\n");
-		return mDefaultTexGroup;
+		loaded = true;
 	}
 
-	KTX_error_code err;
-	GLenum target;
-	KTX_dimensions dimensions;
-	GLboolean isMipmapped;
-	GLenum glerr;
-	GLuint id = 0;
-
-	err = ktxLoadTextureN(filename.c_str(), &id, &target, &dimensions, &isMipmapped, &glerr, nullptr, nullptr);
-	if (id == 0)
-	{
-		PRINT_MESSAGE("[LoadTexture2DArrayAsTextureGroup] Cannot load texture '%s'.\n", filename.c_str());
-		return mDefaultTexGroup;
-	}
-
-	TextureGroupId groupId = TextureInfo::CreateGroupId(rendererId, category, dimensions.width, dimensions.height, wrapS, wrapT);
-
-	TextureGroup * texGroup = new TextureGroup(id, groupId, header.numberOfArrayElements);
-
-	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, id); 
-
-	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_S, TextureInfo::FromTextureWrap(wrapS));
-	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, TextureInfo::FromTextureWrap(wrapT));
-	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_MAX_LEVEL, header.numberOfMipmapLevels);
-
-	glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0); GL_CHECK_ERRORS;
-
-	return texGroup;
+	return loaded;
 }
 
 } // namespace CoreFx

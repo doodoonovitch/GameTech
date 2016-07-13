@@ -87,6 +87,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		glDepthFunc(GL_LEQUAL);
 
 		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+		mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(mViewportX), static_cast<GLfloat>(mViewportX + mViewportWidth), static_cast<GLfloat>(mViewportY), static_cast<GLfloat>(mViewportY + mViewportHeight));
 
 		mTextureManager = new TextureManager();
 		mTextureManager->Initialize();
@@ -380,6 +381,7 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 		mGBufferHeight = gBufferHeight;
 
 		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+		mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(mViewportX), static_cast<GLfloat>(mViewportX + mViewportWidth), static_cast<GLfloat>(mViewportY), static_cast<GLfloat>(mViewportY + mViewportHeight));
 
 		InternalUpdateDrawGBufferNormalsPatchCount();
 	}
@@ -663,6 +665,7 @@ void Engine::RenderObjects()
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(mCamera->GetInverseProjectionMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_OrthoProjMatrix], glm::value_ptr(mOrthoProjMatrix), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(viewMatrix), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
@@ -768,16 +771,21 @@ void Engine::RenderObjects()
 
 	if (mSkybox != nullptr)
 	{
+		//glDisable(GL_CULL_FACE);
 		mSkybox->Render();
+		//glEnable(GL_CULL_FACE);
 	}
 
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(GL_TRUE);
 
+	//glDisable(GL_CULL_FACE);
 	mForwardRenderers->ForEach([](Renderer * renderer)
 	{
 		renderer->Render();
 	});
+	//glEnable(GL_CULL_FACE);
 
 	if (mIsDrawLightPositionEnabled)
 	{
@@ -961,6 +969,23 @@ bool Engine::AttachSkyboxRenderer(Renderers::SkyboxRenderer * skybox)
 bool Engine::DetachSkyboxRenderer(Renderers::SkyboxRenderer * skybox)
 {
 	if (mSkybox == skybox)
+	{
+		mSkybox = nullptr;
+		return true;
+	}
+
+	return false;
+}
+
+bool Engine::AttachSkydomeRenderer(Renderers::SkydomeRenderer * skydome)
+{
+	mSkybox = skydome;
+	return true;
+}
+
+bool Engine::DetachSkydomeRenderer(Renderers::SkydomeRenderer * skydome)
+{
+	if (mSkybox == skydome)
 	{
 		mSkybox = nullptr;
 		return true;

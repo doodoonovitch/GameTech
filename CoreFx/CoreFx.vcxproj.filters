@@ -130,6 +130,13 @@
     <ClInclude Include="Renderers\ConeRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\SkydomeRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\CompassRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="DDS.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -215,6 +222,13 @@
     <ClCompile Include="Renderers\ConeRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
+    <ClCompile Include="Renderers\SkydomeRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\CompassRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="DDS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -368,6 +382,15 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\ConeShader.Light.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\compass.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\compass.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\compass.wireframe.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -19,25 +19,30 @@
 	delete [] p; \
 	p = nullptr
 
-namespace CoreFx
-{
-	namespace Log
-	{
-		extern void PrintMessage(const char* messageFormat, ...);
-	}
-}
+//namespace CoreFx
+//{
+//	namespace Log
+//	{
+//		extern void PrintMessage(const char* messageFormat, ...);
+//	}
+//}
 
 #ifndef DISABLE_PRINT_MESSAGE
 #define PRINT_MESSAGE(messageFormat, ...) CoreFx::Log::PrintMessage(messageFormat, __VA_ARGS__);
+#define PRINT_ERROR(messageFormat, ...) CoreFx::Log::PrintError(messageFormat, __VA_ARGS__);
+#define PRINT_WARNING(messageFormat, ...) CoreFx::Log::PrintWarning(messageFormat, __VA_ARGS__);
+#define PRINT_MESSAGE_VA(messageFormat, valist) CoreFx::Log::PrintMessage(messageFormat, valist);
+#define PRINT_ERROR_VA(messageFormat, valist) CoreFx::Log::PrintError(messageFormat, valist);
+#define PRINT_WARNING_VA(messageFormat, valist) CoreFx::Log::PrintWarning(messageFormat, valist);
 #else
 #define PRINT_MESSAGE(messageFormat, ...) {}
+#define PRINT_ERROR(messageFormat, ...) {}
+#define PRINT_WARNING(messageFormat, ...) {}
+#define PRINT_MESSAGE_VA(messageFormat, valist) {}
+#define PRINT_ERROR_VA(messageFormat, valist) {}
+#define PRINT_WARNING_VA(messageFormat, valist) {}
 #endif
 
-#ifndef DISABLE_PRINT_MESSAGE
-#define PRINT_ERROR(messageFormat, ...) CoreFx::Log::PrintError(messageFormat, __VA_ARGS__);
-#else
-#define PRINT_ERROR(messageFormat, ...) {}
-#endif
 
 #define PRINT_GEN_FRAMEBUFFER(prefix, buffer) PRINT_MESSAGE(prefix " Framebuffer " #buffer " : %i.\n", buffer)
 #define PRINT_GEN_RENDERBUFFER(prefix, buffer) PRINT_MESSAGE(prefix " RenderBuffer " #buffer " : %i.\n", buffer)

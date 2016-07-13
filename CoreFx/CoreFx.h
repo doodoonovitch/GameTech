@@ -32,6 +32,7 @@
 #include <iterator>
 #include <functional>
 #include <cstdint>
+#include <memory>
 
 #include "macros.h"
 
@@ -78,6 +79,7 @@ namespace CoreFx
 #include "Lights\SpotLight.h"
 #include "Lights\DirectionalLight.h"
 
+#include "DDS.h"
 #include "TextureManager.h"
 
 #include "Engine.h"
@@ -100,5 +102,7 @@ namespace CoreFx
 #include "Renderers\DeepOceanRenderer.h"
 #include "Renderers\ShallowWaterRenderer.h"
 #include "Renderers\SkyboxRenderer.h"
+#include "Renderers\SkydomeRenderer.h"
+#include "Renderers\CompassRenderer.h"
 
 #endif // COREFX_COREFX_H

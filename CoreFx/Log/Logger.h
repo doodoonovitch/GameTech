@@ -40,6 +40,10 @@ protected:
 
 extern void PrintMessage(const char * messageFormat, ...);
 extern void PrintError(const char * messageFormat, ...);
+extern void PrintWarning(const char * messageFormat, ...);
+extern void PrintMessage(const char * messageFormat, va_list args);
+extern void PrintError(const char * messageFormat, va_list args);
+extern void PrintWarning(const char * messageFormat, va_list args);
 
 // =======================================================================
 // =======================================================================

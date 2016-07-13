@@ -23,6 +23,7 @@ namespace CoreFx
 	namespace Renderers
 	{
 		class SkyboxRenderer;
+		class SkydomeRenderer;
 	}
 
 
@@ -58,6 +59,7 @@ private:
 	{
 		u_ProjMatrix,
 		u_InvProjMatrix,
+		u_OrthoProjMatrix,
 		u_ViewMatrix,
 		u_ViewDQ,
 		u_ViewPosition,
@@ -169,6 +171,9 @@ public:
 
 	bool AttachSkyboxRenderer(Renderers::SkyboxRenderer * skybox);
 	bool DetachSkyboxRenderer(Renderers::SkyboxRenderer * skybox);
+
+	bool AttachSkydomeRenderer(Renderers::SkydomeRenderer * skydome);
+	bool DetachSkydomeRenderer(Renderers::SkydomeRenderer * skydome);
 
 	// Lights
 public:
@@ -358,7 +363,7 @@ private:
 	GLint mLightDescIndexOffsets[Lights::Light::__light_type_count__];
 
 	Camera * mCamera;
-	Renderers::SkyboxRenderer * mSkybox;
+	Renderer * mSkybox;
 
 	GLfloat mTimeDeltaTime[2]; // Time and Delta time
 
@@ -379,6 +384,7 @@ private:
 	GLsizei mGBufferHeight;
 	GLint mViewportX, mViewportY;
 	GLsizei mViewportWidth, mViewportHeight;
+	glm::mat4 mOrthoProjMatrix;
 
 	float mExposure;
 	float mGamma;
@@ -407,6 +413,7 @@ private:
 	{
 		"u_ProjMatrix",
 		"u_InvProjMatrix",
+		"u_OrthoProjMatrix",
 		"u_ViewMatrix",
 		"u_ViewDQ.Qr",
 		"u_ViewPosition",

@@ -8,24 +8,51 @@ namespace Log
 // =======================================================================
 // =======================================================================
 
-void PrintMessage(const char * messageFormat, ...)
+void PrintMessage(const char * messageFormat, va_list args)
 {
 	Logger::GetInstance()->Print("[Info] ");
+	Logger::GetInstance()->Print(messageFormat, args);
+	Logger::GetInstance()->Print("\n");
+}
+
+void PrintError(const char * messageFormat, va_list args)
+{
+	Logger::GetInstance()->Print("[Error] ");
+	Logger::GetInstance()->Print(messageFormat, args);
+	Logger::GetInstance()->Print("\n");
+}
+
+void PrintWarning(const char * messageFormat, va_list args)
+{
+	Logger::GetInstance()->Print("[Warning] ");
+	Logger::GetInstance()->Print(messageFormat, args);
+	Logger::GetInstance()->Print("\n");
+}
+
+
+void PrintMessage(const char * messageFormat, ...)
+{
 	va_list args;
 	va_start(args, messageFormat);
-	Logger::GetInstance()->Print(messageFormat, args);
+	PrintMessage(messageFormat, args);
 	va_end(args);
 }
 
 void PrintError(const char * messageFormat, ...)
 {
-	Logger::GetInstance()->Print("[Error] ");
 	va_list args;
 	va_start(args, messageFormat);
-	Logger::GetInstance()->Print(messageFormat, args);
+	PrintError(messageFormat, args);
 	va_end(args);
 }
 
+void PrintWarning(const char * messageFormat, ...)
+{
+	va_list args;
+	va_start(args, messageFormat);
+	PrintWarning(messageFormat, args);
+	va_end(args);
+}
 
 Logger * Logger::sInstance = nullptr;
 

@@ -18,6 +18,11 @@ public:
 		return mId;
 	}
 
+	GLenum GetTarget() const
+	{
+		return mTarget;
+	}
+
 protected:
 
 	enum TextureClass
@@ -27,7 +32,7 @@ protected:
 		TextureGroup,
 	};
 
-	Texture(GLuint id, TextureClass texClass);
+	Texture(GLuint id, GLenum target, TextureClass texClass);
 	~Texture();
 
 	TextureClass GetTextureClass() const
@@ -40,10 +45,16 @@ protected:
 		mId = id;
 	}
 
+	void SetTarget(GLenum target)
+	{
+		mTarget = target;
+	}
+
 private:
 
 	GLuint mId;
 	TextureClass mTextureClass;
+	GLenum mTarget;
 
 	friend class TextureManager;
 };
@@ -52,7 +63,7 @@ class Texture2D : public Texture
 {
 protected:
 
-	Texture2D(GLuint id);
+	Texture2D(GLuint id, GLenum target);
 	~Texture2D();
 
 private:
@@ -208,7 +219,7 @@ class TextureGroup : public Texture
 	
 protected:
 
-	TextureGroup(GLuint textureId, TextureGroupId groupId, GLint layerCount);
+	TextureGroup(GLuint textureId, TextureGroupId groupId, GLenum target, GLint layerCount);
 	~TextureGroup();
 
 public:
@@ -243,7 +254,7 @@ class CubeMapTexture : public Texture
 {
 protected:
 
-	CubeMapTexture(GLuint textureId);
+	CubeMapTexture(GLuint textureId, GLenum target);
 	~CubeMapTexture();
 
 

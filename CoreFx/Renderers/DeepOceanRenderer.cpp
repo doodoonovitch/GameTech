@@ -262,7 +262,7 @@ void DeepOceanRenderer::Render()
 			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 	
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, mCubeMapTexture->GetResourceId());
+			glBindTexture(mCubeMapTexture->GetTarget(), mCubeMapTexture->GetResourceId());
 
 			//glActiveTexture(GL_TEXTURE2);
 			//glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());

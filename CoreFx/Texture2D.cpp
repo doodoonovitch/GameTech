@@ -5,9 +5,10 @@ namespace CoreFx
 {
 
 
-Texture::Texture(GLuint id, TextureClass texClass)
+Texture::Texture(GLuint id, GLenum target, TextureClass texClass)
 	: mId(id)
 	, mTextureClass(texClass)
+	, mTarget(target)
 {
 }
 
@@ -17,8 +18,8 @@ Texture::~Texture()
 }
 
 
-Texture2D::Texture2D(GLuint id)
-	: Texture(id, TextureClass::Texture2D)
+Texture2D::Texture2D(GLuint id, GLenum target)
+	: Texture(id, target, TextureClass::Texture2D)
 {
 }
 
@@ -28,8 +29,8 @@ Texture2D::~Texture2D()
 }
 
 
-CubeMapTexture::CubeMapTexture(GLuint textureId)
-	: Texture(textureId, TextureClass::CubeMapTexture)
+CubeMapTexture::CubeMapTexture(GLuint textureId, GLenum target)
+	: Texture(textureId, target, TextureClass::CubeMapTexture)
 {
 }
 
@@ -39,8 +40,8 @@ CubeMapTexture::~CubeMapTexture()
 }
 
 
-TextureGroup::TextureGroup(GLuint textureId, TextureGroupId groupId, GLint layerCount)
-	: Texture(textureId, TextureClass::TextureGroup)
+TextureGroup::TextureGroup(GLuint textureId, TextureGroupId groupId, GLenum target, GLint layerCount)
+	: Texture(textureId, target, TextureClass::TextureGroup)
 	, mGroupId(groupId)
 	, mLayerCount(layerCount)
 {

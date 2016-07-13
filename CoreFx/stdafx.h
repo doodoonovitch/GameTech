@@ -43,6 +43,8 @@
 #include <iterator>
 #include <functional>
 #include <algorithm>
+#include <memory>
 
+#include "tiffio.h"
 #include "Introspection.h"
 
