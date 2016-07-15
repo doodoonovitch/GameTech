@@ -5,7 +5,6 @@ in VS_OUT
 	vec2 TexUV;
 } fs_in;
 
-uniform float u_Exposure = 0.2;
 uniform float u_InvGamma = 1.0 / 1.0;
 uniform sampler2D u_HdrBuffer;
 

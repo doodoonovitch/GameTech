@@ -70,6 +70,7 @@ private:
 		u_DepthRangeFovYAspect,
 		u_TimeDeltaTime,
 		u_NormalMagnitude,
+		u_Exposure,
 		u_PointLightCount,
 		u_SpotLightCount,
 		u_DirectionalLightCount,
@@ -321,6 +322,7 @@ private:
 	void InternalInitializeDeferredPassShader();
 	void InternalInitializeToneMappingShader();
 	void InternalInitializeWireFramePassShader();
+	void InternalInitializeCopyShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
 
@@ -347,11 +349,17 @@ private:
 
 	enum EToneMappingShaderUniformIndex
 	{
-		u_Exposure,
 		u_InvGamma,
 		u_HdrBuffer,
 
 		__tonemapping_uniforms_count__
+	};
+
+	enum ECopyShaderUniformIndex
+	{
+		u_SourceBuffer,
+
+		__copyshader_uniforms_count__
 	};
 
 	static Engine* sInstance;
@@ -363,19 +371,22 @@ private:
 	GLint mLightDescIndexOffsets[Lights::Light::__light_type_count__];
 
 	Camera * mCamera;
-	Renderer * mSkybox;
+	Renderers::SkyboxRenderer  * mSkybox;
+	Renderers::SkydomeRenderer * mSkydome;
 
 	GLfloat mTimeDeltaTime[2]; // Time and Delta time
 
 	Renderables::VertexArrayObject<1> * mQuad;
 	Shader mDeferredShader;
 	Shader mToneMappingShader;
+	Shader mCopyShader;
 
 	GLuint mDeferredFBO;
 	GLuint mDepthRBO;
 	GLuint mGBuffers[__gBuffer_count__];
 
 	GLuint mForwardFBO;
+	GLuint mForwardBuffer;
 
 	GLuint mHdrFBO;
 	GLuint mHdrBuffer;
@@ -424,6 +435,7 @@ private:
 		"u_DepthRangeFovYAspect",
 		"u_TimeDeltaTime",
 		"u_NormalMagnitude",
+		"u_Exposure",
 		"u_PointLightCount",
 		"u_SpotLightCount",
 		"u_DirectionalLightCount",

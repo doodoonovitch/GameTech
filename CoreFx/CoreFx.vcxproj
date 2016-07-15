@@ -238,6 +238,7 @@
     <None Include="..\Data\Shaders\ConeShader.Light.forward.fs.glsl" />
     <None Include="..\Data\Shaders\ConeShader.Light.gs.glsl" />
     <None Include="..\Data\Shaders\ConeShader.vs.glsl" />
+    <None Include="..\Data\Shaders\copy.fs.glsl" />
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\cube.gs.glsl" />
     <None Include="..\Data\Shaders\cube.vs.glsl" />
@@ -269,6 +270,8 @@
     <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.vs.glsl" />
     <None Include="..\Data\Shaders\skybox.wireframe.fs.glsl" />
+    <None Include="..\Data\Shaders\skydome.forward.fs.glsl" />
+    <None Include="..\Data\Shaders\skydome.vs.glsl" />
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\terrain.gs.glsl" />
     <None Include="..\Data\Shaders\terrain.tcs.glsl" />
@@ -282,6 +285,15 @@
     <None Include="..\Data\Shaders\vertex_normal.vs.glsl" />
     <None Include="..\Data\Shaders\wireframe.fs.glsl" />
     <None Include="packages.config" />
+    <None Include="Renderers\PreethamScatter\ciexyz31_300_800.table" />
+    <None Include="Renderers\PreethamScatter\ciexyz31_350_800.table" />
+    <None Include="Renderers\PreethamScatter\K.table" />
+    <None Include="Renderers\PreethamScatter\Kg.table" />
+    <None Include="Renderers\PreethamScatter\Ko.table" />
+    <None Include="Renderers\PreethamScatter\Kwa.table" />
+    <None Include="Renderers\PreethamScatter\N21.table" />
+    <None Include="Renderers\PreethamScatter\neta.table" />
+    <None Include="Renderers\PreethamScatter\Sol.table" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

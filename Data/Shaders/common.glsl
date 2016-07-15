@@ -120,6 +120,8 @@ layout (std140, shared) uniform FrameData
 	vec2 u_TimeDeltaTime;
 
 	float u_NormalMagnitude;
+	
+	float u_Exposure;
 
 	int u_PointLightCount; 
 	int u_SpotLightCount;

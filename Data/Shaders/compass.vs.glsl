@@ -16,9 +16,9 @@ void main()
 	float angle = acos(dot(normalize(vec3(u_ViewDir.x, 0, u_ViewDir.z)), north));
 	vec3 axis;
 	if (u_ViewDir.x < north.x)
-		axis = vec3(0, 0, -1);
-	else
 		axis = vec3(0, 0, 1);
+	else
+		axis = vec3(0, 0, -1);
 
 	DualQuat dqT1 = dqFromTranslation(u_Translation);
 	vec4 qRot = qAngleAxis(angle, axis);

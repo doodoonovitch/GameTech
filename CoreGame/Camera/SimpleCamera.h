@@ -31,6 +31,8 @@ public:
 	void OnWindowActivate() {}
 	void OnWindowUnactivate() {}
 
+	void UpdateSunPosition();
+
 private:
 
 	void filterMouseMoves(float dx, float dy);
@@ -59,6 +61,13 @@ private:
 	float mRotX = 0.f, mRotY = 135.f, mDist = 0.f;
 
 	CoreFx::Camera* mCamera;
+	CoreFx::Renderers::SkydomeRenderer * mSkydome;
+	CoreFx::Lights::DirectionalLight * mSunLight;
+
+	uint32_t mSunPositionDegree = 4;
+	uint32_t mSunPositionInc = 1;
+	const uint32_t SunPositionMin = 0;
+	const uint32_t SunPositionMax = 180;
 
 	glm::vec2 m_mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];
 

@@ -225,10 +225,10 @@ void SimpleCamera::OnInit()
 		}
 		*/
 		{
-			//Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/uvCubeMap");
+			//Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/Skybox1");
 			//engine->AttachSkyboxRenderer(skybox);
-			Renderers::SkydomeRenderer * skydome = new Renderers::SkydomeRenderer("medias/CubeMaps/skybox1");
-			engine->AttachSkydomeRenderer(skydome);
+			mSkydome = new Renderers::SkydomeRenderer();
+			engine->AttachSkydomeRenderer(mSkydome);
 		}
 		{
 			Renderers::CompassRenderer * compass = new Renderers::CompassRenderer();
@@ -256,12 +256,15 @@ void SimpleCamera::OnInit()
 		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 15.f, -15.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f, glm::normalize(glm::vec3(.1f, -0.1f, 1.f)), glm::radians(15.f), glm::radians(25.f));
 		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(30.f, 15.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, -0.5f, 1.f)), glm::radians(15.f), glm::radians(25.f));
 
-		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 10.f);
-		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
+
 		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 900.f, 15.f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 10000.f, 100.f);
 		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
 		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
+
+
+		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 10.f);
+		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
 
 	//setup camera
 	mCamera = new Camera();
@@ -272,6 +275,8 @@ void SimpleCamera::OnInit()
 	SetupViewportAndProjection();
 
 	mCamera->Update();
+
+	UpdateSunPosition();
 
 	engine->CreateDynamicResources();
 
@@ -302,6 +307,8 @@ void SimpleCamera::OnInit()
 SimpleCamera::SimpleCamera(GameProgram & gameProgram)
 	: GameEngine(gameProgram)
 	, mCamera(nullptr)
+	, mSkydome(nullptr)
+	, mSunLight(nullptr)
 {
 }
 
@@ -484,7 +491,27 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 		mFreezeTimer = !mFreezeTimer;
 		break;
 
+	case '<':
+		if (mSunPositionDegree < SunPositionMax)
+		{
+			mSunPositionDegree += mSunPositionInc;
+			if (mSunPositionDegree > SunPositionMax)
+				mSunPositionDegree = SunPositionMax;
 
+			UpdateSunPosition();
+		}
+		break;
+
+	case '>':
+		if (mSunPositionDegree > SunPositionMin)
+		{
+			mSunPositionDegree -= mSunPositionInc;
+			if (mSunPositionDegree < SunPositionMin)
+				mSunPositionDegree = SunPositionMin;
+
+			UpdateSunPosition();
+		}
+		break;
 	}
 	//glutPostRedisplay();
 }
@@ -521,7 +548,7 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 
 void SimpleCamera::OnUpdate()
 {
-	bool bWalk = false, bStrafe = false;
+	bool bWalk = false, bStrafe = false, bSunPos = false;
 	float dx = 0, dy = 0, speed = mMoveSpeed;
 
 	if (GetAsyncKeyState(VK_SHIFT))
@@ -559,6 +586,14 @@ void SimpleCamera::OnUpdate()
 		bStrafe = true;
 	}
 
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+	{
+	}
+
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+	{
+	}
+
 	if (bWalk)
 	{
 		mCamera->Walk((float)(dy * mDeltaTime));
@@ -569,8 +604,23 @@ void SimpleCamera::OnUpdate()
 		mCamera->Strafe((float)(dx * mDeltaTime));
 	}
 
+	if (bSunPos)
+	{
+		UpdateSunPosition();
+	}
+
 	//if (bWalk || bStrafe)
 	//	glutPostRedisplay();
+}
+
+void SimpleCamera::UpdateSunPosition()
+{
+	float sunPosRadian = glm::radians((float)(mSunPositionDegree));
+	glm::vec3 sunDir = glm::normalize(glm::vec3(cos(sunPosRadian), sin(sunPosRadian), 0.f));
+	if (mSunLight != nullptr)
+		mSunLight->SetDirection(sunDir);
+	if (mSkydome != nullptr)
+		mSkydome->SetSunDirection(sunDir);
 }
 
 

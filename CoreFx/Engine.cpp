@@ -17,6 +17,7 @@ Engine::Engine()
 	, mCamera(nullptr)
 	, mSkybox(nullptr)
 	, mQuad(nullptr)
+	, mSkydome(nullptr)
 	, mDeferredFBO(0)
 	, mDepthRBO(0)
 	, mHdrFBO(0)
@@ -27,7 +28,7 @@ Engine::Engine()
 	, mViewportY(0)
 	, mViewportWidth(1920)
 	, mViewportHeight(1080)
-	, mExposure(1.0f)
+	, mExposure(0.1f)
 	, mGamma(1.0f)
 	, mInvGamma(1.0f)
 	, mAmbientLight(0.1f, 0.1f, 0.1f, 0.f)
@@ -40,6 +41,7 @@ Engine::Engine()
 	, mFirstLightIndexToDraw(0)
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
+	, mCopyShader("CopyShader")
 	, mPointLightPositionRenderer(nullptr)
 	, mSpotLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
@@ -218,6 +220,7 @@ void Engine::CreateDynamicResources()
 	InternalInitializeQuadVAO();
 	InternalInitializeDeferredPassShader();
 	InternalInitializeToneMappingShader();
+	InternalInitializeCopyShader();
 }
 
 void Engine::InternalCreateGBuffers()
@@ -325,9 +328,13 @@ void Engine::InternalCreateHdrBuffers()
 
 	glGenFramebuffers(1, &mForwardFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, mForwardFBO);
+	glGenTextures(1, &mForwardBuffer);
 
-	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mHdrBuffer, 0);
+	glBindTexture(GL_TEXTURE_2D, mForwardBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mForwardBuffer, 0);
 	GL_CHECK_ERRORS;
 
 	//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
@@ -354,6 +361,8 @@ void Engine::InternalReleaseHdrBuffers()
 {
 	glDeleteTextures(1, &mHdrBuffer);
 	mHdrBuffer = 0;
+	glDeleteTextures(1, &mForwardBuffer);
+	mForwardBuffer = 0;
 	glDeleteFramebuffers(1, &mHdrFBO);
 	mHdrFBO = 0;
 	glDeleteFramebuffers(1, &mForwardFBO);
@@ -493,7 +502,6 @@ void Engine::InternalInitializeToneMappingShader()
 
 	const char * uniformNames[__tonemapping_uniforms_count__] =
 	{
-		"u_Exposure",
 		"u_InvGamma",
 		"u_HdrBuffer"
 	};
@@ -511,6 +519,36 @@ void Engine::InternalInitializeToneMappingShader()
 	GL_CHECK_ERRORS;
 
 	std::cout << "... done." << std::endl;
+}
+
+void Engine::InternalInitializeCopyShader()
+{
+	PRINT_MESSAGE("Initialize copy (post process) shader...");
+
+	//setup shader
+
+	// vertex shader
+	mCopyShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+	mCopyShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/copy.fs.glsl");
+
+	mCopyShader.CreateAndLinkProgram();
+
+	const char * uniformNames[__copyshader_uniforms_count__] =
+	{
+		"u_SourceBuffer"
+	};
+
+	mCopyShader.Use();
+
+	mCopyShader.AddUniforms(uniformNames, __copyshader_uniforms_count__);
+
+	glUniform1i(mCopyShader.GetUniform(u_SourceBuffer), 0);
+
+	mCopyShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	PRINT_MESSAGE("... done.\n");
 }
 
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
@@ -676,7 +714,8 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_DepthRangeFovYAspect], glm::value_ptr(depthRangeFovAspect), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_TimeDeltaTime], mTimeDeltaTime, sizeof(GLfloat) * 2);
 	memcpy(buffer + mFrameDataUniformOffsets[u_NormalMagnitude], &mDrawVertexNormalMagnitude, sizeof(GLfloat));
-
+	memcpy(buffer + mFrameDataUniformOffsets[u_Exposure], &mExposure, sizeof(GLfloat));
+	
 	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
@@ -761,11 +800,32 @@ void Engine::RenderObjects()
 	mDeferredShader.UnUse();
 
 	// -----------------------------------------------------------------------
-	// forward pass
+	// tone mapping pass
 	// -----------------------------------------------------------------------
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
 
+	mToneMappingShader.Use();
+
+	glUniform1f(mToneMappingShader.GetUniform(u_InvGamma), mInvGamma);
+
+	glBindVertexArray(mQuad->GetVao());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	mToneMappingShader.UnUse();
+
+	// -----------------------------------------------------------------------
+	// forward pass
+	// -----------------------------------------------------------------------
+
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -773,6 +833,12 @@ void Engine::RenderObjects()
 	{
 		//glDisable(GL_CULL_FACE);
 		mSkybox->Render();
+		//glEnable(GL_CULL_FACE);
+	}
+	else if (mSkydome != nullptr)
+	{
+		//glDisable(GL_CULL_FACE);
+		mSkydome->Render();
 		//glEnable(GL_CULL_FACE);
 	}
 
@@ -809,7 +875,10 @@ void Engine::RenderObjects()
 			renderer->RenderWireFrame();
 		});
 
-		mSkybox->RenderWireFrame();
+		if(mSkybox != nullptr)
+			mSkybox->RenderWireFrame();
+		else if (mSkydome != nullptr)
+			mSkydome->RenderWireFrame();
 
 		if (mIsDrawLightPositionEnabled)
 		{
@@ -819,29 +888,6 @@ void Engine::RenderObjects()
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-
-	// -----------------------------------------------------------------------
-	// tone mapping pass
-	// -----------------------------------------------------------------------
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); 
-	glClear(GL_COLOR_BUFFER_BIT); 
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
-
-	mToneMappingShader.Use();
-
-		glUniform1f(mToneMappingShader.GetUniform(u_Exposure), mExposure);
-		glUniform1f(mToneMappingShader.GetUniform(u_InvGamma), mInvGamma);
-
-		glBindVertexArray(mQuad->GetVao());
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
-
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
-	mToneMappingShader.UnUse();
 
 	// -----------------------------------------------------------------------
 	// draw normal (from GBuffer) pass
@@ -872,6 +918,28 @@ void Engine::RenderObjects()
 		glBindVertexArray(0);
 		mDrawGBufferNormalShader.UnUse();
 	}
+
+	// -----------------------------------------------------------------------
+	// copy to main framebuffer
+	// -----------------------------------------------------------------------
+
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	mCopyShader.Use();
+	glBindVertexArray(mQuad->GetVao());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mForwardBuffer);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	mCopyShader.UnUse();
+
 }
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat radius)
@@ -979,15 +1047,15 @@ bool Engine::DetachSkyboxRenderer(Renderers::SkyboxRenderer * skybox)
 
 bool Engine::AttachSkydomeRenderer(Renderers::SkydomeRenderer * skydome)
 {
-	mSkybox = skydome;
+	mSkydome = skydome;
 	return true;
 }
 
 bool Engine::DetachSkydomeRenderer(Renderers::SkydomeRenderer * skydome)
 {
-	if (mSkybox == skydome)
+	if (mSkydome == skydome)
 	{
-		mSkybox = nullptr;
+		mSkydome = nullptr;
 		return true;
 	}
 

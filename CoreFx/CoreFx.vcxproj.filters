@@ -30,6 +30,9 @@
     <Filter Include="Log">
       <UniqueIdentifier>{20fe9843-0ea0-46bc-b031-180e0f80dbee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderers\PreethamScatter">
+      <UniqueIdentifier>{70c8aa8e-364c-4e8e-b658-4766b7715138}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -391,6 +394,42 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\compass.wireframe.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\ciexyz31_300_800.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\ciexyz31_350_800.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\K.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\Kg.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\Ko.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\Kwa.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\N21.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\neta.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="Renderers\PreethamScatter\Sol.table">
+      <Filter>Renderers\PreethamScatter</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skydome.forward.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skydome.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\copy.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
