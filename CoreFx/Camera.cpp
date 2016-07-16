@@ -27,9 +27,9 @@ void Camera::Update()
 	{
 		mViewDQ =  GetFrame()->GetDualQuaternion().GetConjugate();
 		glm::mat4 m = GetFrame()->GetDualQuaternion().GetMatrix();
-		mRight = glm::vec3(m[0]);
-		mUp = glm::vec3(m[1]);
-		mLook = glm::vec3(m[2]);
+		mRight = glm::normalize(glm::vec3(m[0]));
+		mUp = glm::normalize(glm::vec3(m[1]));
+		mLook = glm::normalize(glm::vec3(m[2]));
 		GetFrame()->SetIsModified(false);
 	}
 }
