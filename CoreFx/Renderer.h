@@ -18,6 +18,34 @@ class Renderer : public ObjectInstance
 
 public:
 
+
+	class VertexData
+	{
+	public:
+
+		glm::vec3 mPosition;
+		glm::vec2 mTexUV;
+		glm::vec3 mNormal;
+		glm::vec3 mTangent;
+	};
+
+	typedef std::vector<VertexData> VertexDataVector;
+	typedef std::vector<GLuint> IndexVector;
+
+
+	class DrawElementsIndirectCommand
+	{
+	public:
+		GLuint mVertexCount;
+		GLuint mInstanceCount;
+		GLuint mFirstIndex;
+		GLuint mBaseVertex;
+		GLuint mBaseInstance;
+	};
+
+	typedef std::vector<DrawElementsIndirectCommand> DrawElementsIndirectCommandList;
+
+
 	enum ERenderPass
 	{
 		Deferred_Pass,

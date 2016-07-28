@@ -234,21 +234,10 @@ void SimpleCamera::OnInit()
 			Renderers::CompassRenderer * compass = new Renderers::CompassRenderer();
 			engine->AttachRenderer(compass);
 		}
-		/*
-		std::vector<Geometry::MeshData*> meshDataList;
-		int loadFailedCount = 0;
-		Geometry::MeshData::Load("Medias/test/Girl.xml", meshDataList, loadFailedCount);
-		if (!meshDataList.empty())
+
 		{
-			Renderers::MeshRenderer * meshRenderer = new Renderers::MeshRenderer(*meshDataList.front());
-			engine->AttachRenderer(meshRenderer);
+			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromFile("Medias/Objects/planet/planet.obj", "Medias/Textures/planet");
 		}
-		for (auto it : meshDataList)
-		{
-			delete it;
-		}
-		meshDataList.clear();
-		*/
 
 	// Setup Lights
 		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);

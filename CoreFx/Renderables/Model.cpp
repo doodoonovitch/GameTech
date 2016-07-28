@@ -10,13 +10,14 @@ namespace CoreFx
 
 
 
-Mesh::Mesh()
+Model::Model(std::uint8_t materialGroupIndex)
 	: SceneObject(true)
+	, mMaterialGroupIndex(materialGroupIndex)
 {
 }
 
 
-Mesh::~Mesh()
+Model::~Model()
 {
 }
 

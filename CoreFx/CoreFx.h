@@ -34,6 +34,12 @@
 #include <cstdint>
 #include <memory>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+
+
 #include "macros.h"
 
 namespace CoreFx
@@ -84,16 +90,14 @@ namespace CoreFx
 
 #include "Engine.h"
 
-#include "Geometry\VertexData.h"
-#include "Geometry\MaterialData.h"
-#include "Geometry\MeshData.h"
+#include "Geometry\ModelData.h"
 
 
 #include "Camera.h"
 #include "Renderables\Axis.h"
 #include "Renderables\Grid.h"
 #include "Renderables\Cube.h"
-#include "Renderables\Mesh.h"
+#include "Renderables\Model.h"
 
 #include "Renderers\CubeRenderer.h"
 #include "Renderers\GridRenderer.h"
@@ -104,5 +108,6 @@ namespace CoreFx
 #include "Renderers\SkyboxRenderer.h"
 #include "Renderers\SkydomeRenderer.h"
 #include "Renderers\CompassRenderer.h"
+#include "Renderers\ModelRenderer.h"
 
 #endif // COREFX_COREFX_H

@@ -4,11 +4,10 @@
 // Vertex attribute locations
 //
 #define	POSITION_ATTRIBUTE							0
-#define	NORMAL_ATTRIBUTE							1
-#define	TANGENT_ATTRIBUTE							2
-#define	UV_ATTRIBUTE								3
-#define	MATERIALID_ATTRIBUTE						4
-#define	BINORMAL_ATTRIBUTE							5
+#define	UV_ATTRIBUTE								1
+#define	NORMAL_ATTRIBUTE							2
+#define	TANGENT_ATTRIBUTE							3
+#define	MESHID_ATTRIBUTE							4
 //
 // ---------------------------------------------------------------------------
 

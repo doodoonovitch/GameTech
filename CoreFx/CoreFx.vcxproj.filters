@@ -58,19 +58,7 @@
     <ClInclude Include="Renderables\Axis.h">
       <Filter>Renderables</Filter>
     </ClInclude>
-    <ClInclude Include="Geometry\MeshData.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
     <ClInclude Include="Macros.h" />
-    <ClInclude Include="Geometry\VertexData.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderables\Mesh.h">
-      <Filter>Renderables</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometry\MaterialData.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
     <ClInclude Include="Renderers\CubeRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
@@ -140,6 +128,15 @@
       <Filter>Renderers</Filter>
     </ClInclude>
     <ClInclude Include="DDS.h" />
+    <ClInclude Include="Renderers\ModelRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderables\Model.h">
+      <Filter>Renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\ModelData.h">
+      <Filter>Geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -160,15 +157,6 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Renderables\Axis.cpp">
       <Filter>Renderables</Filter>
-    </ClCompile>
-    <ClCompile Include="Geometry\MeshData.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderables\Mesh.cpp">
-      <Filter>Renderables</Filter>
-    </ClCompile>
-    <ClCompile Include="Geometry\MaterialData.cpp">
-      <Filter>Geometry</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\CubeRenderer.cpp">
       <Filter>Renderers</Filter>
@@ -232,6 +220,15 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="DDS.cpp" />
+    <ClCompile Include="Renderers\ModelRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderables\Model.cpp">
+      <Filter>Renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry\ModelData.cpp">
+      <Filter>Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -430,6 +427,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\copy.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.deferred.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.gs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

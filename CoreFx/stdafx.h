@@ -45,6 +45,10 @@
 #include <algorithm>
 #include <memory>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "tiffio.h"
 #include "Introspection.h"
 

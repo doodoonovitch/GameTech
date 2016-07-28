@@ -90,6 +90,7 @@ enum class TextureCategory
 	Specular,
 	NormalMap,
 	HeightMap,
+	Emissive,
 
 	__max_category__ = HeightMap
 };
