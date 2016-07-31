@@ -237,6 +237,9 @@ void SimpleCamera::OnInit()
 
 		{
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromFile("Medias/Objects/planet/planet.obj", "Medias/Textures/planet");
+			Renderables::Model * model = modelRenderer->CreateModelInstance(0);
+			model->GetFrame()->SetPosition(40.f, 20.f, 30.f);
+
 		}
 
 	// Setup Lights
