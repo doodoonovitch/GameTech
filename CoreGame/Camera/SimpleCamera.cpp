@@ -76,7 +76,7 @@ void SimpleCamera::OnInit()
 
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
-
+		
 		{
 			//const float XStart = 1.f;
 			//const float YStart = 0.f;
@@ -191,7 +191,7 @@ void SimpleCamera::OnInit()
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);
 		}
-		
+		/*
 		{
 			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
@@ -207,6 +207,7 @@ void SimpleCamera::OnInit()
 			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
 			engine->AttachRenderer(ocean);
 		}
+		*/
 		/*
 		{
 			Renderers::ShallowWaterRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
@@ -236,9 +237,12 @@ void SimpleCamera::OnInit()
 		}
 
 		{
-			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromFile("Medias/Objects/planet/planet.obj", "Medias/Textures/planet");
+			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromFile(
+				//"Medias/Objects/planet/planet.obj", "Medias/Textures/planet");
+				"Medias/Objects/rock/rock.obj", "Medias/Textures/rock");
+			engine->AttachRenderer(modelRenderer);
 			Renderables::Model * model = modelRenderer->CreateModelInstance(0);
-			model->GetFrame()->SetPosition(40.f, 20.f, 30.f);
+			model->GetFrame()->SetPosition(0.f, 10.f, 0.f);
 
 		}
 

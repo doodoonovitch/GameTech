@@ -117,6 +117,7 @@ private:
 
 	GLuint mMaterialCount;
 	GLsizei mDrawCmdCount;
+	GLsizei mIndexCount;
 
 	TextureBuffer mModelMatrixBuffer;
 	TextureBuffer mMaterialIndexBuffer;

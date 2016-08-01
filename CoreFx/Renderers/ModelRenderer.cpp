@@ -17,6 +17,7 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 	, mMaterialTextureIndexesList((GLuint)materialDescList.size())
 	, mMeshDrawInstanceList(meshDrawInstanceList)
 	, mIsShaderBufferSet(false)
+	, mIndexCount((GLsizei)indexList.size())
 {
 	PRINT_MESSAGE("Initialize ModelRenderer....");
 
@@ -116,6 +117,7 @@ void ModelRenderer::Render()
 	//glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, 0);
+	//glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, (GLsizei)mObjs.GetCount());
 
 	glBindVertexArray(0);
 	mShader.UnUse();
@@ -133,12 +135,13 @@ void ModelRenderer::RenderWireFrame()
 	//glActiveTexture(GL_TEXTURE1);
 	//glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetTextureId());
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, Engine::GetInstance()->GetMaterialDataBuffer().GetTextureId());
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_BUFFER, Engine::GetInstance()->GetMaterialDataBuffer().GetTextureId());
 
 	//glUniform1i(mWireFrameShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
-	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, 0);
+	glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, (GLsizei)mObjs.GetCount());
+	//glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, 0);
 
 	glBindVertexArray(0);
 	mWireFrameShader.UnUse();
@@ -323,20 +326,20 @@ void ModelRenderer::UpdateShaderData()
 	{
 		// --------------------------------------------
 
-		glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetBufferId());
+		//glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetBufferId());
 
-		std::uint8_t * matIndexBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
-		assert(matIndexBuffer != nullptr);
+		//std::uint8_t * matIndexBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+		//assert(matIndexBuffer != nullptr);
 
-		if (matIndexBuffer != nullptr)
-		{
-			mObjs.ForEach([this, matIndexBuffer](Renderables::Model* obj)
-			{
-				matIndexBuffer[obj->GetInstanceId()] = obj->GetMaterialGroupIndex();
-			});
+		//if (matIndexBuffer != nullptr)
+		//{
+		//	mObjs.ForEach([this, matIndexBuffer](Renderables::Model* obj)
+		//	{
+		//		matIndexBuffer[obj->GetInstanceId()] = obj->GetMaterialGroupIndex();
+		//	});
 
-			glUnmapBuffer(GL_TEXTURE_BUFFER);
-		}
+		//	glUnmapBuffer(GL_TEXTURE_BUFFER);
+		//}
 
 		// --------------------------------------------
 
@@ -359,12 +362,14 @@ void ModelRenderer::UpdateShaderData()
 
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 
-		Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, mDrawCmdCount * sizeof(Renderer::DrawElementsIndirectCommand), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		//Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, mDrawCmdCount * sizeof(Renderer::DrawElementsIndirectCommand), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBuffer(GL_DRAW_INDIRECT_BUFFER, GL_WRITE_ONLY);
 
 		GLuint instanceCount = (GLuint)mObjs.GetCount();
 		for (auto i = 0; i < mDrawCmdCount; i++)
 		{
 			cmd->mInstanceCount = instanceCount;
+			++cmd;
 		}
 
 		glUnmapBuffer(GL_DRAW_INDIRECT_BUFFER);
