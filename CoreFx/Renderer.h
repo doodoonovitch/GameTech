@@ -24,9 +24,13 @@ public:
 	public:
 
 		glm::vec3 mPosition;
-		glm::vec2 mTexUV;
+		float _pad1;
 		glm::vec3 mNormal;
+		float _pad2;
 		glm::vec3 mTangent;
+		float _pad3;
+		glm::vec2 mTexUV;
+		float _pad4[2];
 	};
 
 	typedef std::vector<VertexData> VertexDataVector;

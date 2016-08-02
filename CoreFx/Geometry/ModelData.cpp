@@ -67,8 +67,16 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 			return false;
 		}
 
+		GLuint meshIndexCount = 0;
+		for (GLuint i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			meshIndexCount += face.mNumIndices;
+		}
+
+
 		Renderer::DrawElementsIndirectCommand meshDrawInstance;
-		meshDrawInstance.mVertexCount = (GLuint)mesh->mNumVertices;
+		meshDrawInstance.mVertexCount = meshIndexCount;
 		meshDrawInstance.mInstanceCount = 1;
 		meshDrawInstance.mFirstIndex = totalIndexCount;
 		meshDrawInstance.mBaseVertex = totalVertexCount;
@@ -76,11 +84,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		mMeshDrawInstanceList.push_back(meshDrawInstance);
 
 		totalVertexCount += mesh->mNumVertices;
-		for (GLuint i = 0; i < mesh->mNumFaces; i++)
-		{
-			aiFace face = mesh->mFaces[i];
-			totalIndexCount += face.mNumIndices;
-		}
+		totalIndexCount += meshIndexCount;
 
 		return true;
 	}))

@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Model, 3>(Property_Per_Material, capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
+	: SceneObjectRenderer<Renderables::Model, 4>(Property_Per_Material, capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
 	, mMaterialCount((GLuint)materialDescList.size())
 	, mDrawCmdCount((GLsizei)meshDrawInstanceList.size())
 	, mMaterialTextureIndexesList((GLuint)materialDescList.size())
@@ -28,12 +28,18 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 	const GLsizei vertexDataSize = sizeof(Renderer::VertexData);
 
 	//setup vao and vbo stuff
-	glGenVertexArrays(1, &mVaoID);
-	glGenBuffers(mVboCount, mVboIDs);
-	 
+	//setup vao and vbo stuff
+	CreateBuffers();
+
+	PRINT_GEN_VERTEXARRAY("[ModelRenderer]", mVaoID);
+	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Vertex]);
+	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Index]);
+	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Indirect]);
+	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_MeshId]);
+
 	glBindVertexArray(mVaoID);
 	
-		glBindBuffer (GL_ARRAY_BUFFER, mVboIDs[0]);
+		glBindBuffer (GL_ARRAY_BUFFER, mVboIDs[VBO_Vertex]);
 		glBufferData(GL_ARRAY_BUFFER, vertexList.size() * vertexDataSize, vertexList.data(), GL_STATIC_DRAW);
 		GL_CHECK_ERRORS;
 		 
@@ -59,10 +65,20 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 		glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(Renderer::DrawElementsIndirectCommand) * mDrawCmdCount, mMeshDrawInstanceList.data(), GL_STATIC_DRAW);
+		GL_CHECK_ERRORS;
 
+		std::vector<GLuint> meshIds(mDrawCmdCount);
+		for (GLsizei i = 0; i < mDrawCmdCount; ++i)
+		{
+			meshIds[i] = mMeshDrawInstanceList[i].mBaseInstance;
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[VBO_MeshId]);
+		glBufferData(GL_ARRAY_BUFFER, mDrawCmdCount * sizeof(GLuint), meshIds.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(Shader::MESHID_ATTRIBUTE);
-		glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_UNSIGNED_INT, sizeof(Renderer::DrawElementsIndirectCommand), (GLvoid*)offsetof(Renderer::DrawElementsIndirectCommand, mBaseInstance));
+		glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_UNSIGNED_INT, sizeof(GLuint), 0);
 		glVertexAttribDivisor(Shader::MESHID_ATTRIBUTE, 1);
+		GL_CHECK_ERRORS;
+
 	//	 
 	glBindVertexArray(0);
 
@@ -116,7 +132,10 @@ void ModelRenderer::Render()
 
 	//glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
-	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, 0);
+	//glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
+	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, mMeshDrawInstanceList.data(), mDrawCmdCount, 0);
+	//glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+
 	//glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, (GLsizei)mObjs.GetCount());
 
 	glBindVertexArray(0);
@@ -360,20 +379,19 @@ void ModelRenderer::UpdateShaderData()
 
 		// --------------------------------------------
 
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
+		//glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 
-		//Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, mDrawCmdCount * sizeof(Renderer::DrawElementsIndirectCommand), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-		Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBuffer(GL_DRAW_INDIRECT_BUFFER, GL_WRITE_ONLY);
+		//Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBuffer(GL_DRAW_INDIRECT_BUFFER, GL_WRITE_ONLY);
 
-		GLuint instanceCount = (GLuint)mObjs.GetCount();
-		for (auto i = 0; i < mDrawCmdCount; i++)
-		{
-			cmd->mInstanceCount = instanceCount;
-			++cmd;
-		}
+		//GLuint instanceCount = (GLuint)mObjs.GetCount();
+		//for (auto i = 0; i < mDrawCmdCount; i++)
+		//{
+		//	cmd->mInstanceCount = instanceCount;
+		//	++cmd;
+		//}
 
-		glUnmapBuffer(GL_DRAW_INDIRECT_BUFFER);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+		//glUnmapBuffer(GL_DRAW_INDIRECT_BUFFER);
+		//glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
 		// --------------------------------------------
 

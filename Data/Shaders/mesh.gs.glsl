@@ -41,7 +41,7 @@ void main()
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{
-		gs_out.MaterialIndex = 0;//gs_in[0].MeshId;
+		gs_out.MaterialIndex = gs_in[0].MeshId;
 		gs_out.ViewModelDQ = viewModelDQ;
 		
 		gs_out.Position = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
