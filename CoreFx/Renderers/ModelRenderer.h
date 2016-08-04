@@ -121,7 +121,7 @@ private:
 	GLsizei mIndexCount;
 
 	TextureBuffer mModelMatrixBuffer;
-	TextureBuffer mMaterialIndexBuffer;
+	//TextureBuffer mMaterialIndexBuffer;
 
 	MaterialTextureIndexesList mMaterialTextureIndexesList;
 

@@ -33,6 +33,7 @@
 #include <functional>
 #include <cstdint>
 #include <memory>
+#include <type_traits>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

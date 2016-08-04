@@ -76,7 +76,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 
 		Renderer::DrawElementsIndirectCommand meshDrawInstance;
-		meshDrawInstance.mVertexCount = meshIndexCount;
+		meshDrawInstance.mElemCount = meshIndexCount;
 		meshDrawInstance.mInstanceCount = 1;
 		meshDrawInstance.mFirstIndex = totalIndexCount;
 		meshDrawInstance.mBaseVertex = totalVertexCount;

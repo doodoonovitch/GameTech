@@ -19,34 +19,36 @@ class Renderer : public ObjectInstance
 public:
 
 
-	class VertexData
+#pragma pack(push, 1)
+
+	/*__declspec(align(4)) */class VertexData
 	{
 	public:
 
 		glm::vec3 mPosition;
-		float _pad1;
-		glm::vec3 mNormal;
-		float _pad2;
-		glm::vec3 mTangent;
-		float _pad3;
+		//float _pad1;
 		glm::vec2 mTexUV;
-		float _pad4[2];
+		//float _pad4[2];
+		glm::vec3 mNormal;
+		//float _pad2;
+		glm::vec3 mTangent;
+		//float _pad3;
 	};
+
+	/*__declspec(align(4)) */class DrawElementsIndirectCommand
+	{
+	public:
+		GLuint mElemCount;
+		GLuint mInstanceCount;
+		GLuint mFirstIndex;
+		GLint mBaseVertex;
+		GLuint mBaseInstance;
+		//GLuint __padding__[3];
+	};
+#pragma pack(pop)
 
 	typedef std::vector<VertexData> VertexDataVector;
 	typedef std::vector<GLuint> IndexVector;
-
-
-	class DrawElementsIndirectCommand
-	{
-	public:
-		GLuint mVertexCount;
-		GLuint mInstanceCount;
-		GLuint mFirstIndex;
-		GLuint mBaseVertex;
-		GLuint mBaseInstance;
-	};
-
 	typedef std::vector<DrawElementsIndirectCommand> DrawElementsIndirectCommandList;
 
 

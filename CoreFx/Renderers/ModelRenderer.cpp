@@ -37,6 +37,10 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Indirect]);
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_MeshId]);
 
+	PRINT_MESSAGE("Alignment of vertexList (0x%p) : %i", vertexList.data(), ((intptr_t)vertexList.data()) % 4);
+	PRINT_MESSAGE("Alignment of indexList (0x%p) : %i", indexList.data(), ((intptr_t)indexList.data()) % 4);
+	PRINT_MESSAGE("Alignment of meshDrawInstanceList (0x%p) : %i", meshDrawInstanceList.data(), ((intptr_t)meshDrawInstanceList.data()) % 4);
+
 	glBindVertexArray(mVaoID);
 	
 		glBindBuffer (GL_ARRAY_BUFFER, mVboIDs[VBO_Vertex]);
@@ -59,14 +63,6 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 		glVertexAttribPointer(Shader::TANGENT_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, vertexDataSize, (GLvoid*)offsetof(Renderer::VertexData, mTangent));
 		GL_CHECK_ERRORS;
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIDs[VBO_Index]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLuint) * indexList.size()), indexList.data(), GL_STATIC_DRAW);
-		GL_CHECK_ERRORS;
-
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
-		glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(Renderer::DrawElementsIndirectCommand) * mDrawCmdCount, mMeshDrawInstanceList.data(), GL_STATIC_DRAW);
-		GL_CHECK_ERRORS;
-
 		std::vector<GLuint> meshIds(mDrawCmdCount);
 		for (GLsizei i = 0; i < mDrawCmdCount; ++i)
 		{
@@ -75,12 +71,21 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 		glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[VBO_MeshId]);
 		glBufferData(GL_ARRAY_BUFFER, mDrawCmdCount * sizeof(GLuint), meshIds.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(Shader::MESHID_ATTRIBUTE);
-		glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_UNSIGNED_INT, sizeof(GLuint), 0);
+		glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_UNSIGNED_INT, 0, 0);
 		glVertexAttribDivisor(Shader::MESHID_ATTRIBUTE, 1);
+		GL_CHECK_ERRORS;
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIDs[VBO_Index]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLuint) * indexList.size()), indexList.data(), GL_STATIC_DRAW);
 		GL_CHECK_ERRORS;
 
 	//	 
 	glBindVertexArray(0);
+
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
+	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(Renderer::DrawElementsIndirectCommand) * mDrawCmdCount, mMeshDrawInstanceList.data(), GL_DYNAMIC_DRAW);
+	GL_CHECK_ERRORS;
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
 	GL_CHECK_ERRORS;
 
@@ -133,7 +138,7 @@ void ModelRenderer::Render()
 	//glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
-	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, 0);
+	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
 	//glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, (GLsizei)mObjs.GetCount());
