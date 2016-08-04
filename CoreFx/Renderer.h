@@ -19,8 +19,7 @@ class Renderer : public ObjectInstance
 public:
 
 
-#pragma pack(push, 1)
-
+//#pragma pack(push, 1)
 	/*__declspec(align(4)) */class VertexData
 	{
 	public:
@@ -45,7 +44,7 @@ public:
 		GLuint mBaseInstance;
 		//GLuint __padding__[3];
 	};
-#pragma pack(pop)
+//#pragma pack(pop)
 
 	typedef std::vector<VertexData> VertexDataVector;
 	typedef std::vector<GLuint> IndexVector;

@@ -83,7 +83,7 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 	glBindVertexArray(0);
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
-	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(Renderer::DrawElementsIndirectCommand) * mDrawCmdCount, mMeshDrawInstanceList.data(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(Renderer::DrawElementsIndirectCommand) * mDrawCmdCount, mMeshDrawInstanceList.data(), GL_STATIC_DRAW);
 	GL_CHECK_ERRORS;
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
@@ -165,7 +165,7 @@ void ModelRenderer::RenderWireFrame()
 	//glUniform1i(mWireFrameShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
-	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, 0);
+	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 	//glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, (GLsizei)mObjs.GetCount());
 
@@ -386,19 +386,19 @@ void ModelRenderer::UpdateShaderData()
 
 		// --------------------------------------------
 
-		//glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 
-		//Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBuffer(GL_DRAW_INDIRECT_BUFFER, GL_WRITE_ONLY);
+		Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBuffer(GL_DRAW_INDIRECT_BUFFER, GL_WRITE_ONLY);
 
-		//GLuint instanceCount = (GLuint)mObjs.GetCount();
-		//for (auto i = 0; i < mDrawCmdCount; i++)
-		//{
-		//	cmd->mInstanceCount = instanceCount;
-		//	++cmd;
-		//}
+		GLuint instanceCount = (GLuint)mObjs.GetCount();
+		for (auto i = 0; i < mDrawCmdCount; i++)
+		{
+			cmd->mInstanceCount = instanceCount;
+			++cmd;
+		}
 
-		//glUnmapBuffer(GL_DRAW_INDIRECT_BUFFER);
-		//glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+		glUnmapBuffer(GL_DRAW_INDIRECT_BUFFER);
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
 		// --------------------------------------------
 
