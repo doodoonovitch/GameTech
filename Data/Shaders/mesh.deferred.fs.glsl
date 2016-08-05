@@ -58,11 +58,19 @@ void main(void)
 		materialEmissive = materialEmissive * TexGet(emissiveSamplerIndex, vec3(fs_in.TexUV, emissiveTextureIndex)).xyz;
 	}
 
-	vec3 bumpMapNormal = TexGet(normalSamplerIndex, vec3(fs_in.TexUV, normalTextureIndex)).xyz;
-    bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
+	vec3 normal;
+	if (normalSamplerIndex != -1)
+	{
+		vec3 bumpMapNormal = TexGet(normalSamplerIndex, vec3(fs_in.TexUV, normalTextureIndex)).xyz;
+		bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
 
-	vec3 normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
-	normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+		normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
+		normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	}
+	else
+	{
+		normal = normalize(fs_in.Normal);
+	}
 	
 	//outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(packHalf2x16(normal.xy)));
 	outPosition = fs_in.Position.xyz;

@@ -238,8 +238,10 @@ void SimpleCamera::OnInit()
 
 		{
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromFile(
-				//"Medias/Objects/planet/planet.obj", "Medias/Textures/planet");
-				"Medias/Objects/rock/rock.obj", "Medias/Textures/rock");
+				"Medias/Objects/planet/planet.obj", "Medias/Textures/planet");
+				//"Medias/Objects/rock/rock.obj", "Medias/Textures/rock");
+				//"Medias/Objects/apple/apple.obj", "Medias/Textures/apple");
+				//"Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Textures/hatorrihanzo");
 			engine->AttachRenderer(modelRenderer);
 			Renderables::Model * model = modelRenderer->CreateModelInstance(0);
 			model->GetFrame()->SetPosition(0.f, 10.f, 0.f);
