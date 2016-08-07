@@ -4,7 +4,7 @@ layout (triangle_strip, max_vertices = 3) out;
 uniform int u_MaterialBaseIndex;
 
 uniform samplerBuffer u_perInstanceDataSampler;
-//uniform isamplerBuffer u_materialIndexSampler;
+uniform isamplerBuffer u_materialIndexSampler;
 
 #define PROPERTY_PER_MATERIAL_COUNT 3
 
@@ -37,18 +37,19 @@ void main()
 	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 	//viewModelDQ = u_ViewDQ;
 
-	//int matIndex = texelFetch(u_materialIndexSampler, gs_in[0].InstanceId).r * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
+	//int matIndex = texelFetch(u_materialIndexSampler, gs_in[0].MeshId).r * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
+	int matIndex = gs_in[0].MeshId * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{
-		gs_out.MaterialIndex = gs_in[0].MeshId;
+		gs_out.MaterialIndex = matIndex;
 		gs_out.ViewModelDQ = viewModelDQ;
 		
 		gs_out.Position = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
 		gl_Position = u_ProjMatrix * gs_out.Position;
 
-		gs_out.Normal = dqTransformNormal(gs_in[i].Normal, viewModelDQ);
-		gs_out.Tangent = dqTransformNormal(gs_in[i].Tangent, viewModelDQ);
+		gs_out.Normal = gs_in[i].Normal; //dqTransformNormal(gs_in[i].Normal, viewModelDQ);
+		gs_out.Tangent = gs_in[i].Tangent; //dqTransformNormal(gs_in[i].Tangent, viewModelDQ);
 		//gs_out.Normal = dqTransformNormal(gs_in[i].Normal.xyz, viewModelDQ);
 
 		gs_out.TexUV = gs_in[i].TexUV;

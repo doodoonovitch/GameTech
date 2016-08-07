@@ -4,6 +4,21 @@
 namespace CoreFx
 {
 
+const char * TextureCategoryToString(TextureCategory cat)
+{
+	const char * textureCategoryStr[(int)TextureCategory::__count__] =
+	{
+		"Diffuse",
+		"Specular",
+		"NormalMap",
+		"HeightMap",
+		"Emissive",
+		"Roughness"
+	};
+
+	return textureCategoryStr[(int)cat];
+}
+
 
 Texture::Texture(GLuint id, GLenum target, TextureClass texClass)
 	: mId(id)

@@ -41,8 +41,10 @@ private:
 	enum GBufferType
 	{
 		gBuffer_PositionBuffer,
-		gBuffer_DataBuffer,
 		gBuffer_NormalBuffer,
+		gBuffer_AlbedoAndStatus,
+		gBuffer_SpecularRoughness,
+		gBuffer_Emissive,
 		//gBuffer_DepthBuffer,
 
 		__gBuffer_count__
@@ -321,7 +323,6 @@ private:
 	void InternalInitializeQuadVAO();
 	void InternalInitializeDeferredPassShader();
 	void InternalInitializeToneMappingShader();
-	void InternalInitializeWireFramePassShader();
 	void InternalInitializeCopyShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
@@ -338,8 +339,10 @@ private:
 	enum EDeferredShaderUniformIndex
 	{
 		u_gBufferPosition,
-		u_gBufferData,
 		u_gBufferNormal,
+		u_gBufferAlbedoAndStatus,
+		u_gBufferSpecularRoughness,
+		u_gBufferEmissive,
 		//u_materialDataSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,

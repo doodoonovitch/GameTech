@@ -19,6 +19,7 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 	, mIsShaderBufferSet(false)
 	, mIndexCount((GLsizei)indexList.size())
 {
+	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize ModelRenderer....");
 
 	AddTextures(textureDescList);
@@ -36,10 +37,6 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Index]);
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Indirect]);
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_MeshId]);
-
-	PRINT_MESSAGE("Alignment of vertexList (0x%p) : %i", vertexList.data(), ((intptr_t)vertexList.data()) % 4);
-	PRINT_MESSAGE("Alignment of indexList (0x%p) : %i", indexList.data(), ((intptr_t)indexList.data()) % 4);
-	PRINT_MESSAGE("Alignment of meshDrawInstanceList (0x%p) : %i", meshDrawInstanceList.data(), ((intptr_t)meshDrawInstanceList.data()) % 4);
 
 	glBindVertexArray(mVaoID);
 	
@@ -92,18 +89,17 @@ ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, cons
 
 	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
 
-	//mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R8UI, GetCapacity() * sizeof(std::uint8_t), nullptr);
+	//mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, mDrawCmdCount * sizeof(GLuint), nullptr);
 
 	LoadTextures();
 	UpdateMaterialTextureIndex();
 
 
-	PRINT_MESSAGE("[ModelRenderer]\t mVaoID : %li", mVaoID);
-	PRINT_MESSAGE("[ModelRenderer]\t mVboID[0] : %li", mVboIDs[0]);
 	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mModelMatrixBuffer);
 	//PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mMaterialIndexBuffer);
 
-	PRINT_MESSAGE("... SkydomeRenderer initialized!\n");
+	PRINT_MESSAGE("... ModelRenderer initialized!\n");
+	PRINT_END_SECTION;
 }
 
 
@@ -135,7 +131,7 @@ void ModelRenderer::Render()
 		glBindTexture(mTextureMapping.mMapping[i].mTexture->GetTarget(), mTextureMapping.mMapping[i].mTexture->GetResourceId());
 	}
 
-	//glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
+	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
@@ -175,7 +171,7 @@ void ModelRenderer::RenderWireFrame()
 
 
 
-void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & diffuse, TextureIndex diffuseTextureIndex, const glm::vec3 & specular, GLfloat roughness, TextureIndex specularTextureIndex, const glm::vec3 & emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
+void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, TextureIndex specularTextureIndex, GLfloat roughness, TextureIndex roughnessTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
 {
 	assert(materialIndex < mMaterialCount);
 
@@ -189,9 +185,8 @@ void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & d
 		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
 		memcpy(prop2, glm::value_ptr(specular), sizeof(GLfloat) * 3);
 
-		//GLbitfield shininessBitfield = ((roughness & 0xFFFF) << 16);
-		//memcpy(&prop2[3], &shininessBitfield, sizeof(GLfloat));
-		prop2[3] = roughness;
+		GLbitfield roughnessBitfield = (uint32_t)(roughness * 32767);
+		memcpy(&prop2[3], &roughnessBitfield, sizeof(GLfloat));
 
 		GLfloat * prop3 = mMaterials.GetProperty(propertyIndex + 2);
 		memcpy(prop3, glm::value_ptr(emissive), sizeof(GLfloat) * 3);
@@ -199,18 +194,26 @@ void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3 & d
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
 		texIndexes.mDiffuse = diffuseTextureIndex;
 		texIndexes.mSpecular = specularTextureIndex;
+		texIndexes.mRoughness = roughnessTextureIndex;
 		texIndexes.mEmissive = emissiveTextureIndex;
 		texIndexes.mNormal = normalTextureIndex;
+
+		{
+			PRINT_MESSAGE("\t\t- Material %i : Texture index (DSRNE) = (%i, %i, %i, %i, %i)", materialIndex, (int8_t)diffuseTextureIndex, (int8_t)specularTextureIndex, (int8_t)roughnessTextureIndex, (int8_t)normalTextureIndex, (int8_t)emissiveTextureIndex);
+			PRINT_MESSAGE("\t\t\tDiffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", diffuse.x, diffuse.y, diffuse.z, specular.x, specular.y, specular.z, roughness, emissive.x, emissive.y, emissive.z);
+		}
+
 	}
 }
 
 void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const Renderer::MaterialDesc & mat)
 {
-	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mRoughness, mat.mSpecularTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
+	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mSpecularTextureIndex, mat.mRoughness, mat.mRoughnessTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
 }
 
 void ModelRenderer::SetMaterials(const Renderer::MaterialDescList & materials)
 {
+	PRINT_MESSAGE("\t* Material count : %li", materials.size());
 	for (size_t i = 0; i < materials.size(); ++i)
 	{
 		SetMaterial((std::uint16_t)i, materials[i]);
@@ -219,6 +222,8 @@ void ModelRenderer::SetMaterials(const Renderer::MaterialDescList & materials)
 
 void ModelRenderer::UpdateMaterialTextureIndex()
 {
+	PRINT_MESSAGE("Update material texture index :");
+
 	const TextureInfoList & texInfo = GetTextureInfoList();
 
 	for (GLuint materialIndex = 0; materialIndex < (GLuint)mMaterialTextureIndexesList.size(); ++materialIndex)
@@ -229,17 +234,27 @@ void ModelRenderer::UpdateMaterialTextureIndex()
 		std::uint8_t specularTextureIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetLayerIndex() : 0xFF;
 		std::uint8_t emissiveTextureIndex = texIndexes.mEmissive != NoTexture ? (std::uint8_t)texInfo[texIndexes.mEmissive].GetLayerIndex() : 0xFF;
 		std::uint8_t normalTextureIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetLayerIndex() : 0xFF;
+		std::uint8_t roughnessTextureIndex = texIndexes.mRoughness != NoTexture ? (std::uint8_t)texInfo[texIndexes.mRoughness].GetLayerIndex() : 0xFF;
 
 		std::uint8_t diffuseSamplerIndex = texIndexes.mDiffuse != NoTexture ? (std::uint8_t)texInfo[texIndexes.mDiffuse].GetSamplerIndex() : 0xFF;
 		std::uint8_t specularSamplerIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetSamplerIndex() : 0xFF;
 		std::uint8_t emissiveSamplerIndex = texIndexes.mEmissive != NoTexture ? (std::uint8_t)texInfo[texIndexes.mEmissive].GetSamplerIndex() : 0xFF;
 		std::uint8_t normalSamplerIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetSamplerIndex() : 0xFF;
+		std::uint8_t roughnessSamplerIndex = texIndexes.mRoughness != NoTexture ? (std::uint8_t)texInfo[texIndexes.mRoughness].GetSamplerIndex() : 0xFF;
+
+		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) Diffuse=(%i, %i), Specular=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i)", materialIndex, (int8_t)diffuseSamplerIndex, (int8_t)diffuseTextureIndex, (int8_t)specularSamplerIndex, (int8_t)specularTextureIndex, (int8_t)roughnessSamplerIndex, (int8_t)roughnessTextureIndex, (int8_t)normalSamplerIndex, (int8_t)normalTextureIndex, (int8_t)emissiveSamplerIndex, (int8_t)emissiveTextureIndex);
 
 		GLuint propertyIndex = Property_Per_Material * materialIndex;
 
 		GLfloat * prop1 = mMaterials.GetProperty(propertyIndex);
 		GLbitfield diffuseSpecularIndexes = ((diffuseSamplerIndex & 0xFF) << 24) | ((diffuseTextureIndex & 0xFF) << 16) | ((specularSamplerIndex & 0xFF) << 8) | (specularTextureIndex & 0xFF);
 		memcpy(&prop1[3], &diffuseSpecularIndexes, sizeof(GLfloat));
+
+		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
+		GLbitfield roughnessBitfields;
+		memcpy(&roughnessBitfields, &prop2[3], sizeof(GLfloat));
+		roughnessBitfields = ((roughnessSamplerIndex & 0xFF) << 24) | ((roughnessTextureIndex & 0xFF) << 16) | (roughnessBitfields & 0xFFFF);
+		memcpy(&prop2[3], &roughnessBitfields, sizeof(GLfloat));
 
 		GLfloat * prop3 = mMaterials.GetProperty(propertyIndex + 2);
 		GLbitfield emissiveNormalIndexes;
@@ -258,7 +273,6 @@ void ModelRenderer::InitializeShaders()
 
 void ModelRenderer::InitializeMainShader()
 {
-	PRINT_MESSAGE("");
 	PRINT_MESSAGE("Initialize ModelRenderer shader....");
 
 	//setup shader
@@ -276,7 +290,7 @@ void ModelRenderer::InitializeMainShader()
 
 	const char * uniformNames[(int)EMainShaderUniformIndex::__uniforms_count__] =
 	{
-		//"u_MaterialBaseIndex",
+		"u_MaterialBaseIndex",
 		"u_perInstanceDataSampler",
 		//"u_materialIndexSampler",
 		"u_materialDataSampler"
@@ -354,15 +368,15 @@ void ModelRenderer::UpdateShaderData()
 
 		//glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetBufferId());
 
-		//std::uint8_t * matIndexBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+		//GLuint * matIndexBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 		//assert(matIndexBuffer != nullptr);
 
 		//if (matIndexBuffer != nullptr)
 		//{
-		//	mObjs.ForEach([this, matIndexBuffer](Renderables::Model* obj)
+		//	for(GLsizei i = 0; i < mDrawCmdCount; ++i)
 		//	{
-		//		matIndexBuffer[obj->GetInstanceId()] = obj->GetMaterialGroupIndex();
-		//	});
+		//		matIndexBuffer[i] = mMeshDrawInstanceList[i].mBaseInstance;
+		//	}
 
 		//	glUnmapBuffer(GL_TEXTURE_BUFFER);
 		//}
@@ -435,12 +449,25 @@ ModelRenderer * ModelRenderer::CreateFromFile(const std::string & modelFilePath,
 	model.LoadModel(modelFilePath, textureBasePath);
 	if (model.IsLoaded())
 	{
+		return CreateFromModel(model, capacity, pageSize);
+	}
+	else
+	{
+		PRINT_ERROR("Cannot create the 'ModelRenderer' from model file '%s' : model loading has failed!", modelFilePath.c_str());
+		return nullptr;
+	}
+}
+
+ModelRenderer * ModelRenderer::CreateFromModel(const Geometry::ModelData & model, size_t capacity, size_t pageSize)
+{
+	if (model.IsLoaded())
+	{
 		ModelRenderer * renderer = new ModelRenderer(model.GetVertexList(), model.GetIndexList(), model.GetMaterialDescList(), model.GetTextureDescList(), model.GetMeshDrawInstanceList(), capacity, pageSize);
 		return renderer;
 	}
 	else
 	{
-		PRINT_ERROR("Cannot create the 'ModelRenderer' from model file '%s' : model loading has failed!", modelFilePath.c_str());
+		PRINT_ERROR("Cannot create the 'ModelRenderer' from model : the model is not loaded!");
 		return nullptr;
 	}
 }

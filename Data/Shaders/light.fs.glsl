@@ -7,8 +7,10 @@ in VS_OUT
 
 
 uniform sampler2D u_gBufferPosition;
-uniform usampler2D u_gBufferData;
 uniform sampler2D u_gBufferNormal;
+uniform usampler2D u_gBufferAlbedoAndStatus;
+uniform sampler2D u_gBufferSpecularRoughness;
+uniform sampler2D u_gBufferEmissive;
 
 uniform isamplerBuffer u_lightDescSampler;
 uniform samplerBuffer u_lightDataSampler;
@@ -36,37 +38,20 @@ void UnpackFromGBuffer(out FragmentInfo fi)
     vec4 encPositionNormal = texture(u_gBufferPosition, fs_in.TexUV, 0);
 	fi.Position = encPositionNormal.xyz;
 	fi.Normal = texture(u_gBufferNormal, fs_in.TexUV, 0).xyz;
-	//fi.Normal.xy = unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
-	//fi.Normal.z = sqrt(1 - dot(fi.Normal.xy, fi.Normal.xy));
-	//fi.Normal.xy = -unpackHalf2x16(floatBitsToUint(encPositionNormal.w));
-	//fi.Normal.z = 1;
 
-	vec4 temp;
-	uvec3 data = texture(u_gBufferData, fs_in.TexUV, 0).xyz;
-	fi.RendererId = int((data.x >> 24) & 255);
+	uvec4 data = texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0);
+	fi.RendererId = int(data.w & 15);
 
 	uvec3 matD = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
-	fi.DiffuseMaterial = vec3(matD) / 255.f;
+	fi.DiffuseMaterial = data.xyz / 255.f;
 
-	////data.x = data.x & Mask_0x00FFFFFF;
-	//temp = unpackUnorm4x8(data.x);
-	//fi.DiffuseMaterial = temp.xyz;
+	vec4 temp;
+	
+	temp = texture(u_gBufferSpecularRoughness, fs_in.TexUV, 0);
+	fi.Roughness = temp.w;
+	fi.SpecularMaterial = temp.xyz;
 
-	//fi.GlossPower = pow(2, int((data.y >> 24) & 255));
-	fi.Roughness = float((data.y >> 24) & 255) / 255.f;
-	uvec3 matS = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
-	fi.SpecularMaterial = vec3(matS) / 255.f;
-
-	////data.y = data.y & Mask_0x00FFFFFF;
-	//temp = unpackUnorm4x8(data.y);
-	//fi.SpecularMaterial = temp.xyz;
-
-	temp = unpackUnorm4x8(data.z);
-	fi.EmissiveMaterial = temp.xyz;
-
-	//float normalZSign = temp.w;
-	//fi.Normal.z = sqrt(1 - dot(fi.Normal.xy, fi.Normal.xy)) * normalZSign;
-	//fi.Normal = normalize(fi.Normal);
+	fi.EmissiveMaterial = texture(u_gBufferEmissive, fs_in.TexUV, 0).xyz;
 }
 
 

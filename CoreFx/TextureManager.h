@@ -16,7 +16,20 @@ public:
 
 	Texture2D const * LoadTexture2D(std::string const &tiffFilename, bool generateMipMap = true);
 	CubeMapTexture const * LoadTextureCubeMap(std::string const & prefixFilename, bool generateMipMap = true);
-	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> filenames, bool generateMipMap = true);
+
+	struct LoadTextureGroupDesc
+	{
+		LoadTextureGroupDesc(const std::string & filename, bool invertY)
+			: mFilename(filename)
+			, mInvertY(invertY)
+		{ }
+
+		std::string mFilename;
+		bool mInvertY;
+	};
+
+	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, const std::vector<LoadTextureGroupDesc> & list, bool generateMipMap = true);
+	
 
 	void ReleaseTexture2D(Texture2D const *& texture);
 	void ReleaseCubeMapTexture(CubeMapTexture const *& texture);

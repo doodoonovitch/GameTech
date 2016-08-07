@@ -1,6 +1,8 @@
 layout(location = 0) out vec3 outPosition;
-layout(location = 1) out uvec3 outData;
-layout(location = 2) out vec3 outNormal;
+layout(location = 1) out vec3 outNormal;
+layout(location = 2) out uvec4 outAlbedoAndStatus;
+layout(location = 3) out vec4 outSpecularAndRoughness;
+layout(location = 4) out vec3 outEmissive;
 
 uniform samplerBuffer u_materialDataSampler;
 uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
@@ -64,11 +66,9 @@ void main(void)
 	vec3 normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
 	normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
 	
-	//outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(packHalf2x16(normal.xy)));
 	outPosition = fs_in.Position.xyz;
 	outNormal = normal.xyz;
 
-	//outData = uvec3(packUnorm4x8(vec4(materialDiffuse, CUBE_RENDERER_ID / 255)), packUnorm4x8(vec4(materialSpecular, materialShininess / 255)), packUnorm4x8(vec4(materialEmissive, 0)));
-	outData = WriteOutData(CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);
+	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);
 
 }

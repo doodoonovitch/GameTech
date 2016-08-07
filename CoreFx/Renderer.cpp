@@ -18,7 +18,7 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT)
+bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool invertY)
 {
 	assert(filename != nullptr);
 
@@ -29,7 +29,7 @@ bool Renderer::AddTexture(const char * filename, TextureCategory category, Textu
 
 	uint16_t rendererId = (uint16_t)GetInstanceId();
 
-	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)width, (GLsizei)height, wrapS, wrapT);
+	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)width, (GLsizei)height, wrapS, wrapT, invertY);
 
 	mTextures.push_back(textureInfo);
 
@@ -105,11 +105,11 @@ void Renderer::LoadTextures()
 
 	for (TextureMappingList::iterator it = mTextureMapping.mMapping.begin(); it != mTextureMapping.mMapping.end(); ++it)
 	{
-		std::vector<std::string> textureList;
+		std::vector<TextureManager::LoadTextureGroupDesc> textureList;
 		textureList.reserve(it->mTexInfoList.size());
 		for (TexInfoPtrList::const_iterator it2 = it->mTexInfoList.begin(); it2 != it->mTexInfoList.end(); ++it2)
 		{
-			textureList.push_back((*it2)->GetFilename());
+			textureList.push_back(TextureManager::LoadTextureGroupDesc((*it2)->GetFilename(), (*it2)->mInvertY));
 		}
 
 		it->mTexture = textureManager->LoadTextureGroup(it->mTexInfoList.front()->GetGroupId(), textureList);

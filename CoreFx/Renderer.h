@@ -63,7 +63,8 @@ public:
 	struct MaterialDesc
 	{
 		MaterialDesc(const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
-			const glm::vec3& specular, GLfloat roughness, TextureIndex specularTextureIndex,
+			const glm::vec3& specular, TextureIndex specularTextureIndex,
+			GLfloat roughness, TextureIndex roughnessTextureIndex,
 			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
 			TextureIndex normalTextureIndex)
 			: mDiffuse(diffuse)
@@ -72,6 +73,7 @@ public:
 			, mRoughness(roughness)
 			, mDiffuseTextureIndex(diffuseTextureIndex)
 			, mSpecularTextureIndex(specularTextureIndex)
+			, mRoughnessTextureIndex(roughnessTextureIndex)
 			, mEmissiveTextureIndex(emissiveTextureIndex)
 			, mNormalTextureIndex(normalTextureIndex)
 		{}
@@ -83,6 +85,7 @@ public:
 			, mRoughness(src.mRoughness)
 			, mDiffuseTextureIndex(src.mDiffuseTextureIndex)
 			, mSpecularTextureIndex(src.mSpecularTextureIndex)
+			, mRoughnessTextureIndex(src.mRoughnessTextureIndex)
 			, mEmissiveTextureIndex(src.mEmissiveTextureIndex)
 			, mNormalTextureIndex(src.mNormalTextureIndex)
 		{
@@ -95,6 +98,7 @@ public:
 		GLfloat mRoughness;
 		TextureIndex mDiffuseTextureIndex;
 		TextureIndex mSpecularTextureIndex;
+		TextureIndex mRoughnessTextureIndex;
 		TextureIndex mNormalTextureIndex;
 		TextureIndex mEmissiveTextureIndex;
 	};
@@ -103,11 +107,12 @@ public:
 
 	struct TextureDesc
 	{
-		TextureDesc(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT)
+		TextureDesc(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool invertY = true)
 			: mFilename(filename)
 			, mCategory(category)
 			, mWrapS(wrapS)
 			, mWrapT(wrapT)
+			, mInvertY(invertY)
 		{
 		}
 
@@ -115,6 +120,7 @@ public:
 		TextureCategory mCategory; 
 		TextureWrap mWrapS;
 		TextureWrap mWrapT;
+		bool mInvertY;
 	};
 
 	typedef std::vector<TextureDesc> TextureDescList;
@@ -139,10 +145,10 @@ public:
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
 	const TextureInfoList & GetTextureInfoList() const { return mTextures; }
-	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT);
+	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool invertY);
 	bool AddTexture(const TextureDesc & desc)
 	{
-		return AddTexture(desc.mFilename.c_str(), desc.mCategory, desc.mWrapS, desc.mWrapT);
+		return AddTexture(desc.mFilename.c_str(), desc.mCategory, desc.mWrapS, desc.mWrapT, desc.mInvertY);
 	}
 
 	void AddTextures(const TextureDescList & textures);

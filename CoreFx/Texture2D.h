@@ -91,10 +91,12 @@ enum class TextureCategory
 	NormalMap,
 	HeightMap,
 	Emissive,
+	Roughness,
 
-	__max_category__ = HeightMap
+	__count__
 };
 
+extern const char * TextureCategoryToString(TextureCategory cat);
 
 class TextureInfo
 {
@@ -107,15 +109,17 @@ public:
 		: mGroupId((TextureGroupId)-1)
 	{}
 
-	TextureInfo(const char * filename, uint16_t rendererId, TextureCategory category, GLsizei width, GLsizei height, TextureWrap wrapS, TextureWrap wrapT)
+	TextureInfo(const char * filename, uint16_t rendererId, TextureCategory category, GLsizei width, GLsizei height, TextureWrap wrapS, TextureWrap wrapT, bool invertY)
 		: mGroupId(CreateGroupId(rendererId, category, width, height, wrapS, wrapT))
 		, mFilename(filename)
+		, mInvertY(invertY)
 	{
 	}
 
 	TextureInfo(const TextureInfo & src)
 		: mGroupId(src.mGroupId)
 		, mFilename(src.mFilename)
+		, mInvertY(src.mInvertY)
 	{
 	}
 
@@ -207,6 +211,7 @@ private:
 
 	TextureGroupId mGroupId;
 	std::string mFilename;
+	bool mInvertY;
 
 };
 

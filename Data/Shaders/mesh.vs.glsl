@@ -20,7 +20,7 @@ void main()
 	vs_out.Tangent = in_Tangent;
 	vs_out.TexUV = in_TexUV;
 	vs_out.InstanceId = gl_InstanceID;
-	vs_out.MeshId = in_MeshId;
+	vs_out.MeshId = 0;in_MeshId;
 	gl_Position = vec4(in_Position.xyz, 1);
 }
 

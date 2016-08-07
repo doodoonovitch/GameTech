@@ -26,6 +26,9 @@ public:
 	const Renderer::TextureDescList & GetTextureDescList() const { return mTextureList; }
 	const Renderer::DrawElementsIndirectCommandList & GetMeshDrawInstanceList() const { return mMeshDrawInstanceList; }
 
+	Renderer::MaterialDescList & GetMaterialDescList() { return mMaterialList; }
+	Renderer::TextureDescList & GetTextureDescList() { return mTextureList; }
+
 protected:
 
 	typedef std::map<std::string, int> TextureIndexMap;

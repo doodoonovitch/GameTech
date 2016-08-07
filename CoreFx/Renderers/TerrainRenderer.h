@@ -40,7 +40,7 @@ public:
 			const glm::vec3& specular, GLfloat roughness, TextureIndex specularTextureIndex, 
 			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
 			TextureIndex normalTextureIndex, GLfloat texScale = 1.f)
-			: Renderer::MaterialDesc(diffuse, diffuseTextureIndex, specular, roughness, specularTextureIndex, emissive, emissiveTextureIndex, normalTextureIndex)
+			: Renderer::MaterialDesc(diffuse, diffuseTextureIndex, specular, specularTextureIndex, roughness, Renderer::NoTexture, emissive, emissiveTextureIndex, normalTextureIndex)
 			, mHeightMin(heightMin)
 			, mHeightMax(heightMax)
 			, mTexScale(texScale)

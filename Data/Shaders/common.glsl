@@ -335,17 +335,12 @@ vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, sampler2DArray gNormalMap, v
 // ===========================================================================
 
 
-uvec3 WriteOutData(int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, float roughness, vec3 matEmissive)
+void WriteOutData(out uvec4 outAlbedoAndStatus, out vec4 outSpecularAndRoughness, out vec3 outEmissive,
+	int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, float roughness, vec3 matEmissive)
 {
-	uvec3 matD = uvec3(matDiffuseColor * 255);
-	uint x = (matD.x & Mask_0x000000FF) | ((matD.y & Mask_0x000000FF) << 8) | ((matD.z & Mask_0x000000FF) << 16) | ((rendererId & Mask_0x000000FF) << 24);
-	uvec3 matS = uvec3(matSpecularColor * 255);
-	uint y = (matS.x & Mask_0x000000FF) | ((matS.y & Mask_0x000000FF) << 8) | ((matS.z & Mask_0x000000FF) << 16) | ((int(roughness * 255) & Mask_0x000000FF) << 24);
-	uvec3 outData = uvec3(x, y, packUnorm4x8(vec4(matEmissive, 0)));
-	//uvec3 outData = uvec3(packUnorm4x8(vec4(matDiffuseColor, 0)), packUnorm4x8(vec4(matSpecularColor, 0)), packUnorm4x8(vec4(matEmissive, 0)));
-	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
-	//outData.y = outData.y | (matSpecularPower << 24);
-	return outData;
+	outAlbedoAndStatus = uvec4(matDiffuseColor * 255, rendererId);
+	outSpecularAndRoughness = vec4(matSpecularColor, roughness);
+	outEmissive = matEmissive;
 }
 
 

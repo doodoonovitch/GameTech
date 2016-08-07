@@ -83,7 +83,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-		//glFrontFace(GL_CCW);
+		glFrontFace(GL_CCW);
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
@@ -236,8 +236,10 @@ void Engine::InternalCreateGBuffers()
 
 	PRINT_GEN_FRAMEBUFFER("[Engine]", mDeferredFBO);
 	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_PositionBuffer]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_DataBuffer]);
 	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_NormalBuffer]);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_AlbedoAndStatus]);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_SpecularRoughness]);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_Emissive]);
 	//PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_DepthBuffer]);
 
 
@@ -248,18 +250,32 @@ void Engine::InternalCreateGBuffers()
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBuffers[gBuffer_PositionBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DataBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGB_INTEGER, GL_UNSIGNED_INT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBuffers[gBuffer_DataBuffer], 0);
-	GL_CHECK_ERRORS;
-
 	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, mGBuffers[gBuffer_NormalBuffer], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBuffers[gBuffer_NormalBuffer], 0);
+	GL_CHECK_ERRORS;
+
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, mGBuffers[gBuffer_AlbedoAndStatus], 0);
+	GL_CHECK_ERRORS;
+
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, mGBuffers[gBuffer_SpecularRoughness], 0);
+	GL_CHECK_ERRORS;
+
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, mGBuffers[gBuffer_Emissive], 0);
 	GL_CHECK_ERRORS;
 
 
@@ -274,7 +290,7 @@ void Engine::InternalCreateGBuffers()
 	GL_CHECK_ERRORS;
 	PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
 
-	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
 	glDrawBuffers(__gBuffer_count__, drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -449,8 +465,10 @@ void Engine::InternalInitializeDeferredPassShader()
 	const char * uniformNames[__deferred_uniforms_count__] =
 	{
 		"u_gBufferPosition",
-		"u_gBufferData",
 		"u_gBufferNormal",
+		"u_gBufferAlbedoAndStatus",
+		"u_gBufferSpecularRoughness",
+		"u_gBufferEmissive",
 		//"u_materialDataSampler",
 		"u_lightDescSampler",
 		"u_lightDataSampler"
@@ -466,8 +484,10 @@ void Engine::InternalInitializeDeferredPassShader()
 	glUniform1i(mDeferredShader.GetUniform(u_lightDescSampler), 0);
 	glUniform1i(mDeferredShader.GetUniform(u_lightDataSampler), 1);
 	glUniform1i(mDeferredShader.GetUniform(u_gBufferPosition), 2);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferData), 3);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferNormal), 4);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferNormal), 3);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferAlbedoAndStatus), 4);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferSpecularRoughness), 5);
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferEmissive), 6);
 
 	//glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
 	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
@@ -741,6 +761,7 @@ void Engine::RenderObjects()
 
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 
 	glDepthMask(GL_TRUE); 
 	glEnable(GL_DEPTH_TEST);
@@ -781,10 +802,16 @@ void Engine::RenderObjects()
 			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 
 			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DataBuffer]);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
 
 			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
+
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
+
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
 
 			//glActiveTexture(GL_TEXTURE2);
 			//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());

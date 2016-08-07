@@ -1,6 +1,8 @@
 layout(location = 0) out vec3 outPosition;
-layout(location = 1) out uvec3 outData;
-layout(location = 2) out vec3 outNormal;
+layout(location = 1) out vec3 outNormal;
+layout(location = 2) out uvec4 outAlbedoAndStatus;
+layout(location = 3) out vec4 outSpecularAndRoughness;
+layout(location = 4) out vec3 outEmissive;
 
 uniform samplerBuffer u_materialDataSampler;
 uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
@@ -33,8 +35,11 @@ void main(void)
 
 	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 1);
 	vec3 materialSpecular = matData.xyz;
-	float roughness = matData.w;
-
+	bitfieldValue = floatBitsToUint(matData.w);
+	float roughness = float((bitfieldValue & uint(32767)) / 32767.f);
+	int roughnessTextureIndex = int((bitfieldValue >> 16) & uint(255));
+	int roughnessSamplerIndex = int((bitfieldValue >> 24) & uint(255));
+	
 	matData = texelFetch(u_materialDataSampler, fs_in.MaterialIndex + 2);
 	vec3 materialEmissive = matData.xyz;
 	bitfieldValue = floatBitsToUint(matData.w);
@@ -58,25 +63,28 @@ void main(void)
 		materialEmissive = materialEmissive * TexGet(emissiveSamplerIndex, vec3(fs_in.TexUV, emissiveTextureIndex)).xyz;
 	}
 
-	vec3 normal;
-	if (normalSamplerIndex != -1)
+	if (roughnessTextureIndex != -1)
 	{
-		vec3 bumpMapNormal = TexGet(normalSamplerIndex, vec3(fs_in.TexUV, normalTextureIndex)).xyz;
-		bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
-
-		normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
-		normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+		roughness = roughness * TexGet(roughnessSamplerIndex, vec3(fs_in.TexUV, roughnessTextureIndex)).x;
 	}
-	else
+
+	vec3 normal;
+	//if (normalSamplerIndex != -1)
+	//{
+	//	vec3 bumpMapNormal = TexGet(normalSamplerIndex, vec3(fs_in.TexUV, normalTextureIndex)).xyz;
+	//	bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
+
+	//	normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
+	//	normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	//}
+	//else
 	{
-		normal = normalize(fs_in.Normal);
+		normal = dqTransformNormal(normalize(fs_in.Normal), fs_in.ViewModelDQ);
 	}
 	
-	//outPosition = vec4(fs_in.Position.xyz, uintBitsToFloat(packHalf2x16(normal.xy)));
 	outPosition = fs_in.Position.xyz;
 	outNormal = normal.xyz;
 
-	//outData = uvec3(packUnorm4x8(vec4(materialDiffuse, CUBE_RENDERER_ID / 255)), packUnorm4x8(vec4(materialSpecular, materialShininess / 255)), packUnorm4x8(vec4(materialEmissive, 0)));
-	outData = WriteOutData(CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);
+	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);
 
 }

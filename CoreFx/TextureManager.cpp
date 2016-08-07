@@ -393,13 +393,13 @@ void TextureManager::ReleaseTextureGroup(TextureGroup const *& texture)
 	texture = nullptr;
 }
 
-TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, std::vector<std::string> tex2DFilenameList, bool generateMipMap)
+TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, const std::vector<LoadTextureGroupDesc> & list, bool generateMipMap)
 {
 	TexGroupMap::const_iterator it = mTexGroupMap.find(groupId);
 	if (it != mTexGroupMap.end())
 		return it->second;
 
-	if (tex2DFilenameList.empty())
+	if (list.empty())
 	{
 		PRINT_ERROR("Cannot load texture group : tex2DFilenameList is empty!\n");
 		return mDefaultTexGroup;
@@ -411,7 +411,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 	GLsizei mipMapCount = generateMipMap ? GetNumberOfMipMapLevels(width, height) : 1;
 
-	GLint layerCount = (GLint)tex2DFilenameList.size();
+	GLint layerCount = (GLint)list.size();
 
 	GLuint id = 0;
 	GLenum target = GL_TEXTURE_2D_ARRAY;
@@ -424,10 +424,11 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, st
 
 	for (int index = 0; index < layerCount; ++index)
 	{
-		bool loaded = LoadTiffImage(tex2DFilenameList[index], [target, index](uint32_t w, uint32_t h, const uint32_t * raster)
+		const LoadTextureGroupDesc & texDesc = list[index];
+		bool loaded = LoadTiffImage(texDesc.mFilename, [target, index](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
 			glTexSubImage3D(target, 0, 0, 0, index, w, h, 1, GL_RGBA, GL_UNSIGNED_BYTE, raster); GL_CHECK_ERRORS;
-		}, &width, &height);
+		}, &width, &height, texDesc.mInvertY);
 		if (!loaded)
 		{
 			uint32_t * ptr = new uint32_t[npixels];

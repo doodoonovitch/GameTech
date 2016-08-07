@@ -39,20 +39,23 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		mIsLoaded = false;
 	}
 
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Loading model '%s'...", filepath.c_str());
+
 	// Read file via ASSIMP
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_RemoveRedundantMaterials);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_RemoveRedundantMaterials | aiProcess_PreTransformVertices);
 	// Check for errors
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
 		PRINT_ERROR("Cannot load model '%s'. (Assimp error : %s)", filepath.c_str(), importer.GetErrorString());
-		return;
+		goto LoadModelEnd;
 	}
 
 	if(!scene->HasMaterials())
 	{
 		PRINT_ERROR("Cannot load model '%s' : the model should have materials!", filepath.c_str());
-		return;
+		goto LoadModelEnd;
 	}
 
 	ProcessMaterials(scene, textureBasePath);
@@ -89,7 +92,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		return true;
 	}))
 	{
-		return;
+		goto LoadModelEnd;
 	}
 
 	mVertexList.resize(totalVertexCount);
@@ -103,10 +106,39 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		return true;
 	}))
 	{
-		return;
+		goto LoadModelEnd;
 	}
 
 	mIsLoaded = true;
+
+	PRINT_MESSAGE("\t* Vertex count : %li", mVertexList.size());
+	PRINT_MESSAGE("\t* Index count : %li", mIndexList.size());
+	PRINT_MESSAGE("\t* Mesh count : %li", mMeshDrawInstanceList.size());
+
+	PRINT_MESSAGE("\t* Material count : %li", mMaterialList.size());
+	{
+		
+		for (int i = 0; i < mMaterialList.size(); ++i)
+		{
+			const Renderer::MaterialDesc & v = mMaterialList[i];
+			PRINT_MESSAGE("\t\t- Material %i : Texture index (DSNE) = (%i, %i, %i, %i)", i, (int8_t)v.mDiffuseTextureIndex, (int8_t)v.mSpecularTextureIndex, (int8_t)v.mNormalTextureIndex, (int8_t)v.mEmissiveTextureIndex);
+			PRINT_MESSAGE("\t\t\tDiffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", v.mDiffuse.x, v.mDiffuse.y, v.mDiffuse.z, v.mSpecular.x, v.mSpecular.y, v.mSpecular.z, v.mRoughness, v.mEmissive.x, v.mEmissive.y, v.mEmissive.z);
+		}
+	}
+
+	PRINT_MESSAGE("\t* Texture count : %li", mTextureList.size());
+	{
+		for (int i = 0; i < mTextureList.size(); ++i)
+		{
+			const Renderer::TextureDesc & v = mTextureList[i];
+			PRINT_MESSAGE("\t\t- Texture %i : Category=%s, filename='%s'", i, TextureCategoryToString(v.mCategory), v.mFilename.c_str());
+		}
+	}
+
+
+LoadModelEnd:
+	PRINT_MESSAGE("... loading model '%s' ended.", filepath.c_str());
+	PRINT_END_SECTION;
 }
 
 static glm::vec3 GetMaterialColor(aiMaterial * mat, const char* pKey, unsigned int type, unsigned int idx)
@@ -134,12 +166,19 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		glm::vec3 specularColor(GetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR));
 		glm::vec3 emissiveColor(GetMaterialColor(mat, AI_MATKEY_COLOR_EMISSIVE));
 
+		float roughness;  
+		if (mat->Get(AI_MATKEY_SHININESS, roughness) != aiReturn_SUCCESS)
+		{
+			roughness = 1.f;
+		}
+
 		Renderer::TextureIndex diffuseTextureIndex = ProcessTextures(mDiffuseTextureList, mat, aiTextureType_DIFFUSE, textureBasePath);
 		Renderer::TextureIndex specularTextureIndex = ProcessTextures(mSpecularTextureList, mat, aiTextureType_SPECULAR, textureBasePath);
 		Renderer::TextureIndex emissiveTextureIndex = ProcessTextures(mEmissiveTextureList, mat, aiTextureType_EMISSIVE, textureBasePath);
 		Renderer::TextureIndex normalTextureIndex = ProcessTextures(mNormalTextureList, mat, aiTextureType_NORMALS, textureBasePath);
+		Renderer::TextureIndex roughnessTextureIndex = Renderer::NoTexture;
 
-		mMaterialList.push_back(Renderer::MaterialDesc(diffuseColor, diffuseTextureIndex, specularColor, 1.f, specularTextureIndex, emissiveColor, emissiveTextureIndex, normalTextureIndex));
+		mMaterialList.push_back(Renderer::MaterialDesc(diffuseColor, diffuseTextureIndex, specularColor, specularTextureIndex, roughness, roughnessTextureIndex, emissiveColor, emissiveTextureIndex, normalTextureIndex));
 	}
 }
 

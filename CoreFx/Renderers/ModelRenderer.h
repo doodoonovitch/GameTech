@@ -33,10 +33,11 @@ public:
 	// ---------------------------------------------
 
 	static ModelRenderer * CreateFromFile(const std::string & modelFilePath, const std::string & textureBasePath, size_t capacity = 64, size_t pageSize = 10);
+	static ModelRenderer * CreateFromModel(const Geometry::ModelData & model, size_t capacity = 64, size_t pageSize = 10);
 
 	// ---------------------------------------------
 
-	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, GLfloat roughness, TextureIndex specularTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
+	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, TextureIndex specularTextureIndex, GLfloat roughness, TextureIndex roughnessTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
 	void SetMaterial(std::uint16_t materialIndex, const Renderer::MaterialDesc & mat);
 	void SetMaterials(const Renderer::MaterialDescList & materials);
 
@@ -49,7 +50,7 @@ private:
 	
 	enum class EMainShaderUniformIndex
 	{
-		//u_MaterialBaseIndex,
+		u_MaterialBaseIndex,
 		u_perInstanceDataSampler,
 		//u_materialIndexSampler,
 		u_materialDataSampler,
@@ -96,6 +97,7 @@ private:
 		//TextureIndex mAmbient = CubeRenderer::NoTexture;
 		TextureIndex mDiffuse = CubeRenderer::NoTexture;
 		TextureIndex mSpecular = CubeRenderer::NoTexture;
+		TextureIndex mRoughness = CubeRenderer::NoTexture;
 		TextureIndex mEmissive = CubeRenderer::NoTexture;
 		TextureIndex mNormal = CubeRenderer::NoTexture;
 
