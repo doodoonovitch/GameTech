@@ -242,6 +242,8 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock", true);
 			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple", true);
 			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo", true);
+			//modelData.LoadModel("Medias/Objects/Bullet/bullet.obj", "Medias/Objects/Bullet", true, true);
+			
 			{
 				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", true);
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
@@ -257,7 +259,7 @@ void SimpleCamera::OnInit()
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(1.f), 1, .2f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
 				//matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .5f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
 			}
-
+			
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(modelData);
 			engine->AttachRenderer(modelRenderer);
 			Renderables::Model * model = modelRenderer->CreateModelInstance(0);
@@ -276,10 +278,11 @@ void SimpleCamera::OnInit()
 		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(30.f, 15.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, -0.5f, 1.f)), glm::radians(15.f), glm::radians(25.f));
 
 
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 20.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 200.f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 20.f), glm::vec3(1.f, 1.f, 1.f), 1000.f, 50.f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 10000.f, 100.f);
 		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
 		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
+		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(0.f, 30.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 50.f);
 
 
 		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);

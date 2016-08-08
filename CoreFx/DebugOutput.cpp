@@ -65,13 +65,13 @@ void APIENTRY DebugOutput::Callback(GLenum source,
 	if (dbg->IsEnabled())
 	{
 		//display warnings/errors however you like
-		PRINT_MESSAGE("\n********** Debug Output **************\n");
-		PRINT_MESSAGE("  source: %s.\n", getStringForSource(source));
-		PRINT_MESSAGE("  id: %u.\n", id);
-		PRINT_MESSAGE("  type: %s.\n", getStringForType(type));
-		PRINT_MESSAGE("  severity: %s.\n", getStringForSeverity(severity));
-		PRINT_MESSAGE("  debug call: %s.\n", msg);
-		PRINT_MESSAGE("**************************************\n");
+		PRINT_MESSAGE("********** Debug Output **************");
+		PRINT_MESSAGE("  source: %s.", getStringForSource(source));
+		PRINT_MESSAGE("  id: %u.", id);
+		PRINT_MESSAGE("  type: %s.", getStringForType(type));
+		PRINT_MESSAGE("  severity: %s.", getStringForSeverity(severity));
+		PRINT_MESSAGE("  debug call: %s.", msg);
+		PRINT_MESSAGE("**************************************");
 	}
 }
 

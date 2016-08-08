@@ -23,7 +23,7 @@ ModelData::~ModelData()
 {
 }
 
-void ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath, bool preTransformVertices)
+void ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath, bool preTransformVertices, bool flipWindingOrder)
 {
 	if (mIsLoaded)
 	{
@@ -44,7 +44,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	// Read file via ASSIMP
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_RemoveRedundantMaterials | (preTransformVertices ? aiProcess_PreTransformVertices : 0));
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | /*aiProcess_RemoveRedundantMaterials | */(preTransformVertices ? aiProcess_PreTransformVertices : 0) | (flipWindingOrder ? aiProcess_FlipWindingOrder : 0));
 	// Check for errors
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
@@ -114,10 +114,16 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 	PRINT_MESSAGE("\t* Vertex count : %li", mVertexList.size());
 	PRINT_MESSAGE("\t* Index count : %li", mIndexList.size());
 	PRINT_MESSAGE("\t* Mesh count : %li", mMeshDrawInstanceList.size());
+	{
+		for (int i = 0; i < mMeshDrawInstanceList.size(); ++i)
+		{
+			const Renderer::DrawElementsIndirectCommand & v = mMeshDrawInstanceList[i];
+			PRINT_MESSAGE("\t\t- Mesh %i : mElemCount=%li, mFirstIndex=%li, mBaseVertex=%li, mBaseInstance=%li", i, v.mElemCount, v.mFirstIndex, v.mBaseVertex, v.mBaseInstance);
+		}
+	}
 
 	PRINT_MESSAGE("\t* Material count : %li", mMaterialList.size());
-	{
-		
+	{		
 		for (int i = 0; i < mMaterialList.size(); ++i)
 		{
 			const Renderer::MaterialDesc & v = mMaterialList[i];
@@ -137,7 +143,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 
 LoadModelEnd:
-	PRINT_MESSAGE("... loading model '%s' ended.", filepath.c_str());
+	PRINT_MESSAGE(".....loading model '%s' ended.", filepath.c_str());
 	PRINT_END_SECTION;
 }
 
@@ -162,12 +168,15 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 	{
 		aiMaterial * mat = scene->mMaterials[i];
 
+		aiString name;
+		mat->Get(AI_MATKEY_NAME, name);
+
 		glm::vec3 diffuseColor(GetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE));
 		glm::vec3 specularColor(GetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR));
 		glm::vec3 emissiveColor(GetMaterialColor(mat, AI_MATKEY_COLOR_EMISSIVE));
 
 		float roughness;  
-		if (mat->Get(AI_MATKEY_SHININESS, roughness) != aiReturn_SUCCESS)
+		//if (mat->Get(AI_MATKEY_SHININESS, roughness) != aiReturn_SUCCESS)
 		{
 			roughness = 1.f;
 		}
@@ -179,6 +188,8 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		Renderer::TextureIndex roughnessTextureIndex = Renderer::NoTexture;
 
 		mMaterialList.push_back(Renderer::MaterialDesc(diffuseColor, diffuseTextureIndex, specularColor, specularTextureIndex, roughness, roughnessTextureIndex, emissiveColor, emissiveTextureIndex, normalTextureIndex));
+
+		PRINT_MESSAGE("\t-Parse material %i: Name='%s', Diffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", i, name.C_Str(), diffuseColor.x, diffuseColor.y, diffuseColor.z, specularColor.x, specularColor.y, specularColor.z, roughness, emissiveColor.x, emissiveColor.y, emissiveColor.z);
 	}
 }
 

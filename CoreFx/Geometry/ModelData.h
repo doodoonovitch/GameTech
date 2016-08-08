@@ -17,7 +17,7 @@ public:
 	ModelData();
 	virtual ~ModelData();
 
-	void LoadModel(const std::string & filepath, const std::string & textureBasePath, bool preTransformVertices);
+	void LoadModel(const std::string & filepath, const std::string & textureBasePath, bool preTransformVertices, bool flipWindingOrder = false);
 	bool IsLoaded() const { return mIsLoaded; }
 
 	const Renderer::VertexDataVector & GetVertexList() const { return mVertexList; }

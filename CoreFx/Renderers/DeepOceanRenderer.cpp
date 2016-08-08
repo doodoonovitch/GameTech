@@ -84,7 +84,7 @@ void DeepOceanRenderer::LoadShaders(const Desc & desc)
 
 void DeepOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 {
-	PRINT_MESSAGE("Initialize Deep Ocean Renderer Shaders : \n\n");
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer Shaders : .....");
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -128,12 +128,12 @@ void DeepOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 
 	GL_CHECK_ERRORS;
 
-	PRINT_MESSAGE("... done.\n");
+	PRINT_MESSAGE(".....done.");
 }
 
 void DeepOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 {
-	PRINT_MESSAGE("Initialize Deep Ocean Renderer (Wire Frame) Shaders : \n\n");
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer (Wire Frame) Shaders : .....");
 
 	const char * uniformNames[] =
 	{
@@ -173,7 +173,7 @@ void DeepOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 
 	GL_CHECK_ERRORS;
 
-	PRINT_MESSAGE("... done.\n");
+	PRINT_MESSAGE(".....done.");
 }
 
 void DeepOceanRenderer::GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps)
@@ -183,31 +183,31 @@ void DeepOceanRenderer::GetWavePropertyUniformIndex(Shader & shader, WavePropUni
 		char uniformName[50];
 		sprintf_s(uniformName, 50, "u_Direction[%i]", i);
 		waveProps.mDirectionUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.\n", uniformName, waveProps.mDirectionUniformIndex[i]);
+		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mDirectionUniformIndex[i]);
 
 		sprintf_s(uniformName, 50, "u_WaveLength[%i]", i);
 		waveProps.mWaveLengthUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.\n", uniformName, waveProps.mWaveLengthUniformIndex[i]);
+		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mWaveLengthUniformIndex[i]);
 
 		sprintf_s(uniformName, 50, "u_Frequency[%i]", i);
 		waveProps.mFrequencyUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.\n", uniformName, waveProps.mFrequencyUniformIndex[i]);
+		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mFrequencyUniformIndex[i]);
 
 		sprintf_s(uniformName, 50, "u_Amplitude[%i]", i);
 		waveProps.mAmplitudeUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.\n", uniformName, waveProps.mAmplitudeUniformIndex[i]);
+		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mAmplitudeUniformIndex[i]);
 
 		sprintf_s(uniformName, 50, "u_Velocity[%i]", i);
 		waveProps.mVelocityUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.\n", uniformName, waveProps.mVelocityUniformIndex[i]);
+		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mVelocityUniformIndex[i]);
 
 		sprintf_s(uniformName, 50, "u_Steepness[%i]", i);
 		waveProps.mSteepnessUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.\n", uniformName, waveProps.mSteepnessUniformIndex[i]);
+		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mSteepnessUniformIndex[i]);
 
 		sprintf_s(uniformName, 50, "u_Phase[%i]", i);
 		waveProps.mPhaseUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.\n", uniformName, waveProps.mPhaseUniformIndex[i]);
+		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mPhaseUniformIndex[i]);
 	}
 }
 

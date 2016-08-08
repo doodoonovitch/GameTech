@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Model, 4>(Property_Per_Material, capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
+	: SceneObjectRenderer<Renderables::Model, 4>((GLuint)(materialDescList.size() * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
 	, mMaterialCount((GLuint)materialDescList.size())
 	, mDrawCmdCount((GLsizei)meshDrawInstanceList.size())
 	, mMaterialTextureIndexesList((GLuint)materialDescList.size())
@@ -357,7 +357,7 @@ void ModelRenderer::InitializeWireFrameShader()
 
 	GL_CHECK_ERRORS;
 
-	PRINT_MESSAGE("... ModelRenderer (wireframe) shader initialized!");
+	PRINT_MESSAGE(".....ModelRenderer (wireframe) shader initialized!");
 }
 
 void ModelRenderer::UpdateShaderData()
