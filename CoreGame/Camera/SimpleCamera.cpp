@@ -238,20 +238,20 @@ void SimpleCamera::OnInit()
 
 		{
 			Geometry::ModelData modelData;
-			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Textures/planet");
-			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Textures/rock");
-			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Textures/apple");
-			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Textures/hatorrihanzo");
+			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet");
+			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock");
+			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple");
+			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo");
 			{
-				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Textures/ArtoriasSword");
+				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword");
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
 				
 				texList.clear();
-				texList.push_back(Renderer::TextureDesc("Medias/Textures/ArtoriasSword/Sword_albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Textures/ArtoriasSword/Sword_metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Textures/ArtoriasSword/Sword_roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Textures/ArtoriasSword/Sword_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false));
+				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false));
+				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false));
+				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false));
+				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false));
 
 				matList.clear();
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(1.f), 1, .2f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));

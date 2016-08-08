@@ -48,36 +48,36 @@ void main(void)
 	int normalTextureIndex = int(bitfieldValue & uint(255));
 	int normalSamplerIndex = int((bitfieldValue >> 8) & uint(255));
 
-	if (diffuseTextureIndex != -1)
+	if (diffuseTextureIndex != -1 && diffuseSamplerIndex != -1)
 	{
 		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec3(fs_in.TexUV, diffuseTextureIndex)).xyz;
 	}
 
-	if (specularTextureIndex != -1)
+	if (specularTextureIndex != -1 && specularSamplerIndex != -1)
 	{
 		materialSpecular = materialSpecular * TexGet(specularSamplerIndex, vec3(fs_in.TexUV, specularTextureIndex)).xyz;
 	}
 
-	if (emissiveTextureIndex != -1)
+	if (emissiveTextureIndex != -1 && emissiveSamplerIndex != -1)
 	{
 		materialEmissive = materialEmissive * TexGet(emissiveSamplerIndex, vec3(fs_in.TexUV, emissiveTextureIndex)).xyz;
 	}
 
-	if (roughnessTextureIndex != -1)
+	if (roughnessTextureIndex != -1 && roughnessSamplerIndex != -1)
 	{
 		roughness = roughness * TexGet(roughnessSamplerIndex, vec3(fs_in.TexUV, roughnessTextureIndex)).x;
 	}
 
 	vec3 normal;
-	//if (normalSamplerIndex != -1)
-	//{
-	//	vec3 bumpMapNormal = TexGet(normalSamplerIndex, vec3(fs_in.TexUV, normalTextureIndex)).xyz;
-	//	bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
+	if (normalTextureIndex != -1 && normalSamplerIndex != -1)
+	{
+		vec3 bumpMapNormal = TexGet(normalSamplerIndex, vec3(fs_in.TexUV, normalTextureIndex)).xyz;
+		bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
 
-	//	normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
-	//	normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
-	//}
-	//else
+		normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
+		normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+	}
+	else
 	{
 		normal = dqTransformNormal(normalize(fs_in.Normal), fs_in.ViewModelDQ);
 	}

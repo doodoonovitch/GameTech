@@ -48,9 +48,8 @@ void main()
 		gs_out.Position = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
 		gl_Position = u_ProjMatrix * gs_out.Position;
 
-		gs_out.Normal = gs_in[i].Normal; //dqTransformNormal(gs_in[i].Normal, viewModelDQ);
-		gs_out.Tangent = gs_in[i].Tangent; //dqTransformNormal(gs_in[i].Tangent, viewModelDQ);
-		//gs_out.Normal = dqTransformNormal(gs_in[i].Normal.xyz, viewModelDQ);
+		gs_out.Normal = gs_in[i].Normal; 
+		gs_out.Tangent = gs_in[i].Tangent; 
 
 		gs_out.TexUV = gs_in[i].TexUV;
 		EmitVertex();
