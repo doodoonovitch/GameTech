@@ -312,12 +312,10 @@ vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, vec3 bumpMapNormal)
 {
 	normal = normalize(normal);
 	tangent = normalize(tangent);
-    tangent = normalize(tangent - dot(tangent, normal) * normal);
-    vec3 bitangent = cross(tangent, normal);
+    vec3 bitangent = cross(normal, tangent);
     mat3 TBN = mat3(tangent, bitangent, normal);
     vec3 newNormal;
-    //newNormal = TBN * bumpMapNormal;
-	newNormal = TBN * bumpMapNormal;
+	newNormal = TBN * normalize(bumpMapNormal);
     newNormal = normalize(newNormal);
     return newNormal;
 }

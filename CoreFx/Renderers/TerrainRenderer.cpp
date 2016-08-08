@@ -19,8 +19,8 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	, mHeightMapTextureId(0)
 	, mMapCount(0)
 {
-	std::cout << std::endl;
-	std::cout << "Initialize TerrainRenderer...." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize TerrainRenderer.....");
 
 	AddTextures(desc.mTextures);
 	BuildTextureMapping(nullptr);
@@ -67,7 +67,8 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	//UpdateMaterialTextureIndex(desc);
 	LoadShaders(desc);
 
-	std::cout << "... TerrainRenderer initialized!" << std::endl << std::endl;
+	PRINT_MESSAGE(".....TerrainRenderer initialized!");
+	PRINT_END_SECTION;
 }
 
 
@@ -86,7 +87,7 @@ void TerrainRenderer::LoadShaders(const Desc & desc)
 
 void TerrainRenderer::LoadMainShader(const Desc & desc)
 {
-	PRINT_MESSAGE("Initialize Terrain Renderer Shaders : \n\n");
+	PRINT_MESSAGE("Initialize Terrain Renderer Shaders.....");
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -139,7 +140,7 @@ void TerrainRenderer::LoadMainShader(const Desc & desc)
 		if (uniformIndex > 0)
 		{
 			glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);	GL_CHECK_ERRORS;
-			std::cout << "\t" << uniformName << " : " << uniformIndex << std::endl;
+			PRINT_MESSAGE("\t%s : %i", uniformName, uniformIndex);
 		}
 	}
 
@@ -149,13 +150,12 @@ void TerrainRenderer::LoadMainShader(const Desc & desc)
 	GL_CHECK_ERRORS;
 
 
-	PRINT_MESSAGE("... done.\n");
-	PRINT_MESSAGE("-------------------------------------------------\n\n");
+	PRINT_MESSAGE(".....done.");
 }
 
 void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 {
-	PRINT_MESSAGE("Initialize Terrain Renderer (Wire Frame) Shaders : \n\n");
+	PRINT_MESSAGE("Initialize Terrain Renderer (Wire Frame) Shaders...");
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -194,8 +194,7 @@ void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 	GL_CHECK_ERRORS;
 
 
-	PRINT_MESSAGE("... done.\n");
-	PRINT_MESSAGE("-------------------------------------------------\n\n");
+	PRINT_MESSAGE(".....done.\n");
 }
 
 #define PRINT_MATERIAL_COLOR(diffuseVar, specularVar, specularPowerVar, heightVar, mat) \

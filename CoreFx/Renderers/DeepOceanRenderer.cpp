@@ -18,8 +18,8 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 	, mMapCount(0)
 	, mDrawNormalShader("TerrainDrawNormals")
 {
-	std::cout << std::endl;
-	std::cout << "Initialize DeepOceanRenderer...." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize DeepOceanRenderer.....");
 
 	memset(mShaderWaveProps.mWavePropModified, -1, sizeof(mShaderWaveProps.mWavePropModified));
 	memset(mWireFrameShaderWaveProps.mWavePropModified, -1, sizeof(mWireFrameShaderWaveProps.mWavePropModified));
@@ -66,7 +66,8 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 
 	LoadShaders(desc);
 
-	std::cout << "... DeepOceanRenderer initialized!" << std::endl << std::endl;
+	PRINT_MESSAGE(".....DeepOceanRenderer initialized!");
+	PRINT_END_SECTION;
 }
 
 
@@ -128,7 +129,6 @@ void DeepOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 	GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("... done.\n");
-	PRINT_MESSAGE("-------------------------------------------------\n\n");
 }
 
 void DeepOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
@@ -174,7 +174,6 @@ void DeepOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 	GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("... done.\n");
-	PRINT_MESSAGE("-------------------------------------------------\n\n");
 }
 
 void DeepOceanRenderer::GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps)

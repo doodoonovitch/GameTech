@@ -14,6 +14,9 @@ CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
 	, mIsMaterialIndexBufferSet(false)
 	, mIsMaterialDataBufferSet(false)
 {
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize CubeRenderer.....");
+
 	memset(mMaterials.GetData(), 0, mMaterials.GetDataSize());
 
 	AddTextures(desc.mTextures);
@@ -133,6 +136,9 @@ CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
 
 	LoadTextures();
 	UpdateMaterialTextureIndex();
+
+	PRINT_MESSAGE(".....CubeRenderer initialized!");
+	PRINT_END_SECTION;
 }
 
 
@@ -220,15 +226,14 @@ void CubeRenderer::InitializeShaders()
 
 void CubeRenderer::InitializeMainShader()
 {
-	std::cout << std::endl;
-	std::cout << "Initialize CubeRenderer shader...." << std::endl;
+	PRINT_MESSAGE("Initialize CubeRenderer shader....");
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube.vs.glsl");
 	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/cube.gs.glsl");
 	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/cube.deferred.fs.glsl");
 
-	std::cout << "Loading shader file : shaders/cube.deferred.fs.glsl" << std::endl;
+	PRINT_MESSAGE("Loading shader file : shaders/cube.deferred.fs.glsl");
 	// fragment shader
 	std::vector<std::string> lightFsGlsl(2);
 	Shader::MergeFile(lightFsGlsl[0], "shaders/cube.deferred.fs.glsl");
@@ -272,13 +277,12 @@ void CubeRenderer::InitializeMainShader()
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "... CubeRenderer shader initialized!" << std::endl << std::endl;
+	PRINT_MESSAGE(".....CubeRenderer shader initialized!");
 }
 
 void CubeRenderer::InitializeWireFrameShader()
 {
-	std::cout << std::endl;
-	std::cout << "Initialize CubeRenderer (wire frame) shader...." << std::endl;
+	PRINT_MESSAGE("Initialize CubeRenderer (wire frame) shader.....");
 
 	//setup shader
 	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/cube.vs.glsl");
@@ -306,7 +310,7 @@ void CubeRenderer::InitializeWireFrameShader()
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "... CubeRenderer (wire frame) shader initialized!" << std::endl << std::endl;
+	PRINT_MESSAGE(".....CubeRenderer (wire frame) shader initialized!");
 }
 
 void CubeRenderer::UpdateShaderData()

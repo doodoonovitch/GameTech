@@ -18,8 +18,8 @@ ShallowWaterRenderer::ShallowWaterRenderer(const Desc & desc)
 	, mMapCount(0)
 	, mDrawNormalShader("TerrainDrawNormals")
 {
-	std::cout << std::endl;
-	std::cout << "Initialize ShallowWaterRenderer...." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize ShallowWaterRenderer.....");
 
 	memset(mShaderWaveProps.mWavePropModified, -1, sizeof(mShaderWaveProps.mWavePropModified));
 	memset(mDebugShaderWaveProps.mWavePropModified, -1, sizeof(mDebugShaderWaveProps.mWavePropModified));
@@ -64,7 +64,8 @@ ShallowWaterRenderer::ShallowWaterRenderer(const Desc & desc)
 
 	LoadShaders(desc);
 
-	std::cout << "... ShallowWaterRenderer initialized!" << std::endl << std::endl;
+	PRINT_MESSAGE(".....ShallowWaterRenderer initialized!");
+	PRINT_END_SECTION;
 }
 
 
@@ -153,7 +154,6 @@ void ShallowWaterRenderer::LoadShaders(const Desc & /*desc*/)
 	//GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("... done.\n");
-	PRINT_MESSAGE("-------------------------------------------------\n\n");
 }
 
 void ShallowWaterRenderer::GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps)

@@ -13,6 +13,7 @@
 
 // TODO: faites référence ici aux en-têtes supplémentaires nécessaires au programme
 #include <iostream>
+#include <strsafe.h>
 
 #include "Introspection.h"
 #include "CoreFx.h"

@@ -63,7 +63,7 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 	{
 		if (!MergeFile(sCommonInclude, "shaders/common.glsl"))
 		{
-			cerr << "Error loading common include file : 'shaders/common.inc' !" << endl;
+			PRINT_ERROR("Error loading common include file : 'shaders/common.inc' !");
 			return;
 		}
 	}
@@ -98,7 +98,7 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 		GLchar *infoLog = new GLchar[infoLogLength];
 		glGetShaderInfoLog(shader, infoLogLength, NULL, infoLog);
-		cerr << endl << ShaderName(whichShader) << " Compile log : " << infoLog << endl;
+		PRINT_ERROR("%s Compile log : %s", ShaderName(whichShader), infoLog);
 		delete[] infoLog;
 	}
 	mShaders.push_back(shader);
@@ -109,14 +109,14 @@ void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, bool 
 	std::vector<string> buffers(1);
 	string & buffer = buffers.back();
 
-	cout << "Loading shader file : " << filename.c_str() << endl;
+	PRINT_MESSAGE("Loading shader file : '%s'.", filename.c_str());
 	if (MergeFile(buffer, filename))
 	{
 		LoadFromString(whichShader, buffers, includeCommon);
 	}
 	else
 	{
-		cerr << "Error loading shader : '" << filename << "'!" << endl;
+		PRINT_ERROR("Error loading shader : '%s'!", filename.c_str());
 	}
 }
 
@@ -127,11 +127,11 @@ void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & f
 	int i = 0;
 	for (auto it : filenames)
 	{		
-		cout << "Loading shader file : " << it.c_str() << endl;
+		PRINT_MESSAGE("Loading shader file : '%s'", it.c_str());
 		string & buffer = buffers[i++];
 		if (!MergeFile(buffer, it))
 		{
-			cerr << "Error loading shader file : '" << it << "'!" << endl;
+			PRINT_ERROR("Error loading shader file : '%s'!", it.c_str());
 			return;
 		}
 	}
@@ -180,7 +180,7 @@ void Shader::CreateAndLinkProgram()
 		glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
 		GLchar *infoLog = new GLchar[infoLogLength];
 		glGetProgramInfoLog(mProgram, infoLogLength, NULL, infoLog);
-		cerr << "Link log: " << infoLog << endl;
+		PRINT_ERROR("Link log: %s", infoLog);
 		delete[] infoLog;
 	}
 
@@ -207,7 +207,7 @@ void Shader::AddAttributes(const char * names[], int count)
 	for (auto i = 0; i < count; ++i)
 	{
 		mAttributeList.push_back(glGetAttribLocation(mProgram, names[i]));
-		PRINT_MESSAGE("\t[%s] + attribute : name='%s' (index=%i), location=%i.\n", mTitle.c_str(), names[i], i, mAttributeList.back());
+		PRINT_MESSAGE("\t[%s] + attribute : name='%s' (index=%i), location=%i.", mTitle.c_str(), names[i], i, mAttributeList.back());
 	}
 }
 
@@ -217,7 +217,7 @@ void Shader::AddUniforms(const char * names[], int count)
 	for (auto i = 0; i < count; ++i)
 	{
 		mUniformLocationList.push_back(glGetUniformLocation(mProgram, names[i]));
-		PRINT_MESSAGE("\t[%s] + uniform : name='%s' (index=%i), location=%i.\n", mTitle.c_str(), names[i], i, mUniformLocationList.back());
+		PRINT_MESSAGE("\t[%s] + uniform : name='%s' (index=%i), location=%i.", mTitle.c_str(), names[i], i, mUniformLocationList.back());
 	}
 }
 

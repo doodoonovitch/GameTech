@@ -32,7 +32,7 @@ public:
 
 	// ---------------------------------------------
 
-	static ModelRenderer * CreateFromFile(const std::string & modelFilePath, const std::string & textureBasePath, size_t capacity = 64, size_t pageSize = 10);
+	static ModelRenderer * CreateFromFile(const std::string & modelFilePath, const std::string & textureBasePath, bool preTransformVertices, size_t capacity = 64, size_t pageSize = 10);
 	static ModelRenderer * CreateFromModel(const Geometry::ModelData & model, size_t capacity = 64, size_t pageSize = 10);
 
 	// ---------------------------------------------

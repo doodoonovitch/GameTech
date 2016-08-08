@@ -13,8 +13,8 @@ namespace CoreFx
 		: RendererHelper<1>(0, "SkyboxRenderer", "SkyboxWireFrameRenderer", Renderer::Forward_Pass)
 		, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(skyboxCubeMapTextureFilename))
 {
-	std::cout << std::endl;
-	std::cout << "Initialize SkyboxRenderer...." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize SkyboxRenderer.....");
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -110,8 +110,10 @@ namespace CoreFx
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "... SkyboxRenderer initialized!" << std::endl << std::endl;
-}
+
+	PRINT_MESSAGE(".....SkyboxRenderer initialized!");
+	PRINT_END_SECTION;
+		}
 
 SkyboxRenderer::~SkyboxRenderer()
 {

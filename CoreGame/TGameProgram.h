@@ -3,6 +3,7 @@
 #ifndef COREGAME_TRUNSAMPLE_H
 #define COREGAME_TRUNSAMPLE_H
 
+#include <strsafe.h>
 #include "CoreFx.h"
 
 
@@ -93,6 +94,9 @@ protected:
 
 	bool CreateGLWindow(const wchar_t* title, int monitorIndex, const RECT & winRect, bool fullscreenflag, BYTE bitsPerPixel)
 	{
+		PRINT_BEGIN_SECTION;
+		PRINT_MESSAGE("Application initialization.....");
+
 		GLuint		PixelFormat;				// Holds The Results After Searching For A Match
 		WNDCLASS	wc;							// Windows Class Structure
 		DWORD		dwExStyle;					// Window Extended Style
@@ -115,7 +119,8 @@ protected:
 
 		if (!RegisterClass(&wc))									// Attempt To Register The Window Class
 		{
-			MessageBox(NULL, L"Failed To Register The Window Class.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
+			//MessageBox(NULL, L"Failed To Register The Window Class.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
+			ErrorExit(L"Register the Window Class");
 			return false;
 		}
 
@@ -236,6 +241,9 @@ protected:
 		SetForegroundWindow(mHWnd);
 		SetFocus(mHWnd);
 
+		PRINT_MESSAGE(".....Application initialization end");
+		PRINT_END_SECTION;
+
 		return true;
 	}
 
@@ -245,23 +253,23 @@ protected:
 		GLenum err = glewInit();
 		if (GLEW_OK != err)
 		{
-			std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
+			PRINT_ERROR("Initialization has failed : %s", glewGetErrorString(err));
 			return false;
 		}
 
-		std::cout << "\tUsing glew " << glewGetString(GLEW_VERSION) << std::endl;
-		std::cout << "\tVendor: " << glGetString(GL_VENDOR) << std::endl;
-		std::cout << "\tRenderer: " << glGetString(GL_RENDERER) << std::endl;
-		std::cout << "\tVersion: " << glGetString(GL_VERSION) << std::endl;
-		std::cout << "\tGLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+		PRINT_MESSAGE("\tUsing glew: %s", glewGetString(GLEW_VERSION));
+		PRINT_MESSAGE("\tVendor: %s", glGetString(GL_VENDOR));
+		PRINT_MESSAGE("\tRenderer: %s", glGetString(GL_RENDERER));
+		PRINT_MESSAGE("\tVersion: %s", glGetString(GL_VERSION));
+		PRINT_MESSAGE("\tGLSL: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 		if (glewIsSupported("GL_VERSION_4_5"))
 		{
-			std::cout << "\tGLEW Version is 4.5\n ";
+			PRINT_MESSAGE("\tGLEW Version is 4.5");
 		}
 		else
 		{
-			std::cout << "\tGLEW 4.5 not supported\n ";
+			PRINT_MESSAGE("\tGLEW 4.5 not supported");
 		}
 
 		return true;
@@ -446,6 +454,28 @@ private:
 	static void OnKeyDown(wchar_t key)
 	{
 		sGameProgram->mGameEngine.OnKeyDown(key);
+	}
+
+protected:
+
+	void ErrorExit(LPTSTR lpszFunction)
+	{
+		LPVOID lpMsgBuf;
+		LPVOID lpDisplayBuf;
+		DWORD dw = GetLastError();
+
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
+
+		// Display the error message and exit the process
+
+		lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
+		StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("%s failed with error %d: %s"), lpszFunction, dw, lpMsgBuf);
+		MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+
+		LocalFree(lpMsgBuf);
+		LocalFree(lpDisplayBuf);
+
+		ExitProcess(dw);
 	}
 
 private:

@@ -21,8 +21,8 @@ DrawGBufferNormalShader::~DrawGBufferNormalShader()
  
 void DrawGBufferNormalShader::LoadShaders()
 {
-	std::cout << std::endl;
-	std::cout << "Load 'draw GBuffer normal' shader..." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Load 'draw GBuffer normal' shader.....");
 
 	//setup shader
 	LoadFromFile(GL_VERTEX_SHADER, "shaders/drawGBufferNormals.vs.glsl");
@@ -51,8 +51,8 @@ void DrawGBufferNormalShader::LoadShaders()
 	GL_CHECK_ERRORS;
 
 
-	std::cout << std::endl;
-
+	PRINT_MESSAGE(".....'draw GBuffer normal' shader loaded!");
+	PRINT_END_SECTION;
 }
 
 void DrawGBufferNormalShader::SetUniformValues() const

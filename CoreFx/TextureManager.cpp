@@ -130,7 +130,7 @@ void TextureManager::Initialize()
 
 	mDefault2D = new Texture2D(id, target);
 
-	PRINT_MESSAGE("[TextureManager] Texture mDefault2D : %i.\n", id);
+	PRINT_MESSAGE("[TextureManager] Texture mDefault2D : %i.", id);
 
 	id = 0;
 	target = GL_TEXTURE_CUBE_MAP;
@@ -274,19 +274,19 @@ bool TextureManager::LoadTiffImage(std::string const &tiffFilename, std::functio
 			}
 			else
 			{
-				PRINT_ERROR("Loading texture '%s' has failed : cannot read the image data.\n", tiffFilename.c_str())
+				PRINT_ERROR("Loading texture '%s' has failed : cannot read the image data.", tiffFilename.c_str())
 			}
 			_TIFFfree(raster);
 		}
 		else
 		{
-			PRINT_ERROR("Loading texture '%s' has failed : cannot allocate memory.\n", tiffFilename.c_str())
+			PRINT_ERROR("Loading texture '%s' has failed : cannot allocate memory.", tiffFilename.c_str())
 		}
 		TIFFClose(tif);
 	}
 	else
 	{
-		PRINT_ERROR("Loading texture '%s' has failed : cannot open the file.\n", tiffFilename.c_str())
+		PRINT_ERROR("Loading texture '%s' has failed : cannot open the file.", tiffFilename.c_str())
 	}
 
 	return loaded;
@@ -401,7 +401,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, co
 
 	if (list.empty())
 	{
-		PRINT_ERROR("Cannot load texture group : tex2DFilenameList is empty!\n");
+		PRINT_ERROR("Cannot load texture group : tex2DFilenameList is empty!");
 		return mDefaultTexGroup;
 	}
 
@@ -420,7 +420,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, co
 	glBindTexture(target, id); GL_CHECK_ERRORS;
 	glTexStorage3D(target, mipMapCount, GL_RGBA8, width, height, layerCount); GL_CHECK_ERRORS;
 
-	PRINT_MESSAGE("[LoadTextureGroup] Texture group '%I64x' (Cat=%i) : %i.\n", groupId, (int)TextureInfo::GetCategoryFromGroupId(groupId), id);
+	PRINT_MESSAGE("[LoadTextureGroup] Texture group '%I64x' (Cat=%i) : %i.", groupId, (int)TextureInfo::GetCategoryFromGroupId(groupId), id);
 
 	for (int index = 0; index < layerCount; ++index)
 	{

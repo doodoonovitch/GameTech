@@ -23,7 +23,7 @@ ModelData::~ModelData()
 {
 }
 
-void ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath)
+void ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath, bool preTransformVertices)
 {
 	if (mIsLoaded)
 	{
@@ -44,7 +44,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	// Read file via ASSIMP
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_RemoveRedundantMaterials | aiProcess_PreTransformVertices);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_RemoveRedundantMaterials | (preTransformVertices ? aiProcess_PreTransformVertices : 0));
 	// Check for errors
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{

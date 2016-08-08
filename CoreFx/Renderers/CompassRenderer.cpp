@@ -13,8 +13,8 @@ CompassRenderer::CompassRenderer()
 	: RendererHelper<1>(0, "CompassRenderer", "CompassWireframeRenderer", Renderer::Forward_Pass)
 	, mCompassTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/compass.tif"))
 {
-	std::cout << std::endl;
-	std::cout << "Initialize CompassRenderer...." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize CompassRenderer.....");
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -73,7 +73,8 @@ CompassRenderer::CompassRenderer()
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "... CompassRenderer initialized!" << std::endl << std::endl;
+	PRINT_MESSAGE(".....CompassRenderer initialized!\n");
+	PRINT_END_SECTION;
 }
 
 CompassRenderer::~CompassRenderer()

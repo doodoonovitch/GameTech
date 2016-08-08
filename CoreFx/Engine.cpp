@@ -109,8 +109,8 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		mDrawGBufferNormalShader.LoadShaders();
 		//InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
 
-		PRINT_MESSAGE("Initializing PointLightHelper Renderer...\n");
-		PRINT_MESSAGE("... end.\n");
+		PRINT_MESSAGE("Initializing PointLightHelper Renderer...");
+		PRINT_MESSAGE("... end.");
 
 		mInitialized = true;
 	}
@@ -225,9 +225,9 @@ void Engine::CreateDynamicResources()
 
 void Engine::InternalCreateGBuffers()
 {
-	std::cout << std::endl;
-	std::cout << "Initialize Deferred framebuffers..." << std::endl;
-	std::cout << "\t Size = " << mGBufferWidth << " x " << mGBufferHeight << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize Deferred framebuffers.....");
+	PRINT_MESSAGE("Size = %li x %li", mGBufferWidth, mGBufferHeight);
 
 	glGenFramebuffers(1, &mDeferredFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, mDeferredFBO);
@@ -294,8 +294,14 @@ void Engine::InternalCreateGBuffers()
 	glDrawBuffers(__gBuffer_count__, drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "... failed!" << std::endl;
-	std::cout << "...complete!" << std::endl;
+	{
+		PRINT_MESSAGE(".....failed!");
+	}
+	else
+	{
+		PRINT_MESSAGE("...complete!");
+	}
+	PRINT_END_SECTION;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -312,9 +318,9 @@ void Engine::InternalReleaseGBuffers()
 
 void Engine::InternalCreateHdrBuffers()
 {
-	std::cout << std::endl;
-	std::cout << "Initialize HDR framebuffers..." << std::endl;
-	std::cout << "\t Size = " << mGBufferWidth << " x " << mGBufferHeight << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize HDR framebuffers.....");
+	PRINT_MESSAGE("Size = %li x %li", mGBufferWidth, mGBufferHeight);
 
 	glGenFramebuffers(1, &mHdrFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, mHdrFBO);
@@ -334,13 +340,19 @@ void Engine::InternalCreateHdrBuffers()
 	glDrawBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "... failed!" << std::endl;
-	std::cout << "...complete!" << std::endl;
+	{
+		PRINT_MESSAGE(".....failed!");
+	}
+	else
+	{
+		PRINT_MESSAGE("...complete!");
+	}
+	PRINT_END_SECTION;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	std::cout << std::endl;
-	std::cout << "Initialize Fordward framebuffers..." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize Forward framebuffers.....");
 
 	glGenFramebuffers(1, &mForwardFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, mForwardFBO);
@@ -367,8 +379,14 @@ void Engine::InternalCreateHdrBuffers()
 	glDrawBuffers(1, drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "... failed!" << std::endl;
-	std::cout << "...complete!" << std::endl;
+	{
+		PRINT_MESSAGE(".....failed!");
+	}
+	else
+	{
+		PRINT_MESSAGE("...complete!");
+	}
+	PRINT_END_SECTION;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -445,8 +463,8 @@ void Engine::InternalInitializeQuadVAO()
 
 void Engine::InternalInitializeDeferredPassShader()
 {
-	std::cout << std::endl;
-	std::cout << "Initialize Deferred light pass shader..." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize Deferred light pass shader.....");
 
 	//setup shader
 
@@ -506,13 +524,15 @@ void Engine::InternalInitializeDeferredPassShader()
 	mDeferredShader.UnUse();
 
 	GL_CHECK_ERRORS;
-	std::cout << "... done." << std::endl;
+
+	PRINT_MESSAGE(".....Deferred light pass shader initialized!");
+	PRINT_END_SECTION;
 }
 
 void Engine::InternalInitializeToneMappingShader()
 {
-	std::cout << std::endl;
-	std::cout << "Initialize tone mapping shader..." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize tone mapping shader.....");
 
 	//setup shader
 
@@ -538,12 +558,14 @@ void Engine::InternalInitializeToneMappingShader()
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "... done." << std::endl;
+	PRINT_MESSAGE(".....tone mapping shader initialized!");
+	PRINT_END_SECTION;
 }
 
 void Engine::InternalInitializeCopyShader()
 {
-	PRINT_MESSAGE("Initialize copy (post process) shader...");
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize copy (post process) shader.....");
 
 	//setup shader
 
@@ -568,7 +590,8 @@ void Engine::InternalInitializeCopyShader()
 
 	GL_CHECK_ERRORS;
 
-	PRINT_MESSAGE("... done.\n");
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
 }
 
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
@@ -590,6 +613,9 @@ void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizei
 
 void Engine::InternalCreateMaterialBuffer()
 {
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Create material buffers.....");
+
 	int bufferSize = 0;
 	mRenderers->ForEach([&bufferSize](Renderer * renderer)
 	{
@@ -610,11 +636,17 @@ void Engine::InternalCreateMaterialBuffer()
 
 	InternalCreateMaterialBuffer(mRenderers, offset, baseIndex);
 	InternalCreateMaterialBuffer(mForwardRenderers, offset, baseIndex);
+
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
 }
 
 void Engine::InternalCreateFrameDataBuffer(GLuint program)
 {
-	printf("Getting FrameData uniform block information...\n");
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Create FrameData buffers.....");
+
+	PRINT_MESSAGE("Getting FrameData uniform block information...");
 	glGetUniformIndices(program, __uniforms_count__, mFrameDataUniformNames, mFrameDataUniformIndices); GL_CHECK_ERRORS;
 	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_OFFSET, mFrameDataUniformOffsets); GL_CHECK_ERRORS;
 	glGetActiveUniformsiv(program, __uniforms_count__, mFrameDataUniformIndices, GL_UNIFORM_SIZE, mFrameDataUniformSizes); GL_CHECK_ERRORS;
@@ -624,14 +656,12 @@ void Engine::InternalCreateFrameDataBuffer(GLuint program)
 	GLuint frameDataUniformIndex = glGetUniformBlockIndex(program, "FrameData");
 	glGetActiveUniformBlockiv(program, frameDataUniformIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &mFrameDataSize);
 
-	printf("\n");
-	printf("FrameData uniform block : \n");
-	printf(" \t size : %i\n", mFrameDataSize);
+	PRINT_MESSAGE("FrameData uniform block :");
+	PRINT_MESSAGE(" \t size : %i", mFrameDataSize);
 	for (int i = 0; i < __uniforms_count__; ++i)
 	{
-		printf(" \t - %s : offset = %i, size = %i\n", mFrameDataUniformNames[i], mFrameDataUniformOffsets[i], mFrameDataUniformSizes[i]);
+		PRINT_MESSAGE(" \t - %s : offset = %i, size = %i", mFrameDataUniformNames[i], mFrameDataUniformOffsets[i], mFrameDataUniformSizes[i]);
 	}
-	printf("\n");
 
 	glGenBuffers(__BufferId_Count__, mBufferIds); GL_CHECK_ERRORS;
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); GL_CHECK_ERRORS;
@@ -640,6 +670,9 @@ void Engine::InternalCreateFrameDataBuffer(GLuint program)
 	glBindBuffer(GL_UNIFORM_BUFFER, 0); GL_CHECK_ERRORS;
 
 	PRINT_GEN_BUFFER("[Engine]", mBufferIds[FrameData_BufferId]);
+
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
 }
 
 void Engine::Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
@@ -981,7 +1014,7 @@ Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::v
 	}
 	else
 	{
-		std::cerr << "Cannot create a Point Light : max lights reached!" << std::endl;
+		PRINT_ERROR("Cannot create a Point Light : max lights reached!" );
 		return nullptr;
 	}
 }
@@ -997,7 +1030,7 @@ Lights::SpotLight * Engine::CreateSpotLight(const glm::vec3 & position, glm::vec
 	}
 	else
 	{
-		std::cerr << "Cannot create a Point Light : max lights reached!" << std::endl;
+		PRINT_ERROR("Cannot create a Point Light : max lights reached!");
 		return nullptr;
 	}
 }
@@ -1014,7 +1047,7 @@ Lights::DirectionalLight * Engine::CreateDirectionalLight(const glm::vec3 & dire
 	}
 	else
 	{
-		std::cerr << "Cannot create a Directional Light : max lights reached!" << std::endl;
+		PRINT_ERROR("Cannot create a Directional Light : max lights reached!");
 		return nullptr;
 	}
 }

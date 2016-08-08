@@ -12,8 +12,8 @@ namespace CoreFx
 AxisRenderer::AxisRenderer()
 	: RendererHelper<1>(0, "AxisRenderer", "AxisWireFrameRenderer", Renderer::Forward_Pass)
 {
-	std::cout << std::endl;
-	std::cout << "Initialize AxisRenderer...." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize AxisRenderer.....");
 
 	const char * attributeNames[__attributes_count__] =
 	{
@@ -67,7 +67,8 @@ AxisRenderer::AxisRenderer()
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "... AxisRenderer initialized!" << std::endl << std::endl;
+	PRINT_MESSAGE(".....AxisRenderer initialized!");
+	PRINT_END_SECTION;
 }
 
 

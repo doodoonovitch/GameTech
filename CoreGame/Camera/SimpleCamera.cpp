@@ -33,7 +33,7 @@ void SimpleCamera::OnShutdown()
 {
 	Engine::Release();
 
-	cout << "Shutdown successfull" << endl;
+	PRINT_MESSAGE("Shutdown successfull");
 }
 
 void SimpleCamera::OnWindowResize(int w, int h)
@@ -238,12 +238,12 @@ void SimpleCamera::OnInit()
 
 		{
 			Geometry::ModelData modelData;
-			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet");
-			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock");
-			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple");
-			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo");
+			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", true);
+			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock", true);
+			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple", true);
+			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo", true);
 			{
-				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword");
+				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", true);
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
 				
@@ -263,6 +263,9 @@ void SimpleCamera::OnInit()
 			Renderables::Model * model = modelRenderer->CreateModelInstance(0);
 			//model->GetFrame()->SetPosition(-15.f, 10.f, 0.f);
 			model->GetFrame()->SetPosition(-.5f, 25.f, 10.f);
+
+			Renderables::Model * model2 = modelRenderer->CreateModelInstance(0);
+			model2->GetFrame()->SetPosition(5.f, 25.f, 10.f);
 
 		}
 
@@ -296,7 +299,7 @@ void SimpleCamera::OnInit()
 
 	engine->CreateDynamicResources();
 
-	cout << "Initialization successfull" << endl;
+	PRINT_MESSAGE("Initialization successfull");
 
 
 	//{

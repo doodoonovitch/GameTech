@@ -21,8 +21,8 @@ DrawNormalShader::~DrawNormalShader()
  
 void DrawNormalShader::LoadShaders()
 {
-	std::cout << std::endl;
-	std::cout << "Load 'draw vertex normal' shader..." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Load 'draw vertex normal' shader.....");
 
 	//setup shader
 	LoadFromFile(GL_VERTEX_SHADER, "shaders/vertex_normal.vs.glsl");
@@ -56,8 +56,8 @@ void DrawNormalShader::LoadShaders()
 	GL_CHECK_ERRORS;
 
 
-	std::cout << std::endl;
-
+	PRINT_MESSAGE(".....'draw vertex normal' shader loaded!");
+	PRINT_END_SECTION;
 }
 
 void DrawNormalShader::SetUniformValues() const

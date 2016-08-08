@@ -12,8 +12,8 @@ namespace CoreFx
 GridRenderer::GridRenderer(int width, int depth)
 	: RendererHelper<1>(0, "GridRenderer", "GridWireFrameRenderer", Forward_Pass)
 {
-	std::cout << std::endl;
-	std::cout << "Initialize GridRenderer...." << std::endl;
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize GridRenderer.....");
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -73,9 +73,10 @@ GridRenderer::GridRenderer(int width, int depth)
 
 	GL_CHECK_ERRORS;
 
-	std::cout << "... GridRenderer initialized!" << std::endl << std::endl;
-
 	delete [] vertices;	 
+
+	PRINT_MESSAGE(".....GridRenderer initialized!");
+	PRINT_END_SECTION;
 }
 
 

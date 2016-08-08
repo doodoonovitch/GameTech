@@ -12,7 +12,8 @@ namespace CoreFx
 SkydomeRenderer::SkydomeRenderer(const int rings, const int segments)
 	: RendererHelper<2>(0, "SkydomeRenderer", "SkydomeWireFrameRenderer", Renderer::Forward_Pass)
 {
-	PRINT_MESSAGE("Initialize SkydomeRenderer....");
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize SkydomeRenderer.....");
 
 	mCosThetaSun = cos(-1.0f);
 	mThetaSun = glm::vec2(-1.0f, mCosThetaSun * mCosThetaSun);
@@ -101,7 +102,8 @@ SkydomeRenderer::SkydomeRenderer(const int rings, const int segments)
 
 	GL_CHECK_ERRORS;
 
-	PRINT_MESSAGE("... SkydomeRenderer initialized!\n");
+	PRINT_MESSAGE(".....SkydomeRenderer initialized!\n");
+	PRINT_END_SECTION;
 }
 
 SkydomeRenderer::~SkydomeRenderer()
