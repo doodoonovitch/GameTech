@@ -37,7 +37,8 @@ protected:
 	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* scene);
 	Renderer::TextureIndex ProcessTextures(TextureIndexMap & texMap, aiMaterial* mat, aiTextureType type, const std::string & textureBasePath);
 
-	bool ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiMesh* mesh, const aiScene* scene)> processMeshFunc);
+	bool ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiMesh* mesh, const aiScene* scene)> processMeshFunc, int level, bool logInfo = false);
+	static void PrintNodeMatrix(aiNode* node, const char * indent);
 
 protected:
 

@@ -1062,6 +1062,13 @@ void Engine::DeleteLight(Lights::Light * & light)
 
 bool Engine::AttachRenderer(Renderer* renderer)
 {
+	assert(renderer != nullptr);
+	if (renderer == nullptr)
+	{
+		PRINT_ERROR("Cannot attach renderer : parameter null!");
+		return false;
+	}
+
 	switch (renderer->GetRenderPass())
 	{
 	case Renderer::Deferred_Pass:
@@ -1076,6 +1083,13 @@ bool Engine::AttachRenderer(Renderer* renderer)
 
 bool Engine::DetachRenderer(Renderer* renderer)
 {
+	assert(renderer != nullptr);
+	if (renderer == nullptr)
+	{
+		PRINT_ERROR("Cannot detach renderer : parameter null!");
+		return false;
+	}
+
 	switch (renderer->GetRenderPass())
 	{
 	case Renderer::Deferred_Pass:

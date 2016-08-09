@@ -243,9 +243,11 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple", true);
 			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo", true);
 			//modelData.LoadModel("Medias/Objects/Bullet/bullet.obj", "Medias/Objects/Bullet", true, true);
-			
+			//modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", false, false);
+			modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", false, false);
+			/*
 			{
-				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", true);
+				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", false);
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
 				
@@ -259,15 +261,22 @@ void SimpleCamera::OnInit()
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(1.f), 1, .2f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
 				//matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .5f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
 			}
-			
+			*/
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(modelData);
-			engine->AttachRenderer(modelRenderer);
-			Renderables::Model * model = modelRenderer->CreateModelInstance(0);
-			//model->GetFrame()->SetPosition(-15.f, 10.f, 0.f);
-			model->GetFrame()->SetPosition(-.5f, 25.f, 10.f);
+			if (modelRenderer != nullptr)
+			{
+				engine->AttachRenderer(modelRenderer);
+				Renderables::Model * model = modelRenderer->CreateModelInstance(0);
+				//model->GetFrame()->SetPosition(-15.f, 10.f, 0.f);
+				model->GetFrame()->SetPosition(-.5f, 25.f, 10.f);
 
-			Renderables::Model * model2 = modelRenderer->CreateModelInstance(0);
-			model2->GetFrame()->SetPosition(5.f, 25.f, 10.f);
+				Renderables::Model * model2 = modelRenderer->CreateModelInstance(0);
+				model2->GetFrame()->SetPosition(5.f, 25.f, 10.f);
+			}
+			else
+			{
+				PRINT_ERROR("Cannot create ModelRenderer!");
+			}
 
 		}
 

@@ -58,8 +58,6 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		goto LoadModelEnd;
 	}
 
-	ProcessMaterials(scene, textureBasePath);
-
 	GLuint totalVertexCount = 0;
 	GLuint totalIndexCount = 0;
 	if (!ParseNode(scene->mRootNode, scene, [this, &totalVertexCount, &totalIndexCount, filepath](aiMesh* mesh, const aiScene* /*scene*/)
@@ -90,7 +88,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		totalIndexCount += meshIndexCount;
 
 		return true;
-	}))
+	}, 1, true))
 	{
 		goto LoadModelEnd;
 	}
@@ -98,13 +96,15 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 	mVertexList.resize(totalVertexCount);
 	mIndexList.resize(totalIndexCount);
 
+	ProcessMaterials(scene, textureBasePath);
+
 	GLuint meshInstanceNum = 0;
 	if (!ParseNode(scene->mRootNode, scene, [this, &meshInstanceNum](aiMesh* mesh, const aiScene* scene)
 	{
 		this->ProcessMesh(meshInstanceNum, mesh, scene);
 		++meshInstanceNum;
 		return true;
-	}))
+	}, 1, false))
 	{
 		goto LoadModelEnd;
 	}
@@ -193,14 +193,47 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 	}
 }
 
-bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiMesh* mesh, const aiScene* scene)> processMeshFunc)
+void ModelData::PrintNodeMatrix(aiNode* node, const char * indent)
 {
+	aiMatrix4x4 aiMat = node->mTransformation;
+	glm::mat4 mat(aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2, aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3, aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4);
+	const glm::vec4 & c1 = mat[0];
+	const glm::vec4 & c2 = mat[1];
+	const glm::vec4 & c3 = mat[2];
+	const glm::vec4 & c4 = mat[3];
+	
+	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.x, c2.x, c3.x, c4.x);
+	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.y, c2.y, c3.y, c4.y);
+	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.z, c2.z, c3.z, c4.z);
+	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.w, c2.w, c3.w, c4.w);
+}
+
+bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiMesh* mesh, const aiScene* scene)> processMeshFunc, int level, bool logInfo)
+{
+	if (logInfo)
+	{
+		std::string indent(level, '.');
+		PRINT_MESSAGE("%sNode '%s'(children=%li, mesh=%li)", indent.c_str(), node->mName.C_Str(), node->mNumChildren, node->mNumMeshes);
+
+		indent += '.';
+		PRINT_MESSAGE("%sMatrix :", indent);
+		indent += '.';
+		PrintNodeMatrix(node, indent.c_str());
+		
+	}
 	// Process each mesh located at the current node
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
 	{
 		// The node object only contains indices to index the actual objects in the scene. 
 		// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+
+		if (logInfo)
+		{
+			std::string indent(level + 1, '.');
+			PRINT_MESSAGE("%sMesh '%s'(bones=%li)", indent.c_str(), mesh->mName.C_Str(), mesh->mNumBones);
+		}
+
 		if (!processMeshFunc(mesh, scene))
 			return false;
 	}
@@ -208,7 +241,7 @@ bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool
 	// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
 	for (GLuint i = 0; i < node->mNumChildren; i++)
 	{
-		if (!ParseNode(node->mChildren[i], scene, processMeshFunc))
+		if (!ParseNode(node->mChildren[i], scene, processMeshFunc, level + 1, logInfo))
 			return false;
 	}
 	return true;
