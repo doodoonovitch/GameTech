@@ -23,7 +23,7 @@ ModelData::~ModelData()
 {
 }
 
-void ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath, bool preTransformVertices, bool flipWindingOrder)
+void ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options)
 {
 	if (mIsLoaded)
 	{
@@ -44,12 +44,36 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	// Read file via ASSIMP
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | /*aiProcess_RemoveRedundantMaterials | */(preTransformVertices ? aiProcess_PreTransformVertices : 0) | (flipWindingOrder ? aiProcess_FlipWindingOrder : 0));
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | /*aiProcess_RemoveRedundantMaterials | */(options.mPreTransformVertices ? aiProcess_PreTransformVertices : 0) | (options.mFlipWindingOrder ? aiProcess_FlipWindingOrder : 0));
+
 	// Check for errors
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
 		PRINT_ERROR("Cannot load model '%s'. (Assimp error : %s)", filepath.c_str(), importer.GetErrorString());
 		goto LoadModelEnd;
+	}
+
+	if (options.mLogInfo)
+	{
+		PRINT_MESSAGE("--------------------");
+		ParseNode(scene->mRootNode, scene, [](aiNode* node, const aiScene* /*scene*/, int level)
+		{
+			std::string indent(level + 1, '-');
+			PRINT_MESSAGE("|%s[%li].Node : '%s' (children=%li, mesh=%li)", indent.c_str(), level, node->mName.C_Str(), node->mNumChildren, node->mNumMeshes);
+
+			PRINT_MESSAGE("|%s[%li]..Matrix :", indent, level);
+			PrintNodeMatrix(node, level, indent.c_str());
+			return true;
+
+		}, [](unsigned int meshIndex, const aiScene* scene, int level)
+		{
+			aiMesh* mesh = scene->mMeshes[meshIndex];
+			std::string indent(level + 1, '-');
+			PRINT_MESSAGE("|%s[%li].Mesh %li : '%s' (bones=%li)", indent.c_str(), level, meshIndex, mesh->mName.C_Str(), mesh->mNumBones);
+
+			return true;
+		}, 0);
+		PRINT_MESSAGE("--------------------");
 	}
 
 	if(!scene->HasMaterials())
@@ -60,8 +84,9 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	GLuint totalVertexCount = 0;
 	GLuint totalIndexCount = 0;
-	if (!ParseNode(scene->mRootNode, scene, [this, &totalVertexCount, &totalIndexCount, filepath](aiMesh* mesh, const aiScene* /*scene*/)
+	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &totalVertexCount, &totalIndexCount, filepath](unsigned int meshIndex, const aiScene* scene, int /*level*/)
 	{
+		aiMesh* mesh = scene->mMeshes[meshIndex];
 		if (mesh->mMaterialIndex < 0)
 		{
 			PRINT_ERROR("Cannot load model '%s' : the mesh '%s' should have a material!", filepath.c_str(), mesh->mName.C_Str());
@@ -88,7 +113,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		totalIndexCount += meshIndexCount;
 
 		return true;
-	}, 1, true))
+	}, 0))
 	{
 		goto LoadModelEnd;
 	}
@@ -99,12 +124,13 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 	ProcessMaterials(scene, textureBasePath);
 
 	GLuint meshInstanceNum = 0;
-	if (!ParseNode(scene->mRootNode, scene, [this, &meshInstanceNum](aiMesh* mesh, const aiScene* scene)
+	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &meshInstanceNum](unsigned int meshIndex, const aiScene* scene, int /*level*/)
 	{
+		aiMesh* mesh = scene->mMeshes[meshIndex];
 		this->ProcessMesh(meshInstanceNum, mesh, scene);
 		++meshInstanceNum;
 		return true;
-	}, 1, false))
+	}, 0))
 	{
 		goto LoadModelEnd;
 	}
@@ -145,6 +171,21 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 LoadModelEnd:
 	PRINT_MESSAGE(".....loading model '%s' ended.", filepath.c_str());
 	PRINT_END_SECTION;
+}
+
+void ModelData::PrintNodeMatrix(aiNode* node, int level, const char * indent)
+{
+	aiMatrix4x4 aiMat = node->mTransformation;
+	glm::mat4 mat(aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2, aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3, aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4);
+	const glm::vec4 & c1 = mat[0];
+	const glm::vec4 & c2 = mat[1];
+	const glm::vec4 & c3 = mat[2];
+	const glm::vec4 & c4 = mat[3];
+
+	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.x, c2.x, c3.x, c4.x);
+	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.y, c2.y, c3.y, c4.y);
+	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.z, c2.z, c3.z, c4.z);
+	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.w, c2.w, c3.w, c4.w);
 }
 
 static glm::vec3 GetMaterialColor(aiMaterial * mat, const char* pKey, unsigned int type, unsigned int idx)
@@ -193,55 +234,25 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 	}
 }
 
-void ModelData::PrintNodeMatrix(aiNode* node, const char * indent)
+bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiNode* node, const aiScene* scene, int level)> processNodeFunc, std::function<bool(unsigned int meshIndex, const aiScene* scene, int level)> processMeshFunc, int level)
 {
-	aiMatrix4x4 aiMat = node->mTransformation;
-	glm::mat4 mat(aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2, aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3, aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4);
-	const glm::vec4 & c1 = mat[0];
-	const glm::vec4 & c2 = mat[1];
-	const glm::vec4 & c3 = mat[2];
-	const glm::vec4 & c4 = mat[3];
-	
-	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.x, c2.x, c3.x, c4.x);
-	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.y, c2.y, c3.y, c4.y);
-	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.z, c2.z, c3.z, c4.z);
-	PRINT_MESSAGE("%s%f, %f, %f, %f", indent, c1.w, c2.w, c3.w, c4.w);
-}
-
-bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiMesh* mesh, const aiScene* scene)> processMeshFunc, int level, bool logInfo)
-{
-	if (logInfo)
+	if (processNodeFunc != nullptr)
 	{
-		std::string indent(level, '.');
-		PRINT_MESSAGE("%sNode '%s'(children=%li, mesh=%li)", indent.c_str(), node->mName.C_Str(), node->mNumChildren, node->mNumMeshes);
-
-		indent += '.';
-		PRINT_MESSAGE("%sMatrix :", indent);
-		indent += '.';
-		PrintNodeMatrix(node, indent.c_str());
-		
+		if (!processNodeFunc(node, scene, level))
+			return false;
 	}
+
 	// Process each mesh located at the current node
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
 	{
-		// The node object only contains indices to index the actual objects in the scene. 
-		// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-
-		if (logInfo)
-		{
-			std::string indent(level + 1, '.');
-			PRINT_MESSAGE("%sMesh '%s'(bones=%li)", indent.c_str(), mesh->mName.C_Str(), mesh->mNumBones);
-		}
-
-		if (!processMeshFunc(mesh, scene))
+		if (!processMeshFunc(node->mMeshes[i], scene, level + 1))
 			return false;
 	}
 
 	// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
 	for (GLuint i = 0; i < node->mNumChildren; i++)
 	{
-		if (!ParseNode(node->mChildren[i], scene, processMeshFunc, level + 1, logInfo))
+		if (!ParseNode(node->mChildren[i], scene, processNodeFunc, processMeshFunc, level + 1))
 			return false;
 	}
 	return true;

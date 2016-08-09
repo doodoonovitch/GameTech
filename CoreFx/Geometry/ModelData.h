@@ -17,7 +17,32 @@ public:
 	ModelData();
 	virtual ~ModelData();
 
-	void LoadModel(const std::string & filepath, const std::string & textureBasePath, bool preTransformVertices, bool flipWindingOrder = false);
+	struct LoadOptions
+	{
+		LoadOptions & SetPreTransformVertices(bool value)
+		{
+			mPreTransformVertices = value;
+			return *this;
+		}
+
+		LoadOptions & SetFlipWindingOrder(bool value)
+		{
+			mFlipWindingOrder = value;
+			return *this;
+		}
+
+		LoadOptions & SetLogInfo(bool value)
+		{
+			mLogInfo = value;
+			return *this;
+		}
+
+		bool mPreTransformVertices = false;
+		bool mFlipWindingOrder = false;
+		bool mLogInfo = false;
+	};
+
+	void LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options);
 	bool IsLoaded() const { return mIsLoaded; }
 
 	const Renderer::VertexDataVector & GetVertexList() const { return mVertexList; }
@@ -37,8 +62,8 @@ protected:
 	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* scene);
 	Renderer::TextureIndex ProcessTextures(TextureIndexMap & texMap, aiMaterial* mat, aiTextureType type, const std::string & textureBasePath);
 
-	bool ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiMesh* mesh, const aiScene* scene)> processMeshFunc, int level, bool logInfo = false);
-	static void PrintNodeMatrix(aiNode* node, const char * indent);
+	bool ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiNode* node, const aiScene* scene, int level)> processNodeFunc, std::function<bool(unsigned int meshIndex, const aiScene* scene, int level)> processMeshFunc, int level);
+	static void PrintNodeMatrix(aiNode* node, int level, const char * indent);
 
 protected:
 

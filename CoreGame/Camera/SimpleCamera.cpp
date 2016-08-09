@@ -237,14 +237,17 @@ void SimpleCamera::OnInit()
 		}
 
 		{
+			Geometry::ModelData::LoadOptions opt;
+			opt.SetLogInfo(true);
+
 			Geometry::ModelData modelData;
-			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", true);
-			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock", true);
-			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple", true);
-			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo", true);
-			//modelData.LoadModel("Medias/Objects/Bullet/bullet.obj", "Medias/Objects/Bullet", true, true);
-			//modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", false, false);
-			modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", false, false);
+			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", opt.SetFlipWindingOrder(true).SetPreTransformVertices(true));
+			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock", opt.SetFlipWindingOrder(true).SetPreTransformVertices(true));
+			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple", opt.SetFlipWindingOrder(true).SetPreTransformVertices(true));
+			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo", opt.SetFlipWindingOrder(true).SetPreTransformVertices(true));
+			//modelData.LoadModel("Medias/Objects/Bullet/bullet.obj", "Medias/Objects/Bullet", opt.SetFlipWindingOrder(true).SetPreTransformVertices(true));
+			//modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
+			modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
 			/*
 			{
 				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", false);
@@ -267,11 +270,10 @@ void SimpleCamera::OnInit()
 			{
 				engine->AttachRenderer(modelRenderer);
 				Renderables::Model * model = modelRenderer->CreateModelInstance(0);
-				//model->GetFrame()->SetPosition(-15.f, 10.f, 0.f);
 				model->GetFrame()->SetPosition(-.5f, 25.f, 10.f);
 
-				Renderables::Model * model2 = modelRenderer->CreateModelInstance(0);
-				model2->GetFrame()->SetPosition(5.f, 25.f, 10.f);
+				//Renderables::Model * model2 = modelRenderer->CreateModelInstance(0);
+				//model2->GetFrame()->SetPosition(5.f, 25.f, 10.f);
 			}
 			else
 			{

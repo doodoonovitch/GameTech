@@ -443,10 +443,10 @@ void ModelRenderer::DeleteModelInstance(Renderables::Model * modelInstance)
 	mIsShaderBufferSet = false;
 }
 
-ModelRenderer * ModelRenderer::CreateFromFile(const std::string & modelFilePath, const std::string & textureBasePath, bool preTransformVertices, size_t capacity, size_t pageSize)
+ModelRenderer * ModelRenderer::CreateFromFile(const std::string & modelFilePath, const std::string & textureBasePath, const Geometry::ModelData::LoadOptions & options, size_t capacity, size_t pageSize)
 {
 	Geometry::ModelData model;
-	model.LoadModel(modelFilePath, textureBasePath, preTransformVertices);
+	model.LoadModel(modelFilePath, textureBasePath, options);
 	if (model.IsLoaded())
 	{
 		return CreateFromModel(model, capacity, pageSize);
