@@ -31,6 +31,12 @@ public:
 			return *this;
 		}
 
+		LoadOptions & SetFlipNormal(bool value)
+		{
+			mFlipNormal = value;
+			return *this;
+		}
+
 		LoadOptions & SetLogInfo(bool value)
 		{
 			mLogInfo = value;
@@ -39,6 +45,7 @@ public:
 
 		bool mPreTransformVertices = false;
 		bool mFlipWindingOrder = false;
+		bool mFlipNormal = false;
 		bool mLogInfo = false;
 	};
 
@@ -57,13 +64,16 @@ public:
 protected:
 
 	typedef std::map<std::string, int> TextureIndexMap;
+	typedef std::map<std::string, GLuint> BoneMapping;
 
 	void ProcessMaterials(const aiScene* scene, const std::string & textureBasePath);
-	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* scene);
+	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* scene, bool flipNormal);
+	void ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh);
 	Renderer::TextureIndex ProcessTextures(TextureIndexMap & texMap, aiMaterial* mat, aiTextureType type, const std::string & textureBasePath);
 
 	bool ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiNode* node, const aiScene* scene, int level)> processNodeFunc, std::function<bool(unsigned int meshIndex, const aiScene* scene, int level)> processMeshFunc, int level);
-	static void PrintNodeMatrix(aiNode* node, int level, const char * indent);
+	static void PrintNodeMatrix(const aiMatrix4x4 & aiMat, int level, const char * indent);
+	static void SetMatrix(const aiMatrix4x4 & from, glm::mat4 & to);
 
 protected:
 
@@ -72,11 +82,16 @@ protected:
 	Renderer::TextureDescList mTextureList;
 	Renderer::MaterialDescList mMaterialList;
 	Renderer::DrawElementsIndirectCommandList mMeshDrawInstanceList;
+	Renderer::BoneDataList mBoneDataList;
+	Renderer::VertexBoneDataList mVertexBoneDataList;
+	BoneMapping mBoneMapping;
+
 	TextureIndexMap mDiffuseTextureList;
 	TextureIndexMap mSpecularTextureList;
 	TextureIndexMap mEmissiveTextureList;
 	TextureIndexMap mNormalTextureList;
 
+	bool mHasBones;
 	bool mIsLoaded;
 };
 

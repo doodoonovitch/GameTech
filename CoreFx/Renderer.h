@@ -44,11 +44,57 @@ public:
 		GLuint mBaseInstance;
 		//GLuint __padding__[3];
 	};
+
+	enum
+	{
+		BonesPerVertex = 4
+	};
+
+	class VertexBoneData
+	{
+	public:
+
+		GLint mBoneIds[BonesPerVertex];
+		GLfloat mWeights[BonesPerVertex];
+
+		VertexBoneData()
+		{
+			for (GLuint i = 0; i < BonesPerVertex; i++)
+			{
+				mBoneIds[i] = -1;
+				mWeights[i] = 0.f;
+			}
+		}
+
+		void AddBoneData(GLuint boneID, float weight)
+		{
+			for (GLuint i = 0; i < BonesPerVertex; i++) 
+			{
+				if (mBoneIds[i] == -1)
+				{
+					mBoneIds[i] = boneID;
+					mWeights[i] = weight;
+					return;
+				}
+			}
+
+			PRINT_WARNING("[AddBoneData] Too many bones per vertex !")
+		}
+
+	};
+
+	struct BoneData
+	{
+		glm::mat4 mOffsetMatrix;
+	};
+
 //#pragma pack(pop)
 
 	typedef std::vector<VertexData> VertexDataVector;
 	typedef std::vector<GLuint> IndexVector;
 	typedef std::vector<DrawElementsIndirectCommand> DrawElementsIndirectCommandList;
+	typedef std::vector<BoneData> BoneDataList;
+	typedef std::vector<VertexBoneData> VertexBoneDataList;
 
 
 	enum ERenderPass

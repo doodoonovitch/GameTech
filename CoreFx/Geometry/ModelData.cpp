@@ -14,7 +14,8 @@ namespace CoreFx
 
 
 ModelData::ModelData()
-	: mIsLoaded(false)
+	: mHasBones(false)
+	, mIsLoaded(false)
 {
 }
 
@@ -37,6 +38,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		mEmissiveTextureList.clear();
 		mNormalTextureList.clear();
 		mIsLoaded = false;
+		mHasBones = false;
 	}
 
 	PRINT_BEGIN_SECTION;
@@ -59,17 +61,41 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		ParseNode(scene->mRootNode, scene, [](aiNode* node, const aiScene* /*scene*/, int level)
 		{
 			std::string indent(level + 1, '-');
-			PRINT_MESSAGE("|%s[%li].Node : '%s' (children=%li, mesh=%li)", indent.c_str(), level, node->mName.C_Str(), node->mNumChildren, node->mNumMeshes);
+			PRINT_MESSAGE("|%s[%li] Node : '%s' (children=%li, mesh=%li)", indent.c_str(), level, node->mName.C_Str(), node->mNumChildren, node->mNumMeshes);
 
-			PRINT_MESSAGE("|%s[%li]..Matrix :", indent, level);
-			PrintNodeMatrix(node, level, indent.c_str());
+			indent += "-";
+			PRINT_MESSAGE("|%s[%li] Matrix :", indent, level);
+
+			indent += "-";
+			PrintNodeMatrix(node->mTransformation, level, indent.c_str());
+
 			return true;
 
 		}, [](unsigned int meshIndex, const aiScene* scene, int level)
 		{
 			aiMesh* mesh = scene->mMeshes[meshIndex];
 			std::string indent(level + 1, '-');
-			PRINT_MESSAGE("|%s[%li].Mesh %li : '%s' (bones=%li)", indent.c_str(), level, meshIndex, mesh->mName.C_Str(), mesh->mNumBones);
+			PRINT_MESSAGE("|%s[%li] Mesh %li : '%s' (bones=%li)", indent.c_str(), level, meshIndex, mesh->mName.C_Str(), mesh->mNumBones);
+
+			indent += "-";
+			std::string indent2 = indent + "-";
+			std::string indent3 = indent2 + "-";
+			for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+			{
+				aiBone * bone = mesh->mBones[boneIndex];
+				PRINT_MESSAGE("|%s[%li] Bone %li : '%s' (weights=li)", indent.c_str(), level, boneIndex, bone->mName.C_Str(), bone->mNumWeights);
+
+				PRINT_MESSAGE("|%s[%li] Offset Matrix :", indent2.c_str(), level, boneIndex, bone->mName.C_Str());
+				PrintNodeMatrix(bone->mOffsetMatrix, level, indent3.c_str());
+
+				PRINT_MESSAGE("|%s[%li] Weights :", indent2.c_str(), level);
+				for (unsigned int numWeight = 0; numWeight < bone->mNumWeights; ++numWeight)
+				{
+					const aiVertexWeight & weight = bone->mWeights[numWeight];
+					PRINT_MESSAGE("|%s[%li] VertexId = %li, weight = %f", indent3.c_str(), level, weight.mVertexId, weight.mWeight);
+				}
+
+			}
 
 			return true;
 		}, 0);
@@ -87,6 +113,9 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &totalVertexCount, &totalIndexCount, filepath](unsigned int meshIndex, const aiScene* scene, int /*level*/)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
+
+		mHasBones = mHasBones || mesh->HasBones();
+
 		if (mesh->mMaterialIndex < 0)
 		{
 			PRINT_ERROR("Cannot load model '%s' : the mesh '%s' should have a material!", filepath.c_str(), mesh->mName.C_Str());
@@ -120,14 +149,18 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	mVertexList.resize(totalVertexCount);
 	mIndexList.resize(totalIndexCount);
+	if (mHasBones)
+	{
+		mVertexBoneDataList.resize(totalVertexCount);
+	}
 
 	ProcessMaterials(scene, textureBasePath);
 
 	GLuint meshInstanceNum = 0;
-	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &meshInstanceNum](unsigned int meshIndex, const aiScene* scene, int /*level*/)
+	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &meshInstanceNum, &options](unsigned int meshIndex, const aiScene* scene, int /*level*/)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		this->ProcessMesh(meshInstanceNum, mesh, scene);
+		this->ProcessMesh(meshInstanceNum, mesh, scene, options.mFlipNormal);
 		++meshInstanceNum;
 		return true;
 	}, 0))
@@ -139,6 +172,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	PRINT_MESSAGE("\t* Vertex count : %li", mVertexList.size());
 	PRINT_MESSAGE("\t* Index count : %li", mIndexList.size());
+	PRINT_MESSAGE("\t* Has bones : %i", mHasBones);
 	PRINT_MESSAGE("\t* Mesh count : %li", mMeshDrawInstanceList.size());
 	{
 		for (int i = 0; i < mMeshDrawInstanceList.size(); ++i)
@@ -173,19 +207,32 @@ LoadModelEnd:
 	PRINT_END_SECTION;
 }
 
-void ModelData::PrintNodeMatrix(aiNode* node, int level, const char * indent)
+void ModelData::PrintNodeMatrix(const aiMatrix4x4 & aiMat, int level, const char * indent)
 {
-	aiMatrix4x4 aiMat = node->mTransformation;
-	glm::mat4 mat(aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2, aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3, aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4);
+	//glm::mat4 mat(aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2, aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3, aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4);
+	glm::mat4 mat;
+	SetMatrix(aiMat, mat);
 	const glm::vec4 & c1 = mat[0];
 	const glm::vec4 & c2 = mat[1];
 	const glm::vec4 & c3 = mat[2];
 	const glm::vec4 & c4 = mat[3];
 
-	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.x, c2.x, c3.x, c4.x);
-	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.y, c2.y, c3.y, c4.y);
-	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.z, c2.z, c3.z, c4.z);
-	PRINT_MESSAGE("|%s[%li].. %f, %f, %f, %f", indent, level, c1.w, c2.w, c3.w, c4.w);
+	PRINT_MESSAGE("|%s[%li] %f, %f, %f, %f", indent, level, c1.x, c2.x, c3.x, c4.x);
+	PRINT_MESSAGE("|%s[%li] %f, %f, %f, %f", indent, level, c1.y, c2.y, c3.y, c4.y);
+	PRINT_MESSAGE("|%s[%li] %f, %f, %f, %f", indent, level, c1.z, c2.z, c3.z, c4.z);
+	PRINT_MESSAGE("|%s[%li] %f, %f, %f, %f", indent, level, c1.w, c2.w, c3.w, c4.w);
+}
+
+void ModelData::SetMatrix(const aiMatrix4x4 & from, glm::mat4 & to)
+{
+	to[0][0] = from.a1; to[1][0] = from.a2;
+	to[2][0] = from.a3; to[3][0] = from.a4;
+	to[0][1] = from.b1; to[1][1] = from.b2;
+	to[2][1] = from.b3; to[3][1] = from.b4;
+	to[0][2] = from.c1; to[1][2] = from.c2;
+	to[2][2] = from.c3; to[3][2] = from.c4;
+	to[0][3] = from.d1; to[1][3] = from.d2;
+	to[2][3] = from.d3; to[3][3] = from.d4;
 }
 
 static glm::vec3 GetMaterialColor(aiMaterial * mat, const char* pKey, unsigned int type, unsigned int idx)
@@ -258,8 +305,9 @@ bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool
 	return true;
 }
 
-void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* /*scene*/)
+void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* /*scene*/, bool flipNormal)
 {
+	float c = flipNormal ? -1.f : 1.f;
 	const Renderer::DrawElementsIndirectCommand & meshDrawInstance = mMeshDrawInstanceList[meshInstanceNum];
 	// Walk through each of the mesh's vertices
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
@@ -272,17 +320,27 @@ void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene*
 		vertex.mPosition.z = mesh->mVertices[i].z;
 
 		// Normals
-		vertex.mNormal.x = mesh->mNormals[i].x;
-		vertex.mNormal.y = mesh->mNormals[i].y;
-		vertex.mNormal.z = mesh->mNormals[i].z;
+		if (mesh->HasNormals())
+		{
+			vertex.mNormal.x = c * mesh->mNormals[i].x;
+			vertex.mNormal.y = c * mesh->mNormals[i].y;
+			vertex.mNormal.z = c * mesh->mNormals[i].z;
+		}
+		else
+			vertex.mNormal = glm::vec3(0.f);
 
 		// Tangent
-		vertex.mTangent.x = mesh->mNormals[i].x;
-		vertex.mTangent.y = mesh->mNormals[i].y;
-		vertex.mTangent.z = mesh->mNormals[i].z;
+		if (mesh->HasTangentsAndBitangents())
+		{
+			vertex.mTangent.x = c * mesh->mTangents[i].x;
+			vertex.mTangent.y = c * mesh->mTangents[i].y;
+			vertex.mTangent.z = c * mesh->mTangents[i].z;
+		}
+		else
+			vertex.mTangent = glm::vec3(0.f);
 
 		// Texture Coordinates
-		if (mesh->mTextureCoords[0] != nullptr) // Does the mesh contain texture coordinates?
+		if (mesh->HasTextureCoords(0)) // Does the mesh contain texture coordinates?
 		{
 			// A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 			// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
@@ -304,11 +362,42 @@ void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene*
 			mIndexList[index++] = face.mIndices[j];
 	}
 
-	// Process materials
-	//if (mesh->mMaterialIndex >= 0)
-	//{
-	//	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	//}
+	if (mHasBones)
+	{
+		ProcessMeshBones(meshInstanceNum, mesh);
+	}
+}
+
+void ModelData::ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh)
+{
+	for (GLuint i = 0; i < mesh->mNumBones; i++)
+	{
+		aiBone * bone = mesh->mBones[i];
+		GLuint boneIndex = 0;
+		std::string boneName(bone->mName.C_Str());
+
+		BoneMapping::const_iterator it = mBoneMapping.find(boneName);
+		if (it == mBoneMapping.end()) 
+		{
+			// Allocate an index for a new bone
+			boneIndex = (GLuint)mBoneDataList.size();
+			Renderer::BoneData boneData;
+			SetMatrix(bone->mOffsetMatrix, boneData.mOffsetMatrix);
+			mBoneDataList.push_back(boneData);
+			mBoneMapping[boneName] = boneIndex;
+		}
+		else 
+		{
+			boneIndex = it->second;
+		}
+
+		for (GLuint j = 0; j < bone->mNumWeights; j++) 
+		{
+			aiVertexWeight & weight = bone->mWeights[j];
+			GLuint vertexId = mMeshDrawInstanceList[meshInstanceNum].mBaseVertex + weight.mVertexId;
+			mVertexBoneDataList[vertexId].AddBoneData(boneIndex, weight.mWeight);
+		}
+	}
 }
 
 Renderer::TextureIndex ModelData::ProcessTextures(TextureIndexMap & textureIndexMap, aiMaterial* mat, aiTextureType type, const std::string & textureBasePath)
