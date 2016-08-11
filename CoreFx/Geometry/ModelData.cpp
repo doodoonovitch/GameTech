@@ -264,10 +264,12 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		glm::vec3 emissiveColor(GetMaterialColor(mat, AI_MATKEY_COLOR_EMISSIVE));
 
 		float roughness;  
-		//if (mat->Get(AI_MATKEY_SHININESS, roughness) != aiReturn_SUCCESS)
+		if (mat->Get(AI_MATKEY_SHININESS, roughness) != aiReturn_SUCCESS)
 		{
 			roughness = 1.f;
 		}
+
+		roughness = glm::clamp(roughness, 0.f, 1.f);
 
 		Renderer::TextureIndex diffuseTextureIndex = ProcessTextures(mDiffuseTextureList, mat, aiTextureType_DIFFUSE, textureBasePath);
 		Renderer::TextureIndex specularTextureIndex = ProcessTextures(mSpecularTextureList, mat, aiTextureType_SPECULAR, textureBasePath);
@@ -277,7 +279,7 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 
 		mMaterialList.push_back(Renderer::MaterialDesc(diffuseColor, diffuseTextureIndex, specularColor, specularTextureIndex, roughness, roughnessTextureIndex, emissiveColor, emissiveTextureIndex, normalTextureIndex));
 
-		PRINT_MESSAGE("\t-Parse material %i: Name='%s', Diffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", i, name.C_Str(), diffuseColor.x, diffuseColor.y, diffuseColor.z, specularColor.x, specularColor.y, specularColor.z, roughness, emissiveColor.x, emissiveColor.y, emissiveColor.z);
+		//PRINT_MESSAGE("\t-Parse material %i: Name='%s', Diffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", i, name.C_Str(), diffuseColor.x, diffuseColor.y, diffuseColor.z, specularColor.x, specularColor.y, specularColor.z, roughness, emissiveColor.x, emissiveColor.y, emissiveColor.z);
 	}
 }
 
