@@ -55,6 +55,11 @@ public:
 	void SetProperty(const glm::vec4 & value, GLuint propertyIndex);
 	void SetProperty(const glm::vec3 & value, GLuint propertyIndex);
 
+	void Resize(GLuint propertyCount, bool copyData = false);
+
+	void Clear();
+
+
 private:
 
 	GLfloat * mData;

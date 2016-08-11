@@ -16,7 +16,7 @@ PropertyData::PropertyData(GLuint propertyCount)
 
 PropertyData::~PropertyData()
 {
-	SAFE_DELETE_ARRAY(mData);
+	Clear();
 }
 
 void PropertyData::SetProperty(const GLbitfield values[4], GLuint propertyIndex)
@@ -47,6 +47,32 @@ void PropertyData::SetProperty(const glm::vec3 & value, GLuint propertyIndex)
 	SetIsModified(true);
 }
 
+void PropertyData::Resize(GLuint propertyCount, bool copyData)
+{
+	if (propertyCount == 0)
+	{
+		Clear();
+		return;
+	}
 
+	GLfloat * newData = new GLfloat[propertyCount * Element_Per_Property];
+
+	if (copyData && mPropertyCount > 0)
+	{
+		GLuint n = min(propertyCount, mPropertyCount);
+		memcpy(newData, mData, n * Element_Per_Property * sizeof(GLfloat));
+	}
+
+	SAFE_DELETE_ARRAY(mData);
+	mPropertyCount = propertyCount;
+	mData = newData;
+}
+
+void PropertyData::Clear()
+{
+	SAFE_DELETE_ARRAY(mData);
+	mPropertyCount = 0;
+	mIsModified = false;
+}
 
 } // namespace CoreFx

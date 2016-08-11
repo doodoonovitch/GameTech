@@ -190,7 +190,7 @@ public:
 	const PropertyData & GetMaterials() const {	return mMaterials; }
 	GLint GetMaterialBaseIndex() const { return mMaterialBaseIndex; }
 
-	const TextureInfoList & GetTextureInfoList() const { return mTextures; }
+	const TextureInfoList & GetTextureInfoList() const { return mTextureInfoList; }
 	bool AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool invertY);
 	bool AddTexture(const TextureDesc & desc)
 	{
@@ -203,14 +203,16 @@ public:
 
 protected:
 
-	void BuildTextureMapping(TextureMapping * lightPassTextureMapping = nullptr);
+	void BuildTextureMapping();
+
+	static void GenericBuildTextureMapping(TextureMapping * lightPassTextureMapping, const TextureInfoList & texInfoList);
 	void LoadTextures();
 
 protected:
 
 	PropertyData mMaterials;
 	GLint mMaterialBaseIndex;
-	TextureInfoList mTextures;
+	TextureInfoList mTextureInfoList;
 	TextureMapping mTextureMapping;
 	ERenderPass mRenderPass;
 };

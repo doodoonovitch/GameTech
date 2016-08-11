@@ -47,7 +47,7 @@ void main(void)
 	int emissiveSamplerIndex = int((bitfieldValue >> 24) & uint(255));
 	int normalTextureIndex = int(bitfieldValue & uint(255));
 	int normalSamplerIndex = int((bitfieldValue >> 8) & uint(255));
-
+	/*
 	if (diffuseTextureIndex != -1 && diffuseSamplerIndex != -1)
 	{
 		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec3(fs_in.TexUV, diffuseTextureIndex)).xyz;
@@ -67,7 +67,7 @@ void main(void)
 	{
 		roughness = roughness * TexGet(roughnessSamplerIndex, vec3(fs_in.TexUV, roughnessTextureIndex)).x;
 	}
-
+	*/
 	vec3 normal;
 	if (normalTextureIndex != -1 && normalSamplerIndex != -1)
 	{

@@ -55,51 +55,10 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		goto LoadModelEnd;
 	}
 
-	if (options.mLogInfo)
+	if (!scene->HasMeshes())
 	{
-		PRINT_MESSAGE("--------------------");
-		ParseNode(scene->mRootNode, scene, [](aiNode* node, const aiScene* /*scene*/, int level)
-		{
-			std::string indent(level + 1, '-');
-			PRINT_MESSAGE("|%s[%li] Node : '%s' (children=%li, mesh=%li)", indent.c_str(), level, node->mName.C_Str(), node->mNumChildren, node->mNumMeshes);
-
-			indent += "-";
-			PRINT_MESSAGE("|%s[%li] Matrix :", indent, level);
-
-			indent += "-";
-			PrintNodeMatrix(node->mTransformation, level, indent.c_str());
-
-			return true;
-
-		}, [](unsigned int meshIndex, const aiScene* scene, int level)
-		{
-			aiMesh* mesh = scene->mMeshes[meshIndex];
-			std::string indent(level + 1, '-');
-			PRINT_MESSAGE("|%s[%li] Mesh %li : '%s' (bones=%li)", indent.c_str(), level, meshIndex, mesh->mName.C_Str(), mesh->mNumBones);
-
-			indent += "-";
-			std::string indent2 = indent + "-";
-			std::string indent3 = indent2 + "-";
-			for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
-			{
-				aiBone * bone = mesh->mBones[boneIndex];
-				PRINT_MESSAGE("|%s[%li] Bone %li : '%s' (weights=li)", indent.c_str(), level, boneIndex, bone->mName.C_Str(), bone->mNumWeights);
-
-				PRINT_MESSAGE("|%s[%li] Offset Matrix :", indent2.c_str(), level, boneIndex, bone->mName.C_Str());
-				PrintNodeMatrix(bone->mOffsetMatrix, level, indent3.c_str());
-
-				PRINT_MESSAGE("|%s[%li] Weights :", indent2.c_str(), level);
-				for (unsigned int numWeight = 0; numWeight < bone->mNumWeights; ++numWeight)
-				{
-					const aiVertexWeight & weight = bone->mWeights[numWeight];
-					PRINT_MESSAGE("|%s[%li] VertexId = %li, weight = %f", indent3.c_str(), level, weight.mVertexId, weight.mWeight);
-				}
-
-			}
-
-			return true;
-		}, 0);
-		PRINT_MESSAGE("--------------------");
+		PRINT_ERROR("Cannot load model '%s' : the model should have meshes!", filepath.c_str());
+		goto LoadModelEnd;
 	}
 
 	if(!scene->HasMaterials())
@@ -170,37 +129,103 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	mIsLoaded = true;
 
-	PRINT_MESSAGE("\t* Vertex count : %li", mVertexList.size());
-	PRINT_MESSAGE("\t* Index count : %li", mIndexList.size());
-	PRINT_MESSAGE("\t* Has bones : %i", mHasBones);
-	PRINT_MESSAGE("\t* Mesh count : %li", mMeshDrawInstanceList.size());
+	if (options.mLogInfo)
 	{
-		for (int i = 0; i < mMeshDrawInstanceList.size(); ++i)
-		{
-			const Renderer::DrawElementsIndirectCommand & v = mMeshDrawInstanceList[i];
-			PRINT_MESSAGE("\t\t- Mesh %i : mElemCount=%li, mFirstIndex=%li, mBaseVertex=%li, mBaseInstance=%li", i, v.mElemCount, v.mFirstIndex, v.mBaseVertex, v.mBaseInstance);
-		}
-	}
+		PRINT_MESSAGE("--------------------");
 
-	PRINT_MESSAGE("\t* Material count : %li", mMaterialList.size());
-	{		
-		for (int i = 0; i < mMaterialList.size(); ++i)
-		{
-			const Renderer::MaterialDesc & v = mMaterialList[i];
-			PRINT_MESSAGE("\t\t- Material %i : Texture index (DSNE) = (%i, %i, %i, %i)", i, (int8_t)v.mDiffuseTextureIndex, (int8_t)v.mSpecularTextureIndex, (int8_t)v.mNormalTextureIndex, (int8_t)v.mEmissiveTextureIndex);
-			PRINT_MESSAGE("\t\t\tDiffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", v.mDiffuse.x, v.mDiffuse.y, v.mDiffuse.z, v.mSpecular.x, v.mSpecular.y, v.mSpecular.z, v.mRoughness, v.mEmissive.x, v.mEmissive.y, v.mEmissive.z);
-		}
-	}
+		PRINT_MESSAGE("\t* Vertex count : %li", mVertexList.size());
+		PRINT_MESSAGE("\t* Index count : %li", mIndexList.size());
+		PRINT_MESSAGE("\t* Has bones : %i", mHasBones);
 
-	PRINT_MESSAGE("\t* Texture count : %li", mTextureList.size());
-	{
-		for (int i = 0; i < mTextureList.size(); ++i)
+		PRINT_MESSAGE("\t* Mesh count : %li", mMeshDrawInstanceList.size());
 		{
-			const Renderer::TextureDesc & v = mTextureList[i];
-			PRINT_MESSAGE("\t\t- Texture %i : Category=%s, filename='%s'", i, TextureCategoryToString(v.mCategory), v.mFilename.c_str());
+			for (int i = 0; i < mMeshDrawInstanceList.size(); ++i)
+			{
+				const Renderer::DrawElementsIndirectCommand & v = mMeshDrawInstanceList[i];
+				PRINT_MESSAGE("\t\t- Mesh %i : mElemCount=%li, mFirstIndex=%li, mBaseVertex=%li, mBaseInstance=%li", i, v.mElemCount, v.mFirstIndex, v.mBaseVertex, v.mBaseInstance);
+			}
 		}
-	}
 
+		PRINT_MESSAGE("\t* Material count : %li", mMaterialList.size());
+		{
+			for (int i = 0; i < mMaterialList.size(); ++i)
+			{
+				const Renderer::MaterialDesc & v = mMaterialList[i];
+				PRINT_MESSAGE("\t\t- Material %i : Texture index (DSNE) = (%i, %i, %i, %i)", i, (int8_t)v.mDiffuseTextureIndex, (int8_t)v.mSpecularTextureIndex, (int8_t)v.mNormalTextureIndex, (int8_t)v.mEmissiveTextureIndex);
+				PRINT_MESSAGE("\t\t\tDiffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", v.mDiffuse.x, v.mDiffuse.y, v.mDiffuse.z, v.mSpecular.x, v.mSpecular.y, v.mSpecular.z, v.mRoughness, v.mEmissive.x, v.mEmissive.y, v.mEmissive.z);
+			}
+		}
+
+		PRINT_MESSAGE("\t* Texture count : %li", mTextureList.size());
+		{
+			for (int i = 0; i < mTextureList.size(); ++i)
+			{
+				const Renderer::TextureDesc & v = mTextureList[i];
+				PRINT_MESSAGE("\t\t- Texture %i : Category=%s, filename='%s'", i, TextureCategoryToString(v.mCategory), v.mFilename.c_str());
+			}
+		}
+
+		PRINT_MESSAGE("--------------------");
+
+		ParseNode(scene->mRootNode, scene, [](aiNode* node, const aiScene* /*scene*/, int level)
+		{
+			std::string indent(level + 1, '-');
+			PRINT_MESSAGE("|%s[%li] Node : '%s' (children=%li, mesh=%li)", indent.c_str(), level, node->mName.C_Str(), node->mNumChildren, node->mNumMeshes);
+
+			indent += "-";
+			PRINT_MESSAGE("|%s[%li] Matrix :", indent, level);
+
+			indent += "-";
+			PrintNodeMatrix(node->mTransformation, level, indent.c_str());
+
+			return true;
+
+		}, [&options](unsigned int meshIndex, const aiScene* scene, int level)
+		{
+			aiMesh* mesh = scene->mMeshes[meshIndex];
+			std::string indent(level + 1, '-');
+			PRINT_MESSAGE("|%s[%li] Mesh %li : '%s' (bones=%li)", indent.c_str(), level, meshIndex, mesh->mName.C_Str(), mesh->mNumBones);
+
+			indent += "-";
+			std::string indent2 = indent + "-";
+			std::string indent3 = indent2 + "-";
+			for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+			{
+				aiBone * bone = mesh->mBones[boneIndex];
+				PRINT_MESSAGE("|%s[%li] Bone %li : '%s' (weights=li)", indent.c_str(), level, boneIndex, bone->mName.C_Str(), bone->mNumWeights);
+
+				PRINT_MESSAGE("|%s[%li] Offset Matrix :", indent2.c_str(), level, boneIndex, bone->mName.C_Str());
+				PrintNodeMatrix(bone->mOffsetMatrix, level, indent3.c_str());
+
+				if (options.mLogBoneInfo)
+				{
+					PRINT_MESSAGE("|%s[%li] Weights :", indent2.c_str(), level);
+					for (unsigned int numWeight = 0; numWeight < bone->mNumWeights; ++numWeight)
+					{
+						const aiVertexWeight & weight = bone->mWeights[numWeight];
+						PRINT_MESSAGE("|%s[%li] VertexId = %li, weight = %f", indent3.c_str(), level, weight.mVertexId, weight.mWeight);
+					}
+				}
+			}
+
+			return true;
+		}, 0);
+
+		PRINT_MESSAGE("--------------------");
+
+		if (scene->HasAnimations())
+		{
+			PRINT_MESSAGE("\t* Animations : %li", scene->mNumAnimations);
+
+			for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
+			{
+				aiAnimation * anim = scene->mAnimations[i];
+				PRINT_MESSAGE("\t\t* Animation : '%s' (duration=%f, tick/second=%f, n.tracks=%li, n.mesh channels=%li)", anim->mName.C_Str(), anim->mDuration, anim->mTicksPerSecond, anim->mNumChannels, anim->mNumMeshChannels);
+			}
+		}
+
+		PRINT_MESSAGE("--------------------");
+	}
 
 LoadModelEnd:
 	PRINT_MESSAGE(".....loading model '%s' ended.", filepath.c_str());
@@ -259,10 +284,6 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		aiString name;
 		mat->Get(AI_MATKEY_NAME, name);
 
-		glm::vec3 diffuseColor(GetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE));
-		glm::vec3 specularColor(GetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR));
-		glm::vec3 emissiveColor(GetMaterialColor(mat, AI_MATKEY_COLOR_EMISSIVE));
-
 		float roughness;  
 		if (mat->Get(AI_MATKEY_SHININESS, roughness) != aiReturn_SUCCESS)
 		{
@@ -270,6 +291,17 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		}
 
 		roughness = glm::clamp(roughness, 0.f, 1.f);
+
+		glm::vec3 diffuseColor(GetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE));
+		glm::vec3 specularColor(GetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR));
+		glm::vec3 emissiveColor(GetMaterialColor(mat, AI_MATKEY_COLOR_EMISSIVE));
+
+		if (specularColor.x == 0.f && specularColor.y == 0.f && specularColor.z == 0.f)
+		{
+			specularColor = glm::vec3(1.00f, 0.71f, 0.29f);
+			diffuseColor = glm::vec3(1.f);
+			//roughness = 1.f;
+		}
 
 		Renderer::TextureIndex diffuseTextureIndex = ProcessTextures(mDiffuseTextureList, mat, aiTextureType_DIFFUSE, textureBasePath);
 		Renderer::TextureIndex specularTextureIndex = ProcessTextures(mSpecularTextureList, mat, aiTextureType_SPECULAR, textureBasePath);

@@ -10,21 +10,38 @@ namespace CoreFx
 
 
 
-ModelRenderer::ModelRenderer(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList, size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Model, 4>((GLuint)(materialDescList.size() * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
-	, mMaterialCount((GLuint)materialDescList.size())
-	, mDrawCmdCount((GLsizei)meshDrawInstanceList.size())
-	, mMaterialTextureIndexesList((GLuint)materialDescList.size())
-	, mMeshDrawInstanceList(meshDrawInstanceList)
+ModelRenderer::ModelRenderer(size_t capacity, size_t pageSize)
+	: SceneObjectRenderer<Renderables::Model, 4>((GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
+	, mMaterialCount(0)
+	, mDrawCmdCount(0)
+	, mMaterialTextureIndexesList(0)
+	, mIsModelSet(false)
 	, mIsShaderBufferSet(false)
-	, mIndexCount((GLsizei)indexList.size())
 {
+
+}
+
+void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList)
+{
+	if (mIsModelSet)
+	{
+		PRINT_ERROR("[ModelRenderer] The renderer is already initialized with a model!");
+		return;
+	}
+
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize ModelRenderer....");
 
+	mMaterialCount = (GLuint)materialDescList.size();
+	mDrawCmdCount = (GLsizei)meshDrawInstanceList.size();
+	mMaterialTextureIndexesList.resize((GLuint)materialDescList.size());
+	mMeshDrawInstanceList = meshDrawInstanceList;
+
+	mMaterials.Resize(mMaterialCount * Property_Per_Material);
+
 	AddTextures(textureDescList);
 	SetMaterials(materialDescList);
-	BuildTextureMapping(nullptr);
+	BuildTextureMapping();
 
 	const GLsizei vertexDataSize = sizeof(Renderer::VertexData);
 
@@ -307,6 +324,7 @@ void ModelRenderer::InitializeMainShader()
 	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_materialDataSampler), 1);
 
 
+	PRINT_MESSAGE("Texture mapping : sampler count = %li", mTextureMapping.mMapping.size());
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
 	{
 		char uniformName[50];
@@ -315,7 +333,8 @@ void ModelRenderer::InitializeMainShader()
 		if (uniformIndex > 0)
 		{
 			glUniform1i(uniformIndex, i + FIRST_TEXTURE_SAMPLER_INDEX);	GL_CHECK_ERRORS;
-			std::cout << "\t" << uniformName << " : " << uniformIndex << std::endl;
+			PRINT_MESSAGE("mapping : u_textureSampler[%i] = %i (uniform index = %i)", i, i + FIRST_TEXTURE_SAMPLER_INDEX, uniformIndex);
+			//std::cout << "\t" << uniformName << " : " << uniformIndex << std::endl;
 		}
 	}
 
@@ -443,13 +462,13 @@ void ModelRenderer::DeleteModelInstance(Renderables::Model * modelInstance)
 	mIsShaderBufferSet = false;
 }
 
-ModelRenderer * ModelRenderer::CreateFromFile(const std::string & modelFilePath, const std::string & textureBasePath, const Geometry::ModelData::LoadOptions & options, size_t capacity, size_t pageSize)
+ModelRenderer * ModelRenderer::CreateFromFile(Engine * engine, const std::string & modelFilePath, const std::string & textureBasePath, const Geometry::ModelData::LoadOptions & options, size_t capacity, size_t pageSize)
 {
 	Geometry::ModelData model;
 	model.LoadModel(modelFilePath, textureBasePath, options);
 	if (model.IsLoaded())
 	{
-		return CreateFromModel(model, capacity, pageSize);
+		return CreateFromModel(engine, model, capacity, pageSize);
 	}
 	else
 	{
@@ -458,11 +477,16 @@ ModelRenderer * ModelRenderer::CreateFromFile(const std::string & modelFilePath,
 	}
 }
 
-ModelRenderer * ModelRenderer::CreateFromModel(const Geometry::ModelData & model, size_t capacity, size_t pageSize)
+ModelRenderer * ModelRenderer::CreateFromModel(Engine * engine, const Geometry::ModelData & model, size_t capacity, size_t pageSize)
 {
 	if (model.IsLoaded())
 	{
-		ModelRenderer * renderer = new ModelRenderer(model.GetVertexList(), model.GetIndexList(), model.GetMaterialDescList(), model.GetTextureDescList(), model.GetMeshDrawInstanceList(), capacity, pageSize);
+		ModelRenderer * renderer = new ModelRenderer(capacity, pageSize);
+
+		engine->AttachRenderer(renderer);
+
+		renderer->SetModel(model.GetVertexList(), model.GetIndexList(), model.GetMaterialDescList(), model.GetTextureDescList(), model.GetMeshDrawInstanceList());
+
 		return renderer;
 	}
 	else

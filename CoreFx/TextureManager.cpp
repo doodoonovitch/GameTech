@@ -425,9 +425,10 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, co
 	for (int index = 0; index < layerCount; ++index)
 	{
 		const LoadTextureGroupDesc & texDesc = list[index];
-		bool loaded = LoadTiffImage(texDesc.mFilename, [target, index](uint32_t w, uint32_t h, const uint32_t * raster)
+		bool loaded = LoadTiffImage(texDesc.mFilename, [target, index, &texDesc, groupId](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
 			glTexSubImage3D(target, 0, 0, 0, index, w, h, 1, GL_RGBA, GL_UNSIGNED_BYTE, raster); GL_CHECK_ERRORS;
+			PRINT_MESSAGE("[LoadTextureGroup] Texture group '%I64x' (Cat=%i) : image '%s' loaded.", groupId, (int)TextureInfo::GetCategoryFromGroupId(groupId), texDesc.mFilename.c_str());
 		}, &width, &height, texDesc.mInvertY);
 		if (!loaded)
 		{

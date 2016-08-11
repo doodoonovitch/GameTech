@@ -24,16 +24,18 @@ public:
 
 public:
 
-	ModelRenderer(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList, size_t capacity = 64, size_t pageSize = 10);
+	ModelRenderer(size_t capacity = 64, size_t pageSize = 10);
 	virtual ~ModelRenderer();
+
+	void SetModel(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList);
 
 	virtual void Render() override;
 	virtual void RenderWireFrame() override;
 
 	// ---------------------------------------------
 
-	static ModelRenderer * CreateFromFile(const std::string & modelFilePath, const std::string & textureBasePath, const Geometry::ModelData::LoadOptions & options, size_t capacity = 64, size_t pageSize = 10);
-	static ModelRenderer * CreateFromModel(const Geometry::ModelData & model, size_t capacity = 64, size_t pageSize = 10);
+	static ModelRenderer * CreateFromFile(Engine * engine, const std::string & modelFilePath, const std::string & textureBasePath, const Geometry::ModelData::LoadOptions & options, size_t capacity = 64, size_t pageSize = 10);
+	static ModelRenderer * CreateFromModel(Engine * engine, const Geometry::ModelData & model, size_t capacity = 64, size_t pageSize = 10);
 
 	// ---------------------------------------------
 
@@ -120,7 +122,6 @@ private:
 
 	GLuint mMaterialCount;
 	GLsizei mDrawCmdCount;
-	GLsizei mIndexCount;
 
 	TextureBuffer mModelMatrixBuffer;
 	//TextureBuffer mMaterialIndexBuffer;
@@ -129,6 +130,7 @@ private:
 
 	Renderer::DrawElementsIndirectCommandList mMeshDrawInstanceList;
 
+	bool mIsModelSet;
 	bool mIsShaderBufferSet;
 
 	friend class Engine;

@@ -21,7 +21,7 @@ CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
 
 	AddTextures(desc.mTextures);
 	SetMaterials(desc.mMaterials);
-	BuildTextureMapping(nullptr);
+	BuildTextureMapping();
 
 
 	const float k = 1.f / 1.5f;

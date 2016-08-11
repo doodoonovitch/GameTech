@@ -43,10 +43,17 @@ public:
 			return *this;
 		}
 
+		LoadOptions & SetLogBoneInfo(bool value)
+		{
+			mLogBoneInfo = value;
+			return *this;
+		}
+
 		bool mPreTransformVertices = false;
 		bool mFlipWindingOrder = false;
 		bool mFlipNormal = false;
 		bool mLogInfo = false;
+		bool mLogBoneInfo = false;
 	};
 
 	void LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options);

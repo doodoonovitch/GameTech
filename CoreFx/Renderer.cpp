@@ -31,7 +31,7 @@ bool Renderer::AddTexture(const char * filename, TextureCategory category, Textu
 
 	TextureInfo textureInfo(filename, rendererId, category, (GLsizei)width, (GLsizei)height, wrapS, wrapT, invertY);
 
-	mTextures.push_back(textureInfo);
+	mTextureInfoList.push_back(textureInfo);
 
 	return true;
 }
@@ -44,23 +44,17 @@ void Renderer::AddTextures(const TextureDescList & textures)
 	}
 }
 
-void Renderer::BuildTextureMapping(TextureMapping * lightPassTextureMapping) 
+void Renderer::BuildTextureMapping()
 {
-	const TextureInfoList & texInfoList = this->GetTextureInfoList();
+	GenericBuildTextureMapping(&mTextureMapping, mTextureInfoList);
+}
+
+void Renderer::GenericBuildTextureMapping(TextureMapping * texMap, const TextureInfoList & texInfoList)
+{
+	//const TextureInfoList & texInfoList = this->GetTextureInfoList();
 	for (TextureInfoList::const_iterator texInfoListIter = texInfoList.begin(); texInfoListIter != texInfoList.end(); ++texInfoListIter)
 	{
-		TextureMapping * texMap;
-
 		const TextureInfo & texInfo = *texInfoListIter;
-		if (texInfo.GetRendererId() == 0 && lightPassTextureMapping != nullptr)
-		{
-			texMap = lightPassTextureMapping;
-		}
-		else
-		{
-			texMap = &mTextureMapping;
-		}
-
 		TextureMappingList::iterator targetIt = std::find_if(texMap->mMapping.begin(), texMap->mMapping.end(), [&texInfo](const TextureMappingItem & item)
 		{
 			return item.mTexInfoList.front()->GetGroupId() == texInfo.GetGroupId();

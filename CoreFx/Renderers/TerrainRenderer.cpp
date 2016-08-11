@@ -23,7 +23,7 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	PRINT_MESSAGE("Initialize TerrainRenderer.....");
 
 	AddTextures(desc.mTextures);
-	BuildTextureMapping(nullptr);
+	BuildTextureMapping();
 	LoadTextures();
 
 	const glm::vec3 vertices[] =

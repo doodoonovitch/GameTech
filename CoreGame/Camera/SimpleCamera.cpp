@@ -54,6 +54,13 @@ void SimpleCamera::SetupViewportAndProjection()
 	Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
 }
 
+//#define CUBE_SAMPLES
+//#define TERRAIN_SAMPLE
+//#define DEEP_OCEAN_SAMPLE
+#define SKYDOME_SAMPLE
+#define COMPASS_SAMPLE
+#define MODEL_SAMPLE
+
 void SimpleCamera::OnInit()
 {
 	const glm::vec3 XAxis(1.f, 0.f, 0.f);
@@ -69,7 +76,6 @@ void SimpleCamera::OnInit()
 	}
 
 		Engine* engine = Engine::GetInstance();
-		engine->GetTextureManager()->LoadTexture2D("medias/compass.tif");
 
 		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
 		engine->AttachRenderer(gridRenderer);
@@ -77,6 +83,7 @@ void SimpleCamera::OnInit()
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
 		
+#ifdef CUBE_SAMPLES
 		{
 			//const float XStart = 1.f;
 			//const float YStart = 0.f;
@@ -159,7 +166,9 @@ void SimpleCamera::OnInit()
 				}
 			}
 		}
-		
+#endif // CUBE_SAMPLE
+
+#ifdef TERRAIN_SAMPLE
 		{
 			float yScale = 100.f;
 
@@ -191,7 +200,9 @@ void SimpleCamera::OnInit()
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);
 		}
-		
+#endif // TERRAIN_SAMPLE
+
+#ifdef DEEP_OCEAN_SAMPLE
 		{
 			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
@@ -207,7 +218,7 @@ void SimpleCamera::OnInit()
 			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
 			engine->AttachRenderer(ocean);
 		}
-		
+#endif // DEEP_OCEAN_SAMPLE
 		/*
 		{
 			Renderers::ShallowWaterRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
@@ -225,20 +236,30 @@ void SimpleCamera::OnInit()
 			engine->AttachRenderer(ocean);
 		}
 		*/
+
+#ifdef SKYDOME_SAMPLE
 		{
 			//Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/Skybox1");
 			//engine->AttachSkyboxRenderer(skybox);
 			mSkydome = new Renderers::SkydomeRenderer();
 			engine->AttachSkydomeRenderer(mSkydome);
 		}
+#endif // SKYDOME_SAMPLE
+
+#ifdef COMPASS_SAMPLE
 		{
+			engine->GetTextureManager()->LoadTexture2D("medias/compass.tif");
+
 			Renderers::CompassRenderer * compass = new Renderers::CompassRenderer();
 			engine->AttachRenderer(compass);
 		}
+#endif // COMPASS_SAMPLE
 
+#ifdef MODEL_SAMPLE
 		{
 			Geometry::ModelData::LoadOptions opt;
 			opt.SetLogInfo(true);
+			//opt.SetLogBoneInfo(true);
 
 			Geometry::ModelData modelData;
 			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(false));
@@ -247,8 +268,9 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo", opt.SetFlipWindingOrder(true).SetPreTransformVertices(true));
 			//modelData.LoadModel("Medias/Objects/Bullet/bullet.obj", "Medias/Objects/Bullet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(true));
 			//modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(true));
+			modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(true));
 			//modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
-			
+			/*
 			{
 				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
@@ -261,16 +283,16 @@ void SimpleCamera::OnInit()
 				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false));
 
 				matList.clear();
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(1.f), 1, .2f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
+				matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(0.56f), 1, .2f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
 				//matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .5f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
 			}
-			
-			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(modelData);
+			*/
+			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData);
 			if (modelRenderer != nullptr)
 			{
-				engine->AttachRenderer(modelRenderer);
 				Renderables::Model * model = modelRenderer->CreateModelInstance(0);
-				model->GetFrame()->SetPosition(-.5f, 25.f, 10.f);
+				model->GetFrame()->SetPosition(-.5f, 5.f, 1.f);
+				//model->GetFrame()->SetPosition(-.5f, 25.f, 10.f);
 
 				//Renderables::Model * model2 = modelRenderer->CreateModelInstance(0);
 				//model2->GetFrame()->SetPosition(5.f, 25.f, 10.f);
@@ -281,6 +303,7 @@ void SimpleCamera::OnInit()
 			}
 
 		}
+#endif // MODEL_SAMPLE
 
 	// Setup Lights
 		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
