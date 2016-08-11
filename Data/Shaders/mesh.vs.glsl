@@ -3,7 +3,6 @@ layout (location = POSITION_ATTRIBUTE) in vec3 in_Position;
 layout (location = NORMAL_ATTRIBUTE) in vec3 in_Normal;
 layout (location = TANGENT_ATTRIBUTE) in vec3 in_Tangent;
 layout (location = UV_ATTRIBUTE) in vec2 in_TexUV;
-layout (location = MESHID_ATTRIBUTE) in int in_MeshId;
 
 out VS_OUT
 {
@@ -20,7 +19,7 @@ void main()
 	vs_out.Tangent = in_Tangent;
 	vs_out.TexUV = in_TexUV;
 	vs_out.InstanceId = gl_InstanceID;
-	vs_out.MeshId = in_MeshId;
+	vs_out.MeshId = gl_BaseInstanceARB;
 	gl_Position = vec4(in_Position.xyz, 1);
 }
 

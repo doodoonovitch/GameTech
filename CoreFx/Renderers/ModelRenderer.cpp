@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 ModelRenderer::ModelRenderer(size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Model, 4>((GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
+	: SceneObjectRenderer<Renderables::Model, 3>((GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
 	, mMaterialCount(0)
 	, mDrawCmdCount(0)
 	, mMaterialTextureIndexesList(0)
@@ -53,7 +53,6 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Vertex]);
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Index]);
 	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_Indirect]);
-	PRINT_GEN_BUFFER("[ModelRenderer]", mVboIDs[VBO_MeshId]);
 
 	glBindVertexArray(mVaoID);
 	
@@ -75,18 +74,6 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 
 		glEnableVertexAttribArray(Shader::TANGENT_ATTRIBUTE);
 		glVertexAttribPointer(Shader::TANGENT_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, vertexDataSize, (GLvoid*)offsetof(Renderer::VertexData, mTangent));
-		GL_CHECK_ERRORS;
-
-		std::vector<GLuint> meshIds(mDrawCmdCount);
-		for (GLsizei i = 0; i < mDrawCmdCount; ++i)
-		{
-			meshIds[i] = mMeshDrawInstanceList[i].mBaseInstance;
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[VBO_MeshId]);
-		glBufferData(GL_ARRAY_BUFFER, mDrawCmdCount * sizeof(GLuint), meshIds.data(), GL_STATIC_DRAW);
-		glEnableVertexAttribArray(Shader::MESHID_ATTRIBUTE);
-		glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_UNSIGNED_INT, 0, 0);
-		glVertexAttribDivisor(Shader::MESHID_ATTRIBUTE, 1);
 		GL_CHECK_ERRORS;
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIDs[VBO_Index]);

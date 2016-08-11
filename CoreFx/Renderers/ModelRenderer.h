@@ -12,7 +12,7 @@ namespace CoreFx
 
 
 
-class ModelRenderer : public SceneObjectRenderer<Renderables::Model, 4>
+class ModelRenderer : public SceneObjectRenderer<Renderables::Model, 3>
 {
 public:
 
@@ -74,7 +74,6 @@ private:
 		VBO_Vertex,
 		VBO_Index,
 		VBO_Indirect,
-		VBO_MeshId,
 	};
 
 	struct PerInstanceData

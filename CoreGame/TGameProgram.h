@@ -263,13 +263,24 @@ protected:
 		PRINT_MESSAGE("\tVersion: %s", glGetString(GL_VERSION));
 		PRINT_MESSAGE("\tGLSL: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-		if (glewIsSupported("GL_VERSION_4_5"))
+		if (glewIsSupported("GL_VERSION_4_4"))
 		{
-			PRINT_MESSAGE("\tGLEW Version is 4.5");
+			PRINT_MESSAGE("\tGLEW Version is 4.4");
 		}
 		else
 		{
-			PRINT_MESSAGE("\tGLEW 4.5 not supported");
+			PRINT_ERROR("\tGLEW 4.4 not supported");
+			return false;
+		}
+
+		if (glewIsSupported("GL_ARB_shader_draw_parameters"))
+		{
+			PRINT_MESSAGE("\tGL_ARB_shader_draw_parameters is supported.");
+		}
+		else
+		{
+			PRINT_ERROR("\tGL_ARB_shader_draw_parameters is not supported!");
+			return false;
 		}
 
 		return true;
