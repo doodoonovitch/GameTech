@@ -682,18 +682,13 @@ void Engine::Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth,
 
 void Engine::Release()
 {
-	DebugOutput::GetInstance()->DisableDebugMessage();
-	GetInstance()->InternalRelease();
 	SAFE_DELETE(sInstance);
-	SAFE_DELETE(Log::Logger::sInstance);
 }
 
 Engine* Engine::GetInstance()
 {
 	if (sInstance == nullptr)
 	{
-		Log::Logger::sInstance = new Log::Logger();
-		DebugOutput::GetInstance()->EnableDebugMessage();
 		sInstance = new Engine();
 	}
 

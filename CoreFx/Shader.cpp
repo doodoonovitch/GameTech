@@ -96,8 +96,9 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 	{
 		GLint infoLogLength;
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-		GLchar *infoLog = new GLchar[infoLogLength];
+		GLchar *infoLog = new GLchar[infoLogLength + 1];
 		glGetShaderInfoLog(shader, infoLogLength, NULL, infoLog);
+		infoLog[infoLogLength] = 0;
 		PRINT_ERROR("%s Compile log : %s", ShaderName(whichShader), infoLog);
 		delete[] infoLog;
 	}
@@ -178,9 +179,10 @@ void Shader::CreateAndLinkProgram()
 		GLint infoLogLength;
 
 		glGetProgramiv(mProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
-		GLchar *infoLog = new GLchar[infoLogLength];
+		GLchar *infoLog = new GLchar[infoLogLength + 1];
 		glGetProgramInfoLog(mProgram, infoLogLength, NULL, infoLog);
-		PRINT_ERROR("Link log: %s", infoLog);
+		infoLog[infoLogLength] = 0;
+		PRINT_ERROR("Link log: %s", infoLog, 0);
 		delete[] infoLog;
 	}
 
@@ -245,12 +247,12 @@ void Shader::GenerateTexGetFunction(std::string & generatedSource, int texSample
 	const int tmpBufferCount = 200;
 	char tmpBuffer[tmpBufferCount];
 
-	sprintf_s(tmpBuffer, tmpBufferCount, "vec4 %s(int samplerIndex, vec3 p)\r\n{\r\n", functionName);
+	sprintf_s(tmpBuffer, tmpBufferCount, "vec4 %s(uint samplerIndex, vec2 texUV, uint layerIndex)\r\n{\r\n", functionName);
 	generatedSource.append(tmpBuffer);
 
 	for (int itex = 0; itex < texSamplerCount; ++itex)
 	{
-		sprintf_s(tmpBuffer, tmpBufferCount, "%sif(samplerIndex == %i) { return texture(%s[%i], p); }\r\n", itex == 0 ? "\t" : "\telse ", itex, samplerUniformVarName, itex);
+		sprintf_s(tmpBuffer, tmpBufferCount, "%sif(samplerIndex == %i) { return texture(%s[int(%i)], vec3(texUV, layerIndex)); }\r\n", itex == 0 ? "\t" : "\telse ", itex, samplerUniformVarName, itex);
 		generatedSource.append(tmpBuffer);
 	}
 	generatedSource.append("\treturn vec4(0);\r\n}\n");

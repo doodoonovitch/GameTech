@@ -296,12 +296,12 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		glm::vec3 specularColor(GetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR));
 		glm::vec3 emissiveColor(GetMaterialColor(mat, AI_MATKEY_COLOR_EMISSIVE));
 
-		if (specularColor.x == 0.f && specularColor.y == 0.f && specularColor.z == 0.f)
-		{
-			specularColor = glm::vec3(1.00f, 0.71f, 0.29f);
-			diffuseColor = glm::vec3(1.f);
-			//roughness = 1.f;
-		}
+		//if (specularColor.x == 0.f && specularColor.y == 0.f && specularColor.z == 0.f)
+		//{
+		//	specularColor = glm::vec3(1.00f, 0.71f, 0.29f);
+		//	diffuseColor = glm::vec3(0.f);
+		//	roughness = 0.1f;
+		//}
 
 		Renderer::TextureIndex diffuseTextureIndex = ProcessTextures(mDiffuseTextureList, mat, aiTextureType_DIFFUSE, textureBasePath);
 		Renderer::TextureIndex specularTextureIndex = ProcessTextures(mSpecularTextureList, mat, aiTextureType_SPECULAR, textureBasePath);

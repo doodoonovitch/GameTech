@@ -16,8 +16,6 @@ namespace Log
 
 class Logger
 {
-	friend class Engine;
-
 public:
 
 	static Logger * GetInstance()
@@ -29,12 +27,15 @@ public:
 	void Print(const char* messageFormat, ...);
 	void Print(const char* messageFormat, va_list args);
 
+	static void InitializeLogger();
+	static void ReleaseLogger();
 
 protected:
 	Logger();
 	virtual ~Logger();
 
 	static Logger * sInstance;
+
 };
 
 

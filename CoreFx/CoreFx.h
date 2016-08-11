@@ -57,7 +57,6 @@ namespace CoreFx
 		delete[] p;
 		p = nullptr;
 	}
-
 }; // namespace CoreFx
 
 #include "Log\Logger.h"

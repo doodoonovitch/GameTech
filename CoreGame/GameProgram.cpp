@@ -7,11 +7,13 @@ namespace CoreGame
 
 GameProgram::GameProgram()
 {
+	CoreFx::Log::Logger::InitializeLogger();
 }
 
 
 GameProgram::~GameProgram()
 {
+	CoreFx::Log::Logger::ReleaseLogger();
 }
 
 

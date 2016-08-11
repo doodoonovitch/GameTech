@@ -11,10 +11,6 @@ uniform float u_TriplanarBlendSharpness = 2.0;
 uniform sampler2DArray u_HeightMap;
 uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
 
-vec4 TexGet(int samplerIndex, vec3 p);
-vec4 TexGetNormal(int samplerIndex, vec3 p);
-
-
 in GS_OUT
 {
 	vec3 WorldPosition;
