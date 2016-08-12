@@ -404,6 +404,7 @@ void ModelRenderer::UpdateShaderData()
 			{
 				memcpy(buffer, glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetRealPart()), sizeof(glm::quat));
 				memcpy(buffer + sizeof(glm::quat), glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetDualPart()), sizeof(glm::quat));
+				memcpy(buffer + sizeof(glm::quat) + sizeof(glm::quat), glm::value_ptr(obj->GetFrame()->GetScale()), sizeof(glm::vec3));
 				obj->GetFrame()->SetIsModified(false);
 			}
 			buffer += sizeof(PerInstanceData);

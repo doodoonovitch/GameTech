@@ -34,6 +34,7 @@ void main()
 	int index = gs_in[0].InstanceId * 2;
 	modelDQ.Qr = texelFetch(u_perInstanceDataSampler, index);
 	modelDQ.Qd = texelFetch(u_perInstanceDataSampler, index + 1);
+	vec3 scale = texelFetch(u_perInstanceDataSampler, index + 2).xyz;
 	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 	//viewModelDQ = u_ViewDQ;
 
@@ -45,11 +46,12 @@ void main()
 		gs_out.MaterialIndex = matIndex;
 		gs_out.ViewModelDQ = viewModelDQ;
 		
-		gs_out.Position = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
+		vec3 position = scale * gl_in[i].gl_Position.xyz;
+		gs_out.Position = vec4(dqTransformPoint(viewModelDQ, position), 1);
 		gl_Position = u_ProjMatrix * gs_out.Position;
 
-		gs_out.Normal = gs_in[i].Normal; 
-		gs_out.Tangent = gs_in[i].Tangent; 
+		gs_out.Normal = scale * gs_in[i].Normal; 
+		gs_out.Tangent = scale * gs_in[i].Tangent; 
 
 		gs_out.TexUV = gs_in[i].TexUV;
 		EmitVertex();

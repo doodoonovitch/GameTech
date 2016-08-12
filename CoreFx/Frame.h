@@ -34,6 +34,9 @@ public:
 
 	const Maths::DualQuaternion & GetDualQuaternion() const;
 
+	inline const glm::vec3 & GetScale() const;
+	inline void SetScale(const glm::vec3 &value);
+
 private:
 
 	Frame(const Frame& rhs) = delete;
@@ -42,6 +45,7 @@ private:
 private:
 
 	Maths::DualQuaternion mDQ;
+	glm::vec3 mScale;
 
 	bool mIsModified;
 };
@@ -110,6 +114,16 @@ inline glm::quat Frame::GetRotation() const
 {
 	//return mRotation;
 	return mDQ.GetRotation();
+}
+
+inline const glm::vec3 & Frame::GetScale() const 
+{
+	return mScale;
+}
+
+inline void Frame::SetScale(const glm::vec3 &value)
+{
+	mScale = value;
 }
 
 

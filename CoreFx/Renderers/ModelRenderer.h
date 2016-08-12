@@ -76,12 +76,16 @@ private:
 		VBO_Indirect,
 	};
 
+#pragma pack(push, 1)
 	struct PerInstanceData
 	{
 		//glm::mat4 mModel;
 		glm::quat mQreal;
 		glm::quat mQdual;
+		glm::vec3 mScale;
+		GLfloat __padding__;
 	};
+#pragma pack(pop)
 
 	struct MaterialData
 	{
