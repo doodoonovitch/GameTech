@@ -348,6 +348,8 @@ void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene*
 	{
 		Renderer::VertexData & vertex = mVertexList[i + meshDrawInstance.mBaseVertex];
 
+		vertex.mMeshId = meshDrawInstance.mBaseInstance;
+
 		// Positions
 		vertex.mPosition.x = mesh->mVertices[i].x;
 		vertex.mPosition.y = mesh->mVertices[i].y;

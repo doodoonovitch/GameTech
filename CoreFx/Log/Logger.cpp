@@ -61,13 +61,10 @@ Logger * Logger::sInstance = nullptr;
 void Logger::InitializeLogger()
 {
 	CoreFx::Log::Logger::sInstance = new CoreFx::Log::Logger();
-	CoreFx::DebugOutput::GetInstance()->EnableDebugMessage();
 }
 
 void Logger::ReleaseLogger()
 {
-	CoreFx::DebugOutput::GetInstance()->DisableDebugMessage();
-	CoreFx::DebugOutput::GetInstance()->EnableDebugMessage();
 	SAFE_DELETE(CoreFx::Log::Logger::sInstance);
 }
 

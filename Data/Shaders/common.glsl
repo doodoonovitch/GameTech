@@ -1,6 +1,8 @@
 #version 440
-#extension GL_ARB_shader_draw_parameters : enable
 
+#ifdef GL_ARB_SHADER_DRAW_PARAMETERS
+#extension GL_ARB_shader_draw_parameters : enable
+#endif
 
 // ---------------------------------------------------------------------------
 // Vertex attribute locations

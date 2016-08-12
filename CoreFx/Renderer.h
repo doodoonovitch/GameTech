@@ -32,6 +32,7 @@ public:
 		//float _pad2;
 		glm::vec3 mTangent;
 		//float _pad3;
+		int mMeshId;
 	};
 
 	/*__declspec(align(4)) */class DrawElementsIndirectCommand

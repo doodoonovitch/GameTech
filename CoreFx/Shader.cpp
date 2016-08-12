@@ -61,6 +61,11 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 {
 	if (includeCommon && sCommonInclude.empty())
 	{
+		if (Engine::GetInstance()->IsUsedExtensionSupported(Engine::ARB_shader_draw_parameters))
+		{
+			sCommonInclude.append("#define GL_ARB_SHADER_DRAW_PARAMETERS 1 \n");
+		}
+
 		if (!MergeFile(sCommonInclude, "shaders/common.glsl"))
 		{
 			PRINT_ERROR("Error loading common include file : 'shaders/common.inc' !");

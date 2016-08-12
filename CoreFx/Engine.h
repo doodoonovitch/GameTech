@@ -87,12 +87,24 @@ public:
 		FrameDataBuffer_BindingIndex = 0
 	};
 
+	enum UsedExtensions
+	{
+		ARB_shader_draw_parameters,
+
+		__UsedExtensions_count__
+	};
+
 public:
 
 	static void Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	static void Release();
 
 	static Engine* GetInstance();
+
+	bool IsUsedExtensionSupported(UsedExtensions extension) const
+	{
+		return sIsUsedExtensionSupported[extension];
+	}
 
 	GLfloat GetDeltaTime() const { return mTimeDeltaTime[1]; }
 	GLfloat GetTime() const { return mTimeDeltaTime[0]; }
@@ -366,6 +378,7 @@ private:
 	};
 
 	static Engine* sInstance;
+	static bool sIsUsedExtensionSupported[__UsedExtensions_count__ + 1];
 
 	TextureManager * mTextureManager;
 	RendererContainer * mRenderers;

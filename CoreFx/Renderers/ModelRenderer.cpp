@@ -76,6 +76,13 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 		glVertexAttribPointer(Shader::TANGENT_ATTRIBUTE, 3, GL_FLOAT, GL_FALSE, vertexDataSize, (GLvoid*)offsetof(Renderer::VertexData, mTangent));
 		GL_CHECK_ERRORS;
 
+		if (!Engine::GetInstance()->IsUsedExtensionSupported(Engine::ARB_shader_draw_parameters))
+		{
+			glEnableVertexAttribArray(Shader::MESHID_ATTRIBUTE);
+			glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_UNSIGNED_INT, vertexDataSize, (GLvoid*)offsetof(Renderer::VertexData, mMeshId));
+			GL_CHECK_ERRORS;
+		}
+
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIDs[VBO_Index]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)(sizeof(GLuint) * indexList.size()), indexList.data(), GL_STATIC_DRAW);
 		GL_CHECK_ERRORS;

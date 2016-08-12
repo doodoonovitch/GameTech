@@ -279,8 +279,7 @@ protected:
 		}
 		else
 		{
-			PRINT_ERROR("\tGL_ARB_shader_draw_parameters is not supported!");
-			return false;
+			PRINT_MESSAGE("\tGL_ARB_shader_draw_parameters is not supported!");
 		}
 
 		return true;

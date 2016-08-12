@@ -9,6 +9,7 @@ namespace CoreFx
 
 
 	Engine* Engine::sInstance = nullptr;
+	bool Engine::sIsUsedExtensionSupported[__UsedExtensions_count__ + 1];
 
 Engine::Engine()
 	: mTextureManager(nullptr)
@@ -682,6 +683,7 @@ void Engine::Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth,
 
 void Engine::Release()
 {
+	CoreFx::DebugOutput::GetInstance()->DisableDebugMessage();
 	SAFE_DELETE(sInstance);
 }
 
@@ -689,7 +691,11 @@ Engine* Engine::GetInstance()
 {
 	if (sInstance == nullptr)
 	{
+		memset(sIsUsedExtensionSupported, sizeof(sIsUsedExtensionSupported), 0);
+		sIsUsedExtensionSupported[ARB_shader_draw_parameters] = glewIsSupported("GL_ARB_shader_draw_parameters") != 0;
+
 		sInstance = new Engine();
+		CoreFx::DebugOutput::GetInstance()->EnableDebugMessage();
 	}
 
 	assert(sInstance != nullptr);
