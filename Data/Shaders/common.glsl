@@ -1,6 +1,4 @@
-#version 440
-
-#ifdef GL_ARB_SHADER_DRAW_PARAMETERS
+#ifdef ARB_SHADER_DRAW_PARAMETERS
 #extension GL_ARB_shader_draw_parameters : enable
 #endif
 

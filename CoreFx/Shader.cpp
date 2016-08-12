@@ -61,9 +61,10 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 {
 	if (includeCommon && sCommonInclude.empty())
 	{
+		sCommonInclude.append("#version 440\n");
 		if (Engine::GetInstance()->IsUsedExtensionSupported(Engine::ARB_shader_draw_parameters))
 		{
-			sCommonInclude.append("#define GL_ARB_SHADER_DRAW_PARAMETERS 1 \n");
+			sCommonInclude.append("#define ARB_SHADER_DRAW_PARAMETERS 1 \n");
 		}
 
 		if (!MergeFile(sCommonInclude, "shaders/common.glsl"))
