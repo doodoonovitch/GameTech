@@ -16,24 +16,34 @@ namespace CoreFx
 
 class Model : public SceneObject
 {
-
 	template<typename T_Object, int T_vbo_count, typename T_MainShader = Shader, typename T_WireFrameShader = Shader> friend class Renderers::SceneObjectRenderer;
 	friend class Renderers::ModelRenderer;
 
 protected:
 
-	Model(std::uint8_t materialGroupIndex);
+	Model(GLuint modelIndex);
 	virtual ~Model();
 
 
-	std::uint8_t GetMaterialGroupIndex() const
+	GLuint GetModelIndex() const
 	{
-		return mMaterialGroupIndex;
+		return mModelIndex;
+	}
+
+	GLuint GetMatrixIndex() const
+	{
+		return mMatrixIndex;
+	}
+
+	void SetMatrixIndex(GLuint value)
+	{
+		mMatrixIndex = value;
 	}
 
 private:
 
-	std::uint8_t mMaterialGroupIndex;
+	GLuint mModelIndex;
+	GLuint mMatrixIndex;
 };
 
 

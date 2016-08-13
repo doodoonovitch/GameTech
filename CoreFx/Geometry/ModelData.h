@@ -37,6 +37,13 @@ public:
 			return *this;
 		}
 
+
+		LoadOptions & SetGenSmoothNormal(bool value)
+		{
+			mGenSmoothNormal = value;
+			return *this;
+		}		
+
 		LoadOptions & SetLogInfo(bool value)
 		{
 			mLogInfo = value;
@@ -49,6 +56,7 @@ public:
 			return *this;
 		}
 
+		bool mGenSmoothNormal = true;
 		bool mPreTransformVertices = false;
 		bool mFlipWindingOrder = false;
 		bool mFlipNormal = false;

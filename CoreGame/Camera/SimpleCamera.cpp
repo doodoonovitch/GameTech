@@ -265,10 +265,13 @@ void SimpleCamera::OnInit()
 			glm::vec3 position(0.f);
 			glm::vec3 scale(1.f);
 			glm::quat rotation;
+			glm::vec3 offset(5.f);
+			GLuint count = 1;
 
 #define ARTORIAS_SWORD_MODEL 0
-#define BOX_MODEL 1
+#define BOX_MODEL 0
 #define HOUSE_MODEL 0
+#define BALL_MODEL 1
 
 #if ARTORIAS_SWORD_MODEL == 1
 			{
@@ -325,6 +328,22 @@ void SimpleCamera::OnInit()
 				position = glm::vec3(0.f, 0.f, 0.f);
 				scale = glm::vec3(0.01f);
 			}
+#elif BALL_MODEL == 1
+			{
+				modelData.LoadModel("Medias/Objects/ball/3d.STL", "Medias/Objects/ball", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.clear();
+
+				matList.clear();
+				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
+
+				position = glm::vec3(0.f, 0.f, 0.f);
+				scale = glm::vec3(0.01f);
+				offset = glm::vec3(3.f, 0.f, 0.f);
+				count = 5;
+		}
 #else
 			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
 			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
@@ -332,20 +351,21 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/hatorrihanzo/HattoriHanzo2.0.obj", "Medias/Objects/hatorrihanzo", opt.SetPreTransformVertices(true));
 			//modelData.LoadModel("Medias/Objects/Bullet/bullet.obj", "Medias/Objects/Bullet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(true));
 			//modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
-			modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(true));
+			//modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(true));
 			//modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
 #endif
 
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData);
 			if (modelRenderer != nullptr)
 			{
-				Renderables::Model * model = modelRenderer->CreateModelInstance(0);
-				model->GetFrame()->SetPosition(position);
-				model->GetFrame()->SetRotation(rotation);
-				model->GetFrame()->SetScale(scale);
-
-				//Renderables::Model * model2 = modelRenderer->CreateModelInstance(0);
-				//model2->GetFrame()->SetPosition(5.f, 25.f, 10.f);
+				for (GLuint i = 0; i < count; ++i)
+				{
+					Renderables::Model * model = modelRenderer->CreateModelInstance(0);
+					model->GetFrame()->SetPosition(position);
+					model->GetFrame()->SetRotation(rotation);
+					model->GetFrame()->SetScale(scale);
+					position += offset;
+				}
 			}
 			else
 			{

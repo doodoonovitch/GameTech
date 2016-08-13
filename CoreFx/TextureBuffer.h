@@ -32,6 +32,8 @@ public:
 
 	void ReleaseResource();
 
+	void Resize(GLenum usage, GLsizeiptr size, const void * data = nullptr);
+
 protected:
 
 	GLuint mTextureId;

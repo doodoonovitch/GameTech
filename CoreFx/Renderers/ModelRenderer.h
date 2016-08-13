@@ -45,7 +45,7 @@ public:
 
 	// ---------------------------------------------
 
-	Renderables::Model * CreateModelInstance(std::uint8_t materialGroupIndex);
+	Renderables::Model * CreateModelInstance(GLuint modelIndex);
 	void DeleteModelInstance(Renderables::Model * modelInstance);
 
 private:
@@ -53,18 +53,17 @@ private:
 	enum class EMainShaderUniformIndex
 	{
 		u_MaterialBaseIndex,
-		u_perInstanceDataSampler,
-		//u_materialIndexSampler,
-		u_materialDataSampler,
+		u_MaterialDataSampler,
+		u_PerInstanceDataSampler,
+		u_PerInstanceDataIndexSampler,
 
 		__uniforms_count__
 	};
 
 	enum class EWireFrameShaderUniformIndex
 	{
-		//u_MaterialBaseIndex,
-		u_perInstanceDataSampler,
-		//u_materialIndexSampler,
+		u_PerInstanceDataSampler,
+		u_PerInstanceDataIndexSampler,
 
 		__uniforms_count__
 	};
@@ -110,7 +109,29 @@ private:
 
 	typedef std::vector<MaterialTextureIndexes> MaterialTextureIndexesList;
 
-	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;
+	struct ModelInstanceMapping
+	{
+		ModelInstanceMapping(GLuint drawElementsIndirectCommandIndex, GLuint drawElementsIndirectCommandCount, GLuint instanceCount)
+			: mDrawCommandIndex(drawElementsIndirectCommandIndex)
+			, mDrawCommandCount(drawElementsIndirectCommandCount)
+			, mInstanceCount(instanceCount)
+		{ }
+
+		ModelInstanceMapping(const ModelInstanceMapping & src)
+			: mDrawCommandIndex(src.mDrawCommandIndex)
+			, mDrawCommandCount(src.mDrawCommandCount)
+			, mInstanceCount(src.mInstanceCount)
+		{
+		}
+
+		GLuint mDrawCommandIndex = 0;
+		GLuint mDrawCommandCount = 0;
+		GLuint mInstanceCount = 0;
+	};
+
+	typedef std::vector<ModelInstanceMapping> ModelInstanceMappingList;
+
+	const int FIRST_TEXTURE_SAMPLER_INDEX = 3;
 
 private:
 
@@ -121,20 +142,24 @@ private:
 
 	void UpdateShaderData();
 
+	void UpdateObjMaxtrixIndexProp();
+
 private:
 
 	GLuint mMaterialCount;
 	GLsizei mDrawCmdCount;
 
-	TextureBuffer mModelMatrixBuffer;
-	//TextureBuffer mMaterialIndexBuffer;
+	TextureBuffer mInstanceMatrixBuffer;
+	TextureBuffer mInstanceMatrixIndexBuffer;
 
 	MaterialTextureIndexesList mMaterialTextureIndexesList;
 
-	Renderer::DrawElementsIndirectCommandList mMeshDrawInstanceList;
+	Renderer::DrawElementsIndirectCommandList mDrawCommandList;
+	ModelInstanceMappingList mModelInstanceMappingList;
 
 	bool mIsModelSet;
 	bool mIsShaderBufferSet;
+	bool mUpdateObjMatrixIndexProp;
 
 	friend class Engine;
 

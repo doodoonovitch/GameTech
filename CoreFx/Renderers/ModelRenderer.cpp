@@ -17,6 +17,7 @@ ModelRenderer::ModelRenderer(size_t capacity, size_t pageSize)
 	, mMaterialTextureIndexesList(0)
 	, mIsModelSet(false)
 	, mIsShaderBufferSet(false)
+	, mUpdateObjMatrixIndexProp(false)
 {
 
 }
@@ -31,11 +32,14 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize ModelRenderer....");
+	
+	mModelInstanceMappingList.clear();
+	mModelInstanceMappingList.push_back(ModelInstanceMapping(0, (GLuint)mDrawCommandList.size(), 0));
 
 	mMaterialCount = (GLuint)materialDescList.size();
 	mDrawCmdCount = (GLsizei)meshDrawInstanceList.size();
 	mMaterialTextureIndexesList.resize((GLuint)materialDescList.size());
-	mMeshDrawInstanceList = meshDrawInstanceList;
+	mDrawCommandList = meshDrawInstanceList;
 
 	mMaterials.Resize(mMaterialCount * Property_Per_Material);
 
@@ -91,23 +95,23 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	glBindVertexArray(0);
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
-	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(Renderer::DrawElementsIndirectCommand) * mDrawCmdCount, mMeshDrawInstanceList.data(), GL_STATIC_DRAW);
+	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(Renderer::DrawElementsIndirectCommand) * mDrawCmdCount, mDrawCommandList.data(), GL_STATIC_DRAW);
 	GL_CHECK_ERRORS;
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
 	GL_CHECK_ERRORS;
 
 
-	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
+	mInstanceMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
 
-	//mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, mDrawCmdCount * sizeof(GLuint), nullptr);
+	mInstanceMatrixIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, mMaterialCount * sizeof(GLuint), nullptr);
 
 	LoadTextures();
 	UpdateMaterialTextureIndex();
 
 
-	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mModelMatrixBuffer);
-	//PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mMaterialIndexBuffer);
+	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mInstanceMatrixBuffer);
+	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mInstanceMatrixIndexBuffer);
 
 	PRINT_MESSAGE("... ModelRenderer initialized!\n");
 	PRINT_END_SECTION;
@@ -116,8 +120,8 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 
 ModelRenderer::~ModelRenderer()
 {
-	mModelMatrixBuffer.ReleaseResource();
-	//mMaterialIndexBuffer.ReleaseResource();
+	mInstanceMatrixBuffer.ReleaseResource();
+	mInstanceMatrixIndexBuffer.ReleaseResource();
 }
 
  
@@ -128,12 +132,12 @@ void ModelRenderer::Render()
 	mShader.Use();
 	glBindVertexArray(mVaoID);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
-
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetTextureId());
+	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixBuffer.GetTextureId());
 
 	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixIndexBuffer.GetTextureId());
+
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, Engine::GetInstance()->GetMaterialDataBuffer().GetTextureId());
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
@@ -148,8 +152,6 @@ void ModelRenderer::Render()
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
-	//glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, (GLsizei)mObjs.GetCount());
-
 	glBindVertexArray(0);
 	mShader.UnUse();
 }
@@ -161,20 +163,14 @@ void ModelRenderer::RenderWireFrame()
 	mWireFrameShader.Use();
 	glBindVertexArray(mVaoID);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixBuffer.GetTextureId());
 
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetTextureId());
-
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_BUFFER, Engine::GetInstance()->GetMaterialDataBuffer().GetTextureId());
-
-	//glUniform1i(mWireFrameShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixIndexBuffer.GetTextureId());
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-	//glDrawElementsInstanced(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, 0, (GLsizei)mObjs.GetCount());
 
 	glBindVertexArray(0);
 	mWireFrameShader.UnUse();
@@ -302,9 +298,9 @@ void ModelRenderer::InitializeMainShader()
 	const char * uniformNames[(int)EMainShaderUniformIndex::__uniforms_count__] =
 	{
 		"u_MaterialBaseIndex",
-		"u_perInstanceDataSampler",
-		//"u_materialIndexSampler",
-		"u_materialDataSampler"
+		"u_MaterialDataSampler",
+		"u_PerInstanceDataSampler",
+		"u_PerInstanceDataIndexSampler"
 	};
 
 	mShader.CreateAndLinkProgram();
@@ -313,9 +309,9 @@ void ModelRenderer::InitializeMainShader()
 	mShader.AddUniforms(uniformNames, (int)EMainShaderUniformIndex::__uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_perInstanceDataSampler), 0);
-	//glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_materialIndexSampler), 1);
-	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_materialDataSampler), 1);
+	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_PerInstanceDataSampler), 0);
+	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_PerInstanceDataIndexSampler), 1);
+	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialDataSampler), 2);
 
 
 	PRINT_MESSAGE("Texture mapping : sampler count = %li", mTextureMapping.mMapping.size());
@@ -351,9 +347,8 @@ void ModelRenderer::InitializeWireFrameShader()
 
 	const char * uniformNames[(int)EWireFrameShaderUniformIndex::__uniforms_count__] =
 	{
-		//"u_MaterialBaseIndex",
-		"u_perInstanceDataSampler",
-		//"u_materialIndexSampler"
+		"u_PerInstanceDataSampler",
+		"u_PerInstanceDataIndexSampler"
 	};
 
 	mWireFrameShader.CreateAndLinkProgram();
@@ -362,8 +357,8 @@ void ModelRenderer::InitializeWireFrameShader()
 	mWireFrameShader.AddUniforms(uniformNames, (int)EWireFrameShaderUniformIndex::__uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_perInstanceDataSampler), 0);
-	//glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_materialIndexSampler), 1);
+	glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_PerInstanceDataSampler), 0);
+	glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_PerInstanceDataIndexSampler), 1);
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -379,39 +374,53 @@ void ModelRenderer::UpdateShaderData()
 	{
 		// --------------------------------------------
 
-		//glBindBuffer(GL_TEXTURE_BUFFER, mMaterialIndexBuffer.GetBufferId());
+		glBindBuffer(GL_TEXTURE_BUFFER, mInstanceMatrixIndexBuffer.GetBufferId());
 
-		//GLuint * matIndexBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
-		//assert(matIndexBuffer != nullptr);
+		GLuint index = 0;
+		GLuint * matIndexBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+		assert(matIndexBuffer != nullptr);
 
-		//if (matIndexBuffer != nullptr)
-		//{
-		//	for(GLsizei i = 0; i < mDrawCmdCount; ++i)
-		//	{
-		//		matIndexBuffer[i] = mMeshDrawInstanceList[i].mBaseInstance;
-		//	}
+		if (matIndexBuffer != nullptr)
+		{
+			for(GLsizei i = 0; i < (GLsizei)mModelInstanceMappingList.size(); ++i)
+			{
+				for (GLsizei j = 0; j < (GLsizei)mDrawCommandList.size(); ++j)
+				{
+					*matIndexBuffer = index;
+					++matIndexBuffer;
+				}
+				index += mModelInstanceMappingList[i].mInstanceCount;
+			}
 
-		//	glUnmapBuffer(GL_TEXTURE_BUFFER);
-		//}
+			glUnmapBuffer(GL_TEXTURE_BUFFER);
+		}
 
 		// --------------------------------------------
 
-		glBindBuffer(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetBufferId());
-		std::uint8_t * buffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
-		mObjs.ForEach([this, &buffer](Renderables::Model* obj)
+		if (mUpdateObjMatrixIndexProp)
 		{
-			if (obj->GetFrame()->IsModified())
+			UpdateObjMaxtrixIndexProp();
+		}
+
+		// --------------------------------------------
+
+		glBindBuffer(GL_TEXTURE_BUFFER, mInstanceMatrixBuffer.GetBufferId());
+		std::uint8_t * bufferBase = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+		mObjs.ForEach([this, &bufferBase](Renderables::Model* obj)
+		{
+			std::uint8_t * buffer = bufferBase + obj->GetMatrixIndex() * sizeof(PerInstanceData);
+			if (mUpdateObjMatrixIndexProp || obj->GetFrame()->IsModified())
 			{
 				memcpy(buffer, glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetRealPart()), sizeof(glm::quat));
 				memcpy(buffer + sizeof(glm::quat), glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetDualPart()), sizeof(glm::quat));
 				memcpy(buffer + sizeof(glm::quat) + sizeof(glm::quat), glm::value_ptr(obj->GetFrame()->GetScale()), sizeof(glm::vec3));
 				obj->GetFrame()->SetIsModified(false);
 			}
-			buffer += sizeof(PerInstanceData);
 		});
 		glUnmapBuffer(GL_TEXTURE_BUFFER);
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
+		mUpdateObjMatrixIndexProp = false;
 		// --------------------------------------------
 
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
@@ -434,14 +443,33 @@ void ModelRenderer::UpdateShaderData()
 	}
 }
 
+void ModelRenderer::UpdateObjMaxtrixIndexProp()
+{
+	GLuint index = 0;
+	std::vector<GLuint> indexList(mModelInstanceMappingList.size(), 0);
+	for (GLsizei i = 0; i < (GLsizei)mModelInstanceMappingList.size(); ++i)
+	{
+		indexList[i] = index;
+		index += mModelInstanceMappingList[i].mInstanceCount;
+	}
 
-Renderables::Model * ModelRenderer::CreateModelInstance(std::uint8_t materialGroupIndex)
+	mObjs.ForEach([this, &indexList](Renderables::Model* obj)
+	{
+		GLuint & offset = indexList[obj->GetModelIndex()];
+		obj->SetMatrixIndex(offset);
+		++offset;
+	});
+}
+
+
+Renderables::Model * ModelRenderer::CreateModelInstance(GLuint modelIndex)
 {
 	if (GetCount() < GetCapacity())
 	{
-		Renderables::Model *obj = new Renderables::Model(materialGroupIndex);
+		Renderables::Model *obj = new Renderables::Model(modelIndex);
 		mObjs.Attach(obj);
 		mIsShaderBufferSet = false;
+		mUpdateObjMatrixIndexProp = true;
 		return obj;
 	}
 	else
@@ -455,6 +483,7 @@ void ModelRenderer::DeleteModelInstance(Renderables::Model * modelInstance)
 	mObjs.Detach(modelInstance);
 	SAFE_DELETE(modelInstance);
 	mIsShaderBufferSet = false;
+	mUpdateObjMatrixIndexProp = true;
 }
 
 ModelRenderer * ModelRenderer::CreateFromFile(Engine * engine, const std::string & modelFilePath, const std::string & textureBasePath, const Geometry::ModelData::LoadOptions & options, size_t capacity, size_t pageSize)

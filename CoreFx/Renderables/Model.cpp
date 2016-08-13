@@ -10,9 +10,10 @@ namespace CoreFx
 
 
 
-Model::Model(std::uint8_t materialGroupIndex)
+Model::Model(GLuint modelIndex)
 	: SceneObject(true)
-	, mMaterialGroupIndex(materialGroupIndex)
+	, mModelIndex(modelIndex)
+	, mMatrixIndex(0)
 {
 }
 

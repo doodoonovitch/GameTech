@@ -3,8 +3,8 @@ layout (triangle_strip, max_vertices = 3) out;
 
 uniform int u_MaterialBaseIndex;
 
-uniform samplerBuffer u_perInstanceDataSampler;
-uniform isamplerBuffer u_materialIndexSampler;
+uniform samplerBuffer u_PerInstanceDataSampler;
+uniform isamplerBuffer u_PerInstanceDataIndexSampler;
 
 #define PROPERTY_PER_MATERIAL_COUNT 3
 
@@ -30,15 +30,18 @@ out GS_OUT
 
 void main()
 {  
+	int offset = texelFetch(u_PerInstanceDataIndexSampler, gs_in[0].MeshId).r;
+
+	int index = (offset + gs_in[0].InstanceId) * 3;
+
+
 	DualQuat modelDQ;
-	int index = gs_in[0].InstanceId * 2;
-	modelDQ.Qr = texelFetch(u_perInstanceDataSampler, index);
-	modelDQ.Qd = texelFetch(u_perInstanceDataSampler, index + 1);
-	vec3 scale = texelFetch(u_perInstanceDataSampler, index + 2).xyz;
+	modelDQ.Qr = texelFetch(u_PerInstanceDataSampler, index);
+	modelDQ.Qd = texelFetch(u_PerInstanceDataSampler, index + 1);
+	vec3 scale = texelFetch(u_PerInstanceDataSampler, index + 2).xyz;
 	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 	//viewModelDQ = u_ViewDQ;
 
-	//int matIndex = texelFetch(u_materialIndexSampler, gs_in[0].MeshId).r * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
 	int matIndex = gs_in[0].MeshId * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
 
 	for(int i = 0; i < gl_in.length(); ++i )

@@ -31,6 +31,7 @@ void TextureBuffer::CreateResource(GLenum usage, GLenum internalformat, GLsizeip
 	glBindTexture(GL_TEXTURE_BUFFER, mTextureId);
 	glTexBuffer(GL_TEXTURE_BUFFER, internalformat, mBufferId);
 	GL_CHECK_ERRORS;
+	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 void TextureBuffer::ReleaseResource()
@@ -39,6 +40,14 @@ void TextureBuffer::ReleaseResource()
 	mTextureId = 0;
 	glDeleteBuffers(1, &mBufferId);
 	mBufferId = 0;
+}
+
+void TextureBuffer::Resize(GLenum usage, GLsizeiptr size, const void * data)
+{
+	glBindBuffer(GL_TEXTURE_BUFFER, mBufferId);
+	glBufferData(GL_TEXTURE_BUFFER, size, data, usage);
+	GL_CHECK_ERRORS;
+	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 } // namespace CoreFx
