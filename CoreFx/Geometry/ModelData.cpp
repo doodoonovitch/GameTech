@@ -33,6 +33,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		mTextureList.clear();
 		mMaterialList.clear();
 		mMeshDrawInstanceList.clear();
+		mModelMappingList.clear();
 		mDiffuseTextureList.clear();
 		mSpecularTextureList.clear();
 		mEmissiveTextureList.clear();
@@ -94,7 +95,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 		Renderer::DrawElementsIndirectCommand meshDrawInstance;
 		meshDrawInstance.mElemCount = meshIndexCount;
-		meshDrawInstance.mInstanceCount = 1;
+		meshDrawInstance.mInstanceCount = 0;
 		meshDrawInstance.mFirstIndex = totalIndexCount;
 		meshDrawInstance.mBaseVertex = totalVertexCount;
 		meshDrawInstance.mBaseInstance = (GLuint)mesh->mMaterialIndex;//(GLuint)mMeshDrawInstanceList.size();
@@ -108,6 +109,8 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 	{
 		goto LoadModelEnd;
 	}
+
+	mModelMappingList.push_back(ModelMapping(0, (GLuint)mMeshDrawInstanceList.size()));
 
 	mVertexList.resize(totalVertexCount);
 	mIndexList.resize(totalIndexCount);
@@ -540,6 +543,31 @@ Renderer::TextureIndex ModelData::ProcessTextures(TextureIndexMap & textureIndex
 		}
 	}
 	return textureIndex;
+}
+
+bool ModelData::CopyAndAddModel(GLuint sourceModelIndex, GLuint materialOffset)
+{
+	if (sourceModelIndex < (GLuint)mModelMappingList.size())
+	{
+		GLuint drawCommandIndex = (GLuint)mMeshDrawInstanceList.size();
+		const ModelMapping & mapping = mModelMappingList[sourceModelIndex];
+		for (GLuint i = 0; i < mapping.mDrawCommandCount; ++i)
+		{
+			Renderer::DrawElementsIndirectCommand drawCommand = mMeshDrawInstanceList[mapping.mDrawCommandIndex + i];
+			drawCommand.mBaseInstance += materialOffset;
+			mMeshDrawInstanceList.push_back(drawCommand);
+		}
+
+		
+		mModelMappingList.push_back(ModelMapping(drawCommandIndex, mapping.mDrawCommandCount));
+
+		return true;
+	}
+	else
+	{
+		PRINT_ERROR("Cannot copy and add model : invalid sourceModelIndex=%li (Model count = %li)!", sourceModelIndex, mModelMappingList.size());
+		return false;
+	}
 }
 
 // =======================================================================

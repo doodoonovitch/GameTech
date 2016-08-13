@@ -31,16 +31,13 @@ out GS_OUT
 void main()
 {  
 	int offset = texelFetch(u_PerInstanceDataIndexSampler, gs_in[0].MeshId).r;
-
 	int index = (offset + gs_in[0].InstanceId) * 3;
-
-
+	
 	DualQuat modelDQ;
 	modelDQ.Qr = texelFetch(u_PerInstanceDataSampler, index);
 	modelDQ.Qd = texelFetch(u_PerInstanceDataSampler, index + 1);
 	vec3 scale = texelFetch(u_PerInstanceDataSampler, index + 2).xyz;
 	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
-	//viewModelDQ = u_ViewDQ;
 
 	int matIndex = gs_in[0].MeshId * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
 

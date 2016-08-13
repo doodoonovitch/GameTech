@@ -27,7 +27,7 @@ public:
 	ModelRenderer(size_t capacity = 64, size_t pageSize = 10);
 	virtual ~ModelRenderer();
 
-	void SetModel(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList);
+	void SetModel(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList, const Geometry::ModelData::ModelMappingList & modelMapping);
 
 	virtual void Render() override;
 	virtual void RenderWireFrame() override;
@@ -109,24 +109,26 @@ private:
 
 	typedef std::vector<MaterialTextureIndexes> MaterialTextureIndexesList;
 
-	struct ModelInstanceMapping
+	struct ModelInstanceMapping : public Geometry::ModelData::ModelMapping
 	{
-		ModelInstanceMapping(GLuint drawElementsIndirectCommandIndex, GLuint drawElementsIndirectCommandCount, GLuint instanceCount)
-			: mDrawCommandIndex(drawElementsIndirectCommandIndex)
-			, mDrawCommandCount(drawElementsIndirectCommandCount)
+		ModelInstanceMapping(GLuint drawElementsIndirectCommandIndex = 0, GLuint drawElementsIndirectCommandCount = 0, GLuint instanceCount = 0)
+			: Geometry::ModelData::ModelMapping(drawElementsIndirectCommandIndex, drawElementsIndirectCommandCount)
 			, mInstanceCount(instanceCount)
 		{ }
 
 		ModelInstanceMapping(const ModelInstanceMapping & src)
-			: mDrawCommandIndex(src.mDrawCommandIndex)
-			, mDrawCommandCount(src.mDrawCommandCount)
+			: Geometry::ModelData::ModelMapping(src)
 			, mInstanceCount(src.mInstanceCount)
 		{
 		}
 
-		GLuint mDrawCommandIndex = 0;
-		GLuint mDrawCommandCount = 0;
-		GLuint mInstanceCount = 0;
+		ModelInstanceMapping(const Geometry::ModelData::ModelMapping & src)
+			: Geometry::ModelData::ModelMapping(src)
+			, mInstanceCount(0)
+		{
+		}
+
+		GLuint mInstanceCount;
 	};
 
 	typedef std::vector<ModelInstanceMapping> ModelInstanceMappingList;
@@ -143,6 +145,7 @@ private:
 	void UpdateShaderData();
 
 	void UpdateObjMaxtrixIndexProp();
+	void UpdateDrawCommandListInstanceCount(const ModelInstanceMapping & mapping);
 
 private:
 

@@ -22,7 +22,7 @@ ModelRenderer::ModelRenderer(size_t capacity, size_t pageSize)
 
 }
 
-void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList)
+void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList, const Geometry::ModelData::ModelMappingList & modelMapping)
 {
 	if (mIsModelSet)
 	{
@@ -34,7 +34,11 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	PRINT_MESSAGE("Initialize ModelRenderer....");
 	
 	mModelInstanceMappingList.clear();
-	mModelInstanceMappingList.push_back(ModelInstanceMapping(0, (GLuint)mDrawCommandList.size(), 0));
+	mModelInstanceMappingList.reserve(modelMapping.size());
+	for (Geometry::ModelData::ModelMappingList::const_iterator it = modelMapping.begin(); it != modelMapping.end(); ++it)
+	{
+		mModelInstanceMappingList.push_back(*it);
+	}
 
 	mMaterialCount = (GLuint)materialDescList.size();
 	mDrawCmdCount = (GLsizei)meshDrawInstanceList.size();
@@ -379,17 +383,19 @@ void ModelRenderer::UpdateShaderData()
 		GLuint index = 0;
 		GLuint * matIndexBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 		assert(matIndexBuffer != nullptr);
-
+		//std::vector<GLuint> indexList(mMaterialCount);
 		if (matIndexBuffer != nullptr)
 		{
-			for(GLsizei i = 0; i < (GLsizei)mModelInstanceMappingList.size(); ++i)
+			for(ModelInstanceMappingList::const_iterator it = mModelInstanceMappingList.begin(); it !=  mModelInstanceMappingList.end(); ++it)
 			{
-				for (GLsizei j = 0; j < (GLsizei)mDrawCommandList.size(); ++j)
+				const ModelInstanceMapping & mapping = *it;
+				for (GLuint j = 0; j < mapping.mDrawCommandCount; ++j)
 				{
-					*matIndexBuffer = index;
-					++matIndexBuffer;
+					const Renderer::DrawElementsIndirectCommand & cmd = mDrawCommandList[mapping.mDrawCommandIndex + j];
+					//indexList[cmd.mBaseInstance] = index;
+					matIndexBuffer[cmd.mBaseInstance] = index;
 				}
-				index += mModelInstanceMappingList[i].mInstanceCount;
+				index += mapping.mInstanceCount;
 			}
 
 			glUnmapBuffer(GL_TEXTURE_BUFFER);
@@ -408,7 +414,8 @@ void ModelRenderer::UpdateShaderData()
 		std::uint8_t * bufferBase = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 		mObjs.ForEach([this, &bufferBase](Renderables::Model* obj)
 		{
-			std::uint8_t * buffer = bufferBase + obj->GetMatrixIndex() * sizeof(PerInstanceData);
+			GLuint matrixIndex = obj->GetMatrixIndex();
+			std::uint8_t * buffer = bufferBase + (matrixIndex * sizeof(PerInstanceData));
 			if (mUpdateObjMatrixIndexProp || obj->GetFrame()->IsModified())
 			{
 				memcpy(buffer, glm::value_ptr(obj->GetFrame()->GetDualQuaternion().GetRealPart()), sizeof(glm::quat));
@@ -427,10 +434,9 @@ void ModelRenderer::UpdateShaderData()
 
 		Renderer::DrawElementsIndirectCommand * cmd = (Renderer::DrawElementsIndirectCommand *)	glMapBuffer(GL_DRAW_INDIRECT_BUFFER, GL_WRITE_ONLY);
 
-		GLuint instanceCount = (GLuint)mObjs.GetCount();
 		for (auto i = 0; i < mDrawCmdCount; i++)
 		{
-			cmd->mInstanceCount = instanceCount;
+			cmd->mInstanceCount = mDrawCommandList[i].mInstanceCount;
 			++cmd;
 		}
 
@@ -461,25 +467,53 @@ void ModelRenderer::UpdateObjMaxtrixIndexProp()
 	});
 }
 
+void ModelRenderer::UpdateDrawCommandListInstanceCount(const ModelInstanceMapping & mapping)
+{
+	for (GLuint i = 0; i < mapping.mDrawCommandCount; ++i)
+	{
+		Renderer::DrawElementsIndirectCommand & drawCommand = mDrawCommandList[mapping.mDrawCommandIndex + i];
+		drawCommand.mInstanceCount = mapping.mInstanceCount;
+	}
+}
 
 Renderables::Model * ModelRenderer::CreateModelInstance(GLuint modelIndex)
 {
+	if (modelIndex >= mModelInstanceMappingList.size())
+	{
+		PRINT_ERROR("Cannot create model instance : invalid modelIndex=%li! (Model count=%li)", modelIndex, mModelInstanceMappingList.size());
+		return nullptr;
+	}
+		
 	if (GetCount() < GetCapacity())
 	{
 		Renderables::Model *obj = new Renderables::Model(modelIndex);
 		mObjs.Attach(obj);
+
+		ModelInstanceMapping & mapping = mModelInstanceMappingList[modelIndex];
+		++mapping.mInstanceCount;
+		UpdateDrawCommandListInstanceCount(mapping);
+
 		mIsShaderBufferSet = false;
 		mUpdateObjMatrixIndexProp = true;
 		return obj;
 	}
 	else
+	{
+		PRINT_ERROR("Cannot create model instance : out of capacity (capacity = %li, count = %li)!", GetCapacity(), GetCount());
 		return nullptr;
+	}		
 }
 
 void ModelRenderer::DeleteModelInstance(Renderables::Model * modelInstance)
 {
 	if (modelInstance == nullptr)
 		return;
+
+	GLuint modelIndex = modelInstance->GetModelIndex();
+	ModelInstanceMapping & mapping = mModelInstanceMappingList[modelIndex];
+	--mapping.mInstanceCount;
+	UpdateDrawCommandListInstanceCount(mapping);
+
 	mObjs.Detach(modelInstance);
 	SAFE_DELETE(modelInstance);
 	mIsShaderBufferSet = false;
@@ -509,7 +543,7 @@ ModelRenderer * ModelRenderer::CreateFromModel(Engine * engine, const Geometry::
 
 		engine->AttachRenderer(renderer);
 
-		renderer->SetModel(model.GetVertexList(), model.GetIndexList(), model.GetMaterialDescList(), model.GetTextureDescList(), model.GetMeshDrawInstanceList());
+		renderer->SetModel(model.GetVertexList(), model.GetIndexList(), model.GetMaterialDescList(), model.GetTextureDescList(), model.GetMeshDrawInstanceList(), model.GetModelMappingList());
 
 		return renderer;
 	}

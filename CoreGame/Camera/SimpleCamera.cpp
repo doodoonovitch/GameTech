@@ -262,11 +262,12 @@ void SimpleCamera::OnInit()
 			//opt.SetLogBoneInfo(true);
 
 			Geometry::ModelData modelData;
-			glm::vec3 position(0.f);
 			glm::vec3 scale(1.f);
-			glm::quat rotation;
-			glm::vec3 offset(5.f);
-			GLuint count = 1;
+			glm::vec3 position(0.f);
+			glm::quat qOrientation;
+			glm::vec3 transl(1.f);
+			glm::vec3 rot(0.f);
+			glm::uvec3 count(1, 1, 1);
 
 #define ARTORIAS_SWORD_MODEL 0
 #define BOX_MODEL 0
@@ -289,7 +290,14 @@ void SimpleCamera::OnInit()
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(0.56f), 1, .2f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
 				//matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
 
-				position = glm::vec3(5.f, 25.f, 10.f);
+				//position = glm::vec3(5.f, 25.f, 10.f);
+
+				position = glm::vec3(0.f, 0.f, 0.f);
+				scale = glm::vec3(0.1f);
+				transl = glm::vec3(1.f, 3.f, -1.f);
+				count = glm::uvec3(20);
+				rot = glm::vec3(0.f, glm::two_pi<float>() / (float)count.y, 0.f);
+
 			}
 #elif BOX_MODEL == 1
 			{
@@ -308,7 +316,11 @@ void SimpleCamera::OnInit()
 
 				position = glm::vec3(3.f, 3.f, -3.f);
 				scale = glm::vec3(0.25f);
-				rotation = glm::angleAxis(glm::two_pi<float>(), ZAxis);
+				qOrientation = glm::angleAxis(glm::two_pi<float>(), ZAxis);
+				transl = glm::vec3(10.f, 10.f, -10.f);
+				count = glm::uvec3(20);
+				rot = glm::vec3(glm::two_pi<float>() / (float)count.x, glm::two_pi<float>() / (float)count.y, glm::two_pi<float>() / (float)count.z);
+
 			}
 #elif HOUSE_MODEL == 1
 			{
@@ -337,12 +349,26 @@ void SimpleCamera::OnInit()
 				texList.clear();
 
 				matList.clear();
+				// Iron : 0.56,0.57,0.58
+				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.56f, 0.57f, 0.58f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
+				// Copper : 0.95f, 0.64f, 0.54f
+				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
+				// Gold : 1.00f, 0.71f, 0.29f
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
+				// Aluminum : 0.91,0.92,0.92
+				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.91f, 0.92f, 0.92f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
+				// Silver : 0.95,0.93,0.88
+				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
+
+				modelData.CopyAndAddModel(0, 1);
+				modelData.CopyAndAddModel(0, 2);
+				modelData.CopyAndAddModel(0, 3);
+				modelData.CopyAndAddModel(0, 4);
 
 				position = glm::vec3(0.f, 0.f, 0.f);
-				scale = glm::vec3(0.01f);
-				offset = glm::vec3(3.f, 0.f, 0.f);
-				count = 5;
+				scale = glm::vec3(0.1f);
+				transl = glm::vec3(12.f, 12.f, -12.f);
+				count = glm::uvec3(6);
 		}
 #else
 			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
@@ -355,17 +381,51 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
 #endif
 
-			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData);
+			GLuint capacity = count.x * count.y * count.z;
+			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData, capacity > 0 ? capacity : 1);
 			if (modelRenderer != nullptr)
 			{
-				for (GLuint i = 0; i < count; ++i)
+				glm::vec3 rotAngle(0.f);
+				glm::vec3 p(0.f);
+
+				GLuint modelCount = (GLuint)modelData.GetModelMappingList().size();
+				for (GLuint i = 0; i < count.x; ++i)
 				{
-					Renderables::Model * model = modelRenderer->CreateModelInstance(0);
-					model->GetFrame()->SetPosition(position);
-					model->GetFrame()->SetRotation(rotation);
-					model->GetFrame()->SetScale(scale);
-					position += offset;
+					glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
+					rotAngle.x += rot.x;
+
+					p.y = 0.f;
+					for (GLuint j = 0; j < count.y; ++j)
+					{
+						glm::quat qY = glm::angleAxis(rotAngle.y, YAxis);
+						rotAngle.y += rot.y;
+
+						p.z = 0.f;
+						for (GLuint k = 0; k < count.z; ++k)
+						{
+							glm::quat qZ = glm::angleAxis(rotAngle.z, ZAxis);
+							rotAngle.z += rot.z;
+
+							glm::quat qRot = qX * qY * qZ * qOrientation;
+
+							Renderables::Model * model = modelRenderer->CreateModelInstance(i % modelCount);
+							if (model != nullptr)
+							{
+								model->GetFrame()->SetPosition(position + p);
+								model->GetFrame()->SetRotation(qRot);
+								model->GetFrame()->SetScale(scale);
+							}
+
+							p.z += transl.z;
+						}
+
+						p.y += transl.y;
+					}
+
+					p.x += transl.x;
 				}
+
+				PRINT_MESSAGE("Model instance count = %li.", modelRenderer->GetCount());
 			}
 			else
 			{
@@ -389,7 +449,7 @@ void SimpleCamera::OnInit()
 		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(0.f, 30.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 50.f);
 
 
-		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);
+		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 300.f);
 		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
 
 	//setup camera

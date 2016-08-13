@@ -64,6 +64,27 @@ public:
 		bool mLogBoneInfo = false;
 	};
 
+	struct ModelMapping
+	{
+		ModelMapping(GLuint drawElementsIndirectCommandIndex, GLuint drawElementsIndirectCommandCount)
+			: mDrawCommandIndex(drawElementsIndirectCommandIndex)
+			, mDrawCommandCount(drawElementsIndirectCommandCount)
+		{
+		}
+
+		ModelMapping(const ModelMapping & src)
+			: mDrawCommandIndex(src.mDrawCommandIndex)
+			, mDrawCommandCount(src.mDrawCommandCount)
+		{
+		}
+
+		GLuint mDrawCommandIndex = 0;
+		GLuint mDrawCommandCount = 0;
+	};
+
+	typedef std::vector<ModelMapping> ModelMappingList;
+
+
 	void LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options);
 	bool IsLoaded() const { return mIsLoaded; }
 
@@ -75,6 +96,11 @@ public:
 
 	Renderer::MaterialDescList & GetMaterialDescList() { return mMaterialList; }
 	Renderer::TextureDescList & GetTextureDescList() { return mTextureList; }
+
+	const ModelMappingList & GetModelMappingList() const { return mModelMappingList; }
+	ModelMappingList & GetModelMappingList() { return mModelMappingList; }
+
+	bool CopyAndAddModel(GLuint sourceModelIndex, GLuint materialOffset);
 
 protected:
 
@@ -100,6 +126,7 @@ protected:
 	Renderer::BoneDataList mBoneDataList;
 	Renderer::VertexBoneDataList mVertexBoneDataList;
 	BoneMapping mBoneMapping;
+	ModelMappingList mModelMappingList;
 
 	TextureIndexMap mDiffuseTextureList;
 	TextureIndexMap mSpecularTextureList;
