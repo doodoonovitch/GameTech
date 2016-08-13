@@ -125,7 +125,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &meshInstanceNum, &options](unsigned int meshIndex, const aiScene* scene, int /*level*/)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		this->ProcessMesh(meshInstanceNum, mesh, scene, options.mFlipNormal);
+		this->ProcessMesh(meshInstanceNum, mesh, scene, options);
 		++meshInstanceNum;
 		return true;
 	}, 0))
@@ -345,9 +345,9 @@ bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool
 	return true;
 }
 
-void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* /*scene*/, bool flipNormal)
+void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* /*scene*/, const LoadOptions & options)
 {
-	float c = flipNormal ? -1.f : 1.f;
+	float c = options.mFlipNormal ? -1.f : 1.f;
 	const Renderer::DrawElementsIndirectCommand & meshDrawInstance = mMeshDrawInstanceList[meshInstanceNum];
 	// Walk through each of the mesh's vertices
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
@@ -355,31 +355,41 @@ void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene*
 		Renderer::VertexData & vertex = mVertexList[i + meshDrawInstance.mBaseVertex];
 
 		vertex.mMeshId = meshDrawInstance.mBaseInstance;
+		glm::vec4 p(0.f, 0.f, 0.f, 1.f);
+		glm::vec4 n(0.f);
+		glm::vec4 t(0.f);
 
 		// Positions
-		vertex.mPosition.x = mesh->mVertices[i].x;
-		vertex.mPosition.y = mesh->mVertices[i].y;
-		vertex.mPosition.z = mesh->mVertices[i].z;
+		p.x = mesh->mVertices[i].x;
+		p.y = mesh->mVertices[i].y;
+		p.z = mesh->mVertices[i].z;
 
 		// Normals
 		if (mesh->HasNormals())
 		{
-			vertex.mNormal.x = c * mesh->mNormals[i].x;
-			vertex.mNormal.y = c * mesh->mNormals[i].y;
-			vertex.mNormal.z = c * mesh->mNormals[i].z;
+			n.x = c * mesh->mNormals[i].x;
+			n.y = c * mesh->mNormals[i].y;
+			n.z = c * mesh->mNormals[i].z;
 		}
-		else
-			vertex.mNormal = glm::vec3(0.f);
 
 		// Tangent
 		if (mesh->HasTangentsAndBitangents())
 		{
-			vertex.mTangent.x = c * mesh->mTangents[i].x;
-			vertex.mTangent.y = c * mesh->mTangents[i].y;
-			vertex.mTangent.z = c * mesh->mTangents[i].z;
+			t.x = c * mesh->mTangents[i].x;
+			t.y = c * mesh->mTangents[i].y;
+			t.z = c * mesh->mTangents[i].z;
 		}
-		else
-			vertex.mTangent = glm::vec3(0.f);
+
+		if (options.mUseMatrix)
+		{
+			p = options.mMatrix * p;
+			n = options.mMatrix * n;
+			t = options.mMatrix * t;
+		}
+
+		vertex.mNormal = glm::vec3(n);
+		vertex.mTangent = glm::vec3(t);
+		vertex.mPosition = glm::vec3(p / p.w);
 
 		// Texture Coordinates
 		if (mesh->HasTextureCoords(0)) // Does the mesh contain texture coordinates?

@@ -22,6 +22,15 @@ public:
 		LoadOptions & SetPreTransformVertices(bool value)
 		{
 			mPreTransformVertices = value;
+			mUseMatrix = false;
+			return *this;
+		}
+
+		LoadOptions & SetPreTransformVertices(const glm::mat4 & mat)
+		{
+			mPreTransformVertices = true;
+			mUseMatrix = true;
+			mMatrix = mat;
 			return *this;
 		}
 
@@ -62,6 +71,8 @@ public:
 		bool mFlipNormal = false;
 		bool mLogInfo = false;
 		bool mLogBoneInfo = false;
+		bool mUseMatrix = false;
+		glm::mat4 mMatrix;
 	};
 
 	struct ModelMapping
@@ -108,7 +119,7 @@ protected:
 	typedef std::map<std::string, GLuint> BoneMapping;
 
 	void ProcessMaterials(const aiScene* scene, const std::string & textureBasePath);
-	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* scene, bool flipNormal);
+	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* scene, const LoadOptions & options);
 	void ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh);
 	Renderer::TextureIndex ProcessTextures(TextureIndexMap & texMap, aiMaterial* mat, aiTextureType type, const std::string & textureBasePath);
 

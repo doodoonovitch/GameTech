@@ -270,9 +270,9 @@ void SimpleCamera::OnInit()
 			glm::uvec3 count(1, 1, 1);
 
 #define ARTORIAS_SWORD_MODEL 0
-#define BOX_MODEL 0
+#define BOX_MODEL 1
 #define HOUSE_MODEL 0
-#define BALL_MODEL 1
+#define BALL_MODEL 0
 
 #if ARTORIAS_SWORD_MODEL == 1
 			{
@@ -301,7 +301,10 @@ void SimpleCamera::OnInit()
 			}
 #elif BOX_MODEL == 1
 			{
-				modelData.LoadModel("Medias/Objects/Box/Box.3DS", "Medias/Objects/Box/Textures", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
+				glm::mat4 m = glm::scale(glm::vec3(0.25f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Box/Box.3DS", "Medias/Objects/Box/Textures", opt);
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
 
@@ -315,8 +318,7 @@ void SimpleCamera::OnInit()
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.784314f), 0, glm::vec3(0.952941f), 1, 1.f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
 
 				position = glm::vec3(3.f, 3.f, -3.f);
-				scale = glm::vec3(0.25f);
-				qOrientation = glm::angleAxis(glm::two_pi<float>(), ZAxis);
+				//scale = glm::vec3(0.25f);
 				transl = glm::vec3(10.f, 10.f, -10.f);
 				count = glm::uvec3(20);
 				rot = glm::vec3(glm::two_pi<float>() / (float)count.x, glm::two_pi<float>() / (float)count.y, glm::two_pi<float>() / (float)count.z);
@@ -324,7 +326,11 @@ void SimpleCamera::OnInit()
 			}
 #elif HOUSE_MODEL == 1
 			{
-				modelData.LoadModel("Medias/Objects/OldHouse/house_01.3DS", "Medias/Objects/OldHouse", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
+				//
+				glm::mat4 m = glm::rotate(glm::pi<float>(), YAxis) * glm::translate(glm::vec3(13.4f, 0.f, 0.f)) * glm::scale(glm::vec3(0.05f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/OldHouse/house_01.3DS", "Medias/Objects/OldHouse", opt);
 				//Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				//Renderer::TextureDescList & texList = modelData.GetTextureDescList();
 
@@ -338,7 +344,7 @@ void SimpleCamera::OnInit()
 				//matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(1.f), 1, 1.f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
 
 				position = glm::vec3(0.f, 0.f, 0.f);
-				scale = glm::vec3(0.01f);
+				//scale = glm::vec3(0.01f);
 			}
 #elif BALL_MODEL == 1
 			{
@@ -449,7 +455,7 @@ void SimpleCamera::OnInit()
 		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(0.f, 30.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 50.f);
 
 
-		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 300.f);
+		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);
 		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
 
 	//setup camera
