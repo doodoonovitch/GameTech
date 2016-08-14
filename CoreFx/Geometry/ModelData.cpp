@@ -528,7 +528,7 @@ Renderer::TextureIndex ModelData::ProcessTextures(TextureIndexMap & textureIndex
 		TextureIndexMap::const_iterator it = textureIndexMap.find(texFilename);
 		if (it == textureIndexMap.end())
 		{
-			textureIndex = (Renderer::TextureIndex)textureIndexMap.size();
+			textureIndex = (Renderer::TextureIndex)mTextureList.size();
 			textureIndexMap[texFilename] = (int)textureIndexMap.size();
 			
 			TextureWrap texWrap[2];
