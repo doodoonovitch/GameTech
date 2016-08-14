@@ -280,10 +280,10 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
-#define ARTORIAS_SWORD_MODEL
+//#define ARTORIAS_SWORD_MODEL
 #define BOX_MODEL
-//#define HOUSE_MODEL
-//#define BALL_MODEL
+#define NANOSUIT_MODEL
+
 
 #ifdef ARTORIAS_SWORD_MODEL
 			{
@@ -347,60 +347,6 @@ void SimpleCamera::OnInit()
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 4);
 			}
 #endif
-#ifdef HOUSE_MODEL
-			{
-				//
-				glm::mat4 m = glm::rotate(glm::pi<float>(), YAxis) * glm::translate(glm::vec3(13.4f, 0.f, 0.f)) * glm::scale(glm::vec3(0.05f));
-				opt.SetPreTransformVertices(m);
-
-				modelData.LoadModel("Medias/Objects/OldHouse/house_01.3DS", "Medias/Objects/OldHouse", opt);
-				//Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
-				//Renderer::TextureDescList & texList = modelData.GetTextureDescList();
-
-				//texList.clear();
-				//texList.push_back(Renderer::TextureDesc("Medias/Objects/OldHouse/DSC_5871_.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				//texList.push_back(Renderer::TextureDesc("Medias/Objects/OldHouse/DSC_5871_SPEC.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				//texList.push_back(Renderer::TextureDesc("Medias/Objects/OldHouse/DSC_5871_rough.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				//texList.push_back(Renderer::TextureDesc("Medias/Objects/OldHouse/DSC_5871_NRM.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false));
-
-				//matList.clear();
-				//matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(1.f), 1, 1.f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
-
-				position = glm::vec3(0.f, 0.f, 0.f);
-				//scale = glm::vec3(0.01f);
-			}
-#endif
-#ifdef BALL_MODEL
-			{
-				modelData.LoadModel("Medias/Objects/ball/3d.STL", "Medias/Objects/ball", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
-				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
-				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
-
-				texList.clear();
-
-				matList.clear();
-				// Iron : 0.56,0.57,0.58
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.56f, 0.57f, 0.58f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
-				// Copper : 0.95f, 0.64f, 0.54f
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
-				// Gold : 1.00f, 0.71f, 0.29f
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
-				// Aluminum : 0.91f, 0.92f, 0.92f
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.91f, 0.92f, 0.92f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
-				// Silver : 0.95f, 0.93f, 0.88f
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
-
-				modelData.CopyAndAddModel(0, 1);
-				modelData.CopyAndAddModel(0, 2);
-				modelData.CopyAndAddModel(0, 3);
-				modelData.CopyAndAddModel(0, 4);
-
-				position = glm::vec3(0.f, 0.f, 0.f);
-				scale = glm::vec3(0.1f);
-				transl = glm::vec3(12.f, 12.f, -12.f);
-				count = glm::uvec3(6);
-		}
-#endif
 			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
 			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
 			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
@@ -409,6 +355,15 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
 			//modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(true));
 			//modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
+
+#ifdef NANOSUIT_MODEL
+			glm::mat4 m = glm::scale(glm::vec3(0.5f));
+			opt.SetPreTransformVertices(m);
+
+			modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt, &dataCtxBase);
+			const GLuint modelCount = 1;
+			modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+#endif
 
 			ModelInfoList::const_iterator maxIt = std::max_element(modelInfoList.begin(), modelInfoList.end(), [](const ModelInfo & a, const ModelInfo & b) { return a.mCount < b.mCount; });
 			GLuint maxN = maxIt != modelInfoList.end() ? maxIt->mCount : 0;

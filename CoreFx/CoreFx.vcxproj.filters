@@ -33,6 +33,9 @@
     <Filter Include="Renderers\PreethamScatter">
       <UniqueIdentifier>{70c8aa8e-364c-4e8e-b658-4766b7715138}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderers\Text2D">
+      <UniqueIdentifier>{2d2d61f2-3203-4551-b068-cf8c0e56e6cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -137,6 +140,9 @@
     <ClInclude Include="Geometry\ModelData.h">
       <Filter>Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\Text2D\TextRenderer.h">
+      <Filter>Renderers\Text2D</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -228,6 +234,9 @@
     </ClCompile>
     <ClCompile Include="Geometry\ModelData.cpp">
       <Filter>Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Text2D\TextRenderer.cpp">
+      <Filter>Renderers\Text2D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
