@@ -55,11 +55,25 @@ void SimpleCamera::SetupViewportAndProjection()
 }
 
 //#define CUBE_SAMPLES
-//#define TERRAIN_SAMPLE
+#define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
+
+struct ModelInfo
+{
+	ModelInfo(GLuint baseIndex = 0, GLuint count = 0)
+		: mBaseIndex(baseIndex)
+		, mCount(count)
+	{
+	}
+
+	GLuint mBaseIndex;
+	GLuint mCount;
+};
+
+typedef std::vector<ModelInfo> ModelInfoList;
 
 void SimpleCamera::OnInit()
 {
@@ -261,70 +275,79 @@ void SimpleCamera::OnInit()
 			opt.SetLogInfo(true);
 			//opt.SetLogBoneInfo(true);
 
+			ModelInfoList modelInfoList;
+
 			Geometry::ModelData modelData;
-			glm::vec3 scale(1.f);
-			glm::vec3 position(0.f);
-			glm::quat qOrientation;
-			glm::vec3 transl(1.f);
-			glm::vec3 rot(0.f);
-			glm::uvec3 count(1, 1, 1);
+			Geometry::ModelData::DataContextBase dataCtxBase;
 
-#define ARTORIAS_SWORD_MODEL 0
-#define BOX_MODEL 1
-#define HOUSE_MODEL 0
-#define BALL_MODEL 0
+#define ARTORIAS_SWORD_MODEL
+#define BOX_MODEL
+//#define HOUSE_MODEL
+//#define BALL_MODEL
 
-#if ARTORIAS_SWORD_MODEL == 1
+#ifdef ARTORIAS_SWORD_MODEL
 			{
-				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
+				glm::mat4 m = glm::scale(glm::vec3(0.4f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", opt, &dataCtxBase);
+
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
 				
-				texList.clear();
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false));
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				matList.clear();
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(1.f), 0, glm::vec3(0.56f), 1, .2f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
-				//matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
+				const GLuint modelCount = 4;
+				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
 
-				//position = glm::vec3(5.f, 25.f, 10.f);
+				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
-				position = glm::vec3(0.f, 0.f, 0.f);
-				scale = glm::vec3(0.1f);
-				transl = glm::vec3(1.f, 3.f, -1.f);
-				count = glm::uvec3(20);
-				rot = glm::vec3(0.f, glm::two_pi<float>() / (float)count.y, 0.f);
+				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 1);
+				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 2);
+				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 3);
 
 			}
-#elif BOX_MODEL == 1
+#endif
+#ifdef BOX_MODEL
 			{
-				glm::mat4 m = glm::scale(glm::vec3(0.25f));
+				glm::mat4 m = glm::translate(glm::vec3(3.f, 3.f, -3.f)) * glm::scale(glm::vec3(0.25f));
 				opt.SetPreTransformVertices(m);
 
-				modelData.LoadModel("Medias/Objects/Box/Box.3DS", "Medias/Objects/Box/Textures", opt);
+				modelData.LoadModel("Medias/Objects/Box/Box.3DS", "Medias/Objects/Box/Textures", opt, &dataCtxBase);
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
 
-				texList.clear();
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/Box/Textures/Dif.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/Box/Textures/Met.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/Box/Textures/rough.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false));
-				texList.push_back(Renderer::TextureDesc("Medias/Objects/Box/Textures/Nor.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false));
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Dif.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Met.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Box/Textures/rough.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Nor.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				matList.clear();
-				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.784314f), 0, glm::vec3(0.952941f), 1, 1.f, 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 3));
+				const GLuint modelCount = 5;
+				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
 
-				position = glm::vec3(3.f, 3.f, -3.f);
-				//scale = glm::vec3(0.25f);
-				transl = glm::vec3(10.f, 10.f, -10.f);
-				count = glm::uvec3(20);
-				rot = glm::vec3(glm::two_pi<float>() / (float)count.x, glm::two_pi<float>() / (float)count.y, glm::two_pi<float>() / (float)count.z);
+				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.784314f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.9f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.784314f, 0.f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f, 0.784314f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(0.4f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
+				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 1);
+				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 2);
+				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 3);
+				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 4);
 			}
-#elif HOUSE_MODEL == 1
+#endif
+#ifdef HOUSE_MODEL
 			{
 				//
 				glm::mat4 m = glm::rotate(glm::pi<float>(), YAxis) * glm::translate(glm::vec3(13.4f, 0.f, 0.f)) * glm::scale(glm::vec3(0.05f));
@@ -346,7 +369,8 @@ void SimpleCamera::OnInit()
 				position = glm::vec3(0.f, 0.f, 0.f);
 				//scale = glm::vec3(0.01f);
 			}
-#elif BALL_MODEL == 1
+#endif
+#ifdef BALL_MODEL
 			{
 				modelData.LoadModel("Medias/Objects/ball/3d.STL", "Medias/Objects/ball", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
@@ -361,9 +385,9 @@ void SimpleCamera::OnInit()
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
 				// Gold : 1.00f, 0.71f, 0.29f
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
-				// Aluminum : 0.91,0.92,0.92
+				// Aluminum : 0.91f, 0.92f, 0.92f
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.91f, 0.92f, 0.92f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
-				// Silver : 0.95,0.93,0.88
+				// Silver : 0.95f, 0.93f, 0.88f
 				matList.push_back(Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), Renderers::CubeRenderer::NoTexture, .1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture));
 
 				modelData.CopyAndAddModel(0, 1);
@@ -376,7 +400,7 @@ void SimpleCamera::OnInit()
 				transl = glm::vec3(12.f, 12.f, -12.f);
 				count = glm::uvec3(6);
 		}
-#else
+#endif
 			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
 			//modelData.LoadModel("Medias/Objects/rock/rock.obj", "Medias/Objects/rock", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
 			//modelData.LoadModel("Medias/Objects/apple/apple.obj", "Medias/Objects/apple", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true));
@@ -385,12 +409,18 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
 			//modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt.SetFlipWindingOrder(false).SetPreTransformVertices(true).SetFlipNormal(true));
 			//modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
-#endif
 
+			ModelInfoList::const_iterator maxIt = std::max_element(modelInfoList.begin(), modelInfoList.end(), [](const ModelInfo & a, const ModelInfo & b) { return a.mCount < b.mCount; });
+			GLuint maxN = maxIt != modelInfoList.end() ? maxIt->mCount : 0;
+			glm::uvec3 count = glm::uvec3(maxN * (GLuint)modelInfoList.size());
 			GLuint capacity = count.x * count.y * count.z;
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData, capacity > 0 ? capacity : 1);
 			if (modelRenderer != nullptr)
 			{
+				glm::vec3 position = glm::vec3(0.f, 0.f, 0.f);
+				glm::vec3 transl = glm::vec3(10.f, 10.f, -10.f);
+				glm::vec3 rot = glm::vec3(glm::two_pi<float>() / (float)count.x, glm::two_pi<float>() / (float)count.y, glm::two_pi<float>() / (float)count.z);
+
 				glm::vec3 rotAngle(0.f);
 				glm::vec3 p(0.f);
 
@@ -399,6 +429,9 @@ void SimpleCamera::OnInit()
 				{
 					glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
 					rotAngle.x += rot.x;
+					
+					const ModelInfo & modelInfo = modelInfoList[i % modelInfoList.size()];
+					GLuint modelId = (modelInfo.mBaseIndex + ((i / modelInfoList.size()) % modelInfo.mCount)) % modelCount;
 
 					p.y = 0.f;
 					for (GLuint j = 0; j < count.y; ++j)
@@ -412,14 +445,14 @@ void SimpleCamera::OnInit()
 							glm::quat qZ = glm::angleAxis(rotAngle.z, ZAxis);
 							rotAngle.z += rot.z;
 
-							glm::quat qRot = qX * qY * qZ * qOrientation;
+							glm::quat qRot = qX * qY * qZ;
 
-							Renderables::Model * model = modelRenderer->CreateModelInstance(i % modelCount);
+							Renderables::Model * model = modelRenderer->CreateModelInstance(modelId);
 							if (model != nullptr)
 							{
 								model->GetFrame()->SetPosition(position + p);
 								model->GetFrame()->SetRotation(qRot);
-								model->GetFrame()->SetScale(scale);
+								//model->GetFrame()->SetScale(scale);
 							}
 
 							p.z += transl.z;
@@ -445,14 +478,14 @@ void SimpleCamera::OnInit()
 		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);
 
 		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 15.f, -15.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f, glm::normalize(glm::vec3(.1f, -0.1f, 1.f)), glm::radians(15.f), glm::radians(25.f));
-		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(30.f, 15.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, -0.5f, 1.f)), glm::radians(15.f), glm::radians(25.f));
+		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
 
 
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(10.f, 10.f, 20.f), glm::vec3(1.f, 1.f, 1.f), 1000.f, 50.f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 1000.f, 100.f);
 		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 100.f), glm::vec3(1.f, 0.6f, 0.f), 10000.f, 100.f);
 		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
 		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
-		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(0.f, 30.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 50.f);
+		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
 
 
 		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);

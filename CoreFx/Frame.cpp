@@ -13,6 +13,7 @@ namespace CoreFx
 
 Frame::Frame()
 	: mDQ()
+	, mScale(1.f)
 	, mIsModified(true)
 {
 }

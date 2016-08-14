@@ -111,8 +111,8 @@ private:
 
 	struct ModelInstanceMapping : public Geometry::ModelData::ModelMapping
 	{
-		ModelInstanceMapping(GLuint drawElementsIndirectCommandIndex = 0, GLuint drawElementsIndirectCommandCount = 0, GLuint instanceCount = 0)
-			: Geometry::ModelData::ModelMapping(drawElementsIndirectCommandIndex, drawElementsIndirectCommandCount)
+		ModelInstanceMapping(GLuint drawElementsIndirectCommandIndex = 0, GLuint drawElementsIndirectCommandCount = 0, bool hasBones = false, GLuint instanceCount = 0)
+			: Geometry::ModelData::ModelMapping(drawElementsIndirectCommandIndex, drawElementsIndirectCommandCount, hasBones)
 			, mInstanceCount(instanceCount)
 		{ }
 

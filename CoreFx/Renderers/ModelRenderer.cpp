@@ -383,7 +383,9 @@ void ModelRenderer::UpdateShaderData()
 		GLuint index = 0;
 		GLuint * matIndexBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 		assert(matIndexBuffer != nullptr);
-		//std::vector<GLuint> indexList(mMaterialCount);
+#ifdef _DEBUG
+		std::vector<GLuint> indexList(mMaterialCount);
+#endif
 		if (matIndexBuffer != nullptr)
 		{
 			for(ModelInstanceMappingList::const_iterator it = mModelInstanceMappingList.begin(); it !=  mModelInstanceMappingList.end(); ++it)
@@ -392,7 +394,9 @@ void ModelRenderer::UpdateShaderData()
 				for (GLuint j = 0; j < mapping.mDrawCommandCount; ++j)
 				{
 					const Renderer::DrawElementsIndirectCommand & cmd = mDrawCommandList[mapping.mDrawCommandIndex + j];
-					//indexList[cmd.mBaseInstance] = index;
+#ifdef _DEBUG
+					indexList[cmd.mBaseInstance] = index;
+#endif
 					matIndexBuffer[cmd.mBaseInstance] = index;
 				}
 				index += mapping.mInstanceCount;
@@ -484,7 +488,9 @@ Renderables::Model * ModelRenderer::CreateModelInstance(GLuint modelIndex)
 		return nullptr;
 	}
 		
-	if (GetCount() < GetCapacity())
+	size_t count = GetCount();
+	size_t capacity = GetCapacity();
+	if (count < capacity)
 	{
 		Renderables::Model *obj = new Renderables::Model(modelIndex);
 		mObjs.Attach(obj);
@@ -523,8 +529,8 @@ void ModelRenderer::DeleteModelInstance(Renderables::Model * modelInstance)
 ModelRenderer * ModelRenderer::CreateFromFile(Engine * engine, const std::string & modelFilePath, const std::string & textureBasePath, const Geometry::ModelData::LoadOptions & options, size_t capacity, size_t pageSize)
 {
 	Geometry::ModelData model;
-	model.LoadModel(modelFilePath, textureBasePath, options);
-	if (model.IsLoaded())
+	bool isLoaded = model.LoadModel(modelFilePath, textureBasePath, options);
+	if (isLoaded)
 	{
 		return CreateFromModel(engine, model, capacity, pageSize);
 	}
@@ -537,21 +543,13 @@ ModelRenderer * ModelRenderer::CreateFromFile(Engine * engine, const std::string
 
 ModelRenderer * ModelRenderer::CreateFromModel(Engine * engine, const Geometry::ModelData & model, size_t capacity, size_t pageSize)
 {
-	if (model.IsLoaded())
-	{
-		ModelRenderer * renderer = new ModelRenderer(capacity, pageSize);
+	ModelRenderer * renderer = new ModelRenderer(capacity, pageSize);
 
-		engine->AttachRenderer(renderer);
+	engine->AttachRenderer(renderer);
 
-		renderer->SetModel(model.GetVertexList(), model.GetIndexList(), model.GetMaterialDescList(), model.GetTextureDescList(), model.GetMeshDrawInstanceList(), model.GetModelMappingList());
+	renderer->SetModel(model.GetVertexList(), model.GetIndexList(), model.GetMaterialDescList(), model.GetTextureDescList(), model.GetMeshDrawInstanceList(), model.GetModelMappingList());
 
-		return renderer;
-	}
-	else
-	{
-		PRINT_ERROR("Cannot create the 'ModelRenderer' from model : the model is not loaded!");
-		return nullptr;
-	}
+	return renderer;
 }
 
 	} // namespace Renderers

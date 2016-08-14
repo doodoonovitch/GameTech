@@ -109,6 +109,18 @@ public:
 
 	struct MaterialDesc
 	{
+		MaterialDesc()
+			: mDiffuse(0.f)
+			, mSpecular(0.f)
+			, mEmissive(0.f)
+			, mRoughness(0.f)
+			, mDiffuseTextureIndex(NoTexture)
+			, mSpecularTextureIndex(NoTexture)
+			, mRoughnessTextureIndex(NoTexture)
+			, mEmissiveTextureIndex(NoTexture)
+			, mNormalTextureIndex(NoTexture)
+		{}
+
 		MaterialDesc(const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
 			const glm::vec3& specular, TextureIndex specularTextureIndex,
 			GLfloat roughness, TextureIndex roughnessTextureIndex,
@@ -154,6 +166,14 @@ public:
 
 	struct TextureDesc
 	{
+		TextureDesc()
+			: mCategory(TextureCategory::Diffuse)
+			, mWrapS(TextureWrap::Repeat)
+			, mWrapT(TextureWrap::Repeat)
+			, mInvertY(true)
+		{
+		}
+
 		TextureDesc(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool invertY = true)
 			: mFilename(filename)
 			, mCategory(category)

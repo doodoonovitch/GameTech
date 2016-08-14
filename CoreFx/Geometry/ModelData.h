@@ -77,27 +77,43 @@ public:
 
 	struct ModelMapping
 	{
-		ModelMapping(GLuint drawElementsIndirectCommandIndex, GLuint drawElementsIndirectCommandCount)
+		ModelMapping(GLuint drawElementsIndirectCommandIndex, GLuint drawElementsIndirectCommandCount, bool hasBones)
 			: mDrawCommandIndex(drawElementsIndirectCommandIndex)
 			, mDrawCommandCount(drawElementsIndirectCommandCount)
+			, mHasBones(hasBones)
 		{
 		}
 
 		ModelMapping(const ModelMapping & src)
 			: mDrawCommandIndex(src.mDrawCommandIndex)
 			, mDrawCommandCount(src.mDrawCommandCount)
+			, mHasBones(src.mHasBones)
 		{
 		}
 
 		GLuint mDrawCommandIndex = 0;
 		GLuint mDrawCommandCount = 0;
+		bool mHasBones = false;
 	};
 
 	typedef std::vector<ModelMapping> ModelMappingList;
 
 
-	void LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options);
-	bool IsLoaded() const { return mIsLoaded; }
+	struct DataContextBase
+	{
+		GLuint mVertexIndexBase;
+		GLuint mIndexBase;
+		GLuint mModelMappingIndexBase;
+		GLuint mMeshInstanceIndexBase;
+		GLuint mTextureIndexBase;
+		GLuint mMaterialIndexBase;
+		GLuint mBoneDataIndexBase;
+		GLuint mVertexBoneDataIndexBase;
+		GLuint mBoneMappingBaseIndex;
+	};
+
+
+	bool LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options, DataContextBase * outDataContextBase = nullptr);
 
 	const Renderer::VertexDataVector & GetVertexList() const { return mVertexList; }
 	const Renderer::IndexVector & GetIndexList() const { return mIndexList; }
@@ -117,10 +133,13 @@ protected:
 
 	typedef std::map<std::string, int> TextureIndexMap;
 	typedef std::map<std::string, GLuint> BoneMapping;
+	typedef std::vector<BoneMapping> BonneMappingList;
+
+	bool AddModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options, DataContextBase * outDataContextBase);
 
 	void ProcessMaterials(const aiScene* scene, const std::string & textureBasePath);
-	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* scene, const LoadOptions & options);
-	void ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh);
+	void ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, bool hasBones, const LoadOptions & options, const DataContextBase & dataCtxBase);
+	void ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh, const DataContextBase & dataCtxBase);
 	Renderer::TextureIndex ProcessTextures(TextureIndexMap & texMap, aiMaterial* mat, aiTextureType type, const std::string & textureBasePath);
 
 	bool ParseNode(aiNode* node, const aiScene* scene, std::function<bool(aiNode* node, const aiScene* scene, int level)> processNodeFunc, std::function<bool(unsigned int meshIndex, const aiScene* scene, int level)> processMeshFunc, int level);
@@ -136,16 +155,13 @@ protected:
 	Renderer::DrawElementsIndirectCommandList mMeshDrawInstanceList;
 	Renderer::BoneDataList mBoneDataList;
 	Renderer::VertexBoneDataList mVertexBoneDataList;
-	BoneMapping mBoneMapping;
+	BonneMappingList mBoneMappingList;
 	ModelMappingList mModelMappingList;
 
 	TextureIndexMap mDiffuseTextureList;
 	TextureIndexMap mSpecularTextureList;
 	TextureIndexMap mEmissiveTextureList;
 	TextureIndexMap mNormalTextureList;
-
-	bool mHasBones;
-	bool mIsLoaded;
 };
 
 

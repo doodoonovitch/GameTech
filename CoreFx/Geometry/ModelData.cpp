@@ -14,8 +14,8 @@ namespace CoreFx
 
 
 ModelData::ModelData()
-	: mHasBones(false)
-	, mIsLoaded(false)
+	//: mHasBones(false)
+	//, mIsLoaded(false)
 {
 }
 
@@ -24,27 +24,37 @@ ModelData::~ModelData()
 {
 }
 
-void ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options)
+bool ModelData::LoadModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options, DataContextBase * outDataContextBase)
 {
-	if (mIsLoaded)
-	{
-		mVertexList.clear();
-		mIndexList.clear();
-		mTextureList.clear();
-		mMaterialList.clear();
-		mMeshDrawInstanceList.clear();
-		mModelMappingList.clear();
-		mDiffuseTextureList.clear();
-		mSpecularTextureList.clear();
-		mEmissiveTextureList.clear();
-		mNormalTextureList.clear();
-		mIsLoaded = false;
-		mHasBones = false;
-	}
+	bool loaded = AddModel(filepath, textureBasePath, options, outDataContextBase);
+	return loaded;
+}
 
+bool ModelData::AddModel(const std::string & filepath, const std::string & textureBasePath, const LoadOptions & options, DataContextBase * outDataContextBase)
+{
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Loading model '%s'...", filepath.c_str());
 
+	bool hasBones = false;
+	bool isLoaded = false;
+
+	DataContextBase dataCtxBase;
+
+	dataCtxBase.mVertexIndexBase = (GLuint)mVertexList.size();
+	dataCtxBase.mIndexBase = (GLuint)mIndexList.size();
+	dataCtxBase.mModelMappingIndexBase = (GLuint)mModelMappingList.size();
+	dataCtxBase.mMeshInstanceIndexBase = (GLuint)mMeshDrawInstanceList.size();
+	dataCtxBase.mTextureIndexBase = (GLuint)mTextureList.size();
+	dataCtxBase.mMaterialIndexBase = (GLuint)mMaterialList.size();
+	dataCtxBase.mBoneDataIndexBase = (GLuint)mBoneDataList.size();
+	dataCtxBase.mVertexBoneDataIndexBase = (GLuint)mVertexBoneDataList.size();
+	dataCtxBase.mBoneMappingBaseIndex = (GLuint)mBoneMappingList.size();
+
+	if (outDataContextBase != nullptr)
+	{
+		*outDataContextBase = dataCtxBase;
+	}
+	
 	// Read file via ASSIMP
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_CalcTangentSpace /*| aiProcess_RemoveRedundantMaterials */
@@ -73,11 +83,11 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 	GLuint totalVertexCount = 0;
 	GLuint totalIndexCount = 0;
-	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &totalVertexCount, &totalIndexCount, filepath](unsigned int meshIndex, const aiScene* scene, int /*level*/)
+	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &totalVertexCount, &totalIndexCount, &dataCtxBase, &hasBones, &filepath](unsigned int meshIndex, const aiScene* scene, int /*level*/)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
 
-		mHasBones = mHasBones || mesh->HasBones();
+		hasBones = hasBones || mesh->HasBones();
 
 		if (mesh->mMaterialIndex < 0)
 		{
@@ -96,9 +106,9 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		Renderer::DrawElementsIndirectCommand meshDrawInstance;
 		meshDrawInstance.mElemCount = meshIndexCount;
 		meshDrawInstance.mInstanceCount = 0;
-		meshDrawInstance.mFirstIndex = totalIndexCount;
-		meshDrawInstance.mBaseVertex = totalVertexCount;
-		meshDrawInstance.mBaseInstance = (GLuint)mesh->mMaterialIndex;//(GLuint)mMeshDrawInstanceList.size();
+		meshDrawInstance.mFirstIndex = totalIndexCount + dataCtxBase.mIndexBase;
+		meshDrawInstance.mBaseVertex = totalVertexCount + dataCtxBase.mVertexIndexBase;
+		meshDrawInstance.mBaseInstance = (GLuint)mesh->mMaterialIndex + dataCtxBase.mMeshInstanceIndexBase;
 		mMeshDrawInstanceList.push_back(meshDrawInstance);
 
 		totalVertexCount += mesh->mNumVertices;
@@ -110,22 +120,23 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		goto LoadModelEnd;
 	}
 
-	mModelMappingList.push_back(ModelMapping(0, (GLuint)mMeshDrawInstanceList.size()));
+	mModelMappingList.push_back(ModelMapping(dataCtxBase.mMeshInstanceIndexBase, (GLuint)mMeshDrawInstanceList.size() - dataCtxBase.mMeshInstanceIndexBase, hasBones));
 
-	mVertexList.resize(totalVertexCount);
-	mIndexList.resize(totalIndexCount);
-	if (mHasBones)
+	mVertexList.resize(totalVertexCount + dataCtxBase.mVertexIndexBase);
+	mIndexList.resize(totalIndexCount + dataCtxBase.mIndexBase);
+	if (hasBones)
 	{
-		mVertexBoneDataList.resize(totalVertexCount);
+		mVertexBoneDataList.resize(totalVertexCount + dataCtxBase.mVertexIndexBase);
+		mBoneMappingList.resize(dataCtxBase.mBoneMappingBaseIndex + 1);
 	}
 
 	ProcessMaterials(scene, textureBasePath);
 
-	GLuint meshInstanceNum = 0;
-	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &meshInstanceNum, &options](unsigned int meshIndex, const aiScene* scene, int /*level*/)
+	GLuint meshInstanceNum = dataCtxBase.mMeshInstanceIndexBase;
+	if (!ParseNode(scene->mRootNode, scene, nullptr, [this, &meshInstanceNum, &dataCtxBase, &hasBones, &options](unsigned int meshIndex, const aiScene* scene, int /*level*/)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		this->ProcessMesh(meshInstanceNum, mesh, scene, options);
+		this->ProcessMesh(meshInstanceNum, mesh, hasBones, options, dataCtxBase);
 		++meshInstanceNum;
 		return true;
 	}, 0))
@@ -133,7 +144,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 		goto LoadModelEnd;
 	}
 
-	mIsLoaded = true;
+	isLoaded = true;
 
 	if (options.mLogInfo)
 	{
@@ -141,7 +152,7 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 
 		PRINT_MESSAGE("\t* Vertex count : %li", mVertexList.size());
 		PRINT_MESSAGE("\t* Index count : %li", mIndexList.size());
-		PRINT_MESSAGE("\t* Has bones : %i", mHasBones);
+		PRINT_MESSAGE("\t* Has bones : %i", hasBones);
 
 		PRINT_MESSAGE("\t* Mesh count : %li", mMeshDrawInstanceList.size());
 		{
@@ -236,6 +247,8 @@ void ModelData::LoadModel(const std::string & filepath, const std::string & text
 LoadModelEnd:
 	PRINT_MESSAGE(".....loading model '%s' ended.", filepath.c_str());
 	PRINT_END_SECTION;
+
+	return isLoaded;
 }
 
 void ModelData::PrintNodeMatrix(const aiMatrix4x4 & aiMat, int level, const char * indent)
@@ -302,13 +315,6 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		glm::vec3 specularColor(GetMaterialColor(mat, AI_MATKEY_COLOR_SPECULAR));
 		glm::vec3 emissiveColor(GetMaterialColor(mat, AI_MATKEY_COLOR_EMISSIVE));
 
-		//if (specularColor.x == 0.f && specularColor.y == 0.f && specularColor.z == 0.f)
-		//{
-		//	specularColor = glm::vec3(1.00f, 0.71f, 0.29f);
-		//	diffuseColor = glm::vec3(0.f);
-		//	roughness = 0.1f;
-		//}
-
 		Renderer::TextureIndex diffuseTextureIndex = ProcessTextures(mDiffuseTextureList, mat, aiTextureType_DIFFUSE, textureBasePath);
 		Renderer::TextureIndex specularTextureIndex = ProcessTextures(mSpecularTextureList, mat, aiTextureType_SPECULAR, textureBasePath);
 		Renderer::TextureIndex emissiveTextureIndex = ProcessTextures(mEmissiveTextureList, mat, aiTextureType_EMISSIVE, textureBasePath);
@@ -345,7 +351,7 @@ bool ModelData::ParseNode(aiNode* node, const aiScene* scene, std::function<bool
 	return true;
 }
 
-void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene* /*scene*/, const LoadOptions & options)
+void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, bool hasBones, const LoadOptions & options, const DataContextBase & dataCtxBase)
 {
 	float c = options.mFlipNormal ? -1.f : 1.f;
 	const Renderer::DrawElementsIndirectCommand & meshDrawInstance = mMeshDrawInstanceList[meshInstanceNum];
@@ -411,16 +417,16 @@ void ModelData::ProcessMesh(GLuint meshInstanceNum, aiMesh* mesh, const aiScene*
 		aiFace face = mesh->mFaces[i];
 		// Retrieve all indices of the face and store them in the indices vector
 		for (GLuint j = 0; j < face.mNumIndices; j++)
-			mIndexList[index++] = face.mIndices[j];
+			mIndexList[index++] = face.mIndices[j]/* + meshDrawInstance.mFirstIndex*/;
 	}
 
-	if (mHasBones)
+	if (hasBones)
 	{
-		ProcessMeshBones(meshInstanceNum, mesh);
+		ProcessMeshBones(meshInstanceNum, mesh, dataCtxBase);
 	}
 }
 
-void ModelData::ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh)
+void ModelData::ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh, const DataContextBase & dataCtxBase)
 {
 	for (GLuint i = 0; i < mesh->mNumBones; i++)
 	{
@@ -428,15 +434,16 @@ void ModelData::ProcessMeshBones(GLuint meshInstanceNum, aiMesh * mesh)
 		GLuint boneIndex = 0;
 		std::string boneName(bone->mName.C_Str());
 
-		BoneMapping::const_iterator it = mBoneMapping.find(boneName);
-		if (it == mBoneMapping.end()) 
+		BoneMapping & boneMapping = mBoneMappingList[dataCtxBase.mBoneMappingBaseIndex];
+		BoneMapping::const_iterator it = boneMapping.find(boneName);
+		if (it == boneMapping.end())
 		{
 			// Allocate an index for a new bone
 			boneIndex = (GLuint)mBoneDataList.size();
 			Renderer::BoneData boneData;
 			SetMatrix(bone->mOffsetMatrix, boneData.mOffsetMatrix);
 			mBoneDataList.push_back(boneData);
-			mBoneMapping[boneName] = boneIndex;
+			boneMapping[boneName] = boneIndex;
 		}
 		else 
 		{
@@ -484,9 +491,9 @@ Renderer::TextureIndex ModelData::ProcessTextures(TextureIndexMap & textureIndex
 	if(mat->GetTextureCount(type) > 0)
 	{
 		aiString str;
-		aiTextureMapMode mapMode;
+		aiTextureMapMode mapMode[3];
 
-		mat->GetTexture(type, 0, &str, nullptr, nullptr, nullptr, nullptr, &mapMode);
+		mat->GetTexture(type, 0, &str, nullptr, nullptr, nullptr, nullptr, mapMode);
 		std::string texFilename(str.C_Str());
 		std::string texFilePath;
 
@@ -524,27 +531,29 @@ Renderer::TextureIndex ModelData::ProcessTextures(TextureIndexMap & textureIndex
 			textureIndex = (Renderer::TextureIndex)textureIndexMap.size();
 			textureIndexMap[texFilename] = (int)textureIndexMap.size();
 			
-			TextureWrap texWrap;
+			TextureWrap texWrap[2];
 
-			switch (mapMode)
+			for (int i = 0; i < 2; ++i)
 			{
-			case aiTextureMapMode_Clamp:
-				texWrap = TextureWrap::Clamp;
-				break;
+				switch (mapMode[i])
+				{
+				case aiTextureMapMode_Clamp:
+					texWrap[i] = TextureWrap::Clamp;
+					break;
 
-			case aiTextureMapMode_Wrap:
-				texWrap = TextureWrap::Repeat;
-				break;
+				case aiTextureMapMode_Wrap:
+					texWrap[i] = TextureWrap::Repeat;
+					break;
 
-			case aiTextureMapMode_Mirror:
-				texWrap = TextureWrap::MirrorRepeat;
-				break;
+				case aiTextureMapMode_Mirror:
+					texWrap[i] = TextureWrap::MirrorRepeat;
+					break;
 
-			default:
-				texWrap = TextureWrap::ClampToBorder;
+				default:
+					texWrap[i] = TextureWrap::ClampToBorder;
+				}
 			}
-
-			mTextureList.push_back(Renderer::TextureDesc(texFilePath.c_str(), texCat, texWrap, texWrap));
+			mTextureList.push_back(Renderer::TextureDesc(texFilePath.c_str(), texCat, texWrap[0], texWrap[1]));
 
 		}
 		else
@@ -569,7 +578,7 @@ bool ModelData::CopyAndAddModel(GLuint sourceModelIndex, GLuint materialOffset)
 		}
 
 		
-		mModelMappingList.push_back(ModelMapping(drawCommandIndex, mapping.mDrawCommandCount));
+		mModelMappingList.push_back(ModelMapping(drawCommandIndex, mapping.mDrawCommandCount, mapping.mHasBones));
 
 		return true;
 	}
