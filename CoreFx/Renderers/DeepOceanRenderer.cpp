@@ -66,6 +66,8 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 
 	LoadShaders(desc);
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....DeepOceanRenderer initialized!");
 	PRINT_END_SECTION;
 }

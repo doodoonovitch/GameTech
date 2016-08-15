@@ -73,6 +73,8 @@ CompassRenderer::CompassRenderer()
 
 	GL_CHECK_ERRORS;
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....CompassRenderer initialized!\n");
 	PRINT_END_SECTION;
 }

@@ -67,6 +67,8 @@ AxisRenderer::AxisRenderer()
 
 	GL_CHECK_ERRORS;
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....AxisRenderer initialized!");
 	PRINT_END_SECTION;
 }

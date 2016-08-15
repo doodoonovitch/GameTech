@@ -137,6 +137,8 @@ CubeRenderer::CubeRenderer(const Desc & desc, size_t capacity, size_t pageSize)
 	LoadTextures();
 	UpdateMaterialTextureIndex();
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....CubeRenderer initialized!");
 	PRINT_END_SECTION;
 }

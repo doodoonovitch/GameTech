@@ -64,6 +64,8 @@ ShallowWaterRenderer::ShallowWaterRenderer(const Desc & desc)
 
 	LoadShaders(desc);
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....ShallowWaterRenderer initialized!");
 	PRINT_END_SECTION;
 }

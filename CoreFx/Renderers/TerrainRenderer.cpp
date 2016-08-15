@@ -67,6 +67,8 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	//UpdateMaterialTextureIndex(desc);
 	LoadShaders(desc);
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....TerrainRenderer initialized!");
 	PRINT_END_SECTION;
 }

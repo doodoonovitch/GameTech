@@ -102,6 +102,8 @@ SkydomeRenderer::SkydomeRenderer(const int rings, const int segments)
 
 	GL_CHECK_ERRORS;
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....SkydomeRenderer initialized!\n");
 	PRINT_END_SECTION;
 }

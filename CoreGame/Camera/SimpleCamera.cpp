@@ -56,7 +56,7 @@ void SimpleCamera::SetupViewportAndProjection()
 
 //#define CUBE_SAMPLES
 #define TERRAIN_SAMPLE
-//#define DEEP_OCEAN_SAMPLE
+#define DEEP_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
@@ -280,9 +280,10 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
-//#define ARTORIAS_SWORD_MODEL
+#define ARTORIAS_SWORD_MODEL
 #define BOX_MODEL
-#define NANOSUIT_MODEL
+//#define NANOSUIT_MODEL
+//#define LARACROFT_MODEL
 
 
 #ifdef ARTORIAS_SWORD_MODEL
@@ -357,17 +358,30 @@ void SimpleCamera::OnInit()
 			//modelData.LoadModel("Medias/Objects/Guard/boblampclean.md5mesh", "Medias/Objects/Guard", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false));
 
 #ifdef NANOSUIT_MODEL
+			{
 			glm::mat4 m = glm::scale(glm::vec3(0.5f));
 			opt.SetPreTransformVertices(m);
 
 			modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt, &dataCtxBase);
 			const GLuint modelCount = 1;
 			modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+			}
+#endif
+#ifdef LARACROFT_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(2.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt, &dataCtxBase);
+				const GLuint modelCount = 1;
+				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+			}
 #endif
 
 			ModelInfoList::const_iterator maxIt = std::max_element(modelInfoList.begin(), modelInfoList.end(), [](const ModelInfo & a, const ModelInfo & b) { return a.mCount < b.mCount; });
 			GLuint maxN = maxIt != modelInfoList.end() ? maxIt->mCount : 0;
-			glm::uvec3 count = glm::uvec3(maxN * (GLuint)modelInfoList.size());
+			GLuint n = maxN * (GLuint)modelInfoList.size();
+			glm::uvec3 count = glm::uvec3(n, glm::clamp(n, (GLuint)1, (GLuint)10), glm::clamp(n, (GLuint)1, (GLuint)5));
 			GLuint capacity = count.x * count.y * count.z;
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData, capacity > 0 ? capacity : 1);
 			if (modelRenderer != nullptr)
@@ -384,7 +398,7 @@ void SimpleCamera::OnInit()
 				{
 					glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
 					rotAngle.x += rot.x;
-					
+
 					const ModelInfo & modelInfo = modelInfoList[i % modelInfoList.size()];
 					GLuint modelId = (modelInfo.mBaseIndex + ((i / modelInfoList.size()) % modelInfo.mCount)) % modelCount;
 
@@ -428,6 +442,11 @@ void SimpleCamera::OnInit()
 
 		}
 #endif // MODEL_SAMPLE
+
+		// TextRenderer
+		{
+			Renderers::TextRenderer * textRenderer = new Renderers::TextRenderer();
+		}
 
 	// Setup Lights
 		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(12.f, 5.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 200.f, glm::normalize(glm::vec3(.2f, .2f, -.5f)), glm::radians(15.f), glm::radians(25.f), 0.9f, 0.1f, .1f);

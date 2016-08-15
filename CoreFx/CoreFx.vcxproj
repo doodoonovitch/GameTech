@@ -164,7 +164,6 @@
     <ClInclude Include="Renderers\CubeRenderer.h" />
     <ClInclude Include="Renderers\DeepOceanRenderer.h" />
     <ClInclude Include="Renderers\DrawGBufferNormalShader.h" />
-    <ClInclude Include="Renderers\DrawNormalShader.h" />
     <ClInclude Include="Renderers\GridRenderer.h" />
     <ClInclude Include="Renderers\IcosahedronRenderer.h" />
     <ClInclude Include="Renderers\ModelRenderer.h" />
@@ -207,7 +206,6 @@
     <ClCompile Include="Renderers\CubeRenderer.cpp" />
     <ClCompile Include="Renderers\DeepOceanRenderer.cpp" />
     <ClCompile Include="Renderers\DrawGBufferNormalShader.cpp" />
-    <ClCompile Include="Renderers\DrawNormalShader.cpp" />
     <ClCompile Include="Renderers\GridRenderer.cpp" />
     <ClCompile Include="Renderers\IcosahedronRenderer.cpp" />
     <ClCompile Include="Renderers\ModelRenderer.cpp" />

@@ -110,10 +110,11 @@ namespace CoreFx
 
 	GL_CHECK_ERRORS;
 
+	mIsInitialized = true;
 
 	PRINT_MESSAGE(".....SkyboxRenderer initialized!");
 	PRINT_END_SECTION;
-		}
+}
 
 SkyboxRenderer::~SkyboxRenderer()
 {

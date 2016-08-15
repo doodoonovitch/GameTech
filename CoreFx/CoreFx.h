@@ -73,7 +73,6 @@ namespace CoreFx
 #include "SceneObject.h"
 #include "Renderer.h"
 #include "Renderables\VertexArrayObject.h"
-#include "Renderers\DrawNormalShader.h"
 #include "Renderers\DrawGBufferNormalShader.h"
 #include "Renderers\RendererHelper.h"
 #include "Renderers\IcosahedronRenderer.h"

@@ -75,6 +75,8 @@ GridRenderer::GridRenderer(int width, int depth)
 
 	delete [] vertices;	 
 
+	mIsInitialized = true;
+
 	PRINT_MESSAGE(".....GridRenderer initialized!");
 	PRINT_END_SECTION;
 }

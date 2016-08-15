@@ -206,6 +206,8 @@ public:
 	virtual void Render() = 0;
 	virtual void RenderWireFrame() = 0;
 
+	bool GetIsInitialized() const { return mIsInitialized; }
+
 	ERenderPass GetRenderPass() const { return mRenderPass; }
 
 	const PropertyData & GetMaterials() const {	return mMaterials; }
@@ -236,6 +238,7 @@ protected:
 	TextureInfoList mTextureInfoList;
 	TextureMapping mTextureMapping;
 	ERenderPass mRenderPass;
+	bool mIsInitialized;
 };
 
 

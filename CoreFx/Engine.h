@@ -230,10 +230,6 @@ public:
 	// Draw normals and light direction 
 public:
 
-	const Renderers::DrawNormalShader & GetDrawVertexNormal()
-	{
-		return mDrawVertexNormalShader;
-	}
 	
 	GLfloat GetDrawVertexNormalMagnitude() const { return mDrawVertexNormalMagnitude; }
 
@@ -429,7 +425,6 @@ private:
 	GLfloat mDrawLightMagnitude;
 	GLint mFirstLightIndexToDraw;
 	GLint mLightToDrawCount;
-	Renderers::DrawNormalShader mDrawVertexNormalShader;
 
 	GLsizei mFrameDataSize;
 

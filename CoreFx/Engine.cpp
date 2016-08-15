@@ -103,12 +103,8 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 			mLights[i] = new LightContainer(1, 1);
 		}
 		
-		mDrawVertexNormalShader.LoadShaders();
-
-		InternalCreateFrameDataBuffer(mDrawVertexNormalShader.GetProgram());
-
 		mDrawGBufferNormalShader.LoadShaders();
-		//InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
+		InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
 
 		PRINT_MESSAGE("Initializing PointLightHelper Renderer...");
 		PRINT_MESSAGE("... end.");
@@ -809,7 +805,8 @@ void Engine::RenderObjects()
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		renderer->Render();
+		if(renderer->GetIsInitialized())
+			renderer->Render();
 	});
 
 	// -----------------------------------------------------------------------
@@ -892,15 +889,21 @@ void Engine::RenderObjects()
 
 	if (mSkybox != nullptr)
 	{
-		//glDisable(GL_CULL_FACE);
-		mSkybox->Render();
-		//glEnable(GL_CULL_FACE);
+		if (mSkybox->GetIsInitialized())
+		{
+			//glDisable(GL_CULL_FACE);
+			mSkybox->Render();
+			//glEnable(GL_CULL_FACE);
+		}
 	}
 	else if (mSkydome != nullptr)
 	{
-		//glDisable(GL_CULL_FACE);
-		mSkydome->Render();
-		//glEnable(GL_CULL_FACE);
+		if (mSkydome->GetIsInitialized())
+		{
+			//glDisable(GL_CULL_FACE);
+			mSkydome->Render();
+			//glEnable(GL_CULL_FACE);
+		}
 	}
 
 	glEnable(GL_BLEND);
@@ -910,14 +913,17 @@ void Engine::RenderObjects()
 	//glDisable(GL_CULL_FACE);
 	mForwardRenderers->ForEach([](Renderer * renderer)
 	{
-		renderer->Render();
+		if(renderer->GetIsInitialized())
+			renderer->Render();
 	});
 	//glEnable(GL_CULL_FACE);
 
 	if (mIsDrawLightPositionEnabled)
 	{
-		mPointLightPositionRenderer->Render();
-		mSpotLightPositionRenderer->Render();
+		if(mPointLightPositionRenderer->GetIsInitialized())
+			mPointLightPositionRenderer->Render();
+		if (mSpotLightPositionRenderer->GetIsInitialized())
+			mSpotLightPositionRenderer->Render();
 	}
 
 	// -----------------------------------------------------------------------
@@ -933,18 +939,21 @@ void Engine::RenderObjects()
 
 		mRenderers->ForEach([](Renderer * renderer)
 		{
-			renderer->RenderWireFrame();
+			if(renderer->GetIsInitialized())
+				renderer->RenderWireFrame();
 		});
 
-		if(mSkybox != nullptr)
+		if(mSkybox != nullptr && mSkybox->GetIsInitialized())
 			mSkybox->RenderWireFrame();
-		else if (mSkydome != nullptr)
+		else if (mSkydome != nullptr && mSkydome->GetIsInitialized())
 			mSkydome->RenderWireFrame();
 
 		if (mIsDrawLightPositionEnabled)
 		{
-			mPointLightPositionRenderer->RenderWireFrame();
-			mSpotLightPositionRenderer->RenderWireFrame();
+			if (mPointLightPositionRenderer->GetIsInitialized())
+				mPointLightPositionRenderer->RenderWireFrame();
+			if (mSpotLightPositionRenderer->GetIsInitialized())
+				mSpotLightPositionRenderer->RenderWireFrame();
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1198,6 +1207,7 @@ Engine::PointLightPositionRenderer::PointLightPositionRenderer()
 	InitializeUniforms(mShader);
 	LoadShaders(mWireFrameShader, "shaders/IcosahedronShader.PointLight.gs.glsl", "shaders/IcosahedronShader.WireFrame.forward.fs.glsl");
 	InitializeUniforms(mWireFrameShader);
+	mIsInitialized = true;
 }
 
 Engine::PointLightPositionRenderer::~PointLightPositionRenderer()
@@ -1285,6 +1295,8 @@ Engine::SpotLightPositionRenderer::SpotLightPositionRenderer(GLuint numStrips)
 	InitializeUniforms(mShader);
 	LoadShaders(mWireFrameShader, "shaders/ConeShader.Light.gs.glsl", "shaders/IcosahedronShader.WireFrame.forward.fs.glsl");
 	InitializeUniforms(mWireFrameShader);
+
+	mIsInitialized = true;
 }
 
 Engine::SpotLightPositionRenderer::~SpotLightPositionRenderer()

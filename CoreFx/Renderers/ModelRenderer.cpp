@@ -113,9 +113,10 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	LoadTextures();
 	UpdateMaterialTextureIndex();
 
-
 	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mInstanceMatrixBuffer);
 	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mInstanceMatrixIndexBuffer);
+
+	mIsInitialized = true;
 
 	PRINT_MESSAGE("... ModelRenderer initialized!\n");
 	PRINT_END_SECTION;

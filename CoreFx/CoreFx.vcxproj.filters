@@ -85,9 +85,6 @@
     <ClInclude Include="Lights\DirectionalLight.h">
       <Filter>Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Renderers\DrawNormalShader.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
     <ClInclude Include="TextureBuffer.h" />
     <ClInclude Include="Maths\DualQuaternion.h">
       <Filter>Maths</Filter>
@@ -182,9 +179,6 @@
     </ClCompile>
     <ClCompile Include="Lights\DirectionalLight.cpp">
       <Filter>Lights</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\DrawNormalShader.cpp">
-      <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="TextureBuffer.cpp" />
     <ClCompile Include="Maths\DualQuaternion.cpp">
