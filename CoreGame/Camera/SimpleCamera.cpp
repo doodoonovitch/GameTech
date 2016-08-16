@@ -55,8 +55,8 @@ void SimpleCamera::SetupViewportAndProjection()
 }
 
 //#define CUBE_SAMPLES
-#define TERRAIN_SAMPLE
-#define DEEP_OCEAN_SAMPLE
+//#define TERRAIN_SAMPLE
+//#define DEEP_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
@@ -280,7 +280,7 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
-#define ARTORIAS_SWORD_MODEL
+//#define ARTORIAS_SWORD_MODEL
 #define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL

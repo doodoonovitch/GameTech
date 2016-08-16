@@ -192,7 +192,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 			{
 				GlyphMetrics gm;
 				gm.mSize = glm::u16vec2(fi.mCharWidth, fi.mCharHeight);
-				gm.mAdvance = glm::u16vec2(fi.mCharWidth, fi.mCharHeight);
+				gm.mAdvance = glm::i16vec2(fi.mCharWidth, fi.mCharHeight);
 				gm.mBearing = glm::u16vec2(0, fi.mCharHeight);
 				fi.mMapping[ftCharCode] = gm;
 
@@ -206,8 +206,10 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 		{
 			GlyphMetrics gm;
 			gm.mSize = glm::u16vec2(ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows);
-			gm.mAdvance = glm::u16vec2(ftFace->glyph->advance.x, ftFace->glyph->advance.y);
-			gm.mBearing = glm::u16vec2(ftFace->glyph->bitmap_left, ftFace->glyph->bitmap_top);
+			gm.mBearing = glm::i16vec2(ftFace->glyph->bitmap_left, ftFace->glyph->bitmap_top);
+			gm.mAdvance = glm::u16vec2(
+				ftFace->glyph->advance.x % 64 > 0 ? (ftFace->glyph->advance.x >> 6) + 1 : ftFace->glyph->advance.x >> 6,
+				ftFace->glyph->advance.y % 64 > 0 ? (ftFace->glyph->advance.y >> 6) + 1 : ftFace->glyph->advance.y >> 6);
 			fi.mMapping[ftCharCode] = gm;
 
 			GlyphInfo gi;

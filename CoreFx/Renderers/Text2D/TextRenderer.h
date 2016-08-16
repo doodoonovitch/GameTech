@@ -58,7 +58,7 @@ protected:
 	struct GlyphMetrics
 	{
 		glm::u16vec2 mSize;
-		glm::u16vec2 mBearing;
+		glm::i16vec2 mBearing;
 		glm::u16vec2 mAdvance;
 		GLuint mGlyphInfoBufferIndex;
 	};
