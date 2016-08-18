@@ -111,7 +111,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 	FT_Error error;
 	FT_Face ftFace = nullptr;
 
-	GLint lineHeight = 0;
+	GLint * lineHeight = nullptr;
 	glm::uvec2 topLeft(0);
 
 	if (ftLibrary == nullptr)
@@ -145,7 +145,9 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 	fi.mDesiredCharHeight = charHeight == 0 ? charWidth : charHeight;
 	fi.mBufferEntryIndex = (GLuint)mGlyphInfoBuffer.size();
 	fi.mUndefinedCharIndex = (GLuint)mGlyphInfoBuffer.size();
+	fi.mLineHeight = 0;
 
+	lineHeight = &fi.mLineHeight;
 
 	//GlyphInfo gi0, gi1;
 	//gi0.Set(511, 3784, 3482, 3038, 513, GlyphInfo::Status::Undefined);
@@ -191,8 +193,8 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 
 			if (ftCharCode == ' ')
 			{
-				if (ftFace->glyph->metrics.vertAdvance > lineHeight)
-					lineHeight = ftFace->glyph->metrics.vertAdvance;
+				if (ftFace->glyph->metrics.vertAdvance > *lineHeight)
+					*lineHeight = ftFace->glyph->metrics.vertAdvance;
 
 				GlyphMetrics gm;
 				gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);
@@ -208,8 +210,8 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 		}
 		
 		{
-			if (ftFace->glyph->metrics.vertAdvance > lineHeight)
-				lineHeight = ftFace->glyph->metrics.vertAdvance;
+			if (ftFace->glyph->metrics.vertAdvance > *lineHeight)
+				*lineHeight = ftFace->glyph->metrics.vertAdvance;
 
 			GlyphMetrics gm;
 			gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);

@@ -75,7 +75,7 @@ protected:
 		GLuint mBufferEntryIndex;
 		GLuint mUndefinedCharIndex;
 
-		GLuint mLineHeight;
+		GLint mLineHeight;
 
 		GLushort mDesiredCharWidth;
 		GLushort mDesiredCharHeight;
