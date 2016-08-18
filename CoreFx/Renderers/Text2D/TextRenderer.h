@@ -57,9 +57,14 @@ protected:
 
 	struct GlyphMetrics
 	{
-		glm::u16vec2 mSize;
-		glm::i16vec2 mBearing;
-		glm::u16vec2 mAdvance;
+		template <typename T> static T round(T value) { return (value + 32) & -64; }
+		template <typename T> static T floor(T value) {	return value & -64; }
+		template <typename T> static T ceiling(T value) { return (value + 64) & -64; }
+		template <typename T> static T toPixel(T value) { return value / 64; }
+
+		glm::ivec2 mSize;
+		glm::ivec2 mBearing;
+		glm::ivec2 mAdvance;
 		GLuint mGlyphInfoBufferIndex;
 	};
 
@@ -70,11 +75,10 @@ protected:
 		GLuint mBufferEntryIndex;
 		GLuint mUndefinedCharIndex;
 
-		glm::u16vec2 mMin;
-		glm::u16vec2 mMax;
+		GLuint mLineHeight;
 
-		GLushort mCharWidth;
-		GLushort mCharHeight;
+		GLushort mDesiredCharWidth;
+		GLushort mDesiredCharHeight;
 
 		GLushort mStartLayerIndex;
 		GLushort mEndLayerIndex;

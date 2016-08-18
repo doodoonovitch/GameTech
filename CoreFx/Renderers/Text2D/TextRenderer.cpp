@@ -111,6 +111,9 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 	FT_Error error;
 	FT_Face ftFace = nullptr;
 
+	GLint lineHeight = 0;
+	glm::uvec2 topLeft(0);
+
 	if (ftLibrary == nullptr)
 	{
 		PRINT_ERROR("FreeType library is not initialized!", 0);
@@ -138,14 +141,11 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 	fi.mFamilyName = ftFace->family_name;
 	fi.mStyleName = ftFace->style_name;
 	fi.mStartLayerIndex = layerIndex;
-	fi.mCharWidth = charWidth == 0 ? charHeight : charWidth;
-	fi.mCharHeight = charHeight == 0 ? charWidth : charHeight;
+	fi.mDesiredCharWidth = charWidth == 0 ? charHeight : charWidth;
+	fi.mDesiredCharHeight = charHeight == 0 ? charWidth : charHeight;
 	fi.mBufferEntryIndex = (GLuint)mGlyphInfoBuffer.size();
 	fi.mUndefinedCharIndex = (GLuint)mGlyphInfoBuffer.size();
-	fi.mMin = glm::u16vec2(ftFace->bbox.xMin, ftFace->bbox.yMin);
-	fi.mMax = glm::u16vec2(ftFace->bbox.xMax, ftFace->bbox.yMax);
-	GLushort left = 0;
-	GLushort top = 0;
+
 
 	//GlyphInfo gi0, gi1;
 	//gi0.Set(511, 3784, 3482, 3038, 513, GlyphInfo::Status::Undefined);
@@ -184,49 +184,58 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 			goto NextCharacter;
 		}
 
+
 		if (ftFace->glyph->bitmap.width == 0 || ftFace->glyph->bitmap.rows == 0)
 		{
-			PRINT_ERROR("Could not render the glyph bitmap for the character code=%li (0x%x)!", ftCharCode, ftCharCode);
+			PRINT_WARNING("Could not render the glyph bitmap for the character code=%li (0x%x)!", ftCharCode, ftCharCode);
 
 			if (ftCharCode == ' ')
 			{
+				if (ftFace->glyph->metrics.vertAdvance > lineHeight)
+					lineHeight = ftFace->glyph->metrics.vertAdvance;
+
 				GlyphMetrics gm;
-				gm.mSize = glm::u16vec2(fi.mCharWidth, fi.mCharHeight);
-				gm.mAdvance = glm::i16vec2(fi.mCharWidth, fi.mCharHeight);
-				gm.mBearing = glm::u16vec2(0, fi.mCharHeight);
+				gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);
+				gm.mSize = gm.mAdvance;
+				gm.mBearing = glm::ivec2(0);
 				fi.mMapping[ftCharCode] = gm;
 
 				GlyphInfo gi;
-				gi.Set(0, 0, fi.mCharWidth - 1, fi.mCharHeight - 1, 0, GlyphInfo::Status::WhiteSpace);
+				gi.Set(0, 0, (GLushort)GlyphMetrics::toPixel(GlyphMetrics::floor(gm.mAdvance.x)), (GLushort)GlyphMetrics::toPixel(GlyphMetrics::floor(gm.mAdvance.y)), 0, GlyphInfo::Status::WhiteSpace);
 				mGlyphInfoBuffer.push_back(gi);
 			}
 			goto NextCharacter;
 		}
 		
 		{
+			if (ftFace->glyph->metrics.vertAdvance > lineHeight)
+				lineHeight = ftFace->glyph->metrics.vertAdvance;
+
 			GlyphMetrics gm;
-			gm.mSize = glm::u16vec2(ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows);
-			gm.mBearing = glm::i16vec2(ftFace->glyph->bitmap_left, ftFace->glyph->bitmap_top);
-			gm.mAdvance = glm::u16vec2((ftFace->glyph->advance.x + 32) & 64, (ftFace->glyph->advance.y + 32) & 64);
+			gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);
+			gm.mSize = glm::ivec2(ftFace->glyph->metrics.width, ftFace->glyph->metrics.height);
+			gm.mBearing = glm::i16vec2(ftFace->glyph->metrics.horiBearingX, ftFace->glyph->metrics.horiBearingY);
 			fi.mMapping[ftCharCode] = gm;
 
 			GlyphInfo gi;
-			GLushort right = (GLushort)(left + gm.mSize.x - 1);
-			GLushort bottom = (GLushort)(top + gm.mSize.y - 1);
-			if (right >= mTextureSize.x)
+
+			glm::uvec2 bitmapSize(ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows);
+			
+			glm::uvec2 bottomRight = topLeft + bitmapSize - glm::uvec2(1);
+			if (bottomRight.x >= mTextureSize.x)
 			{
-				left = 0;
-				top = bottom;
-				bottom = (GLushort)(top + gm.mSize.y - 1);
-				if (bottom >= mTextureSize.y)
+				topLeft.x = 0;
+				topLeft.y = bottomRight.y;
+				bottomRight.y = topLeft.y + bitmapSize.y - 1;
+				if (bottomRight.y >= mTextureSize.y)
 				{
 					++layerIndex;
-					top = 0;
-					bottom = (GLushort)(top + gm.mSize.y - 1);
+					topLeft.y = 0;
+					bottomRight.y = topLeft.y + bitmapSize.y - 1;
 				}
-				right = (GLushort)(left + gm.mSize.x - 1);
+				bottomRight.x = topLeft.x + bitmapSize.x - 1;
 			}
-			gi.Set(left, top, right, bottom, layerIndex, GlyphInfo::Status::None);
+			gi.Set((GLushort)topLeft.x, (GLushort)topLeft.y, (GLushort)bottomRight.x, (GLushort)bottomRight.y, layerIndex, GlyphInfo::Status::None);
 			mGlyphInfoBuffer.push_back(gi);
 		}
 		
