@@ -12,6 +12,26 @@ namespace CoreFx
 
 class TextRenderer : public RendererHelper<1>
 {
+public:
+
+	struct PoliceDesc
+	{
+		std::string mFont;
+		GLushort mCharacterWidth = 0;
+		GLushort mCharacterHeight = 16;
+		std::vector<GLuint> mCharacterSet;
+	};
+
+	typedef std::vector<PoliceDesc> PoliceDescList;
+
+	class Desc 
+	{
+	public:
+		glm::uvec2 mTextureSize = glm::uvec2(512);
+		glm::uvec2 mScreenResolution = glm::uvec2(72);
+
+		PoliceDescList mPoliceList;
+	};
 
 public:
 	TextRenderer();
@@ -19,6 +39,8 @@ public:
 
 	virtual void Render() override;
 	virtual void RenderWireFrame() override;
+
+	void Initialize(Desc desc);
 
 protected:
 
@@ -95,13 +117,15 @@ protected:
 
 protected:
 
-	bool AddFont(FT_Library ftLibrary, const char * fontName, GLushort charWidth, GLushort charHeight, GLushort &layerIndex);
+	bool AddFont(FT_Library ftLibrary, const char * fontName, GLushort charWidth, GLushort charHeight, GLushort &layerIndex, const std::vector<GLuint> & characterSet);
+	bool AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeight, GLuint & bitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex);
 
 
 protected:
 
 	glm::uvec2 mTextureSize = glm::uvec2(512);
 	glm::uvec2 mScreenResolution = glm::uvec2(72);
+	GLushort mLayerCount = 0;
 
 	GlyphInfoBuffer mGlyphInfoBuffer;
 	FontInfoList mFontInfoList;

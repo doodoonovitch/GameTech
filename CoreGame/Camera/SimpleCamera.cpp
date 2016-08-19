@@ -446,6 +446,21 @@ void SimpleCamera::OnInit()
 		// TextRenderer
 		{
 			Renderers::TextRenderer * textRenderer = new Renderers::TextRenderer();
+			Renderers::TextRenderer::Desc desc;
+			desc.mPoliceList.resize(2);
+			desc.mTextureSize = glm::ivec2(128);
+
+			Renderers::TextRenderer::PoliceDesc & p1 = desc.mPoliceList[0];
+			p1.mFont = "Medias\\Fonts\\OCRAEXT.TTF";
+			p1.mCharacterHeight = 12;
+
+			Renderers::TextRenderer::PoliceDesc & p2 = desc.mPoliceList[1];
+			p2.mFont = "Medias\\Fonts\\arial.ttf";
+			p2.mCharacterHeight = 18;
+			for (GLuint i = L' '; i <= L'µ'; ++i)
+				p2.mCharacterSet.push_back(i);
+
+			textRenderer->Initialize(desc);
 		}
 
 	// Setup Lights
