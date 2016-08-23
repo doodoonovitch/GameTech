@@ -29,6 +29,8 @@ public:
 	};
 
 	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, const std::vector<LoadTextureGroupDesc> & list, bool generateMipMap = true);
+
+	Texture2DArray const * CreateTexture2DArray(GLsizei mipMapCount, GLenum format, GLsizei width, GLsizei height, GLsizei depth);
 	
 
 	void ReleaseTexture2D(Texture2D const *& texture);
@@ -57,12 +59,13 @@ private:
 	void ReleaseAllTexture2D();
 	void ReleaseAllCubeMapTexture();
 	void ReleaseAllTextureGroup();
+	void ReleaseAllTexture2DArray();
 
 	TextureManager(TextureManager const &) = delete;
 	TextureManager & operator=(TextureManager const &) = delete;
 
-	template<typename TTexture>
-	void ReleaseTextureMap(std::map<std::string, TTexture*> & texMap)
+	template<typename TKey, typename TTexture>
+	void ReleaseTextureMap(std::map<TKey, TTexture*> & texMap)
 	{
 		if (texMap.empty())
 			return;
@@ -70,7 +73,7 @@ private:
 		size_t max = texMap.size();
 		std::vector<GLuint> ids(max);
 		size_t count = 0;
-		for (std::map<std::string, TTexture*>::const_iterator it = texMap.begin(); it != texMap.end(); ++it)
+		for (std::map<TKey, TTexture*>::const_iterator it = texMap.begin(); it != texMap.end(); ++it)
 		{
 			if (it->second->GetResourceId() != mDefault2D->GetResourceId())
 			{
@@ -97,11 +100,12 @@ private:
 	typedef std::map<std::string, Texture2D*> Tex2DIdMap;
 	typedef std::map<std::string, CubeMapTexture*> CubeMapTexIdMap;
 	typedef std::map<TextureGroupId, TextureGroup*> TexGroupMap;
+	typedef std::map<Texture2DArray*, Texture2DArray*> Tex2DArrayMap;
 
 	Tex2DIdMap m2DTexMap;
 	CubeMapTexIdMap mCubeMapTexMap;
 	TexGroupMap mTexGroupMap;
-
+	Tex2DArrayMap mTex2DArrayMap;
 
 	friend class Engine;
 };

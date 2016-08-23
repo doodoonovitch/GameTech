@@ -68,4 +68,15 @@ TextureGroup::~TextureGroup()
 
 }
 
+
+Texture2DArray::Texture2DArray(GLuint textureId, GLenum target)
+	: Texture(textureId, target, TextureClass::Texture2DArray)
+{
+}
+
+
+Texture2DArray::~Texture2DArray()
+{
+}
+
 } // namespace CoreFx

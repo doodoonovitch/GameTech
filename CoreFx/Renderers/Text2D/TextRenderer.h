@@ -88,6 +88,9 @@ protected:
 		glm::ivec2 mBearing;
 		glm::ivec2 mAdvance;
 		GLuint mGlyphInfoBufferIndex;
+#ifdef _DEBUG
+		wchar_t mChar;
+#endif // _DEBUG
 	};
 
 	typedef std::map<GLulong, GlyphMetrics> CharGlyphIndexMapping;
@@ -114,15 +117,17 @@ protected:
 
 	typedef std::vector<FontInfo> FontInfoList;
 
+	typedef std::vector<FT_Face> FtFaceList;
 
 protected:
 
-	bool AddFont(FT_Library ftLibrary, const char * fontName, GLushort charWidth, GLushort charHeight, GLushort &layerIndex, const std::vector<GLuint> & characterSet);
+	bool AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const char * fontName, GLushort charWidth, GLushort charHeight, glm::uvec2 & topLeft, GLushort &layerIndex, const std::vector<GLuint> & characterSet);
 	bool AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeight, GLuint & bitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex);
-
+	bool LoadTexture(const FtFaceList & ftFaceList);
 
 protected:
 
+	const Texture2DArray * mTexture = nullptr;
 	glm::uvec2 mTextureSize = glm::uvec2(512);
 	glm::uvec2 mScreenResolution = glm::uvec2(72);
 	GLushort mLayerCount = 0;

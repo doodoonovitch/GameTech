@@ -30,6 +30,7 @@ protected:
 		Texture2D,
 		CubeMapTexture,
 		TextureGroup,
+		Texture2DArray,
 	};
 
 	Texture(GLuint id, GLenum target, TextureClass texClass);
@@ -269,6 +270,24 @@ private:
 	friend class TextureManager;
 	friend class Engine;
 };
+
+class Texture2DArray : public Texture
+{
+protected:
+
+	Texture2DArray(GLuint textureId, GLenum target);
+	~Texture2DArray();
+
+
+private:
+
+	friend class TextureManager;
+	friend class Engine;
+};
+
+
+
+
 
 typedef std::vector<const TextureInfo *> TexInfoPtrList;
 struct TextureMappingItem

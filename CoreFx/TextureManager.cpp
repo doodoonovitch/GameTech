@@ -37,6 +37,7 @@ void TextureManager::Release()
 	ReleaseAllTexture2D();
 	ReleaseAllCubeMapTexture();
 	ReleaseAllTextureGroup();
+	ReleaseAllTexture2DArray();
 
 	if (mDefault2D != nullptr)
 	{
@@ -53,6 +54,11 @@ void TextureManager::ReleaseAllTexture2D()
 void TextureManager::ReleaseAllCubeMapTexture()
 {
 	ReleaseTextureMap(mCubeMapTexMap);
+}
+
+void TextureManager::ReleaseAllTexture2DArray()
+{
+	ReleaseTextureMap(mTex2DArrayMap);
 }
 
 void TextureManager::ReleaseAllTextureGroup()
@@ -391,6 +397,23 @@ void TextureManager::ReleaseCubeMapTexture(CubeMapTexture const *& texture)
 void TextureManager::ReleaseTextureGroup(TextureGroup const *& texture)
 {
 	texture = nullptr;
+}
+
+Texture2DArray const * TextureManager::CreateTexture2DArray(GLsizei mipMapCount, GLenum format, GLsizei width, GLsizei height, GLsizei depth)
+{
+	GLuint id = 0;
+	GLenum target = GL_TEXTURE_2D_ARRAY;
+
+	glGenTextures(1, &id); GL_CHECK_ERRORS;
+	glBindTexture(target, id); GL_CHECK_ERRORS;
+	glTexStorage3D(target, mipMapCount, format, width, height, depth); GL_CHECK_ERRORS;
+
+	glBindTexture(target, 0); GL_CHECK_ERRORS;
+
+	Texture2DArray * texture = new Texture2DArray(id, target);
+	mTex2DArrayMap[texture] = texture;
+
+	return texture;
 }
 
 TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, const std::vector<LoadTextureGroupDesc> & list, bool generateMipMap)
