@@ -306,6 +306,11 @@ public:
 		mIsDrawLightPositionEnabled = value;
 	}
 
+public:
+
+	void DisplayTexture2DArray(const Texture * texture, GLint layerIndex);
+	void UndisplayTexture2DArray();
+
 private:
 
 	typedef InstanceContainer<Renderer> RendererContainer;
@@ -332,8 +337,12 @@ private:
 	void InternalInitializeDeferredPassShader();
 	void InternalInitializeToneMappingShader();
 	void InternalInitializeCopyShader();
+	void InternalInitializeViewTex2DArrayShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
+
+	void InternalRenderObjects();
+	void InternalDisplayTexture();
 
 	Engine();
 	~Engine();
@@ -373,6 +382,14 @@ private:
 		__copyshader_uniforms_count__
 	};
 
+	enum ECopyText2DArrayShaderUniformIndex
+	{
+		u_TextureSampler,
+		u_LayerIndex,
+
+		__copytex2Darrayshader_uniforms_count__
+	};
+
 	static Engine* sInstance;
 	static bool sIsUsedExtensionSupported[__UsedExtensions_count__ + 1];
 
@@ -392,6 +409,7 @@ private:
 	Shader mDeferredShader;
 	Shader mToneMappingShader;
 	Shader mCopyShader;
+	Shader mViewTex2DArrayShader;
 
 	GLuint mDeferredFBO;
 	GLuint mDepthRBO;
@@ -541,6 +559,9 @@ private:
 	bool mIsDrawGBufferNormalEnabled;
 	bool mWireFrame;
 	bool mIsDrawLightPositionEnabled;
+
+	const Texture * mDisplayTexture;
+	GLint mDisplayTextureLayerIndex;
 };
 
 

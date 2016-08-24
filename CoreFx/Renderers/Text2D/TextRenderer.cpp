@@ -120,6 +120,7 @@ void TextRenderer::Initialize(Desc desc)
 		}
 	}
 
+	//Engine::GetInstance()->DisplayTexture2DArray(mTexture, 0);
 
 EndTextRendererInit:
 
@@ -330,6 +331,8 @@ bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
 
 	glBindTexture(mTexture->GetTarget(), mTexture->GetResourceId()); GL_CHECK_ERRORS;
 
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 	for (size_t i = 0; i < mFontInfoList.size(); ++i)
 	{
 		FontInfo &fi = mFontInfoList[i];
@@ -355,11 +358,16 @@ bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
 				if (error != 0)
 				{
 					PRINT_ERROR("Could not load glyph for the character code=%li! (error=%li)", ftCharCode, error);
-					glTexSubImage3D(mTexture->GetTarget(), 0, 0, 0, gi.mBitfields.mLayerIndex, ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows, 1, GL_R, GL_UNSIGNED_BYTE, ftFace->glyph->bitmap.buffer); GL_CHECK_ERRORS;
+					glTexSubImage3D(mTexture->GetTarget(), 0, gi.mBitfields.mLeft, gi.mBitfields.mTop, gi.mBitfields.mLayerIndex, ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows, 1, GL_R, GL_UNSIGNED_BYTE, ftFace->glyph->bitmap.buffer); GL_CHECK_ERRORS;
 				}
 			}
 		}
 	}
+
+	glTexParameteri(mTexture->GetTarget(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(mTexture->GetTarget(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(mTexture->GetTarget(), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(mTexture->GetTarget(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glBindTexture(mTexture->GetTarget(), 0);
 

@@ -444,6 +444,9 @@
     <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\copyTex2DArray.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

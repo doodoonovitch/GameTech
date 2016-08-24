@@ -339,6 +339,8 @@ void ModelRenderer::InitializeMainShader()
 	GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("... ModelRenderer shader initialized!");
+
+	//Engine::GetInstance()->DisplayTexture2DArray(mTextureMapping.mMapping[0].mTexture, 0);
 }
 
 void ModelRenderer::InitializeWireFrameShader()

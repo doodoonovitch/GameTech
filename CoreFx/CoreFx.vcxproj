@@ -238,6 +238,7 @@
     <None Include="..\Data\Shaders\ConeShader.Light.gs.glsl" />
     <None Include="..\Data\Shaders\ConeShader.vs.glsl" />
     <None Include="..\Data\Shaders\copy.fs.glsl" />
+    <None Include="..\Data\Shaders\copyTex2DArray.fs.glsl" />
     <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\cube.gs.glsl" />
     <None Include="..\Data\Shaders\cube.vs.glsl" />

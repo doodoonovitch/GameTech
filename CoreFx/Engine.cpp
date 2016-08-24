@@ -43,6 +43,7 @@ Engine::Engine()
 	, mDeferredShader("DeferredShader")
 	, mToneMappingShader("ToneMappingShader")
 	, mCopyShader("CopyShader")
+	, mViewTex2DArrayShader("CopyTex2DArrayShader")
 	, mPointLightPositionRenderer(nullptr)
 	, mSpotLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
@@ -51,6 +52,7 @@ Engine::Engine()
 	, mIsDrawGBufferNormalEnabled(false)
 	, mWireFrame(false)
 	, mIsDrawLightPositionEnabled(false)
+	, mDisplayTexture(nullptr)
 {
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
@@ -218,6 +220,7 @@ void Engine::CreateDynamicResources()
 	InternalInitializeDeferredPassShader();
 	InternalInitializeToneMappingShader();
 	InternalInitializeCopyShader();
+	InternalInitializeViewTex2DArrayShader();
 }
 
 void Engine::InternalCreateGBuffers()
@@ -591,6 +594,41 @@ void Engine::InternalInitializeCopyShader()
 	PRINT_END_SECTION;
 }
 
+void Engine::InternalInitializeViewTex2DArrayShader()
+{
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize copy 2D texture array (debug purpose) shader.....");
+
+	//setup shader
+
+	// vertex shader
+	mViewTex2DArrayShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+	mViewTex2DArrayShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/copyTex2DArray.fs.glsl");
+
+	mViewTex2DArrayShader.CreateAndLinkProgram();
+
+	const char * uniformNames[__copytex2Darrayshader_uniforms_count__] =
+	{
+		"u_TextureSampler",
+		"u_LayerIndex"
+	};
+
+	mViewTex2DArrayShader.Use();
+
+	mViewTex2DArrayShader.AddUniforms(uniformNames, __copytex2Darrayshader_uniforms_count__);
+
+	glUniform1i(mViewTex2DArrayShader.GetUniform(u_TextureSampler), 0);
+
+	mViewTex2DArrayShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
+}
+
+
+
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
 {
 	renderers->ForEach([&offset, &baseIndex](Renderer * renderer)
@@ -724,7 +762,7 @@ void Engine::RenderObjects()
 
 	// Fill light data buffer 
 	// -----------------------------------------------------------------------
-	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId()); 
+	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId());
 	std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
@@ -741,9 +779,9 @@ void Engine::RenderObjects()
 
 	// Frame data buffer
 	// -----------------------------------------------------------------------
-	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]); 
+	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
 
-	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);	
+	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 	assert(buffer != nullptr);
 
 	glm::vec4 eyePos(mCamera->GetFrame()->GetPosition(), 1.f);
@@ -765,16 +803,28 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_TimeDeltaTime], mTimeDeltaTime, sizeof(GLfloat) * 2);
 	memcpy(buffer + mFrameDataUniformOffsets[u_NormalMagnitude], &mDrawVertexNormalMagnitude, sizeof(GLfloat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_Exposure], &mExposure, sizeof(GLfloat));
-	
+
 	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
 		*((GLint*)(buffer + mFrameDataUniformOffsets[lightUniformVarIndex[i]])) = (GLint)mLights[i]->GetCount();
 	}
 
-	glUnmapBuffer(GL_UNIFORM_BUFFER); 
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	// -----------------------------------------------------------------------
 
+	if (mDisplayTexture == nullptr)
+	{
+		InternalRenderObjects();
+	}
+	else
+	{
+		InternalDisplayTexture();
+	}
+}
+
+void Engine::InternalRenderObjects()
+{
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// -----------------------------------------------------------------------
@@ -1009,7 +1059,32 @@ void Engine::RenderObjects()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
 	mCopyShader.UnUse();
+}
 
+void Engine::InternalDisplayTexture()
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	mViewTex2DArrayShader.Use();
+	glBindVertexArray(mQuad->GetVao());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(mDisplayTexture->GetTarget(), mDisplayTexture->GetResourceId());
+
+	glUniform1i(mViewTex2DArrayShader.GetUniform(u_TextureSampler), mDisplayTextureLayerIndex);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	mViewTex2DArrayShader.UnUse();
 }
 
 Lights::PointLight * Engine::CreatePointLight(const glm::vec3 & position, glm::vec3 const & color, GLfloat intensity, GLfloat radius)
@@ -1187,6 +1262,17 @@ void Engine::InternalUpdateDrawGBufferNormalsPatchCount()
 //	});
 //
 //}
+
+void Engine::DisplayTexture2DArray(const Texture * texture, GLint layerIndex)
+{
+	mDisplayTexture = texture;
+	mDisplayTextureLayerIndex = layerIndex;
+}
+
+void Engine::UndisplayTexture2DArray()
+{
+	mDisplayTexture = nullptr;
+}
 
 
 
