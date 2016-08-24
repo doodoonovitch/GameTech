@@ -281,9 +281,10 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
 //#define ARTORIAS_SWORD_MODEL
-#define BOX_MODEL
+//#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
+#define CERBERUS_MODEL
 
 
 #ifdef ARTORIAS_SWORD_MODEL
@@ -373,6 +374,34 @@ void SimpleCamera::OnInit()
 				opt.SetPreTransformVertices(m);
 
 				modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt, &dataCtxBase);
+				const GLuint modelCount = 1;
+				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+			}
+#endif
+			// Iron : 0.56f, 0.57f, 0.58f
+			// Copper : 0.95f, 0.64f, 0.54f
+			// Gold : 1.00f, 0.71f, 0.29f
+			// Aluminum : 0.91f, 0.92f, 0.92f
+			// Silver : 0.95f, 0.93f, 0.88f
+
+#ifdef CERBERUS_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(10.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Cerberus/Cerberus_LP.dae", "Medias/Objects/Cerberus/Textures", opt, &dataCtxBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_A.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_M.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_R.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_N.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.588235f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+
 				const GLuint modelCount = 1;
 				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
 			}
