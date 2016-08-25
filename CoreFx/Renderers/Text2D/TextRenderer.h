@@ -121,9 +121,9 @@ protected:
 
 protected:
 
-	bool AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const char * fontName, GLushort charWidth, GLushort charHeight, glm::uvec2 & topLeft, GLushort &layerIndex, const std::vector<GLuint> & characterSet);
+	bool AddFont(FT_Library ftLibrary, const char * fontName, GLushort charWidth, GLushort charHeight, glm::uvec2 & topLeft, GLushort &layerIndex, const std::vector<GLuint> & characterSet);
 	bool AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeight, GLuint & bitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex);
-	bool LoadTexture(const FtFaceList & ftFaceList);
+	bool LoadTexture(FT_Library ftLibrary);
 
 protected:
 

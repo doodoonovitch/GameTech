@@ -1080,7 +1080,7 @@ void Engine::InternalDisplayTexture()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(mDisplayTexture->GetTarget(), mDisplayTexture->GetResourceId());
 
-	glUniform1i(mViewTex2DArrayShader.GetUniform(u_TextureSampler), mDisplayTextureLayerIndex);
+	glUniform1i(mViewTex2DArrayShader.GetUniform(u_LayerIndex), mDisplayTextureLayerIndex);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);

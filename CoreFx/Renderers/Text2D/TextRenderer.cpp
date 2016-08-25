@@ -83,7 +83,7 @@ void TextRenderer::RenderWireFrame()
 
 void TextRenderer::Initialize(Desc desc)
 {
-	FtFaceList ftFaceList;
+	//FtFaceList ftFaceList;
 	mLayerCount = 0;
 	glm::uvec2 topLeft(0);
 
@@ -107,22 +107,24 @@ void TextRenderer::Initialize(Desc desc)
 
 	for (const PoliceDesc & policeDesc : desc.mPoliceList)
 	{
-		AddFont(ftLibrary, ftFaceList, policeDesc.mFont.c_str(), policeDesc.mCharacterWidth, policeDesc.mCharacterHeight, topLeft, mLayerCount, policeDesc.mCharacterSet);
+		AddFont(ftLibrary, policeDesc.mFont.c_str(), policeDesc.mCharacterWidth, policeDesc.mCharacterHeight, topLeft, mLayerCount, policeDesc.mCharacterSet);
 	}
 	++mLayerCount;
 
-	LoadTexture(ftFaceList);
+	LoadTexture(ftLibrary);
 	PRINT_MESSAGE(" \t Texture Id = %i", mTexture->GetResourceId());
 
-	for (FT_Face ftFace : ftFaceList)
-	{
-		if (ftFace != nullptr)
-		{
-			FT_Done_Face(ftFace);
-		}
-	}
+	//for (FT_Face ftFace : ftFaceList)
+	//{
+	//	if (ftFace != nullptr)
+	//	{
+	//		FT_Done_Face(ftFace);
+	//	}
+	//}
 
-	Engine::GetInstance()->DisplayTexture2DArray(mTexture, 0);
+	Engine::GetInstance()->DisplayTexture2DArray(mTexture, 1);
+
+	PRINT_MESSAGE(" \t Layer count = %i", mLayerCount);
 
 EndTextRendererInit:
 
@@ -132,7 +134,7 @@ EndTextRendererInit:
 	PRINT_END_SECTION;
 }
 
-bool TextRenderer::AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const char * fontName, GLushort charWidth, GLushort charHeight, glm::uvec2 & topLeft, GLushort & layerIndex, const std::vector<GLuint> & characterSet)
+bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort charWidth, GLushort charHeight, glm::uvec2 & topLeft, GLushort & layerIndex, const std::vector<GLuint> & characterSet)
 {
 	PRINT_MESSAGE("Add font file '%s' :", fontName);
 
@@ -142,7 +144,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const 
 	FT_Face ftFace = nullptr;
 
 	GLint * lineHeight = nullptr;
-	GLuint bitmapHeight = 0;
+	GLuint currLineBitmapHeight = 0;
 
 	if (ftLibrary == nullptr)
 	{
@@ -164,7 +166,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const 
 		goto ExitAddFont;
 	}
 
-	ftFaceList.push_back(ftFace);
+	//ftFaceList.push_back(ftFace);
 
 	GLuint index = (GLuint)mFontInfoList.size();
 	mFontInfoList.resize(index + 1);
@@ -180,7 +182,6 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const 
 	fi.mLineHeight = 0;
 
 	lineHeight = &fi.mLineHeight;
-	bitmapHeight = 0;
 
 	//GlyphInfo gi0, gi1;
 	//gi0.Set(511, 3784, 3482, 3038, 513, GlyphInfo::Status::Undefined);
@@ -201,7 +202,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const 
 		FT_ULong ftCharCode = FT_Get_First_Char(ftFace, &ftGlyphIndex);
 		while (ftGlyphIndex != 0)
 		{
-			AddCharacterMetrics(ftFace, ftCharCode, ftGlyphIndex, fi, *lineHeight, bitmapHeight, topLeft, layerIndex);
+			AddCharacterMetrics(ftFace, ftCharCode, ftGlyphIndex, fi, *lineHeight, currLineBitmapHeight, topLeft, layerIndex);
 
 			ftCharCode = FT_Get_Next_Char(ftFace, ftCharCode, &ftGlyphIndex);
 		}
@@ -212,7 +213,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const 
 		{
 			FT_ULong ftCharCode = v;
 			ftGlyphIndex = FT_Get_Char_Index(ftFace, ftCharCode);
-			AddCharacterMetrics(ftFace, ftCharCode, ftGlyphIndex, fi, *lineHeight, bitmapHeight, topLeft, layerIndex);
+			AddCharacterMetrics(ftFace, ftCharCode, ftGlyphIndex, fi, *lineHeight, currLineBitmapHeight, topLeft, layerIndex);
 		}
 	}
 
@@ -224,10 +225,14 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, FtFaceList & ftFaceList, const 
 	PRINT_MESSAGE("  - character count : %li", fi.mMapping.size());
 
 ExitAddFont:
+	if (ftFace != nullptr)
+	{
+		FT_Done_Face(ftFace);
+	}
 	return result;
 }
 
-bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeight, GLuint & bitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex)
+bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeightMax, GLuint & currLineBitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex)
 {
 	FT_Error error;
 
@@ -260,8 +265,8 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 
 		if (ftCharCode == ' ')
 		{
-			if (ftFace->glyph->metrics.vertAdvance > lineHeight)
-				lineHeight = ftFace->glyph->metrics.vertAdvance;
+			if (ftFace->glyph->metrics.vertAdvance > lineHeightMax)
+				lineHeightMax = ftFace->glyph->metrics.vertAdvance;
 
 			GlyphMetrics gm;
 			gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);
@@ -281,8 +286,8 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 	}
 
 	{
-		if (ftFace->glyph->metrics.vertAdvance > lineHeight)
-			lineHeight = ftFace->glyph->metrics.vertAdvance;
+		if (ftFace->glyph->metrics.vertAdvance > lineHeightMax)
+			lineHeightMax = ftFace->glyph->metrics.vertAdvance;
 
 		GlyphMetrics gm;
 		gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);
@@ -298,18 +303,29 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 
 		//glm::uvec2 bitmapSize(ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows);
 
-		if (bitmapSize.y > bitmapHeight)
-			bitmapHeight = bitmapSize.y;
+		if (bitmapSize.y > currLineBitmapHeight)
+			currLineBitmapHeight = bitmapSize.y;
+
+		if ((topLeft.y + currLineBitmapHeight + 2) >= mTextureSize.y)
+		{
+			topLeft.x = 0;
+			topLeft.y = 0;
+			++layerIndex;
+			currLineBitmapHeight = bitmapSize.y;
+		}
 
 		glm::uvec2 bottomRight = topLeft + bitmapSize - glm::uvec2(1);
 		if (bottomRight.x >= mTextureSize.x)
 		{
 			topLeft.x = 0;
-			topLeft.y += (bitmapHeight + 2);
+			currLineBitmapHeight = bitmapSize.y;
+
+			topLeft.y += (currLineBitmapHeight + 2);
 			bottomRight.y = topLeft.y + bitmapSize.y - 1;
 			if (bottomRight.y >= mTextureSize.y)
 			{
 				++layerIndex;
+
 				topLeft.y = 0;
 				bottomRight.y = topLeft.y + bitmapSize.y - 1;
 			}
@@ -323,10 +339,8 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 	return true;
 }
 
-bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
+bool TextRenderer::LoadTexture(FT_Library ftLibrary)
 {
-	assert(ftFaceList.size() == mFontInfoList.size());
-
 	std::uint8_t * buffer = nullptr;
 	GLsizei bufferSize = mTextureSize.x * mTextureSize.y;
 	buffer = (std::uint8_t*)malloc(bufferSize);
@@ -342,9 +356,23 @@ bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
 	for (size_t i = 0; i < mFontInfoList.size(); ++i)
 	{
 		FontInfo &fi = mFontInfoList[i];
-		FT_Face ftFace = ftFaceList[i];
+		FT_Face ftFace = nullptr;
 
+		FT_Error error = FT_New_Face(ftLibrary, fi.mFileName.c_str(), 0, &ftFace);
+		if (error != 0)
+		{
+			PRINT_ERROR("Could not load font! (error=%li)", error);
+			continue;
+		}
 
+		error = FT_Set_Char_Size(ftFace, fi.mDesiredCharWidth * 64, fi.mDesiredCharHeight * 64, mScreenResolution.x, mScreenResolution.y);
+		if (error != 0)
+		{
+			PRINT_ERROR("Could not set pixel sizes! (error=%li)", error);
+			FT_Done_Face(ftFace);
+			continue;
+		}
+		
 		CharGlyphIndexMapping & mapping = fi.mMapping;
 		for (CharGlyphIndexMapping::iterator itMapping = mapping.begin(); itMapping != mapping.end(); ++itMapping)
 		{
@@ -362,32 +390,31 @@ bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
 
 			if ((GlyphInfo::Status)gi.mBitfields.mStatus == GlyphInfo::Status::None)
 			{
-				FT_Error error = FT_Load_Char(ftFace, ' ', FT_LOAD_RENDER);
+				error = FT_Load_Char(ftFace, ftCharCode, FT_LOAD_RENDER);
 				if (error != 0)
 				{
 					PRINT_ERROR("Could not load glyph for the character code=%li! (error=%li)", ftCharCode, error);
 				}
 				else
 				{
-					error = FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL);
-					if (error != 0)
+					std::uint8_t * dst = buffer + ((mTextureSize.y - gi.mBitfields.mTop - 1) * mTextureSize.x) + gi.mBitfields.mLeft;
+					std::uint8_t * src = ftFace->glyph->bitmap.buffer;
+					for (auto y = gi.mBitfields.mTop; y <= gi.mBitfields.mBottom; ++y)
 					{
-						PRINT_ERROR("Could not render the glyph bitmap for the character code=%li (0x%x)! (error=%li)", ftCharCode, ftCharCode, error);
-					}
-					else
-					{
-						std::uint8_t * dst = buffer + gi.mBitfields.mTop * mTextureSize.x;
-						std::uint8_t * src = ftFace->glyph->bitmap.buffer;
-						for (auto y = gi.mBitfields.mTop; y <= gi.mBitfields.mBottom; ++y)
-						{
-							memcpy(dst, src, ftFace->glyph->bitmap.width);
-							src += ftFace->glyph->bitmap.pitch;
-							dst += mTextureSize.x;
-						}
+						GLuint n = (GLuint)gi.mBitfields.mRight - (GLuint)gi.mBitfields.mLeft + 1;
+							
+						assert(ftFace->glyph->bitmap.width == n);
+						assert(gi.mBitfields.mLeft + ftFace->glyph->bitmap.width <= mTextureSize.x);
+
+						memcpy(dst, src, n);
+						src += std::abs(ftFace->glyph->bitmap.pitch);
+						dst -= mTextureSize.x;
 					}
 				}
 			}
 		}
+
+		FT_Done_Face(ftFace);
 	}
 
 	glTexSubImage3D(mTexture->GetTarget(), 0, 0, 0, layerIndex, mTextureSize.x, mTextureSize.y, 1, GL_RED, GL_UNSIGNED_BYTE, buffer); GL_CHECK_ERRORS;
