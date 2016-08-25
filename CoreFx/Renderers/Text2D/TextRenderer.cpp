@@ -109,8 +109,10 @@ void TextRenderer::Initialize(Desc desc)
 	{
 		AddFont(ftLibrary, ftFaceList, policeDesc.mFont.c_str(), policeDesc.mCharacterWidth, policeDesc.mCharacterHeight, topLeft, mLayerCount, policeDesc.mCharacterSet);
 	}
+	++mLayerCount;
 
 	LoadTexture(ftFaceList);
+	PRINT_MESSAGE(" \t Texture Id = %i", mTexture->GetResourceId());
 
 	for (FT_Face ftFace : ftFaceList)
 	{
@@ -120,7 +122,7 @@ void TextRenderer::Initialize(Desc desc)
 		}
 	}
 
-	//Engine::GetInstance()->DisplayTexture2DArray(mTexture, 0);
+	Engine::GetInstance()->DisplayTexture2DArray(mTexture, 0);
 
 EndTextRendererInit:
 
@@ -325,25 +327,23 @@ bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
 {
 	assert(ftFaceList.size() == mFontInfoList.size());
 
-	std::uint8_t * blankBuffer = nullptr;
+	std::uint8_t * buffer = nullptr;
+	GLsizei bufferSize = mTextureSize.x * mTextureSize.y;
+	buffer = (std::uint8_t*)malloc(bufferSize);
+	memset(buffer, 0, bufferSize);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	mTexture = Engine::GetInstance()->GetTextureManager()->CreateTexture2DArray(1, GL_R8, mTextureSize.x, mTextureSize.y, mLayerCount);
 
 	glBindTexture(mTexture->GetTarget(), mTexture->GetResourceId()); GL_CHECK_ERRORS;
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
+	GLushort layerIndex = 0;
 	for (size_t i = 0; i < mFontInfoList.size(); ++i)
 	{
 		FontInfo &fi = mFontInfoList[i];
 		FT_Face ftFace = ftFaceList[i];
 
-		GLsizei bufferSize = fi.mDesiredCharWidth * fi.mDesiredCharHeight;
-		if (blankBuffer == nullptr)
-			blankBuffer = (std::uint8_t*)malloc(bufferSize);
-		else
-			blankBuffer = (std::uint8_t*)realloc(blankBuffer, bufferSize);
-		memset(blankBuffer, 0, bufferSize);
 
 		CharGlyphIndexMapping & mapping = fi.mMapping;
 		for (CharGlyphIndexMapping::iterator itMapping = mapping.begin(); itMapping != mapping.end(); ++itMapping)
@@ -352,17 +352,46 @@ bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
 			GlyphMetrics & gm = itMapping->second;
 			GlyphInfo & gi = mGlyphInfoBuffer[gm.mGlyphInfoBufferIndex];
 
+			if (gi.mBitfields.mLayerIndex > layerIndex)
+			{
+				glTexSubImage3D(mTexture->GetTarget(), 0, 0, 0, layerIndex, mTextureSize.x, mTextureSize.y, 1, GL_RED, GL_UNSIGNED_BYTE, buffer); GL_CHECK_ERRORS;
+
+				layerIndex = gi.mBitfields.mLayerIndex;
+				memset(buffer, 0, bufferSize);
+			}
+
 			if ((GlyphInfo::Status)gi.mBitfields.mStatus == GlyphInfo::Status::None)
 			{
 				FT_Error error = FT_Load_Char(ftFace, ' ', FT_LOAD_RENDER);
 				if (error != 0)
 				{
 					PRINT_ERROR("Could not load glyph for the character code=%li! (error=%li)", ftCharCode, error);
-					glTexSubImage3D(mTexture->GetTarget(), 0, gi.mBitfields.mLeft, gi.mBitfields.mTop, gi.mBitfields.mLayerIndex, ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows, 1, GL_R, GL_UNSIGNED_BYTE, ftFace->glyph->bitmap.buffer); GL_CHECK_ERRORS;
+				}
+				else
+				{
+					error = FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL);
+					if (error != 0)
+					{
+						PRINT_ERROR("Could not render the glyph bitmap for the character code=%li (0x%x)! (error=%li)", ftCharCode, ftCharCode, error);
+					}
+					else
+					{
+						std::uint8_t * dst = buffer + gi.mBitfields.mTop * mTextureSize.x;
+						std::uint8_t * src = ftFace->glyph->bitmap.buffer;
+						for (auto y = gi.mBitfields.mTop; y <= gi.mBitfields.mBottom; ++y)
+						{
+							memcpy(dst, src, ftFace->glyph->bitmap.width);
+							src += ftFace->glyph->bitmap.pitch;
+							dst += mTextureSize.x;
+						}
+					}
 				}
 			}
 		}
 	}
+
+	glTexSubImage3D(mTexture->GetTarget(), 0, 0, 0, layerIndex, mTextureSize.x, mTextureSize.y, 1, GL_RED, GL_UNSIGNED_BYTE, buffer); GL_CHECK_ERRORS;
+
 
 	glTexParameteri(mTexture->GetTarget(), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(mTexture->GetTarget(), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -371,8 +400,8 @@ bool TextRenderer::LoadTexture(const FtFaceList & ftFaceList)
 
 	glBindTexture(mTexture->GetTarget(), 0);
 
-	if (blankBuffer!=nullptr)
-		free(blankBuffer);
+	if (buffer!=nullptr)
+		free(buffer);
 
 	return true;
 }
