@@ -421,5 +421,41 @@ bool TextRenderer::LoadTexture(FT_Library ftLibrary)
 	return true;
 }
 
+void TextRenderer::BuildPage(TextPage & page, bool forceRebuild)
+{
+	if (page.mIsBuilt && !forceRebuild)
+		return;
+
+	GLuint index = 0;
+	GLuint bufferSize = (GLuint)page.mDataBuffer.size();
+	glm::ivec2 cursor(0);
+
+	for (TextPage::TextLineList::iterator it = page.mTextLineList.begin(); it != page.mTextLineList.end() && index < bufferSize; ++it)
+	{
+		TextPage::TextLine & textLine = *it;
+		GLuint charCount = (GLuint)textLine.mText.size();
+		if (forceRebuild || !textLine.mIsBuilt)
+		{
+			assert(textLine.mFontIndex < (GLuint)mFontInfoList.size());
+
+			//const FontInfo & fi = mFontInfoList[textLine.mFontIndex];
+			for (std::wstring::const_iterator charIt = textLine.mText.begin(); charIt != textLine.mText.end() && index < bufferSize; ++charIt)
+			{
+
+				index += TextPage::__dataindex_count__;
+			}
+			textLine.mIsBuilt = true;
+		}
+		else
+		{
+			index += charCount * TextPage::__dataindex_count__;
+		}
+
+	}
+
+	page.mIsBuilt = true;
+
+}
+
 	} // namespace Renderers
 } // namespace CoreFx

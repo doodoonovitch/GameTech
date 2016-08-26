@@ -34,6 +34,7 @@
 #include <cstdint>
 #include <memory>
 #include <type_traits>
+#include <string>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -109,6 +110,7 @@ namespace CoreFx
 #include "Renderers\SkydomeRenderer.h"
 #include "Renderers\CompassRenderer.h"
 #include "Renderers\ModelRenderer.h"
+#include "Renderers\Text2D\TextPage.h"
 #include "Renderers\Text2D\TextRenderer.h"
 
 #endif // COREFX_COREFX_H

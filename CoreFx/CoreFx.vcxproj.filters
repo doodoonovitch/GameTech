@@ -140,6 +140,9 @@
     <ClInclude Include="Renderers\Text2D\TextRenderer.h">
       <Filter>Renderers\Text2D</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\Text2D\TextPage.h">
+      <Filter>Renderers\Text2D</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -230,6 +233,9 @@
       <Filter>Geometry</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\Text2D\TextRenderer.cpp">
+      <Filter>Renderers\Text2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\Text2D\TextPage.cpp">
       <Filter>Renderers\Text2D</Filter>
     </ClCompile>
   </ItemGroup>

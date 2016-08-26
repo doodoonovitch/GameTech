@@ -78,6 +78,10 @@ protected:
 
 	typedef std::vector<GlyphInfo> GlyphInfoBuffer;
 
+	typedef std::vector<TextPage *> TextPageList;
+
+public:
+
 	struct GlyphMetrics
 	{
 		template <typename T> static T round(T value) { return (value + 32) & -64; }
@@ -96,11 +100,6 @@ protected:
 
 	typedef std::map<GLulong, GlyphMetrics> CharGlyphIndexMapping;
 
-	typedef std::vector<FT_Face> FtFaceList;
-
-
-public:
-
 	class FontInfo
 	{
 	public:
@@ -113,6 +112,8 @@ public:
 
 		GLushort GetCharacterWidth() const { return mDesiredCharWidth; }
 		GLushort GetCharacterHeight() const { return mDesiredCharHeight; }
+
+		const CharGlyphIndexMapping & GetMapping() const { return mMapping; }
 
 	private:
 
@@ -141,9 +142,13 @@ public:
 
 protected:
 
+	//typedef std::vector<FT_Face> FtFaceList;
+
 	bool AddFont(FT_Library ftLibrary, const char * fontName, GLushort charWidth, GLushort charHeight, glm::uvec2 & topLeft, GLushort &layerIndex, const std::vector<GLuint> & characterSet);
 	bool AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeight, GLuint & bitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex);
 	bool LoadTexture(FT_Library ftLibrary);
+
+	void BuildPage(TextPage & page, bool forceRebuild = false);
 
 protected:
 
