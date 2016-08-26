@@ -42,6 +42,7 @@ public:
 
 	void Initialize(Desc desc);
 
+
 protected:
 
 	enum EAttributeIndex
@@ -95,8 +96,28 @@ protected:
 
 	typedef std::map<GLulong, GlyphMetrics> CharGlyphIndexMapping;
 
-	struct FontInfo
+	typedef std::vector<FT_Face> FtFaceList;
+
+
+public:
+
+	class FontInfo
 	{
+	public:
+
+		const std::string & GetFileName() const	{ return mFileName;	}
+		const std::string & GetFamilyName() const { return mFamilyName; }
+		const std::string & GetStyleName() const { return mStyleName; }
+
+		GLint GetLineHeight() const { return mLineHeight; }
+
+		GLushort GetCharacterWidth() const { return mDesiredCharWidth; }
+		GLushort GetCharacterHeight() const { return mDesiredCharHeight; }
+
+	private:
+
+		friend class TextRenderer;
+
 		GLuint mBufferEntryIndex;
 		GLuint mUndefinedCharIndex;
 
@@ -117,7 +138,6 @@ protected:
 
 	typedef std::vector<FontInfo> FontInfoList;
 
-	typedef std::vector<FT_Face> FtFaceList;
 
 protected:
 

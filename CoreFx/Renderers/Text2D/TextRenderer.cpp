@@ -236,26 +236,12 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 {
 	FT_Error error;
 
-	//error = FT_Load_Char(ftFace, ' ', FT_LOAD_RENDER);
-	//if (error != 0)
-	//{
-	//	PRINT_ERROR("Could not load glyph for the character code=%li! (error=%li)", ftCharCode, error);
-	//	goto NextCharacter;
-	//}
-
 	error = FT_Load_Glyph(ftFace, ftGlyphIndex, FT_LOAD_DEFAULT);
 	if (error != 0)
 	{
 		PRINT_ERROR("Could not load glyph for the character code=%li! (error=%li) (0x%x)", ftCharCode, ftCharCode, error);
 		return false;
 	}
-
-	//error = FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL);
-	//if (error != 0)
-	//{
-	//	PRINT_ERROR("Could not render the glyph bitmap for the character code=%li (0x%x)! (error=%li)", ftCharCode, ftCharCode, error);
-	//	return false;
-	//}
 
 	glm::uvec2 bitmapSize(GlyphMetrics::toPixel(ftFace->glyph->metrics.width), GlyphMetrics::toPixel(ftFace->glyph->metrics.height));
 
@@ -301,8 +287,6 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 
 		GlyphInfo gi;
 
-		//glm::uvec2 bitmapSize(ftFace->glyph->bitmap.width, ftFace->glyph->bitmap.rows);
-
 		if (bitmapSize.y > currLineBitmapHeight)
 			currLineBitmapHeight = bitmapSize.y;
 
@@ -318,9 +302,10 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 		if (bottomRight.x >= mTextureSize.x)
 		{
 			topLeft.x = 0;
+			topLeft.y += (currLineBitmapHeight + 2);
+
 			currLineBitmapHeight = bitmapSize.y;
 
-			topLeft.y += (currLineBitmapHeight + 2);
 			bottomRight.y = topLeft.y + bitmapSize.y - 1;
 			if (bottomRight.y >= mTextureSize.y)
 			{
@@ -397,6 +382,9 @@ bool TextRenderer::LoadTexture(FT_Library ftLibrary)
 				}
 				else
 				{
+					assert(gi.mBitfields.mRight - gi.mBitfields.mLeft + 1 == ftFace->glyph->bitmap.width);
+					assert(gi.mBitfields.mBottom - gi.mBitfields.mTop + 1 == ftFace->glyph->bitmap.rows);
+
 					std::uint8_t * dst = buffer + ((mTextureSize.y - gi.mBitfields.mTop - 1) * mTextureSize.x) + gi.mBitfields.mLeft;
 					std::uint8_t * src = ftFace->glyph->bitmap.buffer;
 					for (auto y = gi.mBitfields.mTop; y <= gi.mBitfields.mBottom; ++y)
