@@ -276,6 +276,7 @@
     <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.vs.glsl" />
     <None Include="..\Data\Shaders\skybox.wireframe.fs.glsl" />
+    <None Include="..\Data\Shaders\skydome.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\skydome.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skydome.vs.glsl" />
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl" />

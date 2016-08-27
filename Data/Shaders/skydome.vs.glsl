@@ -39,7 +39,7 @@ void main()
 	// Exposure function for luminance               
 	//                                               
 	                                                 
-	xyY.z = 1.0 - exp( -u_Exposure * xyY.z );
+	//xyY.z = 1.0 - exp( -u_Exposure * xyY.z );
 	                                                 
 	//                                               
 	// Convert CIE xyY to CIE XYZ                    

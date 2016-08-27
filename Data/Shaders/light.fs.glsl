@@ -35,8 +35,7 @@ struct FragmentInfo
 // ---------------------------------------------------------------------------
 void UnpackFromGBuffer(out FragmentInfo fi)
 {
-    vec4 encPositionNormal = texture(u_gBufferPosition, fs_in.TexUV, 0);
-	fi.Position = encPositionNormal.xyz;
+	fi.Position = texture(u_gBufferPosition, fs_in.TexUV, 0).xyz;
 	fi.Normal = texture(u_gBufferNormal, fs_in.TexUV, 0).xyz;
 
 	uvec4 data = texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0);
@@ -530,11 +529,11 @@ void main(void)
 	//{
 	//	vFragColor = vec4((fi.Normal + 1) * 0.5, 1);
 	//}
-	//if (fi.RendererId == SKYBOX_RENDERER_ID)
-	//{
-	//	vFragColor = vec4(fi.DiffuseMaterial, 1);
-	//}
-	//else
+	if (fi.RendererId == SKYBOX_RENDERER_ID)
+	{
+		vFragColor = vec4(fi.SpecularMaterial, 1);
+	}
+	else
 	{
 		//vFragColor = ADSLight(fi);
 		vFragColor = BRDFLight(fi);

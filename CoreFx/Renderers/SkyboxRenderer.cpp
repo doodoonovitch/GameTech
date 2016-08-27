@@ -23,8 +23,8 @@ namespace CoreFx
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/skybox.vs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.forward.fs.glsl");
-	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.deferred.fs.glsl");
+	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.forward.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.deferred.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddUniforms(uniformNames, __uniforms_count__);

@@ -859,6 +859,26 @@ void Engine::InternalRenderObjects()
 			renderer->Render();
 	});
 
+	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_LEQUAL);
+	if (mSkybox != nullptr)
+	{
+		if (mSkybox->GetIsInitialized())
+		{
+			mSkybox->Render();
+		}
+	}
+	else if (mSkydome != nullptr)
+	{
+		if (mSkydome->GetIsInitialized())
+		{
+			mSkydome->Render();
+		}
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
 	// -----------------------------------------------------------------------
 	// light pass
 	// -----------------------------------------------------------------------
@@ -933,29 +953,7 @@ void Engine::InternalRenderObjects()
 	// forward pass
 	// -----------------------------------------------------------------------
 
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-
-	if (mSkybox != nullptr)
-	{
-		if (mSkybox->GetIsInitialized())
-		{
-			//glDisable(GL_CULL_FACE);
-			mSkybox->Render();
-			//glEnable(GL_CULL_FACE);
-		}
-	}
-	else if (mSkydome != nullptr)
-	{
-		if (mSkydome->GetIsInitialized())
-		{
-			//glDisable(GL_CULL_FACE);
-			mSkydome->Render();
-			//glEnable(GL_CULL_FACE);
-		}
-	}
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(GL_TRUE);

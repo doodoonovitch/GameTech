@@ -51,8 +51,8 @@ SkydomeRenderer::SkydomeRenderer(const int rings, const int segments)
 	const glm::vec3 zenith(0.f, 1.f, 0.f);
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/skydome.vs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skydome.forward.fs.glsl");
-	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.deferred.fs.glsl");
+	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skydome.forward.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skydome.deferred.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddUniforms(uniformNames, __uniforms_count__);
