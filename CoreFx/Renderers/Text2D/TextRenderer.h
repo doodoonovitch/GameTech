@@ -30,6 +30,9 @@ public:
 		glm::uvec2 mTextureSize = glm::uvec2(512);
 		glm::uvec2 mScreenResolution = glm::uvec2(72);
 
+		GLuint mCharacterCountBufferCapacity = 1000;
+
+
 		PoliceDescList mPoliceList;
 	};
 
@@ -41,6 +44,7 @@ public:
 	virtual void RenderWireFrame() override;
 
 	void Initialize(Desc desc);
+	void ResizeBuffer(GLuint characterCount);
 
 
 protected:
@@ -115,6 +119,19 @@ public:
 
 		const CharGlyphIndexMapping & GetMapping() const { return mMapping; }
 
+		const GlyphMetrics * GetGlyph(GLulong character) const
+		{
+			CharGlyphIndexMapping::const_iterator it = mMapping.find(character);
+			if (it == mMapping.end())
+			{
+				return nullptr;
+			}
+			else
+			{
+				return &it->second;
+			}
+		}
+
 	private:
 
 		friend class TextRenderer;
@@ -123,6 +140,7 @@ public:
 		GLuint mUndefinedCharIndex;
 
 		GLint mLineHeight;
+		GLint mDefaultWidth;
 
 		GLushort mDesiredCharWidth;
 		GLushort mDesiredCharHeight;
@@ -138,6 +156,19 @@ public:
 	};
 
 	typedef std::vector<FontInfo> FontInfoList;
+
+private:
+
+	enum DataIndex
+	{
+		DataIndex_X,
+		DataIndex_Y,
+		DataIndex_CharIndex,
+
+		__dataindex_count__
+	};
+
+	typedef std::vector<GLuint> DataBuffer;
 
 
 protected:
@@ -156,10 +187,14 @@ protected:
 	glm::uvec2 mTextureSize = glm::uvec2(512);
 	glm::uvec2 mScreenResolution = glm::uvec2(72);
 	GLushort mLayerCount = 0;
+	GLuint mCharCountBufferCapacity = 1000;
 
 	GlyphInfoBuffer mGlyphInfoBuffer;
 	FontInfoList mFontInfoList;
-	bool mIsInitialized;
+	
+	DataBuffer mDataBuffer;
+
+	bool mIsTextBuilt;
 };
 
 

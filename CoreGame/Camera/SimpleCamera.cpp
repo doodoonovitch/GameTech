@@ -55,7 +55,7 @@ void SimpleCamera::SetupViewportAndProjection()
 }
 
 //#define CUBE_SAMPLES
-//#define TERRAIN_SAMPLE
+#define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE

@@ -11,7 +11,9 @@ namespace CoreFx
 
 TextRenderer::TextRenderer()
 	: RendererHelper<1>(0, "TextRenderer", "TextWireFrameRenderer", Renderer::Forward_Pass)
+	, mIsTextBuilt(false)
 {
+	mDataBuffer.reserve(mCharCountBufferCapacity);
 
 	/*
 	const char * attributeNames[__attributes_count__] =
@@ -65,6 +67,7 @@ TextRenderer::TextRenderer()
 
 TextRenderer::~TextRenderer()
 {
+	mDataBuffer.clear();
 }
 
 void TextRenderer::Render()
@@ -81,6 +84,13 @@ void TextRenderer::RenderWireFrame()
 	Render();
 }
 
+void TextRenderer::ResizeBuffer(GLuint characterCount)
+{
+	mCharCountBufferCapacity = characterCount;
+	mDataBuffer.reserve(mCharCountBufferCapacity * __dataindex_count__);
+	mIsTextBuilt = false;
+}
+
 void TextRenderer::Initialize(Desc desc)
 {
 	//FtFaceList ftFaceList;
@@ -89,6 +99,8 @@ void TextRenderer::Initialize(Desc desc)
 
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize TextRenderer.....");
+
+	ResizeBuffer(desc.mCharacterCountBufferCapacity);
 
 	mTextureSize = desc.mTextureSize;
 	mScreenResolution = desc.mScreenResolution;
@@ -122,7 +134,7 @@ void TextRenderer::Initialize(Desc desc)
 	//	}
 	//}
 
-	Engine::GetInstance()->DisplayTexture2DArray(mTexture, 1);
+	//Engine::GetInstance()->DisplayTexture2DArray(mTexture, 1);
 
 	PRINT_MESSAGE(" \t Layer count = %i", mLayerCount);
 
@@ -177,23 +189,18 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 	fi.mStartLayerIndex = layerIndex;
 	fi.mDesiredCharWidth = charWidth == 0 ? charHeight : charWidth;
 	fi.mDesiredCharHeight = charHeight == 0 ? charWidth : charHeight;
+	fi.mDefaultWidth = fi.mDesiredCharWidth * 64;
 	fi.mBufferEntryIndex = (GLuint)mGlyphInfoBuffer.size();
 	fi.mUndefinedCharIndex = (GLuint)mGlyphInfoBuffer.size();
 	fi.mLineHeight = 0;
 
 	lineHeight = &fi.mLineHeight;
 
-	//GlyphInfo gi0, gi1;
-	//gi0.Set(511, 3784, 3482, 3038, 513, GlyphInfo::Status::Undefined);
-	//memset(gi1.mPacked, 0, sizeof(gi1.mPacked));
-	//gi1.mBitfields.mLeft = 511;
-	//gi1.mBitfields.mTop = 3784;
-	//gi1.mBitfields.mRight = 3482;
-	//gi1.mBitfields.mBottom = 3038;
-	//gi1.mBitfields.mLayerIndex = 513;
-	//gi1.mBitfields.mStatus = (GLubyte)GlyphInfo::Status::Undefined;
-	//assert(gi0.mPacked[0] == gi1.mPacked[0]);
-	//assert(gi0.mPacked[1] == gi1.mPacked[1]);
+	{
+		GlyphInfo undefinedCharGlyphInfo;
+		undefinedCharGlyphInfo.Set(0, 0, 0, 0, 0, GlyphInfo::Status::Undefined);
+		mGlyphInfoBuffer.push_back(undefinedCharGlyphInfo);
+	}
 
 	FT_UInt ftGlyphIndex;
 
@@ -216,8 +223,30 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 			AddCharacterMetrics(ftFace, ftCharCode, ftGlyphIndex, fi, *lineHeight, currLineBitmapHeight, topLeft, layerIndex);
 		}
 	}
-
+	
 	fi.mEndLayerIndex = layerIndex;
+
+	{
+		const GlyphMetrics * defaultChar = nullptr;
+		std::wstring chars(L" HOKM#");
+		for (std::wstring::const_iterator it = chars.begin(); it != chars.end() && defaultChar == nullptr; ++it)
+		{
+			defaultChar = fi.GetGlyph(*it);
+		}
+
+		GlyphInfo & undefinedCharGlyphInfo = mGlyphInfoBuffer[fi.mUndefinedCharIndex];
+		if (defaultChar != nullptr)
+		{
+			undefinedCharGlyphInfo.mBitfields.mRight = GlyphMetrics::toPixel(defaultChar->mSize.x);
+			undefinedCharGlyphInfo.mBitfields.mBottom = GlyphMetrics::toPixel(defaultChar->mSize.y);
+		}
+		else
+		{
+			undefinedCharGlyphInfo.mBitfields.mRight = GlyphMetrics::toPixel(fi.mDefaultWidth);
+			undefinedCharGlyphInfo.mBitfields.mBottom = GlyphMetrics::toPixel(fi.mLineHeight);
+		}
+	}
+	
 
 	PRINT_MESSAGE("  - Name : %s", fi.mFamilyName.c_str());
 	PRINT_MESSAGE("  - Style : %s", fi.mStyleName.c_str());
@@ -249,7 +278,7 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 	{
 		PRINT_WARNING("Could not render the glyph bitmap for the character code=%li (0x%x)!", ftCharCode, ftCharCode);
 
-		if (ftCharCode == ' ')
+		if (ftCharCode == L' ')
 		{
 			if (ftFace->glyph->metrics.vertAdvance > lineHeightMax)
 				lineHeightMax = ftFace->glyph->metrics.vertAdvance;
@@ -426,9 +455,13 @@ void TextRenderer::BuildPage(TextPage & page, bool forceRebuild)
 	if (page.mIsBuilt && !forceRebuild)
 		return;
 
+	//Engine * engine = Engine::GetInstance();
+	//glm::ivec2 viewPort1(engine->GetViewPortX(), engine->GetViewPortY());
+	//glm::ivec2 viewPort2(viewPort1.x + engine->GetViewPortX() - 1, viewPort1.y + engine->GetViewPortY() - 1);
+
+
 	GLuint index = 0;
-	GLuint bufferSize = (GLuint)page.mDataBuffer.size();
-	glm::ivec2 cursor(0);
+	GLuint bufferSize = (GLuint)mDataBuffer.size();
 
 	for (TextPage::TextLineList::iterator it = page.mTextLineList.begin(); it != page.mTextLineList.end() && index < bufferSize; ++it)
 	{
@@ -438,17 +471,37 @@ void TextRenderer::BuildPage(TextPage & page, bool forceRebuild)
 		{
 			assert(textLine.mFontIndex < (GLuint)mFontInfoList.size());
 
-			//const FontInfo & fi = mFontInfoList[textLine.mFontIndex];
+			const FontInfo & fi = mFontInfoList[textLine.mFontIndex];
+			glm::ivec2 cursor = textLine.mLocation;
 			for (std::wstring::const_iterator charIt = textLine.mText.begin(); charIt != textLine.mText.end() && index < bufferSize; ++charIt)
 			{
+				const GlyphMetrics * gm = fi.GetGlyph(*charIt);
 
-				index += TextPage::__dataindex_count__;
+				glm::ivec2 pos;
+				if (gm == nullptr)
+				{
+					pos = cursor;
+					mDataBuffer[index + DataIndex_CharIndex] = fi.mUndefinedCharIndex;
+					cursor.x += GlyphMetrics::toPixel(fi.mDefaultWidth);
+				}
+				else
+				{
+					pos.x = cursor.x + GlyphMetrics::toPixel(gm->mBearing.x);
+					pos.y = cursor.y - GlyphMetrics::toPixel(gm->mSize.y - gm->mBearing.y);
+					mDataBuffer[index + DataIndex_CharIndex] = gm->mGlyphInfoBufferIndex;
+					cursor.x += GlyphMetrics::toPixel(gm->mAdvance.x);
+				}
+
+				mDataBuffer[index + DataIndex_X] = pos.x;
+				mDataBuffer[index + DataIndex_Y] = pos.y;
+
+				index += __dataindex_count__;
 			}
 			textLine.mIsBuilt = true;
 		}
 		else
 		{
-			index += charCount * TextPage::__dataindex_count__;
+			index += charCount * __dataindex_count__;
 		}
 
 	}

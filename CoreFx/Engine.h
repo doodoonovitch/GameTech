@@ -126,6 +126,11 @@ public:
 
 	void SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 
+	GLint GetViewPortX() const { return mViewportX; }
+	GLint GetViewPortY() const { return mViewportY; }
+	GLsizei GetViewPortWidth() const { return mViewportWidth; }
+	GLsizei GetViewPortHeight() const { return mViewportHeight; }
+	
 	Camera* GetCamera() const
 	{
 		return mCamera;

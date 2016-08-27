@@ -34,38 +34,19 @@ public:
 	typedef std::vector<TextLine> TextLineList;
 
 protected:
-
-	enum DataIndex
-	{
-		DataIndex_X,
-		DataIndex_Y,
-		DataIndex_CharIndex,
-
-		__dataindex_count__
-	};
-
-	typedef std::vector<GLuint> DataBuffer;
-
-
-
-protected:
-	TextPage(GLuint characterCountBufferCapacity = 1000);
+	TextPage();
 	~TextPage();
 
 
 public:
 
-	void ResizeBuffer(GLuint characterCount);
 	GLint AddText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex);
 
 protected:
 
-	void BuildBuffer(bool forceRebuild = false);
 
 private:
 
-	GLuint mCharCountBufferCapacity;
-	DataBuffer mDataBuffer;
 	TextLineList mTextLineList;
 	bool mIsBuilt;
 };
