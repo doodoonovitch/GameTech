@@ -2,7 +2,7 @@
 //layout (quads, fractional_even_spacing) in;
 layout (quads, equal_spacing) in;
 
-const int c_MaxWavesToSum = 4;
+const int c_MaxWavesToSum = 5;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 //uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -53,22 +53,22 @@ void main()
 		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
 		H += u_Amplitude[i] * pow(halfOfSinSplusOne, u_Steepness[i]);
 
-		float cosS = cos(S);
-		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
+		// Normal computations
+		//float cosS = cos(S);
+		//float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
 
-		if (u_Steepness[i] > 1)
-		{
-			float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
-			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
-		}
+		//if (u_Steepness[i] > 1)
+		//{
+		//	float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, u_Steepness[i] - 1);
+		//	dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
+		//}
 
-		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
-		normal = normal + vec3(dH.x, dH.y, 0);
+		//vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
+		//normal = normal + vec3(-dH.x, 1, -dH.y);
 	}		 
 	p.y = H;
 
-	normal = vec3(-normal.x, 1, -normal.y);
-	normal = normalize(normal);
+	//normal = normalize(normal);
 
 	vec4 viewPos = u_ViewMatrix * p;
 

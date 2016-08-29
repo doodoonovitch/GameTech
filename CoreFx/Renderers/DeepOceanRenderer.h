@@ -16,7 +16,7 @@ public:
 
 	enum
 	{
-		MAX_WAVE_TO_SUM = 4
+		MAX_WAVE_TO_SUM = 5
 	};
 
 	static glm::vec3 AngleToDirection(GLfloat angleDegrees)
@@ -140,6 +140,7 @@ private:
 		u_PerMapDataSampler,
 
 		u_SkyboxCubeMapSampler,
+		u_noiseSampler,
 		u_textureSampler,
 
 		__uniforms_count__
@@ -162,6 +163,7 @@ private:
 	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;
 
 	CubeMapTexture const * mCubeMapTexture;
+	Texture2D const * mNoiseTexture;
 
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;

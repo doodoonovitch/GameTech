@@ -4,7 +4,7 @@ layout(location = 2) out uvec4 outAlbedoAndStatus;
 layout(location = 3) out vec4 outSpecularAndRoughness;
 layout(location = 4) out vec3 outEmissive;
 
-const int c_MaxWavesToSum = 4;
+const int c_MaxWavesToSum = 5;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 //uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -16,7 +16,8 @@ uniform float[c_MaxWavesToSum] u_Phase;
 
 uniform ivec2 u_MapSize;
 uniform samplerCube u_SkyboxCubeMapSampler;
-//uniform sampler2D u_textureSampler;
+uniform sampler2D u_noiseSampler;
+uniform sampler2D u_textureSampler;
 
 
 in TES_OUT
@@ -32,15 +33,19 @@ in TES_OUT
 
 struct Material
 {
-	//vec3 Normal;
+	vec3 Normal;
 	vec3 DiffuseColor;
 	vec3 SpecularColor;
 	float SpecularPower;
 };
 
+float F(vec3 p)
+{
+	return texture(u_noiseSampler, vec2(texture(u_noiseSampler, p.xy).x, p.z)).x;
+}
+
 void main()
 {
-	//vec3 normal = vec3(0, 1, 0);
 	//vec3 normal = normalize(fs_in.Normal);
 	
 	vec3 normal = vec3(0);
@@ -64,9 +69,12 @@ void main()
 		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
 		normal = normal + vec3(-dH.x, 1, -dH.y);
 	}		 
-
-	//normal = vec3(-normal.x, 1, normal.y);
 	normal = normalize(normal);
+
+	////vec3 bumpMapNormal = texture(u_noiseSampler, fs_in.TexUV * t + vec2(0.1, 0.15) * t).xyz; // + texture(u_noiseSampler, fs_in.TexUV + vec2(0.01, 0.02) * t).xyz;
+	//vec3 bumpMapNormal = texture(u_noiseSampler, fs_in.TexUV * 5 + vec2(0.1, 0.15) * t).xyz;
+	//bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);	
+	//normal = normalize(normal + bumpMapNormal);
 	
 	Material mat;
 	mat.SpecularColor = vec3(0.2);

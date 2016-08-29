@@ -100,7 +100,7 @@ void TextureManager::Initialize()
 	GLuint id = 0;
 	GLenum target;
 
-	if (!LoadTiffTex2D(id, target, filename, true))
+	if (!LoadTiffTex2D(id, target, filename, GL_REPEAT, GL_REPEAT, true))
 	{
 		GLsizei w = 128, h = 128;
 		GLubyte* pData = (GLubyte*)malloc(w * h * 4);
@@ -123,8 +123,8 @@ void TextureManager::Initialize()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, id);
 		//set texture parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		//allocate texture 
@@ -187,17 +187,17 @@ void TextureManager::Initialize()
 
 }
 
-bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, bool generateMipMap)
+bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, GLenum wrapS, GLenum wrapT, bool generateMipMap)
 {
 	id = 0;
 	target = GL_TEXTURE_2D;
-	bool loaded = LoadTiffImage(tiffFilename, [&id, target, generateMipMap](uint32_t w, uint32_t h, const uint32_t * raster)
+	bool loaded = LoadTiffImage(tiffFilename, [&id, target, wrapS, wrapT, generateMipMap](uint32_t w, uint32_t h, const uint32_t * raster)
 	{
 		glGenTextures(1, &id);
 		glBindTexture(target, id);
 
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
 
 		if (generateMipMap)
 			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
@@ -217,7 +217,7 @@ bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string con
 	return loaded;
 }
 
-Texture2D const * TextureManager::LoadTexture2D(std::string const &tiffFilename, bool generateMipMap)
+Texture2D const * TextureManager::LoadTexture2D(std::string const &tiffFilename, GLenum wrapS, GLenum wrapT, bool generateMipMap)
 {
 	Texture2D * returnTexture = nullptr;
 
@@ -236,7 +236,7 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &tiffFilename,
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_2D;
 
-		if (LoadTiffTex2D(id, target, tiffFilename, generateMipMap))
+		if (LoadTiffTex2D(id, target, tiffFilename, wrapS, wrapT, generateMipMap))
 		{
 			returnTexture = new Texture2D(id, target);
 		}

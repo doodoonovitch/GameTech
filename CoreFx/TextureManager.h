@@ -14,7 +14,7 @@ class TextureManager
 {
 public:
 
-	Texture2D const * LoadTexture2D(std::string const &tiffFilename, bool generateMipMap = true);
+	Texture2D const * LoadTexture2D(std::string const &tiffFilename, GLenum wrapS = GL_REPEAT, GLenum wrapT = GL_REPEAT, bool generateMipMap = true);
 	CubeMapTexture const * LoadTextureCubeMap(std::string const & prefixFilename, bool generateMipMap = true);
 
 	struct LoadTextureGroupDesc
@@ -88,7 +88,7 @@ private:
 		glDeleteTextures((GLsizei)count, ids.data());
 	}
 
-	bool LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, bool generateMipMap = true);
+	bool LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, GLenum wrapS = GL_REPEAT, GLenum wrapT = GL_REPEAT, bool generateMipMap = true);
 	bool LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::string tiffFilenames[6], bool generateMipMap = true);
 
 private:
