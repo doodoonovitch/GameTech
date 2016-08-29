@@ -2,7 +2,7 @@
 //layout (quads, fractional_even_spacing) in;
 layout (quads, equal_spacing) in;
 
-const int c_MaxWavesToSum = 5;
+const int c_MaxWavesToSum = 4;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 //uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -26,8 +26,6 @@ out TES_OUT
 	vec2 TexUV;
 	vec3 ViewPosition;
 	vec3 Position;
-	vec3 Normal;
-	//vec3 Tangent;
 	flat int MapIndex;
 } tes_out;
 
@@ -41,19 +39,18 @@ void main()
 	vec4 p2 = mix(gl_in[2].gl_Position,	gl_in[3].gl_Position, gl_TessCoord.x);
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
 
-	float H = 0;
-	vec3 normal = vec3(0);
 	float t = u_TimeDeltaTime.x;
-
+	float H = 0;
+	//vec2 dH  = vec2(0);
 	for(int i = 0; i < c_MaxWavesToSum; ++i)
 	{
-		float dirPos = dot(u_Direction[i].xz, tc.xy);
+		float dirPos = dot(u_Direction[i].xz, p.xz);
 		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
 
-		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
+		float halfOfSinSplusOne = 0.5f * (1.0f + sin(S));
 		H += (u_Amplitude[i] * pow(halfOfSinSplusOne, u_Steepness[i]));
 
-		// Normal computations
+		//// Normal computations
 		//float cosS = cos(S);
 		//float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
 
@@ -63,12 +60,10 @@ void main()
 		//	dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
 		//}
 
-		//vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
-		//normal = normal + vec3(-dH.x, 1, -dH.y);
+		//dH += vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
 	}		 
 	p.y = H;
-
-	//normal = normalize(normal);
+	//vec3 normal = normalize(vec3(-dH.x, 1, -dH.y));
 
 	vec4 viewPos = u_ViewMatrix * p;
 
@@ -76,7 +71,6 @@ void main()
 	tes_out.ViewPosition = viewPos.xyz;
 	tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
-	tes_out.Normal = normal;
 
 	
 	gl_Position = u_ProjMatrix * viewPos;

@@ -4,7 +4,7 @@ layout(location = 2) out uvec4 outAlbedoAndStatus;
 layout(location = 3) out vec4 outSpecularAndRoughness;
 layout(location = 4) out vec3 outEmissive;
 
-const int c_MaxWavesToSum = 5;
+const int c_MaxWavesToSum = 4;
 
 uniform vec3[c_MaxWavesToSum] u_Direction;
 //uniform float[c_MaxWavesToSum] u_WaveLength;
@@ -25,7 +25,7 @@ in TES_OUT
 	vec2 TexUV;
 	vec3 ViewPosition;
 	vec3 Position;
-	vec3 Normal;
+	//vec3 Normal;
 	//vec3 Tangent;
 	flat int MapIndex;
 } fs_in;
@@ -46,18 +46,15 @@ float F(vec3 p)
 
 void main()
 {
-	//vec3 normal = normalize(fs_in.Normal);
-	
-	vec3 normal = vec3(0);
 	float t = u_TimeDeltaTime.x;
-	
+	vec2 dH = vec2(0);
 	for(int i = 0; i < c_MaxWavesToSum; ++i)
 	{
-		float dirPos = dot(u_Direction[i].xz, fs_in.TexUV.xy);
+		float dirPos = dot(u_Direction[i].xz, fs_in.Position.xz);
 		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
 
 		float cosS = cos(S);
-		float dhCommon = 0.5 * u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
+		float dhCommon = u_Steepness[i] * u_Frequency[i] * u_Amplitude[i] * cosS;
 
 		if (u_Steepness[i] != 1)
 		{
@@ -66,10 +63,11 @@ void main()
 			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
 		}
 
-		vec2 dH = vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
-		normal = normal + vec3(-dH.x, 1, -dH.y);
+		dH += vec2(u_Direction[i].x * dhCommon, u_Direction[i].z * dhCommon);
+		//normal = normal + vec3(-dH.x, 1, -dH.y);
 	}		 
-	normal = normalize(normal);
+	vec3 normal = normalize(vec3(-dH.x, 1, -dH.y));
+	//vec3 normal = normalize(fs_in.Normal);
 
 	////vec3 bumpMapNormal = texture(u_noiseSampler, fs_in.TexUV * t + vec2(0.1, 0.15) * t).xyz; // + texture(u_noiseSampler, fs_in.TexUV + vec2(0.01, 0.02) * t).xyz;
 	//vec3 bumpMapNormal = texture(u_noiseSampler, fs_in.TexUV * 5 + vec2(0.1, 0.15) * t).xyz;
@@ -89,8 +87,6 @@ void main()
 	//vec3 R = reflect(viewDir, normal);
 	//mat.DiffuseColor = texture(u_SkyboxCubeMapSampler, R).xyz;
 
-	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, 0)), packUnorm4x8(vec4(mat.SpecularColor, mat.SpecularPower / 255)), 0);
-	//outData.x = outData.x | (DEEPOCEAN_RENDERER_ID << 24);
 	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.SpecularPower, vec3(0));
 	outPosition = fs_in.ViewPosition;
 	//outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);

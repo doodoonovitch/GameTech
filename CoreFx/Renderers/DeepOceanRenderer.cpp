@@ -22,8 +22,8 @@ DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize DeepOceanRenderer.....");
 
-	memset(mShaderWaveProps.mWavePropModified, -1, sizeof(mShaderWaveProps.mWavePropModified));
-	memset(mWireFrameShaderWaveProps.mWavePropModified, -1, sizeof(mWireFrameShaderWaveProps.mWavePropModified));
+	memset(mShaderWaveProps.mWavePropModified, 0xFFFF, sizeof(mShaderWaveProps.mWavePropModified));
+	memset(mWireFrameShaderWaveProps.mWavePropModified, 0xFFFF, sizeof(mWireFrameShaderWaveProps.mWavePropModified));
 	memcpy(mWaveProps, desc.mWaveProps, sizeof(mWaveProps));
 
 	const glm::vec3 vertices[] =
@@ -225,33 +225,37 @@ void DeepOceanRenderer::SetWavePropertyUniformValues(WavePropUniformIndex & wave
 		{
 			glUniform3fv(waveProps.mDirectionUniformIndex[i], 1, glm::value_ptr(mWaveProps[i].mDirection));
 		}
+
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_WaveLength_modified) == E_WaveProps_WaveLength_modified)
 		{
 			//glUniform1f(mWaveLengthUniformIndex[i], mWaveProps[i].mWaveLength);
 			glUniform1f(waveProps.mFrequencyUniformIndex[i], mWaveProps[i].mFrequency);
 			phaseModified = true;
 		}
+
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_Amplitude_modified) == E_WaveProps_Amplitude_modified)
 		{
 			glUniform1f(waveProps.mAmplitudeUniformIndex[i], mWaveProps[i].mAmplitude);
 		}
+
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_Velocity_modified) == E_WaveProps_Velocity_modified)
 		{
 			//glUniform1f(mVelocityUniformIndex[i], mWaveProps[i].mVelocity);
 			phaseModified = true;
 		}
+
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_Steepness_modified) == E_WaveProps_Steepness_modified)
 		{
 			glUniform1f(waveProps.mSteepnessUniformIndex[i], mWaveProps[i].mSteepness);
 		}
+
 		if (phaseModified)
 		{
 			GLfloat phase = mWaveProps[i].mVelocity * mWaveProps[i].mFrequency;
 			glUniform1f(waveProps.mPhaseUniformIndex[i], phase);
 		}
 
-		if (waveProps.mWavePropModified[i] != 0)
-			waveProps.mWavePropModified[i] = 0;
+		waveProps.mWavePropModified[i] = 0;
 	}
 }
  

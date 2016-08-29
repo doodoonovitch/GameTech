@@ -16,7 +16,7 @@ public:
 
 	enum
 	{
-		MAX_WAVE_TO_SUM = 5
+		MAX_WAVE_TO_SUM = 4
 	};
 
 	static glm::vec3 AngleToDirection(GLfloat angleDegrees)
@@ -56,7 +56,7 @@ public:
 		WaveProps(const glm::vec3 & direction, GLfloat waveLength, GLfloat amplitude, GLfloat velocity, GLfloat steepness)
 			: mDirection(direction)
 			, mWaveLength(waveLength)
-			, mFrequency(glm::two_pi<GLfloat>() / waveLength)
+			, mFrequency(/*glm::two_pi<GLfloat>()*/ 2.0f / waveLength)
 			, mAmplitude(amplitude)
 			, mVelocity(velocity)
 			, mSteepness(steepness)
@@ -66,7 +66,7 @@ public:
 		WaveProps(GLfloat directionAngleDegrees, GLfloat waveLength, GLfloat amplitude, GLfloat velocity, GLfloat steepness)
 			: mDirection(DeepOceanRenderer::AngleToDirection(directionAngleDegrees))
 			, mWaveLength(waveLength)
-			, mFrequency(glm::two_pi<GLfloat>() / waveLength)
+			, mFrequency(/*glm::two_pi<GLfloat>()*/ 2.0f / waveLength)
 			, mAmplitude(amplitude)
 			, mVelocity(velocity)
 			, mSteepness(steepness)
