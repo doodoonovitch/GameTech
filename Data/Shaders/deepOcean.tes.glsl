@@ -51,7 +51,7 @@ void main()
 		float S = dirPos * u_Frequency[i] + t * u_Phase[i];
 
 		float halfOfSinSplusOne = 0.5 * (1 + sin(S));
-		H += u_Amplitude[i] * pow(halfOfSinSplusOne, u_Steepness[i]);
+		H += (u_Amplitude[i] * pow(halfOfSinSplusOne, u_Steepness[i]));
 
 		// Normal computations
 		//float cosS = cos(S);

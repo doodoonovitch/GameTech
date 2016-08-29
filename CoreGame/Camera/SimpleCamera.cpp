@@ -220,14 +220,14 @@ void SimpleCamera::OnInit()
 		{
 			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
-			const float AmpCoef = 0.1f;
-			const float WaveLengthCoef = 1.f;
+			const float AmpCoef = 0.5f;
+			const float BaseWaveLength = 1.f;
 			const float VelocityCoef = 0.01f;
-			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 28.0f, VelocityCoef * 5.0f, 10.0f);
-			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 7.0f, VelocityCoef * 6.0f, 3.0f);
-			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(015.0f, WaveLengthCoef * 0.500f, AmpCoef * 18.0f, VelocityCoef * 5.0f, 4.0f);
-			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(008.0f, WaveLengthCoef * 0.280f, AmpCoef * 6.0f, VelocityCoef * 4.0f, 2.0f);
-			desc.mWaveProps[4] = Renderers::DeepOceanRenderer::WaveProps(040.0f, WaveLengthCoef * 0.300f, AmpCoef * 3.0f, VelocityCoef * 5.0f, 4.0f);
+			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, BaseWaveLength * 1.000f, AmpCoef * 8.0f, VelocityCoef * 02.0f, 0.0f);
+			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(025.0f, BaseWaveLength * 0.800f, AmpCoef * 5.0f, VelocityCoef * 06.0f, 1.0f);
+			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(005.0f, BaseWaveLength * 0.400f, AmpCoef * 1.0f, VelocityCoef * 08.0f, 2.0f);
+			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(170.0f, BaseWaveLength * 0.300f, AmpCoef * 3.0f, VelocityCoef * 01.0f, 6.0f);
+			desc.mWaveProps[4] = Renderers::DeepOceanRenderer::WaveProps(270.0f, BaseWaveLength * 0.200f, AmpCoef * 2.0f, VelocityCoef * 15.0f, 4.0f);
 
 			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
