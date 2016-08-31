@@ -30,7 +30,7 @@ public:
 		direction.x = (UnitVector.x * cos(angle)) - (UnitVector.z * sin(angle));
 		direction.z = (UnitVector.z * cos(angle)) + (UnitVector.x * sin(angle));
 
-		return direction;
+		return glm::normalize(direction);
 
 	}
 
@@ -54,9 +54,8 @@ public:
 		}
 
 		WaveProps(const glm::vec3 & direction, GLfloat waveLength, GLfloat amplitude, GLfloat velocity)
-			: mDirection(direction)
+			: mDirection(glm::normalize(direction))
 			, mWaveLength(waveLength)
-			, mFrequency(/*glm::two_pi<GLfloat>()*/ 1.0f / waveLength)
 			, mAmplitude(amplitude)
 			, mVelocity(velocity)
 		{
@@ -65,7 +64,6 @@ public:
 		WaveProps(GLfloat directionAngleDegrees, GLfloat waveLength, GLfloat amplitude, GLfloat velocity)
 			: mDirection(PerlinNoiseOceanRenderer::AngleToDirection(directionAngleDegrees))
 			, mWaveLength(waveLength)
-			, mFrequency(/*glm::two_pi<GLfloat>()*/ 1.0f / waveLength)
 			, mAmplitude(amplitude)
 			, mVelocity(velocity)
 		{
@@ -74,7 +72,6 @@ public:
 
 		glm::vec3 mDirection;
 		GLfloat mWaveLength;
-		GLfloat mFrequency;
 		GLfloat mAmplitude;
 		GLfloat mVelocity;
 	};
@@ -112,10 +109,8 @@ private:
 	{
 		GLint mDirectionUniformIndex[MAX_WAVE_TO_SUM];
 		GLint mWaveLengthUniformIndex[MAX_WAVE_TO_SUM];
-		GLint mFrequencyUniformIndex[MAX_WAVE_TO_SUM];
 		GLint mAmplitudeUniformIndex[MAX_WAVE_TO_SUM];
 		GLint mVelocityUniformIndex[MAX_WAVE_TO_SUM];
-		GLint mPhaseUniformIndex[MAX_WAVE_TO_SUM];
 		GLbyte mWavePropModified[MAX_WAVE_TO_SUM];
 	};
 
@@ -153,7 +148,6 @@ private:
 		E_WaveProps_WaveLength_modified = 1 << 1,
 		E_WaveProps_Amplitude_modified = 1 << 2,
 		E_WaveProps_Velocity_modified = 1 << 3,
-		E_WaveProps_Steepness_modified = 1 << 4,
 	};
 
 	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;

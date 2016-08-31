@@ -239,13 +239,13 @@ void SimpleCamera::OnInit()
 		{
 			Renderers::PerlinNoiseOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
-			const float AmpCoef = 8.0f;
+			const float AmpCoef = 10.0f;
 			const float WaveLengthCoef = 1.f;
-			const float VelocityCoef = 0.1f;
-			desc.mWaveProps[0] = Renderers::PerlinNoiseOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 2.000f, AmpCoef * 1.0f, VelocityCoef * 0.05f);
-			desc.mWaveProps[1] = Renderers::PerlinNoiseOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 0.5f, VelocityCoef * 0.06f);
-			desc.mWaveProps[2] = Renderers::PerlinNoiseOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 0.2f, VelocityCoef * 0.04f);
-			desc.mWaveProps[3] = Renderers::PerlinNoiseOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 0.1f, VelocityCoef * 0.05f);
+			const float VelocityCoef = 0.005f;
+			desc.mWaveProps[0] = Renderers::PerlinNoiseOceanRenderer::WaveProps(090.0f, WaveLengthCoef * 5.0f, AmpCoef * 1.0f, VelocityCoef * 1.0f);
+			desc.mWaveProps[1] = Renderers::PerlinNoiseOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 1.0f, AmpCoef * 0.5f, VelocityCoef * 2.0f);
+			desc.mWaveProps[2] = Renderers::PerlinNoiseOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 2.0f, AmpCoef * 0.2f, VelocityCoef * 3.0f);
+			desc.mWaveProps[3] = Renderers::PerlinNoiseOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.5f, AmpCoef * 0.1f, VelocityCoef * 4.0f);
 			//desc.mWaveProps[4] = Renderers::PerlinNoiseOceanRenderer::WaveProps(210.0f, WaveLengthCoef * 0.340f, AmpCoef * 0.05f, VelocityCoef * 0.03f);
 
 			desc.mMaps.push_back(Renderers::PerlinNoiseOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));

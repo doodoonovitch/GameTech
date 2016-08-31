@@ -39,9 +39,9 @@ void main()
 	mat.SpecularColor = vec3(0.2);
 	mat.SpecularPower = .2;
 	//vec2 texUV = fs_in.TexUV * 64.f;
-	//vec2 texUV = fs_in.TexUV;
-	//mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;
-	mat.DiffuseColor = vec3(0, 0.2, 0.8);
+	vec2 texUV = fs_in.TexUV;
+	mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;
+	//mat.DiffuseColor = vec3(0, 0.2, 0.8);
 	
 	//vec3 viewDir = fs_in.Position - u_ViewPosition.xyz;
 	//viewDir = normalize(viewDir);

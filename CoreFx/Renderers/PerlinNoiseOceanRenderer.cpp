@@ -201,10 +201,6 @@ void PerlinNoiseOceanRenderer::GetWavePropertyUniformIndex(Shader & shader, Wave
 		waveProps.mWaveLengthUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
 		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mWaveLengthUniformIndex[i]);
 
-		sprintf_s(uniformName, 50, "u_Frequency[%i]", i);
-		waveProps.mFrequencyUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mFrequencyUniformIndex[i]);
-
 		sprintf_s(uniformName, 50, "u_Amplitude[%i]", i);
 		waveProps.mAmplitudeUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
 		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mAmplitudeUniformIndex[i]);
@@ -212,10 +208,6 @@ void PerlinNoiseOceanRenderer::GetWavePropertyUniformIndex(Shader & shader, Wave
 		sprintf_s(uniformName, 50, "u_Velocity[%i]", i);
 		waveProps.mVelocityUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
 		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mVelocityUniformIndex[i]);
-
-		sprintf_s(uniformName, 50, "u_Phase[%i]", i);
-		waveProps.mPhaseUniformIndex[i] = glGetUniformLocation(shader.GetProgram(), uniformName); GL_CHECK_ERRORS;
-		PRINT_MESSAGE("\t%s : %i.", uniformName, waveProps.mPhaseUniformIndex[i]);
 	}
 }
 
@@ -223,7 +215,6 @@ void PerlinNoiseOceanRenderer::SetWavePropertyUniformValues(WavePropUniformIndex
 {
 	for (int i = 0; i < MAX_WAVE_TO_SUM; ++i)
 	{
-		bool phaseModified = false;
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_Direction_modified) == E_WaveProps_Direction_modified)
 		{
 			glUniform3fv(waveProps.mDirectionUniformIndex[i], 1, glm::value_ptr(mWaveProps[i].mDirection));
@@ -231,9 +222,7 @@ void PerlinNoiseOceanRenderer::SetWavePropertyUniformValues(WavePropUniformIndex
 
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_WaveLength_modified) == E_WaveProps_WaveLength_modified)
 		{
-			//glUniform1f(mWaveLengthUniformIndex[i], mWaveProps[i].mWaveLength);
-			glUniform1f(waveProps.mFrequencyUniformIndex[i], mWaveProps[i].mFrequency);
-			phaseModified = true;
+			glUniform1f(waveProps.mWaveLengthUniformIndex[i], mWaveProps[i].mWaveLength);
 		}
 
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_Amplitude_modified) == E_WaveProps_Amplitude_modified)
@@ -243,14 +232,7 @@ void PerlinNoiseOceanRenderer::SetWavePropertyUniformValues(WavePropUniformIndex
 
 		if ((waveProps.mWavePropModified[i] & E_WaveProps_Velocity_modified) == E_WaveProps_Velocity_modified)
 		{
-			//glUniform1f(mVelocityUniformIndex[i], mWaveProps[i].mVelocity);
-			phaseModified = true;
-		}
-
-		if (phaseModified)
-		{
-			GLfloat phase = mWaveProps[i].mVelocity * mWaveProps[i].mFrequency;
-			glUniform1f(waveProps.mPhaseUniformIndex[i], phase);
+			glUniform1f(waveProps.mVelocityUniformIndex[i], mWaveProps[i].mVelocity);
 		}
 
 		waveProps.mWavePropModified[i] = 0;
