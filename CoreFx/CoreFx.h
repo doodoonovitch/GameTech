@@ -105,6 +105,7 @@ namespace CoreFx
 #include "Renderers\AxisRenderer.h"
 #include "Renderers\TerrainRenderer.h"
 #include "Renderers\DeepOceanRenderer.h"
+#include "Renderers\PerlinNoiseOceanRenderer.h"
 #include "Renderers\ShallowWaterRenderer.h"
 #include "Renderers\SkyboxRenderer.h"
 #include "Renderers\SkydomeRenderer.h"

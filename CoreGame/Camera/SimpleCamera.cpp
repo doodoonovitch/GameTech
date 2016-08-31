@@ -56,7 +56,8 @@ void SimpleCamera::SetupViewportAndProjection()
 
 //#define CUBE_SAMPLES
 #define TERRAIN_SAMPLE
-#define DEEP_OCEAN_SAMPLE
+//#define DEEP_OCEAN_SAMPLE
+#define PERLIN_NOISE_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
@@ -234,23 +235,24 @@ void SimpleCamera::OnInit()
 			engine->AttachRenderer(ocean);
 		}
 #endif // DEEP_OCEAN_SAMPLE
-		/*
+#ifdef PERLIN_NOISE_OCEAN_SAMPLE
 		{
-			Renderers::ShallowWaterRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
+			Renderers::PerlinNoiseOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
-			const float AmpCoef = 0.2f;
+			const float AmpCoef = 8.0f;
 			const float WaveLengthCoef = 1.f;
-			const float VelocityCoef = 0.01f;
-			desc.mWaveProps[0] = Renderers::ShallowWaterRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 10.0f);
-			desc.mWaveProps[1] = Renderers::ShallowWaterRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 7.0f, VelocityCoef * 6.0f, 2.0f);
-			desc.mWaveProps[2] = Renderers::ShallowWaterRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 8.0f, VelocityCoef * 5.0f, 3.0f);
-			desc.mWaveProps[3] = Renderers::ShallowWaterRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 6.0f, VelocityCoef * 4.0f, 1.0f);
+			const float VelocityCoef = 0.1f;
+			desc.mWaveProps[0] = Renderers::PerlinNoiseOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 2.000f, AmpCoef * 1.0f, VelocityCoef * 0.05f);
+			desc.mWaveProps[1] = Renderers::PerlinNoiseOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 0.5f, VelocityCoef * 0.06f);
+			desc.mWaveProps[2] = Renderers::PerlinNoiseOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 0.2f, VelocityCoef * 0.04f);
+			desc.mWaveProps[3] = Renderers::PerlinNoiseOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 0.1f, VelocityCoef * 0.05f);
+			//desc.mWaveProps[4] = Renderers::PerlinNoiseOceanRenderer::WaveProps(210.0f, WaveLengthCoef * 0.340f, AmpCoef * 0.05f, VelocityCoef * 0.03f);
 
-			desc.mMaps.push_back(Renderers::ShallowWaterRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
-			Renderers::ShallowWaterRenderer * ocean = new Renderers::ShallowWaterRenderer(desc);
+			desc.mMaps.push_back(Renderers::PerlinNoiseOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
+			Renderers::PerlinNoiseOceanRenderer * ocean = new Renderers::PerlinNoiseOceanRenderer(desc);
 			engine->AttachRenderer(ocean);
 		}
-		*/
+#endif // PERLIN_NOISE_OCEAN_SAMPLE
 
 #ifdef SKYDOME_SAMPLE
 		{

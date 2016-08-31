@@ -167,6 +167,7 @@
     <ClInclude Include="Renderers\GridRenderer.h" />
     <ClInclude Include="Renderers\IcosahedronRenderer.h" />
     <ClInclude Include="Renderers\ModelRenderer.h" />
+    <ClInclude Include="Renderers\PerlinNoiseOceanRenderer.h" />
     <ClInclude Include="Renderers\RendererHelper.h" />
     <ClInclude Include="Renderers\ShallowWaterRenderer.h" />
     <ClInclude Include="Renderers\SkyboxRenderer.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="Renderers\GridRenderer.cpp" />
     <ClCompile Include="Renderers\IcosahedronRenderer.cpp" />
     <ClCompile Include="Renderers\ModelRenderer.cpp" />
+    <ClCompile Include="Renderers\PerlinNoiseOceanRenderer.cpp" />
     <ClCompile Include="Renderers\ShallowWaterRenderer.cpp" />
     <ClCompile Include="Renderers\SkyboxRenderer.cpp" />
     <ClCompile Include="Renderers\SkydomeRenderer.cpp" />
@@ -272,6 +274,11 @@
     <None Include="..\Data\Shaders\mesh.gs.glsl" />
     <None Include="..\Data\Shaders\mesh.vs.glsl" />
     <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl" />
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.tcs.glsl" />
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl" />
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.vs.glsl" />
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.vs.glsl" />

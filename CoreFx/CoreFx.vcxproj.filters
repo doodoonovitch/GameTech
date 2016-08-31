@@ -143,6 +143,9 @@
     <ClInclude Include="Renderers\Text2D\TextPage.h">
       <Filter>Renderers\Text2D</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\PerlinNoiseOceanRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -237,6 +240,9 @@
     </ClCompile>
     <ClCompile Include="Renderers\Text2D\TextPage.cpp">
       <Filter>Renderers\Text2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\PerlinNoiseOceanRenderer.cpp">
+      <Filter>Renderers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -454,6 +460,21 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\skydome.deferred.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.deferred.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.tcs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
