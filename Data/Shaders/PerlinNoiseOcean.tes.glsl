@@ -44,16 +44,14 @@ void main()
 
     mat3 TBN = mat3(vec3(1, 0, 0), vec3(0, 0, 1), vec3(0, 0, 1));
 
-	vec2 tcBase = p.xz / 512;
-	vec2 coef = u_MapSize / u_PatchCount;
 	float t = u_TimeDeltaTime.x;
 	float H = 0;
 	vec3 normal  = vec3(0);
-	for(int i = 0; i < 1; ++i)
+	for(int i = 0; i < 4; ++i)
 	{
 		
 		//vec2 uv = tc * u_WaveLength[i] / coef + t * u_Velocity[i] * u_Direction[0].xz;
-		vec2 uv = tcBase * pow(2, i) + t * u_Velocity[i] * u_Direction[0].xz;
+		vec2 uv = tc * u_WaveLength[i] + t * u_Velocity[i] * u_Direction[i].xz;
 
 		H += u_Amplitude[i] * texture(u_noiseHeightSampler, uv).r;
 
@@ -69,8 +67,7 @@ void main()
 
 	tes_out.Position = p.xyz;
 	tes_out.ViewPosition = viewPos.xyz;
-	//tes_out.TexUV = tc;
-	tes_out.TexUV = tcBase;
+	tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
 	tes_out.Normal = normalize(normal);
 	
