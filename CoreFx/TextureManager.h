@@ -56,6 +56,15 @@ private:
 	void Initialize();
 	void Release();
 
+	template<typename TTexture> void ReleaseTexture(TTexture *& texture)
+	{
+		if (texture != nullptr)
+		{
+			glDeleteTextures(1, &texture->mId);
+			SAFE_DELETE(texture);
+		}
+	}
+
 	void ReleaseAllTexture2D();
 	void ReleaseAllCubeMapTexture();
 	void ReleaseAllTextureGroup();
@@ -91,11 +100,17 @@ private:
 	bool LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, GLenum wrapS = GL_REPEAT, GLenum wrapT = GL_REPEAT, bool generateMipMap = true);
 	bool LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::string tiffFilenames[6], bool generateMipMap = true);
 
+	void InitializePerlinNoise();
+
 private:
 
 	Texture2D * mDefault2D;
 	CubeMapTexture * mDefaultCubeMap;
 	TextureGroup * mDefaultTexGroup;
+	Texture1D * mPerlinNoisePermutation;
+	Texture2D * mPerlinNoisePermutation2D;
+	Texture1D * mPerlinNoiseGradient;
+	Texture1D * mPerlinNoisePermutationGradient;
 
 	typedef std::map<std::string, Texture2D*> Tex2DIdMap;
 	typedef std::map<std::string, CubeMapTexture*> CubeMapTexIdMap;

@@ -27,6 +27,7 @@ protected:
 
 	enum TextureClass
 	{
+		Texture1D,
 		Texture2D,
 		CubeMapTexture,
 		TextureGroup,
@@ -56,6 +57,18 @@ private:
 	GLuint mId;
 	TextureClass mTextureClass;
 	GLenum mTarget;
+
+	friend class TextureManager;
+};
+
+class Texture1D : public Texture
+{
+protected:
+
+	Texture1D(GLuint id, GLenum target);
+	~Texture1D();
+
+private:
 
 	friend class TextureManager;
 };

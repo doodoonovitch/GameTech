@@ -33,6 +33,17 @@ Texture::~Texture()
 }
 
 
+Texture1D::Texture1D(GLuint id, GLenum target)
+	: Texture(id, target, TextureClass::Texture1D)
+{
+}
+
+
+Texture1D::~Texture1D()
+{
+}
+
+
 Texture2D::Texture2D(GLuint id, GLenum target)
 	: Texture(id, target, TextureClass::Texture2D)
 {

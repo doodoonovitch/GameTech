@@ -21,6 +21,9 @@ TextureManager::TextureManager()
 	: mDefault2D(nullptr)
 	, mDefaultCubeMap(nullptr)
 	, mDefaultTexGroup(nullptr)
+	, mPerlinNoisePermutation(nullptr)
+	, mPerlinNoisePermutation2D(nullptr)
+	, mPerlinNoiseGradient(nullptr)
 {
 	TIFFSetWarningHandler(OnLibTIFFWarning);
 	TIFFSetErrorHandler(OnLibTIFFError);
@@ -39,11 +42,13 @@ void TextureManager::Release()
 	ReleaseAllTextureGroup();
 	ReleaseAllTexture2DArray();
 
-	if (mDefault2D != nullptr)
-	{
-		glDeleteTextures(1, &mDefault2D->mId);
-		SAFE_DELETE(mDefault2D);
-	}
+	ReleaseTexture(mDefault2D);
+	ReleaseTexture(mDefaultCubeMap);
+	ReleaseTexture(mDefaultTexGroup);
+	ReleaseTexture(mPerlinNoisePermutation);
+	ReleaseTexture(mPerlinNoisePermutation2D);
+	ReleaseTexture(mPerlinNoiseGradient);
+	ReleaseTexture(mPerlinNoisePermutationGradient);
 }
 
 void TextureManager::ReleaseAllTexture2D()
@@ -95,6 +100,8 @@ struct RGBA
 
 void TextureManager::Initialize()
 {
+	InitializePerlinNoise();
+
 	const std::string filename("medias/uvtemplate.tif");
 
 	GLuint id = 0;
@@ -512,5 +519,165 @@ bool TextureManager::GetTiffImageSize(std::string const &tiffFilename, uint32_t 
 
 	return loaded;
 }
+
+void TextureManager::InitializePerlinNoise()
+{
+	static uint8_t permutation[] = 
+	{ 
+		151,	160,	137,	91,		90,		15,		131,	13,
+		201,	95,		96,		53,		194,	233,	7,		225,
+		140,	36,		103,	30,		69,		142,	8,		99,
+		37,		240,	21,		10,		23,		190,	6,		148,
+		247,	120,	234,	75,		0,		26,		197,	62,
+		94,		252,	219,	203,	117,	35,		11,		32,
+		57,		177,	33,		88,		237,	149,	56,		87,
+		174,	20,		125,	136,	171,	168,	68,		175,
+		74,		165,	71,		134,	139,	48,		27,		166,
+		77,		146,	158,	231,	83,		111,	229,	122,
+		60,		211,	133,	230,	220,	105,	92,		41,
+		55,		46,		245,	40,		244,	102,	143,	54,
+		65,		25,		63,		161,	1,		216,	80,		73,
+		209,	76,		132,	187,	208,	89,		18,		169,
+		200,	196,	135,	130,	116,	188,	159,	86,
+		164,	100,	109,	198,	173,	186,	3,		64,
+		52,		217,	226,	250,	124,	123,	5,		202,
+		38,		147,	118,	126,	255,	82,		85,		212,
+		207,	206,	59,		227,	47,		16,		58,		17,
+		182,	189,	28,		42,		223,	183,	170,	213,
+		119,	248,	152,	2,		44,		154,	163,	70,
+		221,	153,	101,	155,	167,	43,		172,	9,
+		129,	22,		39,		253,	19,		98,		108,	110,
+		79,		113,	224,	232,	178,	185,	112,	104,
+		218,	246,	97,		228,	251,	34,		242,	193,
+		238,	210,	144,	12,		191,	179,	162,	241,
+		81,		51,		145,	235,	249,	14,		239,	107,
+		49,		192,	214,	31,		181,	199,	106,	157,
+		184,	84,		204,	176,	115,	121,	50,		45,
+		127,	4,		150,	254,	138,	236,	205,	93,
+		222,	114,	67,		29,		24,		72,		243,	141,
+		128,	195,	78,		66,		215,	61,		156,	180
+	};
+
+	{
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_1D;
+		glGenTextures(1, &id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(target, id);
+		//set texture parameters
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//allocate texture 
+		glTexImage1D(target, 0, GL_R, 256, 0, GL_R, GL_UNSIGNED_BYTE, permutation);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(target, 0);
+
+		mPerlinNoisePermutation = new Texture1D(id, target);
+	}
+
+	{
+		glm::uvec4 * permutation2D = new glm::uvec4[256 * 256];
+		for (int v = 0; v < 256; ++v)
+		{
+			for (int u = 0; u < 256; ++u)
+			{
+				glm::uvec2 p(u, v);
+				int A = permutation[p.x] + p.y;
+				int AA = permutation[A & 255];
+				int AB = permutation[(A + 1) & 255];
+				int B = permutation[(p.x + 1) & 255] + p.y;
+				int BA = permutation[B & 255];
+				int BB = permutation[(B + 1) & 255];
+				permutation2D[v * 256 + u] = glm::uvec4(AA, AB, BA, BB) / 255.0;
+			}
+		}
+
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_2D;
+		glGenTextures(1, &id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(target, id);
+		//set texture parameters
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//allocate texture 
+		glTexImage2D(target, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, permutation2D);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(target, 0);
+
+		delete[] permutation2D;
+
+		mPerlinNoisePermutation2D = new Texture2D(id, target);
+	}
+
+	static float gradients[] =
+	{
+		1,	 1,	 0,
+		-1,	 1,	 0,
+		1,	-1,	 0,
+		-1,	-1,	 0,
+		1,	 0,	 1,
+		-1,	 0,	 1,
+		1,	 0,	-1,
+		-1,	 0,	-1,
+		0,	 1,	 1,
+		0,	-1,	 1,
+		0,	 1,	-1,
+		0,	-1,	-1,
+		1,	 1,	 0,
+		0,	-1,	 1,
+		-1,	 1,	 0,
+		0,	-1,	-1
+	};
+	{
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_1D;
+		glGenTextures(1, &id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(target, id);
+		//set texture parameters
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RGB, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, gradients);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(target, 0);
+
+		mPerlinNoiseGradient = new Texture1D(id, target);
+	}
+
+	{
+		float permutationGradients[256];
+		for (int i = 0; i < 256; ++i)
+		{
+			permutationGradients[i] = gradients[permutation[i] & 15];
+		}
+
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_1D;
+		glGenTextures(1, &id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(target, id);
+		//set texture parameters
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//allocate texture 
+		glTexImage1D(target, 0, GL_R, 256, 0, GL_R, GL_FLOAT, permutationGradients);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(target, 0);
+
+		mPerlinNoisePermutationGradient = new Texture1D(id, target);
+	}
+
+}
+
 
 } // namespace CoreFx
