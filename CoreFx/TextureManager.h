@@ -111,6 +111,8 @@ private:
 	Texture2D * mPerlinNoisePermutation2D;
 	Texture1D * mPerlinNoiseGradient;
 	Texture1D * mPerlinNoisePermutationGradient;
+	Texture1D * mPerlinNoiseGradient4D;
+	Texture1D * mPerlinNoisePermutationGradient4D;
 
 	typedef std::map<std::string, Texture2D*> Tex2DIdMap;
 	typedef std::map<std::string, CubeMapTexture*> CubeMapTexIdMap;

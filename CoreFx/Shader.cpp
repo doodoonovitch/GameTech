@@ -209,24 +209,30 @@ void Shader::UnUse() const
 	glUseProgram(0);
 }
 
-void Shader::AddAttributes(const char * names[], int count)
+int Shader::AddAttributes(const char * names[], int count)
 {
+	int offset = (int)mAttributeList.size();
 	mAttributeList.reserve(mAttributeList.size() + count);
 	for (auto i = 0; i < count; ++i)
 	{
 		mAttributeList.push_back(glGetAttribLocation(mProgram, names[i]));
-		PRINT_MESSAGE("\t[%s] + attribute : name='%s' (index=%i), location=%i.", mTitle.c_str(), names[i], i, mAttributeList.back());
+		PRINT_MESSAGE("\t[%s] + attribute : name='%s' (index=%i), location=%i.", mTitle.c_str(), names[i], i + offset, mAttributeList.back());
 	}
+
+	return offset;
 }
 
-void Shader::AddUniforms(const char * names[], int count)
+int Shader::AddUniforms(const char * names[], int count)
 {
+	int offset = (int)mUniformLocationList.size();
 	mUniformLocationList.reserve(mUniformLocationList.size() + count);
 	for (auto i = 0; i < count; ++i)
 	{
 		mUniformLocationList.push_back(glGetUniformLocation(mProgram, names[i]));
-		PRINT_MESSAGE("\t[%s] + uniform : name='%s' (index=%i), location=%i.", mTitle.c_str(), names[i], i, mUniformLocationList.back());
+		PRINT_MESSAGE("\t[%s] + uniform : name='%s' (index=%i), location=%i.", mTitle.c_str(), names[i], offset + i, mUniformLocationList.back());
 	}
+
+	return offset;
 }
 
 GLint Shader::GetAttribute(int index) const
@@ -262,6 +268,21 @@ void Shader::GenerateTexGetFunction(std::string & generatedSource, int texSample
 		generatedSource.append(tmpBuffer);
 	}
 	generatedSource.append("\treturn vec4(0);\r\n}\n");
+}
+
+int Shader::AddPerlinNoiseUniforms()
+{
+	const char * perlinNoiseUniforms[__PerlinNoise_uniforms_count__] =
+	{
+		"u_PerlinNoisePermSampler",
+		"u_PerlinNoisePerm2DSampler",
+		"u_PerlinNoiseGradSampler",
+		"u_PerlinNoisePermGradSampler",
+		"u_PerlinNoisePermGrad4DSampler",
+		"u_PerlinNoiseGrad4DSampler"
+	};
+
+	return AddUniforms(perlinNoiseUniforms, __PerlinNoise_uniforms_count__);
 }
 
 } // namespace CoreFx

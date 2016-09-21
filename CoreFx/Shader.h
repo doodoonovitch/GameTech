@@ -31,6 +31,17 @@ public:
 		USER_FIRST_UNIFORM,
 	};
 
+	enum
+	{
+		u_PerlinNoisePermSampler,
+		u_PerlinNoisePerm2DSampler,
+		u_PerlinNoiseGradSampler,
+		u_PerlinNoisePermGradSampler,
+		u_PerlinNoisePermGrad4DSampler,
+		u_PerlinNoiseGrad4DSampler,
+
+		__PerlinNoise_uniforms_count__
+	};
 
 public:
 	Shader(const char * title);
@@ -46,8 +57,8 @@ public:
 
 	void Use() const;
 	void UnUse() const;
-	void AddAttributes(const char * names[], int count);
-	void AddUniforms(const char * names[], int count);
+	int AddAttributes(const char * names[], int count);
+	int AddUniforms(const char * names[], int count);
 	GLint GetAttribute(int index) const;
 	GLint GetUniform(int index) const;
 	GLint GetProgram() const { return mProgram; }
@@ -59,6 +70,8 @@ public:
 	static bool MergeFile(std::string& buffer, const std::string& filename);
 
 	static void GenerateTexGetFunction(std::string & generatedSource, int texSamplerCount, const char * functionName = "TexGet", const char * samplerUniformVarName = "u_textureSampler");
+
+	int AddPerlinNoiseUniforms();
 
 protected:
 

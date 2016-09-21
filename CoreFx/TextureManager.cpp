@@ -24,6 +24,8 @@ TextureManager::TextureManager()
 	, mPerlinNoisePermutation(nullptr)
 	, mPerlinNoisePermutation2D(nullptr)
 	, mPerlinNoiseGradient(nullptr)
+	, mPerlinNoiseGradient4D(nullptr)
+	, mPerlinNoisePermutationGradient4D(nullptr)
 {
 	TIFFSetWarningHandler(OnLibTIFFWarning);
 	TIFFSetErrorHandler(OnLibTIFFError);
@@ -566,11 +568,11 @@ void TextureManager::InitializePerlinNoise()
 		glBindTexture(target, id);
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		//allocate texture 
-		glTexImage1D(target, 0, GL_R, 256, 0, GL_R, GL_UNSIGNED_BYTE, permutation);
+		glTexImage1D(target, 0, GL_R, 256, 0, GL_RED, GL_UNSIGNED_BYTE, permutation);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(target, 0);
 
@@ -602,11 +604,10 @@ void TextureManager::InitializePerlinNoise()
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		//allocate texture 
 		glTexImage2D(target, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, permutation2D);
-		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(target, 0);
 
 		delete[] permutation2D;
@@ -641,22 +642,21 @@ void TextureManager::InitializePerlinNoise()
 		glBindTexture(target, id);
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		//allocate texture 
-		glTexImage1D(target, 0, GL_RGB, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, gradients);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexImage1D(target, 0, GL_RGB, 16, 0, GL_RGB, GL_FLOAT, gradients);
 		glBindTexture(target, 0);
 
 		mPerlinNoiseGradient = new Texture1D(id, target);
 	}
 
 	{
-		float permutationGradients[256];
+		float permutationGradients[256 * 3];
 		for (int i = 0; i < 256; ++i)
 		{
-			permutationGradients[i] = gradients[permutation[i] & 15];
+			memcpy(&permutationGradients[i * 3], &gradients[(permutation[i] & 15) * 3], sizeof(float) * 3);
 		}
 
 		GLuint id = 0;
@@ -666,15 +666,94 @@ void TextureManager::InitializePerlinNoise()
 		glBindTexture(target, id);
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		//allocate texture 
-		glTexImage1D(target, 0, GL_R, 256, 0, GL_R, GL_FLOAT, permutationGradients);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexImage1D(target, 0, GL_RGB, 256, 0, GL_RGB, GL_FLOAT, permutationGradients);
 		glBindTexture(target, 0);
 
 		mPerlinNoisePermutationGradient = new Texture1D(id, target);
+	}
+
+	// gradients for 4D noise
+	static float gradients4D[] = 
+	{
+		0, -1, -1, -1,
+		0, -1, -1, 1,
+		0, -1, 1, -1,
+		0, -1, 1, 1,
+		0, 1, -1, -1,
+		0, 1, -1, 1,
+		0, 1, 1, -1,
+		0, 1, 1, 1,
+		-1, -1, 0, -1,
+		-1, 1, 0, -1,
+		1, -1, 0, -1,
+		1, 1, 0, -1,
+		-1, -1, 0, 1,
+		-1, 1, 0, 1,
+		1, -1, 0, 1,
+		1, 1, 0, 1,
+
+		-1, 0, -1, -1,
+		1, 0, -1, -1,
+		-1, 0, -1, 1,
+		1, 0, -1, 1,
+		-1, 0, 1, -1,
+		1, 0, 1, -1,
+		-1, 0, 1, 1,
+		1, 0, 1, 1,
+		0, -1, -1, 0,
+		0, -1, -1, 0,
+		0, -1, 1, 0,
+		0, -1, 1, 0,
+		0, 1, -1, 0,
+		0, 1, -1, 0,
+		0, 1, 1, 0,
+		0, 1, 1, 0,
+	};
+
+	{
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_1D;
+		glGenTextures(1, &id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(target, id);
+		//set texture parameters
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RGBA, 32, 0, GL_RGBA, GL_FLOAT, gradients4D);
+		glBindTexture(target, 0);
+
+		mPerlinNoiseGradient4D = new Texture1D(id, target);
+	}
+
+	{
+		float permutationGradients4D[256 * 4];
+		for (int i = 0; i < 256; ++i)
+		{
+			memcpy(&permutationGradients4D[i * 4], &gradients4D[(permutation[i] & 31) * 4], sizeof(float) * 4);
+		}
+
+		GLuint id = 0;
+		GLenum target = GL_TEXTURE_1D;
+		glGenTextures(1, &id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(target, id);
+		//set texture parameters
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, permutationGradients4D);
+		glBindTexture(target, 0);
+
+		mPerlinNoisePermutationGradient4D = new Texture1D(id, target);
 	}
 
 }
