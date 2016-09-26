@@ -275,6 +275,7 @@
     <None Include="..\Data\Shaders\mesh.vs.glsl" />
     <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.hmap.cs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tcs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.vs.glsl" />

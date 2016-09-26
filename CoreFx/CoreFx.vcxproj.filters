@@ -477,6 +477,9 @@
     <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.hmap.cs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">
