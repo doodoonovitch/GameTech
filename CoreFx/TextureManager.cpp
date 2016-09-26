@@ -129,17 +129,9 @@ void TextureManager::Initialize()
 		target = GL_TEXTURE_2D;
 
 		glGenTextures(1, &id);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, id);
-		//set texture parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		//allocate texture 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(target, id);
+		CreateTexStorage(target, w, h, pData, true, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+		glBindTexture(target, 0);
 		free(pData);
 	}
 
@@ -187,12 +179,44 @@ void TextureManager::Initialize()
 		for (int i = 0; i < 6; ++i)
 		{
 			memset(buffer, colors[i], sizeof(buffer));
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+			CreateTexStorage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 2, 2, buffer, false);
+			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 		}
 
 		glBindTexture(target, 0);
 	}
 	mDefaultCubeMap = new CubeMapTexture(id, target);
+
+}
+
+void TextureManager::CreateTexStorage(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLint internalFormat, GLenum rasterDataFormat, GLenum rasterDataType)
+{
+	//glTexImage2D(target, 0, internalFormat, w, h, 0, rasterDataFormat, rasterDataType, raster);
+	GLsizei numLevels = generateMipMap ? (GLsizei)(1 + floor(log2(max(w, h)))) : 1;
+	glTexStorage2D(target, numLevels, internalFormat, w, h);
+	GL_CHECK_ERRORS;
+
+	glTexSubImage2D(target, 0, 0, 0, w, h, rasterDataFormat, rasterDataType, raster);
+	GL_CHECK_ERRORS;
+
+	if (generateMipMap)
+	{
+		glGenerateMipmap(target);
+		GL_CHECK_ERRORS;
+	}
+}
+
+void TextureManager::CreateTexStorage(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLenum texMinFilter, GLenum texMagFilter, GLenum wrapS, GLenum wrapT, GLint internalFormat, GLenum rasterDataFormat, GLenum rasterDataType)
+{
+	CreateTexStorage(target, w, h, raster, generateMipMap, internalFormat, rasterDataFormat, rasterDataType);
+
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
+
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, texMinFilter);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texMagFilter);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 }
 
@@ -204,22 +228,7 @@ bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string con
 	{
 		glGenTextures(1, &id);
 		glBindTexture(target, id);
-
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
-
-		if (generateMipMap)
-			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		else
-			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-		glTexImage2D(target, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, raster);
-
-		if (generateMipMap)
-			glGenerateMipmap(target);
-
+		CreateTexStorage(target, w, h, raster, generateMipMap, generateMipMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR, GL_LINEAR, wrapS, wrapT);
 		glBindTexture(target, 0);
 	});
 
@@ -319,6 +328,7 @@ bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::strin
 		GLenum trg = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
 		bool loaded = LoadTiffImage(tiffFilenames[i], [trg, &desiredW, &desiredH](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
+			//CreateTexStorage(trg, w, h, raster, true);
 			glTexImage2D(trg, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, raster);
 			if (desiredW == 0)
 				desiredW = w;
@@ -338,15 +348,15 @@ bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::strin
 	glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	if (generateMipMap)
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	else
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	if (generateMipMap)
-		glGenerateMipmap(target);
+	//if (generateMipMap)
+	//	glGenerateMipmap(target);
 
 	glBindTexture(target, 0);
 
@@ -564,16 +574,19 @@ void TextureManager::InitializePerlinNoise()
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_1D;
 		glGenTextures(1, &id);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(target, id);
+
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RED, 256, 0, GL_RED, GL_UNSIGNED_BYTE, permutation);
+		GL_CHECK_ERRORS;
+
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//allocate texture 
-		glTexImage1D(target, 0, GL_R, 256, 0, GL_RED, GL_UNSIGNED_BYTE, permutation);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		GL_CHECK_ERRORS;
+
 		glBindTexture(target, 0);
 
 		mPerlinNoisePermutation = new Texture1D(id, target);
@@ -599,15 +612,17 @@ void TextureManager::InitializePerlinNoise()
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_2D;
 		glGenTextures(1, &id);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(target, id);
 		//set texture parameters
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		//glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		//glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		//glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		//allocate texture 
-		glTexImage2D(target, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, permutation2D);
+		CreateTexStorage(target, 256, 256, permutation2D, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+		//glTexImage2D(target, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, permutation2D);
+		GL_CHECK_ERRORS;
+
 		glBindTexture(target, 0);
 
 		delete[] permutation2D;
@@ -638,15 +653,19 @@ void TextureManager::InitializePerlinNoise()
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_1D;
 		glGenTextures(1, &id);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(target, id);
+
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RGB, 16, 0, GL_RGB, GL_FLOAT, gradients);
+		GL_CHECK_ERRORS;
+
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//allocate texture 
-		glTexImage1D(target, 0, GL_RGB, 16, 0, GL_RGB, GL_FLOAT, gradients);
+		GL_CHECK_ERRORS;
+
 		glBindTexture(target, 0);
 
 		mPerlinNoiseGradient = new Texture1D(id, target);
@@ -662,15 +681,19 @@ void TextureManager::InitializePerlinNoise()
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_1D;
 		glGenTextures(1, &id);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(target, id);
+
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RGB, 256, 0, GL_RGB, GL_FLOAT, permutationGradients);
+		GL_CHECK_ERRORS;
+
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//allocate texture 
-		glTexImage1D(target, 0, GL_RGB, 256, 0, GL_RGB, GL_FLOAT, permutationGradients);
+		GL_CHECK_ERRORS;
+
 		glBindTexture(target, 0);
 
 		mPerlinNoisePermutationGradient = new Texture1D(id, target);
@@ -718,15 +741,18 @@ void TextureManager::InitializePerlinNoise()
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_1D;
 		glGenTextures(1, &id);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(target, id);
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RGBA, 32, 0, GL_RGBA, GL_FLOAT, gradients4D);
+		GL_CHECK_ERRORS;
+
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//allocate texture 
-		glTexImage1D(target, 0, GL_RGBA, 32, 0, GL_RGBA, GL_FLOAT, gradients4D);
+		GL_CHECK_ERRORS;
+
 		glBindTexture(target, 0);
 
 		mPerlinNoiseGradient4D = new Texture1D(id, target);
@@ -742,15 +768,19 @@ void TextureManager::InitializePerlinNoise()
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_1D;
 		glGenTextures(1, &id);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(target, id);
+
+		//allocate texture 
+		glTexImage1D(target, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, permutationGradients4D);
+		GL_CHECK_ERRORS;
+
 		//set texture parameters
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//allocate texture 
-		glTexImage1D(target, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, permutationGradients4D);
+		GL_CHECK_ERRORS;
+
 		glBindTexture(target, 0);
 
 		mPerlinNoisePermutationGradient4D = new Texture1D(id, target);

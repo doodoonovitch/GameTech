@@ -168,7 +168,7 @@ void PerlinNoiseOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 	mWireFrameShader.CreateAndLinkProgram();
 	mWireFrameShader.Use();
 
-	mWireFrameShader.AddUniforms(uniformNames, 4);
+	mWireFrameShader.AddUniforms(uniformNames, 6);
 
 	//pass values of constant uniforms at initialization
 	glUniform2iv(mWireFrameShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;

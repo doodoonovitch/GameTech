@@ -12,7 +12,7 @@ namespace CoreFx
 DeepOceanRenderer::DeepOceanRenderer(const Desc & desc)
 	: RendererHelper<1>(0, "DeepOceanRenderer", "DeepOceanWireFrameRenderer")
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
-	, mNoiseTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/noise512_NRM.tif"))
+	, mNoiseTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/noise512_NRM.tif", GL_REPEAT, GL_REPEAT))
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
 	, mScale(desc.mScale)
