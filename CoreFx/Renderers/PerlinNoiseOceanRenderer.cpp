@@ -13,7 +13,6 @@ PerlinNoiseOceanRenderer::PerlinNoiseOceanRenderer(const Desc & desc)
 	: RendererHelper<1>(0, "PerlinNoiseOceanRenderer", "PerlinNoiseOceanWireFrameRenderer")
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mNoiseHeightTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/noise.tif", GL_REPEAT, GL_REPEAT))
-	, mNoiseNormalTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/noise_NRM.tif", GL_REPEAT, GL_REPEAT))
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
 	, mScale(desc.mScale)
@@ -96,7 +95,6 @@ void PerlinNoiseOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 		"u_MapSize",
 		"u_Scale",
 		"u_noiseHeightSampler",
-		"u_noiseNormalSampler",
 		"u_PerMapDataSampler",
 		"u_SkyboxCubeMapSampler",
 		"u_textureSampler",
@@ -124,10 +122,9 @@ void PerlinNoiseOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 	glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
 	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_noiseHeightSampler), 0); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_noiseNormalSampler), 1); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 2); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 3); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_textureSampler), 4); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 2); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_textureSampler), 3); GL_CHECK_ERRORS;
 
 	GetWavePropertyUniformIndex(mShader, mShaderWaveProps);
 
@@ -149,7 +146,6 @@ void PerlinNoiseOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 		"u_MapSize",
 		"u_Scale",
 		"u_noiseHeightSampler",
-		"u_noiseNormalSampler",
 		"u_PerMapDataSampler",
 	};
 
@@ -168,15 +164,14 @@ void PerlinNoiseOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 	mWireFrameShader.CreateAndLinkProgram();
 	mWireFrameShader.Use();
 
-	mWireFrameShader.AddUniforms(uniformNames, 6);
+	mWireFrameShader.AddUniforms(uniformNames, 5);
 
 	//pass values of constant uniforms at initialization
 	glUniform2iv(mWireFrameShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
 	glUniform2iv(mWireFrameShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
 	glUniform3fv(mWireFrameShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 	glUniform1i(mWireFrameShader.GetUniform(u_noiseHeightSampler), 0); GL_CHECK_ERRORS;
-	glUniform1i(mWireFrameShader.GetUniform(u_noiseNormalSampler), 1); GL_CHECK_ERRORS;
-	glUniform1i(mWireFrameShader.GetUniform(u_PerMapDataSampler), 2); GL_CHECK_ERRORS;
+	glUniform1i(mWireFrameShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 
 	GetWavePropertyUniformIndex(mWireFrameShader, mWireFrameShaderWaveProps);
 
@@ -250,15 +245,12 @@ void PerlinNoiseOceanRenderer::Render()
 			glBindTexture(GL_TEXTURE_2D, mNoiseHeightTexture->GetResourceId());
 
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, mNoiseNormalTexture->GetResourceId());
-
-			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 	
-			glActiveTexture(GL_TEXTURE3);
+			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(mCubeMapTexture->GetTarget(), mCubeMapTexture->GetResourceId());
 
-			glActiveTexture(GL_TEXTURE4);
+			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());
 
 			glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
@@ -278,9 +270,6 @@ void PerlinNoiseOceanRenderer::RenderWireFrame()
 			glBindTexture(GL_TEXTURE_2D, mNoiseHeightTexture->GetResourceId());
 
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, mNoiseNormalTexture->GetResourceId());
-
-			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 
 			glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);

@@ -10,7 +10,6 @@ uniform float[c_MaxWavesToSum] u_Amplitude;
 uniform float[c_MaxWavesToSum] u_Velocity;
 
 uniform sampler2D u_noiseHeightSampler;
-uniform sampler2D u_noiseNormalSampler;
 
 uniform ivec2 u_PatchCount;
 uniform ivec2 u_MapSize;
@@ -32,6 +31,9 @@ out TES_OUT
 	flat int MapIndex;
 } tes_out;
 
+const float u_dUV = 0.01;
+const vec2 u_Step = vec2(1.0, 0.0);
+
 void main()
 {
 	vec2 tc1 = mix(tes_in[0].TexUV, tes_in[1].TexUV, gl_TessCoord.x);
@@ -47,6 +49,7 @@ void main()
 	float t = u_TimeDeltaTime.x;
 	float H = 0;
 	vec3 normal  = vec3(0);
+
 	for(int i = 0; i < 4; ++i)
 	{
 		
@@ -55,11 +58,21 @@ void main()
 
 		H += u_Amplitude[i] * texture(u_noiseHeightSampler, uv).r;
 
-		vec3 bumpMapNormal = texture(u_noiseNormalSampler, uv).xzy;
-		bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
-		vec3 newNormal = /*TBN * */normalize(bumpMapNormal); 
-		newNormal.y = newNormal.y * u_Amplitude[i];
-		normal += newNormal;
+		float dUV = u_dUV * u_WaveLength[i];
+
+		float h0 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x - dUV, uv.y)).r;
+		float h1 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x + dUV, uv.y)).r;
+		float h2 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x, uv.y - dUV)).r;
+		float h3 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x, uv.y + dUV)).r;
+
+		vec3 n = vec3(h0 - h1, 2 * u_MapSize.x * u_dUV, h2 - h3);
+		normal += n;
+
+		//vec3 bumpMapNormal = texture(u_noiseNormalSampler, uv).xzy;
+		//bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
+		//vec3 newNormal = /*TBN * */normalize(bumpMapNormal); 
+		//newNormal.y = newNormal.y * u_Amplitude[i];
+		//normal += newNormal;
 	}		 
 	p.y = H;
 
@@ -69,7 +82,7 @@ void main()
 	tes_out.ViewPosition = viewPos.xyz;
 	tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
-	tes_out.Normal = normalize(normal);
+	tes_out.Normal = normalize(u_ViewMatrix * vec4(normal, 0)).xyz;
 	
 	gl_Position = u_ProjMatrix * viewPos;
 }

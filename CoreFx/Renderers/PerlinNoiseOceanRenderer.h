@@ -129,7 +129,6 @@ private:
 		u_MapSize,
 		u_Scale,
 		u_noiseHeightSampler,
-		u_noiseNormalSampler,
 		u_PerMapDataSampler,
 		u_SkyboxCubeMapSampler,
 		u_textureSampler,
@@ -154,7 +153,6 @@ private:
 
 	CubeMapTexture const * mCubeMapTexture;
 	Texture2D const * mNoiseHeightTexture;
-	Texture2D const * mNoiseNormalTexture;
 
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
