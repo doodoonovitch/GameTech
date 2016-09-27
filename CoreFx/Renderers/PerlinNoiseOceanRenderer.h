@@ -10,7 +10,7 @@ namespace CoreFx
 	{
 
 
-class PerlinNoiseOceanRenderer : public RendererHelper<1>
+class PerlinNoiseOceanRenderer : public RendererHelper<2>
 {
 public:
 
@@ -116,10 +116,11 @@ private:
 
 
 	void LoadShaders(const Desc & desc);
+	void LoadHMapComputeShader(const Desc & desc);
 	void LoadMainShader(const Desc & desc);
 	void LoadWireFrameShader(const Desc & desc);
 	void GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps);
-	void SetWavePropertyUniformValues(WavePropUniformIndex & waveProps);
+	//void SetWavePropertyUniformValues(WavePropUniformIndex & waveProps);
 
 private:
 
@@ -149,17 +150,39 @@ private:
 		E_WaveProps_Velocity_modified = 1 << 3,
 	};
 
+	enum VertexBufferIndex
+	{
+		VertexArrayBufferIndex,
+		WavePropsBufferIndex
+	};
+
 	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;
+
+#pragma pack(push, 1)
+	struct HMapCSParam
+	{
+		glm::vec2 m_Direction;
+		GLfloat __padding_1__[2];
+		GLfloat m_WaveLength;
+		GLfloat m_Amplitude;
+		GLfloat m_Velocity;
+		GLfloat __padding_2__;
+	};
+#pragma pack(pop)
 
 	CubeMapTexture const * mCubeMapTexture;
 	Texture2D const * mNoiseHeightTexture;
+
+	HMapCSParam * mWaveProps;
+	GLint mWaveCount;
 
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
 	glm::vec3 mScale;
 	GLint mMapCount;
-	WaveProps mWaveProps[MAX_WAVE_TO_SUM];
+	//WaveProps mWaveProps[MAX_WAVE_TO_SUM];
 
+	Shader mHMapCompShader;
 	Shader mDrawNormalShader;
 	TextureBuffer mModelMatrixBuffer;
 

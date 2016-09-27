@@ -6,10 +6,6 @@ struct Param
 	vec3 u_B; // x : wave length, y : amplitude, z : velocity
 };
 
-uniform int u_WaveCount;
-uniform ivec2 u_TextureSize;
-uniform float u_Time;
-
 layout (binding = 0, r32f) writeonly uniform image2D image_out;
 
 layout (binding = 1) readonly uniform image2D image_in;
@@ -18,6 +14,9 @@ layout (binding = 2, std430) uniform Params
 	Param u_WaveParam[];
 };
 
+layout (binding = 3) uniform int u_WaveCount;
+layout (binding = 4) uniform ivec2 u_TextureSize;
+layout (binding = 5) uniform float u_Time;
 
 layout (local_size_x = 64, local_size_y = 64) in;
 
