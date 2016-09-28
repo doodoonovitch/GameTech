@@ -130,7 +130,7 @@ void TextureManager::Initialize()
 
 		glGenTextures(1, &id);
 		glBindTexture(target, id);
-		CreateTexStorage(target, w, h, pData, true, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+		CreateTexStorage2D(target, w, h, pData, true, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 		glBindTexture(target, 0);
 		free(pData);
 	}
@@ -179,7 +179,7 @@ void TextureManager::Initialize()
 		for (int i = 0; i < 6; ++i)
 		{
 			memset(buffer, colors[i], sizeof(buffer));
-			CreateTexStorage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 2, 2, buffer, false);
+			CreateTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 2, 2, buffer, false);
 			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 		}
 
@@ -189,15 +189,17 @@ void TextureManager::Initialize()
 
 }
 
-void TextureManager::CreateTexStorage(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLint internalFormat, GLenum rasterDataFormat, GLenum rasterDataType)
+void TextureManager::CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLint internalFormat, GLenum rasterDataFormat, GLenum rasterDataType)
 {
 	//glTexImage2D(target, 0, internalFormat, w, h, 0, rasterDataFormat, rasterDataType, raster);
 	GLsizei numLevels = generateMipMap ? (GLsizei)(1 + floor(log2(max(w, h)))) : 1;
 	glTexStorage2D(target, numLevels, internalFormat, w, h);
 	GL_CHECK_ERRORS;
-
-	glTexSubImage2D(target, 0, 0, 0, w, h, rasterDataFormat, rasterDataType, raster);
-	GL_CHECK_ERRORS;
+	if (raster != nullptr)
+	{
+		glTexSubImage2D(target, 0, 0, 0, w, h, rasterDataFormat, rasterDataType, raster);
+		GL_CHECK_ERRORS;
+	}
 
 	if (generateMipMap)
 	{
@@ -206,9 +208,9 @@ void TextureManager::CreateTexStorage(GLenum target, uint32_t w, uint32_t h, con
 	}
 }
 
-void TextureManager::CreateTexStorage(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLenum texMinFilter, GLenum texMagFilter, GLenum wrapS, GLenum wrapT, GLint internalFormat, GLenum rasterDataFormat, GLenum rasterDataType)
+void TextureManager::CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLenum texMinFilter, GLenum texMagFilter, GLenum wrapS, GLenum wrapT, GLint internalFormat, GLenum rasterDataFormat, GLenum rasterDataType)
 {
-	CreateTexStorage(target, w, h, raster, generateMipMap, internalFormat, rasterDataFormat, rasterDataType);
+	CreateTexStorage2D(target, w, h, raster, generateMipMap, internalFormat, rasterDataFormat, rasterDataType);
 
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
@@ -228,7 +230,7 @@ bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string con
 	{
 		glGenTextures(1, &id);
 		glBindTexture(target, id);
-		CreateTexStorage(target, w, h, raster, generateMipMap, generateMipMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR, GL_LINEAR, wrapS, wrapT);
+		CreateTexStorage2D(target, w, h, raster, generateMipMap, generateMipMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR, GL_LINEAR, wrapS, wrapT);
 		glBindTexture(target, 0);
 	});
 
@@ -328,7 +330,7 @@ bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::strin
 		GLenum trg = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
 		bool loaded = LoadTiffImage(tiffFilenames[i], [trg, &desiredW, &desiredH](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
-			//CreateTexStorage(trg, w, h, raster, true);
+			//CreateTexStorage2D(trg, w, h, raster, true);
 			glTexImage2D(trg, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, raster);
 			if (desiredW == 0)
 				desiredW = w;
@@ -619,7 +621,7 @@ void TextureManager::InitializePerlinNoise()
 		//glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		//glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		//allocate texture 
-		CreateTexStorage(target, 256, 256, permutation2D, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+		CreateTexStorage2D(target, 256, 256, permutation2D, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 		//glTexImage2D(target, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, permutation2D);
 		GL_CHECK_ERRORS;
 

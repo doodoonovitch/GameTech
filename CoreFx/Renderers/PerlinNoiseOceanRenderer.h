@@ -119,7 +119,7 @@ private:
 	void LoadHMapComputeShader(const Desc & desc);
 	void LoadMainShader(const Desc & desc);
 	void LoadWireFrameShader(const Desc & desc);
-	void GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps);
+	//void GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps);
 	//void SetWavePropertyUniformValues(WavePropUniformIndex & waveProps);
 
 	void GenerateHeightMap();
@@ -131,7 +131,7 @@ private:
 		u_PatchCount,
 		u_MapSize,
 		u_Scale,
-		u_noiseHeightSampler,
+		u_HeightMapSampler,
 		u_PerMapDataSampler,
 		u_SkyboxCubeMapSampler,
 		u_textureSampler,
@@ -200,8 +200,8 @@ private:
 	Shader mDrawNormalShader;
 	TextureBuffer mModelMatrixBuffer;
 
-	WavePropUniformIndex mShaderWaveProps;
-	WavePropUniformIndex mWireFrameShaderWaveProps;
+	//WavePropUniformIndex mShaderWaveProps;
+	//WavePropUniformIndex mWireFrameShaderWaveProps;
 };
 
 

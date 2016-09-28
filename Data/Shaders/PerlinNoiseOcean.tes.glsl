@@ -2,14 +2,8 @@
 //layout (quads, fractional_even_spacing) in;
 layout (quads, equal_spacing) in;
 
-const int c_MaxWavesToSum = 4;
 
-uniform vec3[c_MaxWavesToSum] u_Direction;
-uniform float[c_MaxWavesToSum] u_WaveLength;
-uniform float[c_MaxWavesToSum] u_Amplitude;
-uniform float[c_MaxWavesToSum] u_Velocity;
-
-uniform sampler2D u_noiseHeightSampler;
+uniform sampler2D u_HeightMapSampler;
 
 uniform ivec2 u_PatchCount;
 uniform ivec2 u_MapSize;
@@ -46,35 +40,15 @@ void main()
 
     mat3 TBN = mat3(vec3(1, 0, 0), vec3(0, 0, 1), vec3(0, 0, 1));
 
-	float t = u_TimeDeltaTime.x;
-	float H = 0;
-	vec3 normal  = vec3(0);
+	p.y = texture(u_HeightMapSampler, tc).r;
 
-	for(int i = 0; i < 4; ++i)
-	{
-		
-		//vec2 uv = tc * u_WaveLength[i] / coef + t * u_Velocity[i] * u_Direction[0].xz;
-		vec2 uv = tc * u_WaveLength[i] + t * u_Velocity[i] * u_Direction[i].xz;
+	float dUV = u_dUV;
+	float h0 = texture(u_HeightMapSampler, vec2(tc.x - dUV, tc.y)).r;
+	float h1 = texture(u_HeightMapSampler, vec2(tc.x + dUV, tc.y)).r;
+	float h2 = texture(u_HeightMapSampler, vec2(tc.x, tc.y - dUV)).r;
+	float h3 = texture(u_HeightMapSampler, vec2(tc.x, tc.y + dUV)).r;
 
-		H += u_Amplitude[i] * texture(u_noiseHeightSampler, uv).r;
-
-		float dUV = u_dUV * u_WaveLength[i];
-
-		float h0 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x - dUV, uv.y)).r;
-		float h1 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x + dUV, uv.y)).r;
-		float h2 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x, uv.y - dUV)).r;
-		float h3 = u_Amplitude[i] * texture(u_noiseHeightSampler, vec2(uv.x, uv.y + dUV)).r;
-
-		vec3 n = vec3(h0 - h1, 2 * u_MapSize.x * u_dUV, h2 - h3);
-		normal += n;
-
-		//vec3 bumpMapNormal = texture(u_noiseNormalSampler, uv).xzy;
-		//bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
-		//vec3 newNormal = /*TBN * */normalize(bumpMapNormal); 
-		//newNormal.y = newNormal.y * u_Amplitude[i];
-		//normal += newNormal;
-	}		 
-	p.y = H;
+	vec3 normal = vec3(h0 - h1, 2 * u_MapSize.x * u_dUV, h2 - h3);
 
 	vec4 viewPos = u_ViewMatrix * p;
 

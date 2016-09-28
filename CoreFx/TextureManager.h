@@ -48,6 +48,12 @@ public:
 
 	static GLsizei GetNumberOfMipMapLevels(uint32_t imgWidth, uint32_t imgHeight);
 
+public:
+
+	static void CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLenum texMinFilter, GLenum texMagFilter, GLenum wrapS, GLenum wrapT, GLint internalFormat = GL_RGBA8, GLenum rasterDataFormat = GL_RGBA, GLenum rasterDataType = GL_UNSIGNED_BYTE);
+	static void CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLint internalFormat = GL_RGBA8, GLenum rasterDataFormat = GL_RGBA, GLenum rasterDataType = GL_UNSIGNED_BYTE);
+
+
 private:
 
 	TextureManager();
@@ -99,9 +105,6 @@ private:
 
 	bool LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, GLenum wrapS = GL_REPEAT, GLenum wrapT = GL_REPEAT, bool generateMipMap = true);
 	bool LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::string tiffFilenames[6], bool generateMipMap = true);
-
-	static void CreateTexStorage(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLenum texMinFilter, GLenum texMagFilter, GLenum wrapS, GLenum wrapT, GLint internalFormat = GL_RGBA8, GLenum rasterDataFormat = GL_RGBA, GLenum rasterDataType = GL_UNSIGNED_BYTE);
-	static void CreateTexStorage(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLint internalFormat = GL_RGBA8, GLenum rasterDataFormat = GL_RGBA, GLenum rasterDataType = GL_UNSIGNED_BYTE);
 
 	void InitializePerlinNoise();
 
