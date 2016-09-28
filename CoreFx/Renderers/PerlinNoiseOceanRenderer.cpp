@@ -15,6 +15,7 @@ PerlinNoiseOceanRenderer::PerlinNoiseOceanRenderer(const Desc & desc)
 	, mNoiseHeightTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/noise.tif", GL_REPEAT, GL_REPEAT))
 	, mWaveProps(nullptr)
 	, mWaveCount(0)
+	, mTextureSize(512, 512)
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
 	, mScale(desc.mScale)
@@ -111,10 +112,20 @@ void PerlinNoiseOceanRenderer::LoadShaders(const Desc & desc)
 void PerlinNoiseOceanRenderer::LoadHMapComputeShader(const Desc & /*desc*/)
 {
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (HMap compute) Shaders : .....");
-
-
-
+	
 	mHMapCompShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/PerlinNoiseOcean.hmap.cs.glsl");
+
+	mShader.CreateAndLinkProgram();
+	mHMapCompShader.Use();
+
+	glBindImageTexture((GLuint)EHMapCSUniforms::u_ImageOut, mVboIDs[WavePropsBufferIndex], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
+	glBindImageTexture((GLuint)EHMapCSUniforms::u_ImageIn, mNoiseHeightTexture->GetResourceId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8UI);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, (GLuint)EHMapCSUniforms::u_WaveParamsBlock, mVboIDs[WavePropsBufferIndex]);
+	glUniform1i((GLuint)EHMapCSUniforms::u_WaveCount, mWaveCount); GL_CHECK_ERRORS;
+	glUniform2iv((GLuint)EHMapCSUniforms::u_TextureSize, 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
+
+	mHMapCompShader.UnUse();
 
 	PRINT_MESSAGE(".....done.");
 }
@@ -267,6 +278,21 @@ void PerlinNoiseOceanRenderer::GetWavePropertyUniformIndex(Shader & shader, Wave
 //		waveProps.mWavePropModified[i] = 0;
 //	}
 //}
+
+void PerlinNoiseOceanRenderer::GenerateHeightMap()
+{
+	mHMapCompShader.Use();
+
+	glBindImageTexture((GLuint)EHMapCSUniforms::u_ImageOut, mVboIDs[WavePropsBufferIndex], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
+	glBindImageTexture((GLuint)EHMapCSUniforms::u_ImageIn, mNoiseHeightTexture->GetResourceId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8UI);
+	glUniform1f((GLuint)EHMapCSUniforms::u_Time, Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
+
+	glDispatchCompute(mTextureSize.x / 64, mTextureSize.y / 64, 1);
+
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	mHMapCompShader.UnUse();
+}
  
 void PerlinNoiseOceanRenderer::Render()
 {

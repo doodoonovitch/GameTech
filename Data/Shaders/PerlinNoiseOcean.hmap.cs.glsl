@@ -6,10 +6,10 @@ struct Param
 	vec3 u_B; // x : wave length, y : amplitude, z : velocity
 };
 
-layout (binding = 0, r32f) writeonly uniform image2D image_out;
+layout (binding = 0, r32f) writeonly uniform image2D u_ImageOut;
 
-layout (binding = 1) readonly uniform image2D image_in;
-layout (binding = 2, std430) uniform Params
+layout (binding = 1) readonly uniform image2D u_ImageIn;
+layout (binding = 2, std430) uniform u_WaveParamsBlock
 {
 	Param u_WaveParam[];
 };
@@ -30,8 +30,8 @@ void main(void)
 	for(int i = 0; i < u_WaveCount; ++i)
 	{
 		vec2 uv = tc * u_WaveParam[i].u_B.x + u_Time * u_WaveParam[i].u_B.z * u_WaveParam[i].u_A.xy;
-		H += u_WaveParam[i].u_B.y * imageLoad(image_in, ivec2(round(uv * u_TextureSize))).r;
+		H += u_WaveParam[i].u_B.y * imageLoad(u_ImageIn, ivec2(round(uv * u_TextureSize))).r;
 	}		 
 
-	imageStore(image_out, p, H);
+	imageStore(u_ImageOut, p, H);
 }
