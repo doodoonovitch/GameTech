@@ -89,9 +89,17 @@ public:
 
 	int AddPerlinNoiseUniforms();
 
+
 protected:
 
-	static std::string sCommonInclude;
+	static const char * GetCommonIncludeFilename(GLuint includeFileId);
+	static bool LoadCommonInclude(std::string & buffer, EInclude includeFileId);
+
+protected:
+
+	//static std::string sCommonInclude;
+	static std::string sRendererShadersCommon;
+	static std::string sComputeShadersCommon;
 
 	GLuint mProgram;
 	std::vector<GLuint> mShaders;

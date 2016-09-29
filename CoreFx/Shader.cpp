@@ -6,7 +6,9 @@ using namespace std;
 namespace CoreFx
 {
 
-	std::string Shader::sCommonInclude;
+	std::string Shader::sRendererShadersCommon;
+	std::string Shader::sComputeShadersCommon;
+
 
 Shader::Shader(const char * title)
 	: mProgram(0)
@@ -57,37 +59,103 @@ const char* Shader::ShaderName(GLenum shaderType)
 	}
 }
 
-void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, EInclude includes)
+const char * Shader::GetCommonIncludeFilename(GLuint includeFileId)
 {
-	if (includeCommon && sCommonInclude.empty())
+	switch (includeFileId)
 	{
-		sCommonInclude.append("#version 440\n");
-		if (Engine::GetInstance()->IsUsedExtensionSupported(Engine::ARB_shader_draw_parameters))
-		{
-			sCommonInclude.append("#define ARB_SHADER_DRAW_PARAMETERS 1 \n");
-		}
+	case (GLuint)EIncludeCommon::RendererShadersHeader:
+		return "shaders/RendererShaders.header.glsl";
 
-		if (!MergeFile(sCommonInclude, "shaders/common.glsl"))
+	case (GLuint)EIncludeCommon::ComputeShadersHeader:
+		return "shaders/ComputeShaders.header.glsl";
+
+	case (GLuint)EIncludeCommon::Quaternions:
+		return "shaders/Quaternions.incl.glsl";
+
+	case (GLuint)EIncludeCommon::FrameCommon:
+		return "shaders/RenderersCommon.incl.glsl";
+
+	default:
+		return nullptr;
+	}
+}
+
+bool Shader::LoadCommonInclude(std::string & buffer, EInclude includes)
+{
+	for (int i = 0; i < 4; ++i)
+	{
+		GLuint item = 1 << i;
+		if (((GLuint)includes & item) != 0)
 		{
-			PRINT_ERROR("Error loading common include file : 'shaders/common.inc' !");
-			return;
+			const char * filename = GetCommonIncludeFilename(item);
+			assert(filename != nullptr);
+			if (filename != nullptr)
+			{
+				if (!MergeFile(buffer, filename))
+				{
+					PRINT_ERROR("Error loading common include file : '%s' !", filename, 0);
+					return false;
+				}
+			}
 		}
 	}
+
+	return true;
+}
+
+void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, EInclude includes)
+{
+	bool includeCommon = includes != EInclude::None;
+	std::vector<const char *> tmp;
+	tmp.reserve(sources.size() + (includeCommon ? 1 : 0));
+
+	switch (includes)
+	{
+	case EInclude::RendererShadersCommon:
+		{
+			if (sRendererShadersCommon.empty())
+			{
+				sRendererShadersCommon.append("#version 440\n");
+				if (Engine::GetInstance()->IsUsedExtensionSupported(Engine::ARB_shader_draw_parameters))
+				{
+					sRendererShadersCommon.append("#define ARB_SHADER_DRAW_PARAMETERS 1 \n");
+				}
+
+				if (!LoadCommonInclude(sRendererShadersCommon, includes))
+				{
+					return;
+				}
+			}
+			tmp.push_back(sRendererShadersCommon.c_str());
+		}
+		break;
+
+	case EInclude::ComputeShadersCommon:
+		{
+			if (sComputeShadersCommon.empty())
+			{
+				sComputeShadersCommon.append("#version 440\n");
+
+				if (!LoadCommonInclude(sComputeShadersCommon, includes))
+				{
+					return;
+				}
+			}
+			tmp.push_back(sComputeShadersCommon.c_str());
+		}
+		break;
+
+	case EInclude::None:
+	default:
+		break;
+	}
+
 
 	GLuint shader = glCreateShader(whichShader);
 
-
-	std::vector<const char *> tmp(sources.size() + (includeCommon ? 1 : 0));
-
-	int i = 0;
-	if (includeCommon)
-	{
-		tmp[i++] = sCommonInclude.c_str();
-	}
-
 	for (auto it = sources.begin(); it != sources.end(); ++it)
 	{
-		tmp[i++] = it->c_str();
+		tmp.push_back(it->c_str());
 	}
 
 	const char ** srcList = tmp.data();
@@ -119,7 +187,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, EIncl
 	PRINT_MESSAGE("Loading shader file : '%s'.", filename.c_str());
 	if (MergeFile(buffer, filename))
 	{
-		LoadFromString(whichShader, buffers, includeCommon);
+		LoadFromString(whichShader, buffers, includes);
 	}
 	else
 	{
@@ -143,7 +211,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & f
 		}
 	}
 
-	LoadFromString(whichShader, buffers, includeCommon);
+	LoadFromString(whichShader, buffers, includes);
 }
 
 bool Shader::MergeFile(std::string& buffer, const std::string& filename) 

@@ -249,9 +249,6 @@
     <None Include="packages.config">
       <Filter>misc</Filter>
     </None>
-    <None Include="..\Data\Shaders\common.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\Data\Shaders\light.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -480,10 +477,13 @@
     <None Include="..\Data\Shaders\PerlinNoiseOcean.hmap.cs.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\Quaternions.glsl">
+    <None Include="..\Data\Shaders\RendererShaders.header.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Data\Shaders\RendererShaders.header.glsl">
+    <None Include="..\Data\Shaders\RenderersCommon.incl.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\Quaternions.incl.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

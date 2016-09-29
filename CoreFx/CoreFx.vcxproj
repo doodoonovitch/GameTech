@@ -234,7 +234,7 @@
     <None Include="..\Data\Shaders\axis.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\axis.forward.fs.glsl" />
     <None Include="..\Data\Shaders\axis.vs.glsl" />
-    <None Include="..\Data\Shaders\common.glsl" />
+    <None Include="..\Data\Shaders\RenderersCommon.incl.glsl" />
     <None Include="..\Data\Shaders\compass.forward.fs.glsl" />
     <None Include="..\Data\Shaders\compass.vs.glsl" />
     <None Include="..\Data\Shaders\compass.wireframe.fs.glsl" />
@@ -280,7 +280,7 @@
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.vs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl" />
-    <None Include="..\Data\Shaders\Quaternions.glsl" />
+    <None Include="..\Data\Shaders\Quaternions.incl.glsl" />
     <None Include="..\Data\Shaders\RendererShaders.header.glsl" />
     <None Include="..\Data\Shaders\skybox.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />

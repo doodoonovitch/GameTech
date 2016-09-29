@@ -4,10 +4,10 @@ struct Param
 	vec3 u_B; // x : wave length, y : amplitude, z : velocity
 };
 
-layout (binding = 0, r32f) writeonly uniform image2D u_ImageOut;
+layout (binding = 0, r32f) uniform image2D u_ImageOut;
 
-layout (binding = 1) readonly uniform image2D u_ImageIn;
-layout (binding = 2, std430) uniform u_WaveParamsBlock
+layout (binding = 1, rgba32f) uniform image2D u_ImageIn;
+layout (binding = 2) uniform u_WaveParamsBlock
 {
 	Param u_WaveParam[];
 };

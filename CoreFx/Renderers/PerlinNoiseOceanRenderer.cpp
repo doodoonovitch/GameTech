@@ -121,7 +121,7 @@ void PerlinNoiseOceanRenderer::LoadHMapComputeShader(const Desc & /*desc*/)
 {
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (HMap compute) Shaders : .....");
 	
-	mHMapCompShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/PerlinNoiseOcean.hmap.cs.glsl");
+	mHMapCompShader.LoadFromFile(GL_COMPUTE_SHADER, "shaders/PerlinNoiseOcean.hmap.cs.glsl", Shader::EInclude::ComputeShadersCommon);
 
 	mShader.CreateAndLinkProgram();
 	mHMapCompShader.Use();
