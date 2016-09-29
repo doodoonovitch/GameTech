@@ -57,7 +57,7 @@ const char* Shader::ShaderName(GLenum shaderType)
 	}
 }
 
-void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, bool includeCommon)
+void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, EInclude includes)
 {
 	if (includeCommon && sCommonInclude.empty())
 	{
@@ -111,7 +111,7 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 	mShaders.push_back(shader);
 }
 
-void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon)
+void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, EInclude includes)
 {
 	std::vector<string> buffers(1);
 	string & buffer = buffers.back();
@@ -127,7 +127,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, bool 
 	}
 }
 
-void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, bool includeCommon)
+void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, EInclude includes)
 {
 	std::vector<string> buffers(filenames.size());
 

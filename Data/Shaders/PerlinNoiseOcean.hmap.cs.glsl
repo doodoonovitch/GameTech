@@ -1,5 +1,3 @@
-#version 450 core
-
 struct Param
 {
 	vec2 u_A; // xy : Direction, 

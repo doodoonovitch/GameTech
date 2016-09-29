@@ -43,15 +43,31 @@ public:
 		__PerlinNoise_uniforms_count__
 	};
 
+	enum class EIncludeCommon
+	{
+		None = 0,
+		RendererShadersHeader = 1,
+		ComputeShadersHeader = 2,
+		Quaternions = 4,
+		FrameCommon = 8,
+	};
+
+	enum class EInclude
+	{
+		None = 0,
+		RendererShadersCommon = (GLuint)EIncludeCommon::RendererShadersHeader | (GLuint)EIncludeCommon::Quaternions | (GLuint)EIncludeCommon::FrameCommon,
+		ComputeShadersCommon = (GLuint)EIncludeCommon::ComputeShadersHeader | (GLuint)EIncludeCommon::Quaternions,
+	};
+
 public:
 	Shader(const char * title);
 	virtual ~Shader(void);
 
 	bool IsLoaded() const { return mProgram != 0; }
 
-	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, bool includeCommon = true);
-	void LoadFromFile(GLenum whichShader, const std::string& filename, bool includeCommon = true);
-	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, bool includeCommon = true);
+	void LoadFromString(GLenum whichShader, const std::vector<std::string> & sources, EInclude includes = EInclude::RendererShadersCommon);
+	void LoadFromFile(GLenum whichShader, const std::string& filename, EInclude includes = EInclude::RendererShadersCommon);
+	void LoadFromFile(GLenum whichShader, const std::vector<std::string> & filenames, EInclude includes = EInclude::RendererShadersCommon);
 	void CreateAndLinkProgram();
 	void DeleteShaderProgram();
 

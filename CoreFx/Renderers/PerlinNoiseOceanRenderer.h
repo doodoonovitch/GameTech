@@ -10,7 +10,7 @@ namespace CoreFx
 	{
 
 
-class PerlinNoiseOceanRenderer : public RendererHelper<3>
+class PerlinNoiseOceanRenderer : public RendererHelper<2>
 {
 public:
 
@@ -119,8 +119,6 @@ private:
 	void LoadHMapComputeShader(const Desc & desc);
 	void LoadMainShader(const Desc & desc);
 	void LoadWireFrameShader(const Desc & desc);
-	//void GetWavePropertyUniformIndex(Shader & shader, WavePropUniformIndex & waveProps);
-	//void SetWavePropertyUniformValues(WavePropUniformIndex & waveProps);
 
 	void GenerateHeightMap();
 
@@ -156,7 +154,6 @@ private:
 	{
 		VertexArrayBufferIndex,
 		WavePropsBufferIndex,
-		HeightMapBufferIndex
 	};
 
 	enum class EHMapCSUniforms
@@ -188,20 +185,17 @@ private:
 
 	HMapCSParam * mWaveProps;
 	GLint mWaveCount;
+	GLuint mHeightMapTextureId;
 
 	glm::ivec2 mTextureSize;
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
 	glm::vec3 mScale;
 	GLint mMapCount;
-	//WaveProps mWaveProps[MAX_WAVE_TO_SUM];
 
 	Shader mHMapCompShader;
 	Shader mDrawNormalShader;
 	TextureBuffer mModelMatrixBuffer;
-
-	//WavePropUniformIndex mShaderWaveProps;
-	//WavePropUniformIndex mWireFrameShaderWaveProps;
 };
 
 

@@ -280,6 +280,8 @@
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.vs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl" />
+    <None Include="..\Data\Shaders\Quaternions.glsl" />
+    <None Include="..\Data\Shaders\RendererShaders.header.glsl" />
     <None Include="..\Data\Shaders\skybox.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.vs.glsl" />
