@@ -156,34 +156,50 @@ private:
 		WavePropsBufferIndex,
 	};
 
-	enum class EHMapCSUniforms
+	enum class EHMapCSBindings
 	{
 		u_ImageOut,
 		u_ImageIn,
 		u_WaveParamsBlock,
+	};
+
+	enum EHMapCSUniforms
+	{
 		u_WaveCount,
 		u_TextureSize,
-		u_Time
+		u_Time,
+		__hmap_cs_uniforms_count__
 	};
 
 	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;
 
-#pragma pack(push, 1)
-	struct HMapCSParam
+//#pragma pack(push, 1)
+//	struct HMapCSParam
+//	{
+//		glm::vec2 m_Direction;
+//		GLfloat __padding_1__[2];
+//		GLfloat m_WaveLength;
+//		GLfloat m_Amplitude;
+//		GLfloat m_Velocity;
+//		GLfloat __padding_2__;
+//	};
+//#pragma pack(pop)
+
+	enum EWaveParamsOffset
 	{
-		glm::vec2 m_Direction;
-		GLfloat __padding_1__[2];
-		GLfloat m_WaveLength;
-		GLfloat m_Amplitude;
-		GLfloat m_Velocity;
-		GLfloat __padding_2__;
+		WaveParams_DirectionX,
+		WaveParams_DirectionY,
+		WaveParams_WaveLength,
+		WaveParams_Amplitude,
+		WaveParams_Velocity,
+
+		__waveparams_count__
 	};
-#pragma pack(pop)
 
 	CubeMapTexture const * mCubeMapTexture;
 	Texture2D const * mNoiseHeightTexture;
 
-	HMapCSParam * mWaveProps;
+	GLfloat * mWaveProps;
 	GLint mWaveCount;
 	GLuint mHeightMapTextureId;
 
