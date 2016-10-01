@@ -18,6 +18,7 @@ uniform float u_Time;
 uniform sampler2D u_NoiseSampler;
 
 
+//layout (local_size_x = 32, local_size_y = 32) in;
 layout (local_size_x = 1, local_size_y = 1) in;
 
 void main(void)

@@ -185,8 +185,10 @@ public:
 	// Renderers
 public:
 
-	bool AttachRenderer(Renderer* renderer);
+	bool AttachComputeShader(ComputeShader* cs);
+	bool DetachComputeShader(ComputeShader* cs);
 
+	bool AttachRenderer(Renderer* renderer);
 	bool DetachRenderer(Renderer* renderer);
 
 	bool AttachSkyboxRenderer(Renderers::SkyboxRenderer * skybox);
@@ -318,6 +320,7 @@ public:
 
 private:
 
+	typedef InstanceContainer<ComputeShader> ComputeShaderContainer;
 	typedef InstanceContainer<Renderer> RendererContainer;
 	typedef InstanceContainer<Lights::Light> LightContainer;
 
@@ -346,6 +349,7 @@ private:
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
 
+	void InternalComputePass();
 	void InternalRenderObjects();
 	void InternalDisplayTexture();
 
@@ -401,6 +405,7 @@ private:
 	TextureManager * mTextureManager;
 	RendererContainer * mRenderers;
 	RendererContainer * mForwardRenderers;
+	ComputeShaderContainer * mComputes;
 	LightContainer * mLights[Lights::Light::__light_type_count__];
 	GLint mLightDescIndexOffsets[Lights::Light::__light_type_count__];
 

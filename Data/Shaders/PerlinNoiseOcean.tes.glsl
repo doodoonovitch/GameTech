@@ -54,7 +54,7 @@ void main()
 	tes_out.ViewPosition = viewPos.xyz;
 	tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
-	tes_out.Normal = dqTransformNormal(normal, u_ViewDQ);
+	tes_out.Normal = normal;
 	
 	gl_Position = u_ProjMatrix * viewPos;
 }

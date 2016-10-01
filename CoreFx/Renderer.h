@@ -7,8 +7,6 @@ namespace CoreFx
 {
 
 	class Engine;
-	class Renderer;
-	typedef InstanceContainer<Renderer*> RendererContainer;
 
 
 
@@ -101,7 +99,7 @@ public:
 	enum ERenderPass
 	{
 		Deferred_Pass,
-		Forward_Pass
+		Forward_Pass,
 	};
 
 	typedef std::uint8_t TextureIndex;

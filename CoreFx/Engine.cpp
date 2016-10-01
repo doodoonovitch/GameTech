@@ -15,6 +15,7 @@ Engine::Engine()
 	: mTextureManager(nullptr)
 	, mRenderers(nullptr)
 	, mForwardRenderers(nullptr)
+	, mComputes(nullptr)
 	, mCamera(nullptr)
 	, mSkybox(nullptr)
 	, mQuad(nullptr)
@@ -99,6 +100,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 
 		mRenderers = new RendererContainer(64, 16);
 		mForwardRenderers = new RendererContainer(64, 16);
+		mComputes = new ComputeShaderContainer(64, 16);
 
 		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{
@@ -127,6 +129,7 @@ void Engine::InternalRelease()
 
 		SAFE_DELETE(mCamera);
 
+		SAFE_DELETE(mComputes);
 		SAFE_DELETE(mRenderers);
 		SAFE_DELETE(mForwardRenderers);
 
@@ -820,12 +823,22 @@ void Engine::RenderObjects()
 
 	if (mDisplayTexture == nullptr)
 	{
+		InternalComputePass();
 		InternalRenderObjects();
 	}
 	else
 	{
 		InternalDisplayTexture();
 	}
+}
+
+void Engine::InternalComputePass()
+{
+	mComputes->ForEach([](ComputeShader * cs)
+	{
+		if (cs->GetIsInitialized())
+			cs->Compute();
+	});
 }
 
 void Engine::InternalRenderObjects()
@@ -860,8 +873,10 @@ void Engine::InternalRenderObjects()
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		if(renderer->GetIsInitialized())
+		if (renderer->GetIsInitialized())
+		{
 			renderer->Render();
+		}			
 	});
 
 	glDepthMask(GL_FALSE);
@@ -1148,6 +1163,29 @@ void Engine::DeleteLight(Lights::Light * & light)
 	SAFE_DELETE(light);
 }
 
+bool Engine::AttachComputeShader(ComputeShader* cs)
+{
+	assert(cs != nullptr);
+	if (cs == nullptr)
+	{
+		PRINT_ERROR("Cannot attach compute shader : parameter null!");
+		return false;
+	}
+	return mComputes->Attach(cs);
+}
+
+bool Engine::DetachComputeShader(ComputeShader* cs)
+{
+	assert(cs != nullptr);
+	if (cs == nullptr)
+	{
+		PRINT_ERROR("Cannot detach compute shader : parameter null!");
+		return false;
+	}
+	return mComputes->Detach(cs);
+}
+
+
 bool Engine::AttachRenderer(Renderer* renderer)
 {
 	assert(renderer != nullptr);
@@ -1156,7 +1194,6 @@ bool Engine::AttachRenderer(Renderer* renderer)
 		PRINT_ERROR("Cannot attach renderer : parameter null!");
 		return false;
 	}
-
 	switch (renderer->GetRenderPass())
 	{
 	case Renderer::Deferred_Pass:

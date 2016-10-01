@@ -137,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ComputeShader.h" />
     <ClInclude Include="CoreFx.h" />
     <ClInclude Include="DDS.h" />
     <ClInclude Include="DebugOutput.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Log\Logger.h" />
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Maths\DualQuaternion.h" />
+    <ClInclude Include="Maths\Helpers.h" />
     <ClInclude Include="PropertyData.h" />
     <ClInclude Include="Renderables\Axis.h" />
     <ClInclude Include="Renderables\Cube.h" />
@@ -167,9 +169,10 @@
     <ClInclude Include="Renderers\GridRenderer.h" />
     <ClInclude Include="Renderers\IcosahedronRenderer.h" />
     <ClInclude Include="Renderers\ModelRenderer.h" />
-    <ClInclude Include="Renderers\PerlinNoiseOceanRenderer.h" />
+    <ClInclude Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.h" />
+    <ClInclude Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanRenderer.h" />
+    <ClInclude Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanWaveProperty.h" />
     <ClInclude Include="Renderers\RendererHelper.h" />
-    <ClInclude Include="Renderers\ShallowWaterRenderer.h" />
     <ClInclude Include="Renderers\SkyboxRenderer.h" />
     <ClInclude Include="Renderers\SkydomeRenderer.h" />
     <ClInclude Include="Renderers\TerrainRenderer.h" />
@@ -185,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ComputeShader.cpp" />
     <ClCompile Include="DDS.cpp" />
     <ClCompile Include="DebugOutput.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -211,8 +215,8 @@
     <ClCompile Include="Renderers\GridRenderer.cpp" />
     <ClCompile Include="Renderers\IcosahedronRenderer.cpp" />
     <ClCompile Include="Renderers\ModelRenderer.cpp" />
-    <ClCompile Include="Renderers\PerlinNoiseOceanRenderer.cpp" />
-    <ClCompile Include="Renderers\ShallowWaterRenderer.cpp" />
+    <ClCompile Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.cpp" />
+    <ClCompile Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanRenderer.cpp" />
     <ClCompile Include="Renderers\SkyboxRenderer.cpp" />
     <ClCompile Include="Renderers\SkydomeRenderer.cpp" />
     <ClCompile Include="Renderers\TerrainRenderer.cpp" />

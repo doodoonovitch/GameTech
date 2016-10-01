@@ -65,6 +65,7 @@ namespace CoreFx
 #include "DebugOutput.h"
 
 #include "Maths\DualQuaternion.h"
+#include "Maths\Helpers.h"
 
 #include "InstanceContainer.h"
 #include "PropertyData.h"
@@ -73,6 +74,7 @@ namespace CoreFx
 #include "Frame.h"
 #include "SceneObject.h"
 #include "Renderer.h"
+#include "ComputeShader.h"
 #include "Renderables\VertexArrayObject.h"
 #include "Renderers\DrawGBufferNormalShader.h"
 #include "Renderers\RendererHelper.h"
@@ -105,8 +107,9 @@ namespace CoreFx
 #include "Renderers\AxisRenderer.h"
 #include "Renderers\TerrainRenderer.h"
 #include "Renderers\DeepOceanRenderer.h"
-#include "Renderers\PerlinNoiseOceanRenderer.h"
-#include "Renderers\ShallowWaterRenderer.h"
+#include "Renderers\PerlinNoiseOcean\PerlinNoiseOceanWaveProperty.h"
+#include "Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.h"
+#include "Renderers\PerlinNoiseOcean\PerlinNoiseOceanRenderer.h"
 #include "Renderers\SkyboxRenderer.h"
 #include "Renderers\SkydomeRenderer.h"
 #include "Renderers\CompassRenderer.h"

@@ -237,19 +237,19 @@ void SimpleCamera::OnInit()
 #endif // DEEP_OCEAN_SAMPLE
 #ifdef PERLIN_NOISE_OCEAN_SAMPLE
 		{
-			Renderers::PerlinNoiseOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
+			Renderers::PerlinNoiseOcean::Renderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
 			const float AmpCoef = 2.0f;
 			const float WaveLengthCoef = 1.0f;
 			const float VelocityCoef = 0.01f;
-			desc.mWaveProps[0] = Renderers::PerlinNoiseOceanRenderer::WaveProps(090.0f, WaveLengthCoef / 4.00f, AmpCoef * 5.0f, VelocityCoef * 1.0f);
-			desc.mWaveProps[1] = Renderers::PerlinNoiseOceanRenderer::WaveProps(005.0f, WaveLengthCoef / 0.70f, AmpCoef * 0.4f, VelocityCoef * 2.0f);
-			desc.mWaveProps[2] = Renderers::PerlinNoiseOceanRenderer::WaveProps(200.0f, WaveLengthCoef / 0.03f, AmpCoef * 0.2f, VelocityCoef * 3.0f);
-			desc.mWaveProps[3] = Renderers::PerlinNoiseOceanRenderer::WaveProps(305.0f, WaveLengthCoef / 0.50f, AmpCoef * 0.1f, VelocityCoef * 4.0f);
-			//desc.mWaveProps[4] = Renderers::PerlinNoiseOceanRenderer::WaveProps(210.0f, WaveLengthCoef * 0.340f, AmpCoef * 0.05f, VelocityCoef * 0.03f);
+			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(090.0f, WaveLengthCoef / 4.00f, AmpCoef * 5.0f, VelocityCoef * 1.0f));
+			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(005.0f, WaveLengthCoef / 0.70f, AmpCoef * 0.4f, VelocityCoef * 2.0f));
+			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(200.0f, WaveLengthCoef / 0.03f, AmpCoef * 0.2f, VelocityCoef * 3.0f));
+			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(305.0f, WaveLengthCoef / 0.50f, AmpCoef * 0.1f, VelocityCoef * 4.0f));
+			//desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(210.0f, WaveLengthCoef * 0.340f, AmpCoef * 0.05f, VelocityCoef * 0.03f));
 
-			desc.mMaps.push_back(Renderers::PerlinNoiseOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
-			Renderers::PerlinNoiseOceanRenderer * ocean = new Renderers::PerlinNoiseOceanRenderer(desc);
+			desc.mMaps.push_back(Renderers::PerlinNoiseOcean::Renderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
+			Renderers::PerlinNoiseOcean::Renderer * ocean = new Renderers::PerlinNoiseOcean::Renderer(desc);
 			engine->AttachRenderer(ocean);
 		}
 #endif // PERLIN_NOISE_OCEAN_SAMPLE
@@ -508,7 +508,7 @@ void SimpleCamera::OnInit()
 
 
 		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);
-		Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
+		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
 
 	//setup camera
 	mCamera = new Camera();

@@ -36,6 +36,9 @@
     <Filter Include="Renderers\Text2D">
       <UniqueIdentifier>{2d2d61f2-3203-4551-b068-cf8c0e56e6cc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderers\PerlinNoiseOcean">
+      <UniqueIdentifier>{a493e601-fd7f-4026-89e1-e03e7e7e9b95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -112,9 +115,6 @@
     <ClInclude Include="Renderers\SkyboxRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
-    <ClInclude Include="Renderers\ShallowWaterRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
     <ClInclude Include="Renderers\IcosahedronRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
@@ -143,8 +143,18 @@
     <ClInclude Include="Renderers\Text2D\TextPage.h">
       <Filter>Renderers\Text2D</Filter>
     </ClInclude>
-    <ClInclude Include="Renderers\PerlinNoiseOceanRenderer.h">
-      <Filter>Renderers</Filter>
+    <ClInclude Include="ComputeShader.h" />
+    <ClInclude Include="Maths\Helpers.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanRenderer.h">
+      <Filter>Renderers\PerlinNoiseOcean</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanWaveProperty.h">
+      <Filter>Renderers\PerlinNoiseOcean</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.h">
+      <Filter>Renderers\PerlinNoiseOcean</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -210,9 +220,6 @@
     <ClCompile Include="Renderers\SkyboxRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
-    <ClCompile Include="Renderers\ShallowWaterRenderer.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
     <ClCompile Include="Renderers\IcosahedronRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
@@ -241,8 +248,12 @@
     <ClCompile Include="Renderers\Text2D\TextPage.cpp">
       <Filter>Renderers\Text2D</Filter>
     </ClCompile>
-    <ClCompile Include="Renderers\PerlinNoiseOceanRenderer.cpp">
-      <Filter>Renderers</Filter>
+    <ClCompile Include="ComputeShader.cpp" />
+    <ClCompile Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanRenderer.cpp">
+      <Filter>Renderers\PerlinNoiseOcean</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.cpp">
+      <Filter>Renderers\PerlinNoiseOcean</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

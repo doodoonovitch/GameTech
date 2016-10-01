@@ -10,6 +10,7 @@ namespace CoreFx
 		: mMaterials(propertyCount)
 		, mMaterialBaseIndex(0)
 		, mRenderPass(renderPass)
+		, mIsInitialized(false)
 {
 }
 

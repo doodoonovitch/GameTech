@@ -98,6 +98,7 @@ public:
 	PerlinNoiseOceanRenderer(const Desc & desc);
 	virtual ~PerlinNoiseOceanRenderer();
 
+	virtual void Compute() override;
 	virtual void Render() override;
 	virtual void RenderWireFrame() override;
 
