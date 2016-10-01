@@ -3,23 +3,20 @@
 #define WAVEPARAM_WAVE_LENGTH	2
 #define WAVEPARAM_AMPLITUDE		3
 #define WAVEPARAM_VELOCITY		4
-//struct Param
-//{
-//	vec2 u_A; // xy : Direction, 
-//	vec3 u_B; // x : wave length, y : amplitude, z : velocity
-//};
+
+#define WAVEPARAM_ITEMS_COUNT	5
 
 layout (binding = 0, r32f) uniform image2D u_ImageOut;
-
-layout (binding = 1, rgba32f) uniform image2D u_ImageIn;
-layout (binding = 2, std430) readonly buffer u_WaveParamsBlock
+layout (binding = 1, std430) coherent readonly buffer u_WaveParamsBlock
 {
-	float u_WaveParams[];
+	float u_WaveParams[15];
 };
 
 uniform int u_WaveCount;
 uniform ivec2 u_TextureSize;
 uniform float u_Time;
+uniform sampler2D u_NoiseSampler;
+
 
 layout (local_size_x = 1, local_size_y = 1) in;
 
@@ -37,7 +34,8 @@ void main(void)
 			tc * u_WaveParams[baseIndex + WAVEPARAM_WAVE_LENGTH] 
 			+ u_Time * u_WaveParams[baseIndex + WAVEPARAM_VELOCITY] * vec2(u_WaveParams[baseIndex + WAVEPARAM_DIR_X], u_WaveParams[baseIndex + WAVEPARAM_DIR_Y]);
 
-		H += u_WaveParams[baseIndex + WAVEPARAM_AMPLITUDE] * imageLoad(u_ImageIn, ivec2(round(uv * u_TextureSize))).r;
+		H += u_WaveParams[baseIndex + WAVEPARAM_AMPLITUDE] * texture(u_NoiseSampler, uv).r;
+		baseIndex += WAVEPARAM_ITEMS_COUNT;
 	}
 
 	imageStore(u_ImageOut, p, vec4(H));

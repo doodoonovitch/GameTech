@@ -486,6 +486,9 @@
     <None Include="..\Data\Shaders\Quaternions.incl.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\ComputeShaders.header.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

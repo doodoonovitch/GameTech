@@ -159,7 +159,6 @@ private:
 	enum class EHMapCSBindings
 	{
 		u_ImageOut,
-		u_ImageIn,
 		u_WaveParamsBlock,
 	};
 
@@ -168,6 +167,7 @@ private:
 		u_WaveCount,
 		u_TextureSize,
 		u_Time,
+		u_NoiseSampler,
 		__hmap_cs_uniforms_count__
 	};
 

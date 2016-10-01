@@ -38,8 +38,6 @@ void main()
 	vec4 p2 = mix(gl_in[2].gl_Position,	gl_in[3].gl_Position, gl_TessCoord.x);
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
 
-    mat3 TBN = mat3(vec3(1, 0, 0), vec3(0, 0, 1), vec3(0, 0, 1));
-
 	p.y = texture(u_HeightMapSampler, tc).r;
 
 	float dUV = u_dUV;
@@ -50,13 +48,13 @@ void main()
 
 	vec3 normal = vec3(h0 - h1, 2 * u_MapSize.x * u_dUV, h2 - h3);
 
-	vec4 viewPos = u_ViewMatrix * p;
+	vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1);
 
 	tes_out.Position = p.xyz;
 	tes_out.ViewPosition = viewPos.xyz;
 	tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
-	tes_out.Normal = normalize(u_ViewMatrix * vec4(normal, 0)).xyz;
+	tes_out.Normal = dqTransformNormal(normal, u_ViewDQ);
 	
 	gl_Position = u_ProjMatrix * viewPos;
 }

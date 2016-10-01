@@ -189,6 +189,7 @@ void Engine::CreateDynamicResources()
 		}
 
 		glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
 	}
 	// -----------------------------------------------------------------------
 
@@ -672,6 +673,8 @@ void Engine::InternalCreateMaterialBuffer()
 	InternalCreateMaterialBuffer(mRenderers, offset, baseIndex);
 	InternalCreateMaterialBuffer(mForwardRenderers, offset, baseIndex);
 
+	glBindBuffer(GL_TEXTURE_BUFFER, 0);
+
 	PRINT_MESSAGE(".....done.");
 	PRINT_END_SECTION;
 }
@@ -774,6 +777,7 @@ void Engine::RenderObjects()
 		});
 	}
 	glUnmapBuffer(GL_TEXTURE_BUFFER);
+	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 	// -----------------------------------------------------------------------
 
 
@@ -811,6 +815,7 @@ void Engine::RenderObjects()
 	}
 
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	// -----------------------------------------------------------------------
 
 	if (mDisplayTexture == nullptr)

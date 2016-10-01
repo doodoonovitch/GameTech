@@ -16,7 +16,7 @@ PerlinNoiseOceanRenderer::PerlinNoiseOceanRenderer(const Desc & desc)
 	, mWaveProps(nullptr)
 	, mWaveCount(0)
 	, mHeightMapTextureId(0)
-	, mTextureSize(256, 256)
+	, mTextureSize(512)
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
 	, mScale(desc.mScale)
@@ -30,20 +30,6 @@ PerlinNoiseOceanRenderer::PerlinNoiseOceanRenderer(const Desc & desc)
 	//memset(mShaderWaveProps.mWavePropModified, 0xFFFF, sizeof(mShaderWaveProps.mWavePropModified));
 	//memset(mWireFrameShaderWaveProps.mWavePropModified, 0xFFFF, sizeof(mWireFrameShaderWaveProps.mWavePropModified));
 	//memcpy(mWaveProps, desc.mWaveProps, sizeof(mWaveProps));
-
-	mWaveCount = MAX_WAVE_TO_SUM;
-	assert(mWaveCount > 0);
-	mWaveProps = new GLfloat[mWaveCount * __waveparams_count__];
-	for (int i = 0; i < mWaveCount; ++i)
-	{
-		const WaveProps & src = desc.mWaveProps[i];
-		GLfloat * trg = &mWaveProps[i * __waveparams_count__];
-		trg[WaveParams_Amplitude] = src.mAmplitude;
-		trg[WaveParams_DirectionX] = src.mDirection.x;
-		trg[WaveParams_DirectionY] = src.mDirection.z;
-		trg[WaveParams_Velocity] = src.mVelocity;
-		trg[WaveParams_WaveLength] = src.mWaveLength;
-	}
 
 	const glm::vec3 vertices[] =
 	{
@@ -75,11 +61,6 @@ PerlinNoiseOceanRenderer::PerlinNoiseOceanRenderer(const Desc & desc)
 
 	GL_CHECK_ERRORS;
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, mVboIDs[WavePropsBufferIndex]);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLfloat) * mWaveCount * __waveparams_count__, mWaveProps, GL_STATIC_DRAW);
-	GL_CHECK_ERRORS;
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
 	mMapCount = (GLint)desc.mMaps.size();
 
 	PerMapData * modelMatrixBuffer = new PerMapData[mMapCount];
@@ -88,12 +69,6 @@ PerlinNoiseOceanRenderer::PerlinNoiseOceanRenderer(const Desc & desc)
 		modelMatrixBuffer[i].mModelDQ = desc.mMaps[i].mModelDQ;
 	}
 	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (mMapCount * sizeof(PerMapData)), modelMatrixBuffer);
-
-	glGenTextures(1, &mHeightMapTextureId);
-	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
-	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
-	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_R32F, GL_RED, GL_FLOAT);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	LoadShaders(desc);
 
@@ -116,37 +91,6 @@ void PerlinNoiseOceanRenderer::LoadShaders(const Desc & desc)
 	LoadHMapComputeShader(desc);
 	LoadMainShader(desc);
 	LoadWireFrameShader(desc);
-}
-
-void PerlinNoiseOceanRenderer::LoadHMapComputeShader(const Desc & /*desc*/)
-{
-	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (HMap compute) Shaders : .....");
-	
-	mHMapCompShader.LoadFromFile(GL_COMPUTE_SHADER, "shaders/PerlinNoiseOcean.hmap.cs.glsl", Shader::EInclude::ComputeShadersCommon);
-
-	mHMapCompShader.CreateAndLinkProgram();
-	mHMapCompShader.Use();
-
-	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mHeightMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
-	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageIn, mNoiseHeightTexture->GetResourceId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8UI);
-
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)EHMapCSBindings::u_WaveParamsBlock, mVboIDs[WavePropsBufferIndex]);
-
-	const char * uniformNames[__hmap_cs_uniforms_count__] =
-	{
-		"u_WaveCount",
-		"u_TextureSize",
-		"u_Time",
-	};
-
-	mHMapCompShader.AddUniforms(uniformNames, __hmap_cs_uniforms_count__);
-
-	glUniform1i(mHMapCompShader.GetUniform(u_WaveCount), mWaveCount); GL_CHECK_ERRORS;
-	glUniform2iv(mHMapCompShader.GetUniform(u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
-
-	mHMapCompShader.UnUse();
-
-	PRINT_MESSAGE(".....done.");
 }
 
 void PerlinNoiseOceanRenderer::LoadMainShader(const Desc & /*desc*/)
@@ -189,8 +133,6 @@ void PerlinNoiseOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 2); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_textureSampler), 3); GL_CHECK_ERRORS;
-
-	//GetWavePropertyUniformIndex(mShader, mShaderWaveProps);
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -247,17 +189,84 @@ void PerlinNoiseOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 	PRINT_MESSAGE(".....done.");
 }
 
+void PerlinNoiseOceanRenderer::LoadHMapComputeShader(const Desc & desc)
+{
+	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Height Map Compute) Shaders : .....");
+
+	mWaveCount = MAX_WAVE_TO_SUM;
+	assert(mWaveCount > 0);
+	GLsizei wavePropsBufferItemCount = mWaveCount * __waveparams_count__;
+	if (wavePropsBufferItemCount % 4 != 0)
+		wavePropsBufferItemCount = ((wavePropsBufferItemCount / 4) + 1) * 4;
+	GLsizei wavePropsBufferSize = wavePropsBufferItemCount * sizeof(GLfloat);
+
+	mWaveProps = new GLfloat[wavePropsBufferItemCount];
+	memset(mWaveProps, 0, wavePropsBufferSize);
+	for (int i = 0; i < mWaveCount; ++i)
+	{
+		const WaveProps & src = desc.mWaveProps[i];
+		GLfloat * trg = &mWaveProps[i * __waveparams_count__];
+		trg[WaveParams_Amplitude] = src.mAmplitude;
+		trg[WaveParams_DirectionX] = src.mDirection.x;
+		trg[WaveParams_DirectionY] = src.mDirection.z;
+		trg[WaveParams_Velocity] = src.mVelocity;
+		trg[WaveParams_WaveLength] = src.mWaveLength;
+	}
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, mVboIDs[WavePropsBufferIndex]);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, wavePropsBufferSize, mWaveProps, GL_STATIC_DRAW);
+	GL_CHECK_ERRORS;
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	glGenTextures(1, &mHeightMapTextureId);
+	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_R32F, GL_RED, GL_FLOAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// ---------------------------------------
+
+	mHMapCompShader.LoadFromFile(GL_COMPUTE_SHADER, "shaders/PerlinNoiseOcean.hmap.cs.glsl", Shader::EInclude::ComputeShadersCommon);
+
+	mHMapCompShader.CreateAndLinkProgram();
+	mHMapCompShader.Use();
+
+	const char * uniformNames[__hmap_cs_uniforms_count__] =
+	{
+		"u_WaveCount",
+		"u_TextureSize",
+		"u_Time",
+		"u_NoiseSampler"
+	};
+
+	mHMapCompShader.AddUniforms(uniformNames, __hmap_cs_uniforms_count__);
+
+	glUniform1i(mHMapCompShader.GetUniform(u_WaveCount), mWaveCount); GL_CHECK_ERRORS;
+	glUniform2iv(mHMapCompShader.GetUniform(u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
+	glUniform1i(mHMapCompShader.GetUniform(u_NoiseSampler), 0); GL_CHECK_ERRORS;
+
+	mHMapCompShader.UnUse();
+
+	PRINT_MESSAGE("Height map texture id : %li", mHeightMapTextureId);
+	PRINT_MESSAGE("Wave props buffer id : %li", mVboIDs[WavePropsBufferIndex]);
+
+	PRINT_MESSAGE(".....done.");
+}
+
 void PerlinNoiseOceanRenderer::GenerateHeightMap()
 {
 	mHMapCompShader.Use();
 
-	//glBindImageTexture((GLuint)EHMapCSUniforms::u_ImageOut, mHeightMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
-	//glBindImageTexture((GLuint)EHMapCSUniforms::u_ImageIn, mNoiseHeightTexture->GetResourceId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8UI);
-	glUniform1f(mHMapCompShader.GetUniform(u_Time), Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
+		glUniform1f(mHMapCompShader.GetUniform(u_Time), Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
 
-	glDispatchCompute(mTextureSize.x /*/ 32*/, mTextureSize.y /*/ 32*/, 1);
+		glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mHeightMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)EHMapCSBindings::u_WaveParamsBlock, mVboIDs[WavePropsBufferIndex]); GL_CHECK_ERRORS;
 
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mNoiseHeightTexture->GetResourceId());
+
+		glDispatchCompute(mTextureSize.x /*/ 32*/, mTextureSize.y /*/ 32*/, 1);
+
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	mHMapCompShader.UnUse();
 }

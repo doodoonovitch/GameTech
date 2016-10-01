@@ -234,6 +234,7 @@
     <None Include="..\Data\Shaders\axis.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\axis.forward.fs.glsl" />
     <None Include="..\Data\Shaders\axis.vs.glsl" />
+    <None Include="..\Data\Shaders\ComputeShaders.header.glsl" />
     <None Include="..\Data\Shaders\RenderersCommon.incl.glsl" />
     <None Include="..\Data\Shaders\compass.forward.fs.glsl" />
     <None Include="..\Data\Shaders\compass.vs.glsl" />
