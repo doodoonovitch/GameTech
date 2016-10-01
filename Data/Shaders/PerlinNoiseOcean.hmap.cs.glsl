@@ -9,7 +9,7 @@
 layout (binding = 0, r32f) uniform image2D u_ImageOut;
 layout (binding = 1, std430) coherent readonly buffer u_WaveParamsBlock
 {
-	float u_WaveParams[15];
+	float u_WaveParams[];
 };
 
 uniform int u_WaveCount;

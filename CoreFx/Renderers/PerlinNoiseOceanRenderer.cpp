@@ -196,8 +196,6 @@ void PerlinNoiseOceanRenderer::LoadHMapComputeShader(const Desc & desc)
 	mWaveCount = MAX_WAVE_TO_SUM;
 	assert(mWaveCount > 0);
 	GLsizei wavePropsBufferItemCount = mWaveCount * __waveparams_count__;
-	if (wavePropsBufferItemCount % 4 != 0)
-		wavePropsBufferItemCount = ((wavePropsBufferItemCount / 4) + 1) * 4;
 	GLsizei wavePropsBufferSize = wavePropsBufferItemCount * sizeof(GLfloat);
 
 	mWaveProps = new GLfloat[wavePropsBufferItemCount];
