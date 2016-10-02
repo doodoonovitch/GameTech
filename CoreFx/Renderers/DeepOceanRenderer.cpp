@@ -102,9 +102,9 @@ void DeepOceanRenderer::LoadMainShader(const Desc & /*desc*/)
 
 
 	//setup shader
-	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
+	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/HeightFieldOcean.vs.glsl");
 
-	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOcean.tcs.glsl");
+	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/HeightFieldOcean.tcs.glsl");
 
 	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
 
@@ -150,9 +150,9 @@ void DeepOceanRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 
 
 	//setup shader
-	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/deepOcean.vs.glsl");
+	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/HeightFieldOcean.vs.glsl");
 
-	mWireFrameShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/deepOcean.tcs.glsl");
+	mWireFrameShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/HeightFieldOcean.tcs.glsl");
 
 	mWireFrameShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/deepOcean.tes.glsl");
 

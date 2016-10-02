@@ -37,7 +37,12 @@ void main()
 	vec4 p1 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
 	vec4 p2 = mix(gl_in[2].gl_Position,	gl_in[3].gl_Position, gl_TessCoord.x);
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
-
+	
+#ifdef PRECOMPUTE_NORMAL
+	vec3 temp = texture(u_HeightMapSampler, tc).rgb;
+	p.y = temp.r;
+	vec3 normal = vec3(-temp.g, 1, -temp.b);
+#else
 	p.y = texture(u_HeightMapSampler, tc).r;
 
 	float dUV = u_dUV;
@@ -47,7 +52,7 @@ void main()
 	float h3 = texture(u_HeightMapSampler, vec2(tc.x, tc.y + dUV)).r;
 
 	vec3 normal = vec3(h0 - h1, 2 /** u_MapSize.x * u_dUV*/, h2 - h3);
-
+#endif
 	vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1);
 
 	tes_out.Position = p.xyz;

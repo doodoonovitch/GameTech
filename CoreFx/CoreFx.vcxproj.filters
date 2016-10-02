@@ -39,6 +39,30 @@
     <Filter Include="Renderers\PerlinNoiseOcean">
       <UniqueIdentifier>{a493e601-fd7f-4026-89e1-e03e7e7e9b95}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderers\GerstnerWaves">
+      <UniqueIdentifier>{e34da265-e078-4b60-b6da-0cbc9671477f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Incl">
+      <UniqueIdentifier>{82666ba7-9faa-4971-97b1-ad8dc4b5cf1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Terrain">
+      <UniqueIdentifier>{c41447ca-4260-4c20-859f-ca8934ae180a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Sky">
+      <UniqueIdentifier>{421dc1a2-446a-48e5-ab65-2db3880328f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Ocean">
+      <UniqueIdentifier>{1e0afd85-d270-41e2-bf92-9f65efc7cebd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Debug">
+      <UniqueIdentifier>{9e4b227a-1b35-46da-bce6-03f3e96719d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Deferred">
+      <UniqueIdentifier>{38f02f50-c664-4e1a-9fe2-87cef2e105a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model">
+      <UniqueIdentifier>{483528d2-529c-415c-8226-2c0a0ceb40b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -156,6 +180,15 @@
     <ClInclude Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.h">
       <Filter>Renderers\PerlinNoiseOcean</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\GerstnerWaves\GerstnerWavesHeightMapCS.h">
+      <Filter>Renderers\GerstnerWaves</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\GerstnerWaves\GerstnerWavesWaveProperty.h">
+      <Filter>Renderers\GerstnerWaves</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\GerstnerWaves\GerstnerWavesRenderer.h">
+      <Filter>Renderers\GerstnerWaves</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -255,157 +288,16 @@
     <ClCompile Include="Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.cpp">
       <Filter>Renderers\PerlinNoiseOcean</Filter>
     </ClCompile>
+    <ClCompile Include="Renderers\GerstnerWaves\GerstnerWavesHeightMapCS.cpp">
+      <Filter>Renderers\GerstnerWaves</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\GerstnerWaves\GerstnerWavesRenderer.cpp">
+      <Filter>Renderers\GerstnerWaves</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
       <Filter>misc</Filter>
-    </None>
-    <None Include="..\Data\Shaders\light.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\light.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\grid.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\axis.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\tonemapping.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\grid.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\axis.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\vertex_normal.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\vertex_normal.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\vertex_normal.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\terrain.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\terrain.tcs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\terrain.tes.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\terrain.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\terrain.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.tcs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.tes.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\drawGBufferNormals.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\drawGBufferNormals.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\drawGBufferNormals.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\skybox.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\skybox.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\skybox.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\axis.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\grid.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\wireframe.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.wireframe.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.wireframe.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\terrain.wireframe.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\skybox.wireframe.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.tcs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.tes.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.PointLight.gs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.PointLight.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\IcosahedronShader.WireFrame.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\ConeShader.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\ConeShader.Light.forward.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\ConeShader.Light.gs.glsl">
-      <Filter>Shaders</Filter>
     </None>
     <None Include="..\Data\Shaders\compass.forward.fs.glsl">
       <Filter>Shaders</Filter>
@@ -443,62 +335,215 @@
     <None Include="Renderers\PreethamScatter\Sol.table">
       <Filter>Renderers\PreethamScatter</Filter>
     </None>
-    <None Include="..\Data\Shaders\skydome.forward.fs.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\skydome.vs.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\deepOcean.gs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\copy.fs.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\deepOcean.tcs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\mesh.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\deepOcean.tes.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\mesh.gs.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\deepOcean.vs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\mesh.vs.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\deepOcean.wireframe.fs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\copyTex2DArray.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\skydome.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.deferred.fs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.tcs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.vs.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
     <None Include="..\Data\Shaders\PerlinNoiseOcean.hmap.cs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\RendererShaders.header.glsl">
-      <Filter>Shaders</Filter>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
     <None Include="..\Data\Shaders\RenderersCommon.incl.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Incl</Filter>
+    </None>
+    <None Include="..\Data\Shaders\RendererShaders.header.glsl">
+      <Filter>Shaders\Incl</Filter>
     </None>
     <None Include="..\Data\Shaders\Quaternions.incl.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Incl</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.deferred.fs.glsl">
+      <Filter>Shaders\Terrain</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.gs.glsl">
+      <Filter>Shaders\Terrain</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.tcs.glsl">
+      <Filter>Shaders\Terrain</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.tes.glsl">
+      <Filter>Shaders\Terrain</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.vs.glsl">
+      <Filter>Shaders\Terrain</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain.wireframe.fs.glsl">
+      <Filter>Shaders\Terrain</Filter>
+    </None>
+    <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl">
+      <Filter>Shaders\Terrain</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skybox.deferred.fs.glsl">
+      <Filter>Shaders\Sky</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skybox.forward.fs.glsl">
+      <Filter>Shaders\Sky</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skybox.vs.glsl">
+      <Filter>Shaders\Sky</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skybox.wireframe.fs.glsl">
+      <Filter>Shaders\Sky</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skydome.deferred.fs.glsl">
+      <Filter>Shaders\Sky</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skydome.forward.fs.glsl">
+      <Filter>Shaders\Sky</Filter>
+    </None>
+    <None Include="..\Data\Shaders\skydome.vs.glsl">
+      <Filter>Shaders\Sky</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis.deferred.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis.forward.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\axis.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\ConeShader.Light.forward.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\ConeShader.Light.gs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\ConeShader.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
     </None>
     <None Include="..\Data\Shaders\ComputeShaders.header.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Incl</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.gs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.wireframe.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\drawGBufferNormals.forward.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\drawGBufferNormals.gs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\drawGBufferNormals.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid.deferred.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid.forward.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\grid.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\wireframe.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\cube.deferred.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.forward.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.gs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.PointLight.forward.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.PointLight.gs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.tcs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.tes.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\IcosahedronShader.WireFrame.forward.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\vertex_normal.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\vertex_normal.gs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\vertex_normal.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\light.fs.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="..\Data\Shaders\light.vs.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="..\Data\Shaders\tonemapping.fs.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.deferred.fs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.gs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.vs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl">
+      <Filter>Shaders\Model</Filter>
+    </None>
+    <None Include="..\Data\Shaders\copy.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\copyTex2DArray.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\GerstnerWaves.hmap.cs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\HeightFieldOcean.deferred.fs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\HeightFieldOcean.tcs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\HeightFieldOcean.vs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\GerstnerWaves.tes.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

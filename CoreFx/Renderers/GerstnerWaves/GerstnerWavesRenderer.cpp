@@ -1,12 +1,11 @@
 #include "stdafx.h"
 #include "CoreFx.h"
 
-
 namespace CoreFx
 {
 	namespace Renderers
 	{
-		namespace PerlinNoiseOcean
+		namespace GerstnerWaves
 		{
 		// =======================================================================
 		// =======================================================================
@@ -14,7 +13,7 @@ namespace CoreFx
 
 
 Renderer::Renderer(const Desc & desc)
-	: RendererHelper<1>(0, "PerlinNoiseOceanRenderer", "PerlinNoiseOceanWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
+	: RendererHelper<1>(0, "GerstnerWaveRenderer", "GerstnerWaveWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
 	, mHeightMapCS(nullptr)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mHeightMapTextureId(0)
@@ -23,10 +22,10 @@ Renderer::Renderer(const Desc & desc)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
 	, mScale(desc.mScale)
 	, mMapCount(0)
-	, mDrawNormalShader("TerrainDrawNormals")
+	, mDrawNormalShader("WavesDrawNormals")
 {
 	PRINT_BEGIN_SECTION;
-	PRINT_MESSAGE("Initialize PerlinNoiseOceanRenderer.....");
+	PRINT_MESSAGE("Initialize GerstnerWavesRenderer.....");
 
 	const glm::vec3 vertices[] =
 	{
@@ -69,7 +68,7 @@ Renderer::Renderer(const Desc & desc)
 
 	mIsInitialized = true;
 
-	PRINT_MESSAGE(".....PerlinNoiseOceanRenderer initialized!");
+	PRINT_MESSAGE(".....GerstnerWavesRenderer initialized!");
 	PRINT_END_SECTION;
 }
 
@@ -88,7 +87,21 @@ void Renderer::LoadShaders(const Desc & desc)
 	LoadWireFrameShader(desc);
 }
 
-void Renderer::LoadMainShader(const Desc & /*desc*/)
+void Renderer::LoadTessellationShader(Shader & shader, GLenum whichShader, const std::string & filename, const Desc & desc)
+{
+	std::vector<std::string> shaderSources;
+	if (desc.mPrecomputeNormals)
+	{
+		shaderSources.push_back("#define PRECOMPUTE_NORMAL\n");
+	}
+
+	std::string csSource;
+	Shader::MergeFile(csSource, filename);
+	shaderSources.push_back(csSource);
+	shader.LoadFromString(whichShader, shaderSources);
+}
+
+void Renderer::LoadMainShader(const Desc & desc)
 {
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer Shaders : .....");
 
@@ -109,7 +122,7 @@ void Renderer::LoadMainShader(const Desc & /*desc*/)
 
 	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/HeightFieldOcean.tcs.glsl");
 
-	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/PerlinNoiseOcean.tes.glsl");
+	LoadTessellationShader(mShader, GL_TESS_EVALUATION_SHADER, "shaders/GerstnerWaves.tes.glsl", desc);
 
 	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
@@ -137,9 +150,9 @@ void Renderer::LoadMainShader(const Desc & /*desc*/)
 	PRINT_MESSAGE(".....done.");
 }
 
-void Renderer::LoadWireFrameShader(const Desc & /*desc*/)
+void Renderer::LoadWireFrameShader(const Desc & desc)
 {
-	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Wire Frame) Shaders : .....");
+	PRINT_MESSAGE("Initialize Gerstner Waves Renderer (Wire Frame) Shaders : .....");
 
 	const char * uniformNames[] =
 	{
@@ -156,7 +169,7 @@ void Renderer::LoadWireFrameShader(const Desc & /*desc*/)
 
 	mWireFrameShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/HeightFieldOcean.tcs.glsl");
 
-	mWireFrameShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/PerlinNoiseOcean.tes.glsl");
+	LoadTessellationShader(mWireFrameShader, GL_TESS_EVALUATION_SHADER, "shaders/GerstnerWaves.tes.glsl", desc);
 
 	//mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
@@ -174,8 +187,6 @@ void Renderer::LoadWireFrameShader(const Desc & /*desc*/)
 	glUniform1i(mWireFrameShader.GetUniform(u_HeightMapSampler), 0); GL_CHECK_ERRORS;
 	glUniform1i(mWireFrameShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 
-	//GetWavePropertyUniformIndex(mWireFrameShader, mWireFrameShaderWaveProps);
-
 	mWireFrameShader.SetupFrameDataBlockBinding();
 	mWireFrameShader.UnUse();
 
@@ -186,10 +197,10 @@ void Renderer::LoadWireFrameShader(const Desc & /*desc*/)
 
 void Renderer::LoadHeightMapComputeShader(const Desc & desc)
 {
-	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Height Map Compute) Shaders : .....");
+	PRINT_MESSAGE("Initialize Gerstner Waves Renderer (Height Map Compute) Shaders : .....");
 
-	mHeightMapCS = new HeightMapCS();
-	mHeightMapCS->LoadShader(desc.mWaveProps, glm::vec2(512));
+	mHeightMapCS = new HeightMapCS(desc.mPrecomputeNormals);
+	mHeightMapCS->LoadShader(desc.mWaveProps, mTextureSize);
 
 	Engine::GetInstance()->AttachComputeShader(mHeightMapCS);
 
@@ -258,6 +269,6 @@ void Renderer::RenderWireFrame()
 //	}
 //}
 
-		} // namespace PerlinNoiseOcean
+		} // namespace GerstnerWaves
 	} // namespace Renderers
 } // namespace CoreFx

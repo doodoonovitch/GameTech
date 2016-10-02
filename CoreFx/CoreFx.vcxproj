@@ -166,6 +166,9 @@
     <ClInclude Include="Renderers\CubeRenderer.h" />
     <ClInclude Include="Renderers\DeepOceanRenderer.h" />
     <ClInclude Include="Renderers\DrawGBufferNormalShader.h" />
+    <ClInclude Include="Renderers\GerstnerWaves\GerstnerWavesRenderer.h" />
+    <ClInclude Include="Renderers\GerstnerWaves\GerstnerWavesWaveProperty.h" />
+    <ClInclude Include="Renderers\GerstnerWaves\GerstnerWavesHeightMapCS.h" />
     <ClInclude Include="Renderers\GridRenderer.h" />
     <ClInclude Include="Renderers\IcosahedronRenderer.h" />
     <ClInclude Include="Renderers\ModelRenderer.h" />
@@ -212,6 +215,8 @@
     <ClCompile Include="Renderers\CubeRenderer.cpp" />
     <ClCompile Include="Renderers\DeepOceanRenderer.cpp" />
     <ClCompile Include="Renderers\DrawGBufferNormalShader.cpp" />
+    <ClCompile Include="Renderers\GerstnerWaves\GerstnerWavesHeightMapCS.cpp" />
+    <ClCompile Include="Renderers\GerstnerWaves\GerstnerWavesRenderer.cpp" />
     <ClCompile Include="Renderers\GridRenderer.cpp" />
     <ClCompile Include="Renderers\IcosahedronRenderer.cpp" />
     <ClCompile Include="Renderers\ModelRenderer.cpp" />
@@ -239,6 +244,11 @@
     <None Include="..\Data\Shaders\axis.forward.fs.glsl" />
     <None Include="..\Data\Shaders\axis.vs.glsl" />
     <None Include="..\Data\Shaders\ComputeShaders.header.glsl" />
+    <None Include="..\Data\Shaders\GerstnerWaves.hmap.cs.glsl" />
+    <None Include="..\Data\Shaders\GerstnerWaves.tes.glsl" />
+    <None Include="..\Data\Shaders\HeightFieldOcean.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\HeightFieldOcean.tcs.glsl" />
+    <None Include="..\Data\Shaders\HeightFieldOcean.vs.glsl" />
     <None Include="..\Data\Shaders\RenderersCommon.incl.glsl" />
     <None Include="..\Data\Shaders\compass.forward.fs.glsl" />
     <None Include="..\Data\Shaders\compass.vs.glsl" />
@@ -279,11 +289,8 @@
     <None Include="..\Data\Shaders\mesh.gs.glsl" />
     <None Include="..\Data\Shaders\mesh.vs.glsl" />
     <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl" />
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.hmap.cs.glsl" />
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.tcs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl" />
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.vs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\Quaternions.incl.glsl" />
     <None Include="..\Data\Shaders\RendererShaders.header.glsl" />

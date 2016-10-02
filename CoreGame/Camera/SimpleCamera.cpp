@@ -57,7 +57,8 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define CUBE_SAMPLES
 #define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
-#define PERLIN_NOISE_OCEAN_SAMPLE
+#define GERSTNER_WAVE_OCEAN_SAMPLE
+//#define PERLIN_NOISE_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
@@ -250,6 +251,24 @@ void SimpleCamera::OnInit()
 
 			desc.mMaps.push_back(Renderers::PerlinNoiseOcean::Renderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
 			Renderers::PerlinNoiseOcean::Renderer * ocean = new Renderers::PerlinNoiseOcean::Renderer(desc);
+			engine->AttachRenderer(ocean);
+		}
+#endif // PERLIN_NOISE_OCEAN_SAMPLE
+
+#ifdef GERSTNER_WAVE_OCEAN_SAMPLE
+		{
+			Renderers::GerstnerWaves::Renderer::Desc desc(true, 512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
+
+			const float AmpCoef = 10.0f;
+			const float WaveLengthCoef = 2.f;
+			const float VelocityCoef = 10.0f;
+			desc.mWaveProps.push_back(Renderers::GerstnerWaves::WaveProperty(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 0.58f, VelocityCoef * 0.05f, 10.0f));
+			desc.mWaveProps.push_back(Renderers::GerstnerWaves::WaveProperty(015.0f, WaveLengthCoef * 0.620f, AmpCoef * 0.07f, VelocityCoef * 0.06f, 03.0f));
+			desc.mWaveProps.push_back(Renderers::GerstnerWaves::WaveProperty(355.0f, WaveLengthCoef * 0.280f, AmpCoef * 0.06f, VelocityCoef * 0.04f, 01.0f));
+			desc.mWaveProps.push_back(Renderers::GerstnerWaves::WaveProperty(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 0.08f, VelocityCoef * 0.05f, 06.0f));
+
+			desc.mMaps.push_back(Renderers::GerstnerWaves::Renderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
+			Renderers::GerstnerWaves::Renderer * ocean = new Renderers::GerstnerWaves::Renderer(desc);
 			engine->AttachRenderer(ocean);
 		}
 #endif // PERLIN_NOISE_OCEAN_SAMPLE
