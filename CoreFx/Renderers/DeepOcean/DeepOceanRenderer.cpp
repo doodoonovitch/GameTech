@@ -5,7 +5,7 @@ namespace CoreFx
 {
 	namespace Renderers
 	{
-		namespace GerstnerWaves
+		namespace DeepOcean
 		{
 		// =======================================================================
 		// =======================================================================
@@ -13,7 +13,7 @@ namespace CoreFx
 
 
 Renderer::Renderer(const Desc & desc)
-	: RendererHelper<1>(0, "GerstnerWaveRenderer", "GerstnerWaveWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
+	: RendererHelper<1>(0, "DeepOceanRenderer", "DeepOceanWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
 	, mHeightMapCS(nullptr)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mHeightMapTextureId(0)
@@ -25,7 +25,7 @@ Renderer::Renderer(const Desc & desc)
 	, mDrawNormalShader("WavesDrawNormals")
 {
 	PRINT_BEGIN_SECTION;
-	PRINT_MESSAGE("Initialize GerstnerWavesRenderer.....");
+	PRINT_MESSAGE("Initialize DeepOceanRenderer.....");
 
 	const glm::vec3 vertices[] =
 	{
@@ -68,7 +68,7 @@ Renderer::Renderer(const Desc & desc)
 
 	mIsInitialized = true;
 
-	PRINT_MESSAGE(".....GerstnerWavesRenderer initialized!");
+	PRINT_MESSAGE(".....DeepOceanRenderer initialized!");
 	PRINT_END_SECTION;
 }
 
@@ -103,7 +103,7 @@ void Renderer::LoadTessellationShader(Shader & shader, GLenum whichShader, const
 
 void Renderer::LoadMainShader(const Desc & desc)
 {
-	PRINT_MESSAGE("Initialize Gerstner Waves Renderer Shaders : .....");
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer Shaders : .....");
 
 	const char * uniformNames[__uniforms_count__] =
 	{
@@ -122,7 +122,7 @@ void Renderer::LoadMainShader(const Desc & desc)
 
 	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/HeightFieldOcean.tcs.glsl");
 
-	LoadTessellationShader(mShader, GL_TESS_EVALUATION_SHADER, "shaders/GerstnerWaves.tes.glsl", desc);
+	LoadTessellationShader(mShader, GL_TESS_EVALUATION_SHADER, "shaders/DeepOcean.tes.glsl", desc);
 
 	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
@@ -152,7 +152,7 @@ void Renderer::LoadMainShader(const Desc & desc)
 
 void Renderer::LoadWireFrameShader(const Desc & desc)
 {
-	PRINT_MESSAGE("Initialize Gerstner Waves Renderer (Wire Frame) Shaders : .....");
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer (Wire Frame) Shaders : .....");
 
 	const char * uniformNames[] =
 	{
@@ -169,7 +169,7 @@ void Renderer::LoadWireFrameShader(const Desc & desc)
 
 	mWireFrameShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/HeightFieldOcean.tcs.glsl");
 
-	LoadTessellationShader(mWireFrameShader, GL_TESS_EVALUATION_SHADER, "shaders/GerstnerWaves.tes.glsl", desc);
+	LoadTessellationShader(mWireFrameShader, GL_TESS_EVALUATION_SHADER, "shaders/DeepOcean.tes.glsl", desc);
 
 	//mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
@@ -197,7 +197,7 @@ void Renderer::LoadWireFrameShader(const Desc & desc)
 
 void Renderer::LoadHeightMapComputeShader(const Desc & desc)
 {
-	PRINT_MESSAGE("Initialize Gerstner Waves Renderer (Height Map Compute) Shaders : .....");
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer (Height Map Compute) Shaders : .....");
 
 	mHeightMapCS = new HeightMapCS(desc.mPrecomputeNormals);
 	mHeightMapCS->LoadShader(desc.mWaveProps, mTextureSize);
@@ -269,6 +269,6 @@ void Renderer::RenderWireFrame()
 //	}
 //}
 
-		} // namespace GerstnerWaves
+		} // namespace DeepOcean
 	} // namespace Renderers
 } // namespace CoreFx

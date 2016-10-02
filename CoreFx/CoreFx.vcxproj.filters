@@ -63,6 +63,9 @@
     <Filter Include="Shaders\Model">
       <UniqueIdentifier>{483528d2-529c-415c-8226-2c0a0ceb40b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderers\DeepOcean">
+      <UniqueIdentifier>{6267aa42-6702-4a81-b0b4-9c3077e02aac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -130,9 +133,6 @@
       <Filter>Renderers</Filter>
     </ClInclude>
     <ClInclude Include="DebugOutput.h" />
-    <ClInclude Include="Renderers\DeepOceanRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
     <ClInclude Include="Renderers\DrawGBufferNormalShader.h">
       <Filter>Renderers</Filter>
     </ClInclude>
@@ -189,6 +189,15 @@
     <ClInclude Include="Renderers\GerstnerWaves\GerstnerWavesRenderer.h">
       <Filter>Renderers\GerstnerWaves</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\DeepOcean\DeepOceanHeightMapCS.h">
+      <Filter>Renderers\DeepOcean</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DeepOcean\DeepOceanRenderer.h">
+      <Filter>Renderers\DeepOcean</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DeepOcean\DeepOceanWaveProperty.h">
+      <Filter>Renderers\DeepOcean</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -244,9 +253,6 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="DebugOutput.cpp" />
-    <ClCompile Include="Renderers\DeepOceanRenderer.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
     <ClCompile Include="Renderers\DrawGBufferNormalShader.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
@@ -293,6 +299,12 @@
     </ClCompile>
     <ClCompile Include="Renderers\GerstnerWaves\GerstnerWavesRenderer.cpp">
       <Filter>Renderers\GerstnerWaves</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DeepOcean\DeepOceanHeightMapCS.cpp">
+      <Filter>Renderers\DeepOcean</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DeepOcean\DeepOceanRenderer.cpp">
+      <Filter>Renderers\DeepOcean</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -341,13 +353,7 @@
     <None Include="..\Data\Shaders\deepOcean.gs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\deepOcean.tcs.glsl">
-      <Filter>Shaders\Ocean</Filter>
-    </None>
     <None Include="..\Data\Shaders\deepOcean.tes.glsl">
-      <Filter>Shaders\Ocean</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.vs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
     <None Include="..\Data\Shaders\deepOcean.wireframe.fs.glsl">
@@ -543,6 +549,9 @@
       <Filter>Shaders\Ocean</Filter>
     </None>
     <None Include="..\Data\Shaders\GerstnerWaves.tes.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\DeepOcean.hmap.cs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
   </ItemGroup>

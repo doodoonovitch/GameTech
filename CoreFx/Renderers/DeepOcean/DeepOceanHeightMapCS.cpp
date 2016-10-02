@@ -7,14 +7,14 @@ namespace CoreFx
 {
 namespace Renderers
 {
-namespace GerstnerWaves
+namespace DeepOcean
 {
 // =======================================================================
 // =======================================================================
 
 
 HeightMapCS::HeightMapCS(bool precomputeNormals)
-	: ComputeShaderHelper<1>("PerlinNoiseOceanComputeShader")
+	: ComputeShaderHelper<1>("DeepOceanComputeShader")
 	, mWaveCount(0)
 	, mHeightMapTextureId(0)
 	, mPrecomputeNormals(precomputeNormals)
@@ -30,7 +30,7 @@ HeightMapCS::~HeightMapCS()
 
 void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2 & textureSize)
 {
-	PRINT_MESSAGE("Initialize Gerstner Waves Renderer (Height Map Compute) Shaders : .....");
+	PRINT_MESSAGE("Initialize Deep Ocean Renderer (Height Map Compute) Shaders : .....");
 
 	mTextureSize = textureSize;
 
@@ -74,7 +74,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2
 	}
 
 	std::string csSource;
-	Shader::MergeFile(csSource, "shaders/GerstnerWaves.hmap.cs.glsl");
+	Shader::MergeFile(csSource, "shaders/DeepOcean.hmap.cs.glsl");
 	shaderSources.push_back(csSource);
 	mShader.LoadFromString(GL_COMPUTE_SHADER, shaderSources, Shader::EInclude::ComputeShadersCommon);
 
@@ -128,6 +128,6 @@ void HeightMapCS::Compute()
 
 
 
-} // namespace GerstnerWaves
+} // namespace DeepOcean
 } // namespace Renderers
 } // namespace CoreFx

@@ -56,8 +56,8 @@ void SimpleCamera::SetupViewportAndProjection()
 
 //#define CUBE_SAMPLES
 #define TERRAIN_SAMPLE
-//#define DEEP_OCEAN_SAMPLE
-#define GERSTNER_WAVE_OCEAN_SAMPLE
+#define DEEP_OCEAN_SAMPLE
+//#define GERSTNER_WAVE_OCEAN_SAMPLE
 //#define PERLIN_NOISE_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
@@ -220,19 +220,18 @@ void SimpleCamera::OnInit()
 
 #ifdef DEEP_OCEAN_SAMPLE
 		{
-			Renderers::DeepOceanRenderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
+			Renderers::DeepOcean::Renderer::Desc desc(true, 512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
 
-			const float AmpCoef = 4.0f;
+			const float AmpCoef = 10.0f;
 			const float WaveLengthCoef = 2.f;
 			const float VelocityCoef = 10.0f;
-			desc.mWaveProps[0] = Renderers::DeepOceanRenderer::WaveProps(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 0.08f, VelocityCoef * 0.05f, 10.0f);
-			desc.mWaveProps[1] = Renderers::DeepOceanRenderer::WaveProps(155.0f, WaveLengthCoef * 0.620f, AmpCoef * 0.07f, VelocityCoef * 0.06f, 02.0f);
-			desc.mWaveProps[2] = Renderers::DeepOceanRenderer::WaveProps(200.0f, WaveLengthCoef * 0.280f, AmpCoef * 0.06f, VelocityCoef * 0.04f, 01.0f);
-			desc.mWaveProps[3] = Renderers::DeepOceanRenderer::WaveProps(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 0.08f, VelocityCoef * 0.05f, 03.0f);
-			//desc.mWaveProps[4] = Renderers::DeepOceanRenderer::WaveProps(210.0f, WaveLengthCoef * 0.340f, AmpCoef * 0.05f, VelocityCoef * 0.03f, 04.0f);
+			desc.mWaveProps.push_back(Renderers::DeepOcean::WaveProperty(355.0f, WaveLengthCoef * 1.000f, AmpCoef * 0.58f, VelocityCoef * 0.05f, 10.0f));
+			desc.mWaveProps.push_back(Renderers::DeepOcean::WaveProperty(015.0f, WaveLengthCoef * 0.620f, AmpCoef * 0.07f, VelocityCoef * 0.06f, 03.0f));
+			desc.mWaveProps.push_back(Renderers::DeepOcean::WaveProperty(355.0f, WaveLengthCoef * 0.280f, AmpCoef * 0.06f, VelocityCoef * 0.04f, 01.0f));
+			desc.mWaveProps.push_back(Renderers::DeepOcean::WaveProperty(005.0f, WaveLengthCoef * 0.500f, AmpCoef * 0.08f, VelocityCoef * 0.05f, 06.0f));
 
-			desc.mMaps.push_back(Renderers::DeepOceanRenderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
-			Renderers::DeepOceanRenderer * ocean = new Renderers::DeepOceanRenderer(desc);
+			desc.mMaps.push_back(Renderers::DeepOcean::Renderer::MapDesc(glm::vec3(0.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
+			Renderers::DeepOcean::Renderer * ocean = new Renderers::DeepOcean::Renderer(desc);
 			engine->AttachRenderer(ocean);
 		}
 #endif // DEEP_OCEAN_SAMPLE
