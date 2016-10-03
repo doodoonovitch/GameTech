@@ -66,7 +66,8 @@ void main(void)
 	}
 
 #ifdef PRECOMPUTE_NORMAL
-	imageStore(u_ImageOut, p, vec4(H, dH.x, dH.y, 0));
+	vec3 n = normalize(vec3(dH.x, dH.y, 1));
+	imageStore(u_ImageOut, p, vec4(H, n.x, n.y, 0));
 #else
 	imageStore(u_ImageOut, p, vec4(H));
 #endif
