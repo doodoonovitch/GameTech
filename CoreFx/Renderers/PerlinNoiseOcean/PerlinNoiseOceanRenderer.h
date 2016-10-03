@@ -93,8 +93,6 @@ private:
 	HeightMapCS * mHeightMapCS;
 	CubeMapTexture const * mCubeMapTexture;
 
-	GLuint mHeightMapTextureId;
-
 	glm::ivec2 mTextureSize;
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;

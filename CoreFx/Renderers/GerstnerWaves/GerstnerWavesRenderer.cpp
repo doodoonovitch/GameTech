@@ -16,7 +16,6 @@ Renderer::Renderer(const Desc & desc)
 	: RendererHelper<1>(0, "GerstnerWaveRenderer", "GerstnerWaveWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
 	, mHeightMapCS(nullptr)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
-	, mHeightMapTextureId(0)
 	, mTextureSize(512)
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
@@ -240,7 +239,7 @@ void Renderer::RenderWireFrame()
 		glBindVertexArray(mVaoID);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
+			glBindTexture(GL_TEXTURE_2D, mHeightMapCS->GetHeightMapTextureId());
 
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());

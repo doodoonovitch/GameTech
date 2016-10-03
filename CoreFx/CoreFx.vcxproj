@@ -253,6 +253,7 @@
     <None Include="..\Data\Shaders\HeightFieldOcean.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\HeightFieldOcean.tcs.glsl" />
     <None Include="..\Data\Shaders\HeightFieldOcean.vs.glsl" />
+    <None Include="..\Data\Shaders\HeightFieldOcean.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\RenderersCommon.incl.glsl" />
     <None Include="..\Data\Shaders\compass.forward.fs.glsl" />
     <None Include="..\Data\Shaders\compass.vs.glsl" />
@@ -269,7 +270,6 @@
     <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.gs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.tes.glsl" />
-    <None Include="..\Data\Shaders\deepOcean.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\drawGBufferNormals.forward.fs.glsl" />
     <None Include="..\Data\Shaders\drawGBufferNormals.gs.glsl" />
@@ -293,7 +293,6 @@
     <None Include="..\Data\Shaders\mesh.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.hmap.cs.glsl" />
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl" />
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\Quaternions.incl.glsl" />
     <None Include="..\Data\Shaders\RendererShaders.header.glsl" />
     <None Include="..\Data\Shaders\skybox.deferred.fs.glsl" />

@@ -356,9 +356,6 @@
     <None Include="..\Data\Shaders\deepOcean.tes.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\deepOcean.wireframe.fs.glsl">
-      <Filter>Shaders\Ocean</Filter>
-    </None>
     <None Include="..\Data\Shaders\deepOcean_vertex_normal.gs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
@@ -366,9 +363,6 @@
       <Filter>Shaders\Ocean</Filter>
     </None>
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl">
-      <Filter>Shaders\Ocean</Filter>
-    </None>
-    <None Include="..\Data\Shaders\PerlinNoiseOcean.wireframe.fs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
     <None Include="..\Data\Shaders\RenderersCommon.incl.glsl">
@@ -552,6 +546,9 @@
       <Filter>Shaders\Ocean</Filter>
     </None>
     <None Include="..\Data\Shaders\DeepOcean.hmap.cs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\HeightFieldOcean.wireframe.fs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
   </ItemGroup>
