@@ -8,11 +8,7 @@
 #define WAVEPARAM_ITEMS_COUNT	6
 
 
-#ifdef PRECOMPUTE_NORMAL
 layout (binding = 0, rgba32f) uniform image2D u_ImageOut;
-#else
-layout (binding = 0, r32f) uniform image2D u_ImageOut;
-#endif
 layout (binding = 1, std430) coherent readonly buffer u_WaveParamsBlock
 {
 	float u_WaveParams[];
@@ -31,44 +27,31 @@ void main(void)
 	ivec2 p = ivec2(gl_GlobalInvocationID.xy);
 	vec2 tc = 2 * vec2(TWO_PI) * vec2(p) / vec2(u_TextureSize);
 
-	float H = 0;
-	vec2 dH = vec2(0);
+	vec3 P = vec3(0);
 
 	int baseIndex = 0;
 	for(int i = 0; i < u_WaveCount; ++i)
 	{
-		float steepness = u_WaveParams[baseIndex + WAVEPARAM_STEEPNESS];
-		float frequency = u_WaveParams[baseIndex + WAVEPARAM_W];
-		float amplitude = u_WaveParams[baseIndex + WAVEPARAM_AMPLITUDE];
+		float Q = u_WaveParams[baseIndex + WAVEPARAM_STEEPNESS];
+		float W = u_WaveParams[baseIndex + WAVEPARAM_W];
+		float A = u_WaveParams[baseIndex + WAVEPARAM_AMPLITUDE];
+		float phase = u_WaveParams[baseIndex + WAVEPARAM_PHASE];
 
-		vec2 dir = vec2(u_WaveParams[baseIndex + WAVEPARAM_DIR_X], u_WaveParams[baseIndex + WAVEPARAM_DIR_Y]);
+		float QA = Q * A;
+		float WA = W * A;
+		vec2 D = vec2(u_WaveParams[baseIndex + WAVEPARAM_DIR_X], u_WaveParams[baseIndex + WAVEPARAM_DIR_Y]);
 
-		float dirPos = dot(dir, tc);
-		float S = dirPos * frequency + u_Time * u_WaveParams[baseIndex + WAVEPARAM_PHASE];
+		float WDPplusPhase = W * dot(D, tc) + phase * u_Time;
+		float S = sin(WDPplusPhase);
+		float C = cos(WDPplusPhase);
 
-		float halfOfSinSplusOne = 0.5f * (1.0f + sin(S));
-		H += (amplitude * pow(halfOfSinSplusOne, steepness));
-		
-#ifdef PRECOMPUTE_NORMAL
-		float cosS = cos(S);
-		float dhCommon = steepness * frequency * amplitude * cosS;
+		float QAC = QA * C;
+		vec2 f = vec2(QAC) * D;
 
-		if (steepness != 1)
-		{
-			float halfOfSinSplusOnePowSteepnessMinusOne = pow(halfOfSinSplusOne, steepness - 1);
-			dhCommon *= halfOfSinSplusOnePowSteepnessMinusOne;
-		}
-
-		dH += vec2(dir.x * dhCommon, dir.y * dhCommon);
-#endif
+		P += vec3(f, A * S);
 
 		baseIndex += WAVEPARAM_ITEMS_COUNT;
 	}
 
-#ifdef PRECOMPUTE_NORMAL
-	vec3 n = normalize(vec3(dH.x, dH.y, 1));
-	imageStore(u_ImageOut, p, vec4(H, n.x, n.y, 0));
-#else
-	imageStore(u_ImageOut, p, vec4(H));
-#endif
+	imageStore(u_ImageOut, p, vec4(P, 0));
 }

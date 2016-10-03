@@ -51,7 +51,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2
 			wavePropsBuffer[WaveParams_DirectionY] = src.mDirection.z;
 			wavePropsBuffer[WaveParams_W] = src.GetFrequency();
 			wavePropsBuffer[WaveParams_Phase] = src.GetPhase();
-			wavePropsBuffer[WaveParams_Steepness] = src.mSteepness;
+			wavePropsBuffer[WaveParams_Steepness] = src.GetQ();
 			wavePropsBuffer += __waveparams_count__;
 		}
 		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER); GL_CHECK_ERRORS;

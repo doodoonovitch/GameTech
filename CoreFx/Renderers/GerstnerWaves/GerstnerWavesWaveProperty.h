@@ -51,6 +51,11 @@ struct WaveProperty
 		return mVelocity * glm::two_pi<GLfloat>() / mWaveLength;
 	}
 
+	GLfloat GetQ() const
+	{
+		return mSteepness / GetFrequency() * mAmplitude;
+	}
+
 	glm::vec3 mDirection;
 	GLfloat mWaveLength;
 	GLfloat mAmplitude;
