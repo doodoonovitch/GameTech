@@ -92,6 +92,7 @@ private:
 
 	HeightMapCS * mHeightMapCS;
 	CubeMapTexture const * mCubeMapTexture;
+	Texture2D const * mOceanColorTexture;
 
 	glm::ivec2 mTextureSize;
 	glm::ivec2 mMapSize;

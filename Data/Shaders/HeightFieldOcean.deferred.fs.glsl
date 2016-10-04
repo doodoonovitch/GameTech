@@ -20,35 +20,27 @@ in TES_OUT
 
 struct Material
 {
-	vec3 Normal;
 	vec3 DiffuseColor;
 	vec3 SpecularColor;
-	float SpecularPower;
+	float Roughness;
 };
 
 void main()
 {
 	vec3 normal = normalize(fs_in.Normal);
 
-	////vec3 bumpMapNormal = texture(u_noiseSampler, fs_in.TexUV * t + vec2(0.1, 0.15) * t).xyz; // + texture(u_noiseSampler, fs_in.TexUV + vec2(0.01, 0.02) * t).xyz;
-	//vec3 bumpMapNormal = texture(u_noiseSampler, fs_in.TexUV * 5 + vec2(0.1, 0.15) * t).xyz;
-	//bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);	
-	//normal = normalize(normal + bumpMapNormal);
-	
 	Material mat;
 	mat.SpecularColor = vec3(0.2);
-	mat.SpecularPower = .2;
-	//vec2 texUV = fs_in.TexUV * 64.f;
-	vec2 texUV = fs_in.TexUV;
-	mat.DiffuseColor = texture(u_textureSampler, texUV).rgb;
-	//mat.DiffuseColor = vec3(0, 0.2, 0.8);
-	
-	//vec3 viewDir = fs_in.Position - u_ViewPosition.xyz;
-	//viewDir = normalize(viewDir);
-	//vec3 R = reflect(viewDir, normal);
-	//mat.DiffuseColor = texture(u_SkyboxCubeMapSampler, R).xyz;
+	mat.Roughness = .1;
 
-	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.SpecularPower, vec3(0));
+	vec2 texUV = fs_in.TexUV;
+	vec3 refractColor = texture(u_textureSampler, texUV).rgb;
+	//vec3 viewDir = normalize(fs_in.Position - u_ViewPosition.xyz);
+	//vec3 R = reflect(viewDir, normal);
+	//vec3 reflectColor = texture(u_SkyboxCubeMapSampler, R).rgb;
+	mat.SpecularColor = refractColor;
+
+	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.Roughness, vec3(0));
 	outPosition = fs_in.ViewPosition;
 	//outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
 	outNormal = dqTransformNormal(normal, u_ViewDQ);

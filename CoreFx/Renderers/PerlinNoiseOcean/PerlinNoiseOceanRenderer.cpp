@@ -17,6 +17,7 @@ Renderer::Renderer(const Desc & desc)
 	: RendererHelper<1>(0, "PerlinNoiseOceanRenderer", "PerlinNoiseOceanWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
 	, mHeightMapCS(nullptr)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
+	, mOceanColorTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/textures/OceanColor256.tif"))
 	, mTextureSize(512)
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
@@ -212,7 +213,7 @@ void Renderer::Render()
 			glBindTexture(mCubeMapTexture->GetTarget(), mCubeMapTexture->GetResourceId());
 
 			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D()->GetResourceId());
+			glBindTexture(GL_TEXTURE_2D, mOceanColorTexture->GetResourceId());
 
 			glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 

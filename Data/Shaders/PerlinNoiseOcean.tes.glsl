@@ -46,7 +46,7 @@ void main()
 	float h2 = texture(u_HeightMapSampler, vec2(tc.x, tc.y - dUV)).r;
 	float h3 = texture(u_HeightMapSampler, vec2(tc.x, tc.y + dUV)).r;
 
-	vec3 normal = vec3(h0 - h1, 2 /** u_MapSize.x * u_dUV*/, h2 - h3);
+	vec3 normal = normalize(vec3(h0 - h1, 2 /** u_MapSize.x * u_dUV*/, h2 - h3));
 
 	vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1);
 
