@@ -9,9 +9,9 @@
 
 
 #ifdef PRECOMPUTE_NORMAL
-layout (binding = 0, rgba32f) uniform image2D u_ImageOut;
+layout (binding = 0, rgba16f) uniform image2D u_ImageOut;
 #else
-layout (binding = 0, r32f) uniform image2D u_ImageOut;
+layout (binding = 0, r16f) uniform image2D u_ImageOut;
 #endif
 layout (binding = 1, std430) coherent readonly buffer u_WaveParamsBlock
 {

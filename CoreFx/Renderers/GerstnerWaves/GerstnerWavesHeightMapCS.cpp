@@ -61,7 +61,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2
 
 	glGenTextures(1, &mHeightMapTextureId);
 	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
-	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, mPrecomputeNormals ? GL_RGBA32F : GL_R32F, GL_RED, GL_FLOAT);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, mPrecomputeNormals ? GL_RGBA16F : GL_R32F, GL_RED, GL_FLOAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// ---------------------------------------
@@ -109,7 +109,7 @@ void HeightMapCS::GenerateHeightMap()
 
 	glUniform1f(mShader.GetUniform(u_Time), Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
 
-	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mHeightMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, mPrecomputeNormals ? GL_RGBA32F : GL_R32F);
+	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mHeightMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, mPrecomputeNormals ? GL_RGBA16F : GL_R32F);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)EHMapCSBindings::u_WaveParamsBlock, mBufferIds[WavePropsBufferIndex]); GL_CHECK_ERRORS;
 
 	//glDispatchCompute(mTextureSize.x / 32, mTextureSize.y / 32, 1);
