@@ -28,7 +28,7 @@ HeightMapCS::~HeightMapCS()
 }
 
 
-void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2 & textureSize)
+void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2 & textureSize, const glm::vec2 & scale)
 {
 	PRINT_MESSAGE("Initialize Gerstner Waves Renderer (Height Map Compute) Shaders : .....");
 
@@ -85,6 +85,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2
 	{
 		"u_WaveCount",
 		"u_TextureSize",
+		"u_Scale",
 		"u_Time",
 	};
 
@@ -92,6 +93,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2
 
 	glUniform1i(mShader.GetUniform(u_WaveCount), mWaveCount); GL_CHECK_ERRORS;
 	glUniform2iv(mShader.GetUniform(u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
+	glUniform2fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(scale)); GL_CHECK_ERRORS;
 
 	mShader.UnUse();
 

@@ -220,7 +220,8 @@ void SimpleCamera::OnInit()
 
 #ifdef DEEP_OCEAN_SAMPLE
 		{
-			Renderers::DeepOcean::Renderer::Desc desc(true, 512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
+			Renderers::DeepOcean::Renderer::Desc desc(true, 512, 512, "medias/CubeMaps/uvCubeMap");
+			//desc.mHeightMapTextureSize = glm::ivec2(128);
 
 			const float AmpCoef = 10.0f;
 			const float WaveLengthCoef = 2.f;
@@ -239,7 +240,8 @@ void SimpleCamera::OnInit()
 #endif // DEEP_OCEAN_SAMPLE
 #ifdef PERLIN_NOISE_OCEAN_SAMPLE
 		{
-			Renderers::PerlinNoiseOcean::Renderer::Desc desc(512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
+			Renderers::PerlinNoiseOcean::Renderer::Desc desc(512, 512, "medias/CubeMaps/uvCubeMap");
+			//desc.mHeightMapTextureSize = glm::ivec2(128);
 
 			const float AmpCoef = 2.0f;
 			const float WaveLengthCoef = 1.0f;
@@ -258,7 +260,8 @@ void SimpleCamera::OnInit()
 
 #ifdef GERSTNER_WAVE_OCEAN_SAMPLE
 		{
-			Renderers::GerstnerWaves::Renderer::Desc desc(true, 512, 512, glm::vec2(1.f, 1.f), "medias/CubeMaps/uvCubeMap");
+			Renderers::GerstnerWaves::Renderer::Desc desc(true, 512, 512, "medias/CubeMaps/uvCubeMap");
+			//desc.mHeightMapTextureSize = glm::ivec2(128);
 
 			const float AmpCoef = 10.0f;
 			const float WaveLengthCoef = 2.f;

@@ -16,6 +16,7 @@ layout (binding = 1, std430) coherent readonly buffer u_WaveParamsBlock
 
 uniform int u_WaveCount;
 uniform ivec2 u_TextureSize;
+uniform vec2 u_Scale;
 uniform float u_Time;
 
 
@@ -25,7 +26,7 @@ layout (local_size_x = 1, local_size_y = 1) in;
 void main(void)
 {
 	ivec2 p = ivec2(gl_GlobalInvocationID.xy);
-	vec2 tc = 2 * vec2(TWO_PI) * vec2(p) / vec2(u_TextureSize);
+	vec2 tc = u_Scale * vec2(TWO_PI) * vec2(p) / vec2(u_TextureSize);
 
 	vec3 P = vec3(0);
 

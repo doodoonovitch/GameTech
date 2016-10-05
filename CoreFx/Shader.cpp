@@ -9,6 +9,9 @@ namespace CoreFx
 	std::string Shader::sRendererShadersCommon;
 	std::string Shader::sComputeShadersCommon;
 
+	int Shader::sComputeWorkgroupCount[3] = { 1, 1, 1 };
+	bool Shader::sIsComputeWorkgroupCountInit = false;
+
 
 Shader::Shader(const char * title)
 	: mProgram(0)
@@ -24,6 +27,13 @@ Shader::~Shader(void)
 	mAttributeList.clear();
 	mUniformLocationList.clear();
 	mShaders.clear();
+}
+
+void Shader::InitializeComputeWorkgroupCount()
+{
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &sComputeWorkgroupCount[0]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &sComputeWorkgroupCount[1]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &sComputeWorkgroupCount[2]);
 }
 
 void Shader::DeleteShaderProgram()
@@ -135,7 +145,16 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 			if (sComputeShadersCommon.empty())
 			{
 				sComputeShadersCommon.append("#version 440\n");
-
+				{
+					const char * wrkgrpName[] = { "X", "Y", "Z" };
+					const int bufferCount = 200;
+					char buffer[bufferCount];
+					for (int i = 0; i < 3; ++i)
+					{
+						sprintf_s(buffer, bufferCount, "#define MAX_COMPUTE_WORKGROUP_COUNT_%s \t %i\n", wrkgrpName[i], GetComputeWorkgroupCount((EComputeWorkgroupId)i));
+						sComputeShadersCommon.append(buffer);
+					}
+				}
 				if (!LoadCommonInclude(sComputeShadersCommon, includes))
 				{
 					return;

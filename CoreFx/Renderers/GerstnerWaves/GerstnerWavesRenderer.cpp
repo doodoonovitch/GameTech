@@ -19,7 +19,6 @@ Renderer::Renderer(const Desc & desc)
 	, mTextureSize(512)
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
-	, mScale(desc.mScale)
 	, mMapCount(0)
 	, mDrawNormalShader("WavesDrawNormals")
 {
@@ -108,7 +107,7 @@ void Renderer::LoadMainShader(const Desc & desc)
 	{
 		"u_PatchCount",
 		"u_MapSize",
-		"u_Scale",
+		"u_HeightMapTextureSize",
 		"u_HeightMapSampler",
 		"u_PerMapDataSampler",
 		"u_SkyboxCubeMapSampler",
@@ -135,7 +134,7 @@ void Renderer::LoadMainShader(const Desc & desc)
 	//pass values of constant uniforms at initialization
 	glUniform2iv(mShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
 	glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	glUniform2iv(mShader.GetUniform(u_HeightMapTextureSize), 1, glm::value_ptr(desc.mHeightMapTextureSize)); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_HeightMapSampler), 0); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 2); GL_CHECK_ERRORS;
@@ -157,7 +156,7 @@ void Renderer::LoadWireFrameShader(const Desc & desc)
 	{
 		"u_PatchCount",
 		"u_MapSize",
-		"u_Scale",
+		"u_HeightMapTextureSize",
 		"u_HeightMapSampler",
 		"u_PerMapDataSampler",
 	};
@@ -182,7 +181,7 @@ void Renderer::LoadWireFrameShader(const Desc & desc)
 	//pass values of constant uniforms at initialization
 	glUniform2iv(mWireFrameShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
 	glUniform2iv(mWireFrameShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	glUniform3fv(mWireFrameShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	glUniform2iv(mShader.GetUniform(u_HeightMapTextureSize), 1, glm::value_ptr(desc.mHeightMapTextureSize)); GL_CHECK_ERRORS;
 	glUniform1i(mWireFrameShader.GetUniform(u_HeightMapSampler), 0); GL_CHECK_ERRORS;
 	glUniform1i(mWireFrameShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 
@@ -198,8 +197,9 @@ void Renderer::LoadHeightMapComputeShader(const Desc & desc)
 {
 	PRINT_MESSAGE("Initialize Gerstner Waves Renderer (Height Map Compute) Shaders : .....");
 
+	glm::vec2 scale((GLfloat)desc.mHeightMapTextureSize.x / (GLfloat)mMapSize.x, (GLfloat)desc.mHeightMapTextureSize.y / (GLfloat)mMapSize.y);
 	mHeightMapCS = new HeightMapCS(desc.mPrecomputeNormals);
-	mHeightMapCS->LoadShader(desc.mWaveProps, mTextureSize);
+	mHeightMapCS->LoadShader(desc.mWaveProps, mTextureSize, scale);
 
 	Engine::GetInstance()->AttachComputeShader(mHeightMapCS);
 

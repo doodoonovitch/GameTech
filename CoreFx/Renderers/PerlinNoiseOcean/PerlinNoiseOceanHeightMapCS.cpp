@@ -28,11 +28,12 @@ HeightMapCS::~HeightMapCS()
 }
 
 
-void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2 & textureSize)
+void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec2 & textureSize, const glm::vec2 & scale)
 {
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Height Map Compute) Shaders : .....");
 
 	mTextureSize = textureSize;
+	mScale = scale;
 
 	mWaveCount = (GLint)waveProps.size();
 	assert(mWaveCount > 0);
@@ -74,6 +75,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2
 	{
 		"u_WaveCount",
 		"u_TextureSize",
+		"u_Scale",
 		"u_Time",
 		"u_NoiseSampler"
 	};
@@ -82,7 +84,9 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::vec2
 
 	glUniform1i(mShader.GetUniform(u_WaveCount), mWaveCount); GL_CHECK_ERRORS;
 	glUniform2iv(mShader.GetUniform(u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
+	glUniform2fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_NoiseSampler), 0); GL_CHECK_ERRORS;
+
 
 	mShader.UnUse();
 
@@ -106,8 +110,9 @@ void HeightMapCS::GenerateHeightMap()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mNoiseTexture->GetResourceId());
 
-	//glDispatchCompute(mTextureSize.x / 32, mTextureSize.y / 32, 1);
-	glDispatchCompute(mTextureSize.x, mTextureSize.y, 1);
+	//glDispatchCompute(mTextureSize.x / Shader::GetComputeWorkgroupCount(Shader::EComputeWorkgroupId::X), mTextureSize.y / Shader::GetComputeWorkgroupCount(Shader::EComputeWorkgroupId::Y), 1);
+	glDispatchCompute(mTextureSize.x / 32, mTextureSize.y / 32, 1);
+	//glDispatchCompute(mTextureSize.x, mTextureSize.y, 1);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 

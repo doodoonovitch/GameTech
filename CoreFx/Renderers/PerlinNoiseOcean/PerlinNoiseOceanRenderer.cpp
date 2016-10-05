@@ -17,11 +17,11 @@ Renderer::Renderer(const Desc & desc)
 	: RendererHelper<1>(0, "PerlinNoiseOceanRenderer", "PerlinNoiseOceanWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
 	, mHeightMapCS(nullptr)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
-	, mOceanColorTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/textures/OceanColor256.tif"))
-	, mTextureSize(512)
+	, mOceanColorTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/textures/OceanColor256.tif", GL_REPEAT, GL_REPEAT))
+	//, mOceanColorTexture(Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D())
+	, mHeightMapTextureSize(desc.mHeightMapTextureSize)
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
-	, mScale(desc.mScale)
 	, mMapCount(0)
 	, mDrawNormalShader("TerrainDrawNormals")
 {
@@ -96,7 +96,7 @@ void Renderer::LoadMainShader(const Desc & /*desc*/)
 	{
 		"u_PatchCount",
 		"u_MapSize",
-		"u_Scale",
+		"u_HeightMapTextureSize",
 		"u_HeightMapSampler",
 		"u_PerMapDataSampler",
 		"u_SkyboxCubeMapSampler",
@@ -123,7 +123,7 @@ void Renderer::LoadMainShader(const Desc & /*desc*/)
 	//pass values of constant uniforms at initialization
 	glUniform2iv(mShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
 	glUniform2iv(mShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	glUniform2iv(mShader.GetUniform(u_HeightMapTextureSize), 1, glm::value_ptr(mHeightMapTextureSize)); GL_CHECK_ERRORS;	
 	glUniform1i(mShader.GetUniform(u_HeightMapSampler), 0); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 2); GL_CHECK_ERRORS;
@@ -145,7 +145,7 @@ void Renderer::LoadWireFrameShader(const Desc & /*desc*/)
 	{
 		"u_PatchCount",
 		"u_MapSize",
-		"u_Scale",
+		"u_HeightMapTextureSize",
 		"u_HeightMapSampler",
 		"u_PerMapDataSampler",
 	};
@@ -170,7 +170,7 @@ void Renderer::LoadWireFrameShader(const Desc & /*desc*/)
 	//pass values of constant uniforms at initialization
 	glUniform2iv(mWireFrameShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
 	glUniform2iv(mWireFrameShader.GetUniform(u_MapSize), 1, glm::value_ptr(mMapSize)); GL_CHECK_ERRORS;
-	glUniform3fv(mWireFrameShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	glUniform2iv(mShader.GetUniform(u_HeightMapTextureSize), 1, glm::value_ptr(mHeightMapTextureSize)); GL_CHECK_ERRORS;
 	glUniform1i(mWireFrameShader.GetUniform(u_HeightMapSampler), 0); GL_CHECK_ERRORS;
 	glUniform1i(mWireFrameShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 
@@ -189,7 +189,8 @@ void Renderer::LoadHeightMapComputeShader(const Desc & desc)
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Height Map Compute) Shaders : .....");
 
 	mHeightMapCS = new HeightMapCS();
-	mHeightMapCS->LoadShader(desc.mWaveProps, glm::vec2(512));
+	glm::vec2 scale = glm::vec2((GLfloat)mHeightMapTextureSize.x / (GLfloat)mMapSize.x, (GLfloat)mHeightMapTextureSize.y / (GLfloat)mMapSize.y);
+	mHeightMapCS->LoadShader(desc.mWaveProps, mHeightMapTextureSize, scale);
 
 	Engine::GetInstance()->AttachComputeShader(mHeightMapCS);
 

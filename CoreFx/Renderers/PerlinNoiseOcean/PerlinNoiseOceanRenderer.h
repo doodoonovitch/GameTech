@@ -32,17 +32,16 @@ public:
 
 	struct Desc : public CoreFx::Renderer::Desc
 	{
-		Desc(GLint mapWidth, GLint mapDepth, const glm::vec2 & scale, const std::string & skyboxCubeMapTextureFilename)
+		Desc(GLint mapWidth, GLint mapDepth, const std::string & skyboxCubeMapTextureFilename)
 			: CoreFx::Renderer::Desc()
 			, mMapWidth(mapWidth)
 			, mMapDepth(mapDepth)
-			, mScale(scale.x, 1.0f, scale.y)
 			, mSkyboxCubeMapTextureFilename(skyboxCubeMapTextureFilename)
 		{ }
 
 		GLint mMapWidth;
 		GLint mMapDepth;
-		glm::vec3 mScale;
+		glm::ivec2 mHeightMapTextureSize = glm::ivec2(512);
 		MapDescList mMaps;
 		WavePropertyList mWaveProps;
 		std::string mSkyboxCubeMapTextureFilename;
@@ -69,7 +68,7 @@ private:
 	{
 		u_PatchCount,
 		u_MapSize,
-		u_Scale,
+		u_HeightMapTextureSize,
 		u_HeightMapSampler,
 		u_PerMapDataSampler,
 		u_SkyboxCubeMapSampler,
@@ -94,10 +93,9 @@ private:
 	CubeMapTexture const * mCubeMapTexture;
 	Texture2D const * mOceanColorTexture;
 
-	glm::ivec2 mTextureSize;
+	glm::ivec2 mHeightMapTextureSize;
 	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
-	glm::vec3 mScale;
 	GLint mMapCount;
 
 	Shader mDrawNormalShader;

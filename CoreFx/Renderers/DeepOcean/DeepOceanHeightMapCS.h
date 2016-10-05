@@ -28,7 +28,7 @@ public:
 
 	GLuint GetHeightMapTextureId() const { return mHeightMapTextureId; }
 
-	void LoadShader(const WavePropertyList & waveProps, const glm::vec2 & textureSize);
+	void LoadShader(const WavePropertyList & waveProps, const glm::vec2 & textureSize, const glm::vec2 & scale);
 
 private:
 
@@ -51,6 +51,7 @@ private:
 	{
 		u_WaveCount,
 		u_TextureSize,
+		u_Scale,
 		u_Time,
 		__hmap_cs_uniforms_count__
 	};

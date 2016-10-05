@@ -59,6 +59,14 @@ public:
 		ComputeShadersCommon = (GLuint)EIncludeCommon::ComputeShadersHeader | (GLuint)EIncludeCommon::Quaternions,
 	};
 
+	enum class EComputeWorkgroupId
+	{
+		X, 
+		Y, 
+		Z
+	};
+
+
 public:
 	Shader(const char * title);
 	virtual ~Shader(void);
@@ -89,17 +97,29 @@ public:
 
 	int AddPerlinNoiseUniforms();
 
+	static GLint GetComputeWorkgroupCount(EComputeWorkgroupId groupId) 
+	{
+		if (!sIsComputeWorkgroupCountInit)
+		{
+			InitializeComputeWorkgroupCount();
+		}
+
+		return sComputeWorkgroupCount[(GLint)groupId];
+	}
 
 protected:
 
 	static const char * GetCommonIncludeFilename(GLuint includeFileId);
 	static bool LoadCommonInclude(std::string & buffer, EInclude includeFileId);
+	static void InitializeComputeWorkgroupCount();
 
 protected:
 
 	//static std::string sCommonInclude;
 	static std::string sRendererShadersCommon;
 	static std::string sComputeShadersCommon;
+	static int sComputeWorkgroupCount[3];
+	static bool sIsComputeWorkgroupCountInit;
 
 	GLuint mProgram;
 	std::vector<GLuint> mShaders;
