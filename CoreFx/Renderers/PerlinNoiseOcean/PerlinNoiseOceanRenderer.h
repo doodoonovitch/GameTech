@@ -17,6 +17,11 @@ namespace CoreFx
 class Renderer : public RendererHelper<1>
 {
 public:
+	enum class ENormalMode
+	{
+		PerVertexNormal,
+		PerPixelNormal
+	};
 
 	struct MapDesc
 	{
@@ -32,11 +37,12 @@ public:
 
 	struct Desc : public CoreFx::Renderer::Desc
 	{
-		Desc(GLint mapWidth, GLint mapDepth, const std::string & skyboxCubeMapTextureFilename)
+		Desc(GLint mapWidth, GLint mapDepth, const std::string & skyboxCubeMapTextureFilename, ENormalMode normalMode = ENormalMode::PerPixelNormal)
 			: CoreFx::Renderer::Desc()
 			, mMapWidth(mapWidth)
 			, mMapDepth(mapDepth)
 			, mSkyboxCubeMapTextureFilename(skyboxCubeMapTextureFilename)
+			, mNormalMode(normalMode)
 		{ }
 
 		GLint mMapWidth;
@@ -45,6 +51,7 @@ public:
 		MapDescList mMaps;
 		WavePropertyList mWaveProps;
 		std::string mSkyboxCubeMapTextureFilename;
+		ENormalMode mNormalMode;
 	};
 
 public:

@@ -88,7 +88,7 @@ void Renderer::LoadShaders(const Desc & desc)
 	LoadWireFrameShader(desc);
 }
 
-void Renderer::LoadMainShader(const Desc & /*desc*/)
+void Renderer::LoadMainShader(const Desc & desc)
 {
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer Shaders : .....");
 
@@ -109,11 +109,37 @@ void Renderer::LoadMainShader(const Desc & /*desc*/)
 
 	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/HeightFieldOcean.tcs.glsl");
 
-	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/PerlinNoiseOcean.tes.glsl");
+	if(desc.mNormalMode==ENormalMode::PerVertexNormal)
+	{
+		std::vector<std::string> shaderSources;
+		shaderSources.push_back("#define PER_VERTEX_NORMAL\n");
+
+		std::string csSource;
+		Shader::MergeFile(csSource, "shaders/PerlinNoiseOcean.tes.glsl");
+		shaderSources.push_back(csSource);
+		mShader.LoadFromString(GL_TESS_EVALUATION_SHADER, shaderSources);
+	}
+	else
+	{
+		mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/PerlinNoiseOcean.tes.glsl");
+	}
 
 	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/HeightFieldOcean.deferred.fs.glsl");
+	if (desc.mNormalMode == ENormalMode::PerVertexNormal)
+	{
+		std::vector<std::string> shaderSources;
+		shaderSources.push_back("#define PER_VERTEX_NORMAL\n");
+
+		std::string csSource;
+		Shader::MergeFile(csSource, "shaders/HeightFieldOcean.deferred.fs.glsl");
+		shaderSources.push_back(csSource);
+		mShader.LoadFromString(GL_FRAGMENT_SHADER, shaderSources);
+	}
+	else
+	{
+		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/HeightFieldOcean.deferred.fs.glsl");
+	}
 
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
