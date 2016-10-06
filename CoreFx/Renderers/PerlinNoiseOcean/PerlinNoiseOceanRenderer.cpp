@@ -19,6 +19,7 @@ Renderer::Renderer(const Desc & desc)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mOceanColorTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/textures/OceanColor256.tif", GL_REPEAT, GL_REPEAT))
 	//, mOceanColorTexture(Engine::GetInstance()->GetTextureManager()->GetDefaultTexture2D())
+	, mNormalTextureId(0)
 	, mHeightMapTextureSize(desc.mHeightMapTextureSize)
 	, mMapSize(desc.mMapWidth, desc.mMapDepth)
 	, mPatchCount(desc.mMapWidth / 64, desc.mMapDepth / 64)
@@ -79,6 +80,8 @@ Renderer::~Renderer()
 	Engine::GetInstance()->DetachComputeShader(mHeightMapCS);
 	SafeDelete(mHeightMapCS);
 	mModelMatrixBuffer.ReleaseResource();
+	glDeleteTextures(1, &mNormalTextureId);
+	mNormalTextureId = 0;
 }
 
 void Renderer::LoadShaders(const Desc & desc)
@@ -101,6 +104,7 @@ void Renderer::LoadMainShader(const Desc & desc)
 		"u_PerMapDataSampler",
 		"u_SkyboxCubeMapSampler",
 		"u_textureSampler",
+		"u_NormalMapSampler",
 	};
 
 
@@ -154,6 +158,7 @@ void Renderer::LoadMainShader(const Desc & desc)
 	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 2); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_textureSampler), 3); GL_CHECK_ERRORS;
+	glUniform1i(mWireFrameShader.GetUniform(u_NormalMapSampler), 4); GL_CHECK_ERRORS;
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -220,6 +225,22 @@ void Renderer::LoadHeightMapComputeShader(const Desc & desc)
 
 	Engine::GetInstance()->AttachComputeShader(mHeightMapCS);
 
+	GLenum target = GL_TEXTURE_2D;
+	glGenTextures(1, &mNormalTextureId);
+	glTextureView(mNormalTextureId, target, mHeightMapCS->GetHeightMapTextureId(), GL_R32F, 0, 1, 0, 1); GL_CHECK_ERRORS;
+
+	glBindTexture(target, mNormalTextureId);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glBindTexture(target, 0);
+
+	GL_CHECK_ERRORS;
+
 	PRINT_MESSAGE(".....done.");
 }
 
@@ -241,6 +262,9 @@ void Renderer::Render()
 
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, mOceanColorTexture->GetResourceId());
+
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, mNormalTextureId);
 
 			glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 

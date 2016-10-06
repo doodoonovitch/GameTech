@@ -80,6 +80,7 @@ private:
 		u_PerMapDataSampler,
 		u_SkyboxCubeMapSampler,
 		u_textureSampler,
+		u_NormalMapSampler,
 
 		__uniforms_count__
 	};
@@ -99,6 +100,7 @@ private:
 	HeightMapCS * mHeightMapCS;
 	CubeMapTexture const * mCubeMapTexture;
 	Texture2D const * mOceanColorTexture;
+	GLuint mNormalTextureId;
 
 	glm::ivec2 mHeightMapTextureSize;
 	glm::ivec2 mMapSize;

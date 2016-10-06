@@ -9,7 +9,7 @@ uniform sampler2D u_textureSampler;
 
 #ifdef PER_PIXEL_NORMAL
 
-uniform sampler2D u_HeightMapSampler;
+uniform sampler2D u_NormalMapSampler;
 
 const float u_dUV = 1/512;
 const vec2 u_Step = vec2(1.0, 0.0);
@@ -51,8 +51,8 @@ void main()
 	vec2 texUV = fs_in.TexUV;
 
 #ifdef PER_PIXEL_NORMAL
-	float nX = textureOffset(u_HeightMapSampler, texUV, ivec2(-1, 0)).r - textureOffset(u_HeightMapSampler, texUV, ivec2(1, 0)).r;
-	float nZ = textureOffset(u_HeightMapSampler, texUV, ivec2(0, -1)).r - textureOffset(u_HeightMapSampler, texUV, ivec2(0, 1)).r;
+	float nX = textureOffset(u_NormalMapSampler, texUV, ivec2(-1, 0)).r - textureOffset(u_NormalMapSampler, texUV, ivec2(1, 0)).r;
+	float nZ = textureOffset(u_NormalMapSampler, texUV, ivec2(0, -1)).r - textureOffset(u_NormalMapSampler, texUV, ivec2(0, 1)).r;
 	vec3 normal = normalize(vec3(nX, 2, nZ));
 #else
 	vec3 normal = normalize(fs_in.Normal);
