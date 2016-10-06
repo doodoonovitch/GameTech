@@ -110,9 +110,9 @@ void HeightMapCS::GenerateHeightMap()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mNoiseTexture->GetResourceId());
 
-	//glDispatchCompute(mTextureSize.x / Shader::GetComputeWorkgroupCount(Shader::EComputeWorkgroupId::X), mTextureSize.y / Shader::GetComputeWorkgroupCount(Shader::EComputeWorkgroupId::Y), 1);
-	glDispatchCompute(mTextureSize.x / 32, mTextureSize.y / 32, 1);
-	//glDispatchCompute(mTextureSize.x, mTextureSize.y, 1);
+	//glDispatchCompute(mTextureSize.x / Shader::GetComputeWorkgroupSize(Shader::EComputeWorkgroupId::X), mTextureSize.y / Shader::GetComputeWorkgroupSize(Shader::EComputeWorkgroupId::Y), 1);
+	//glDispatchCompute(mTextureSize.x / 32, mTextureSize.y / 32, 1);
+	glDispatchCompute(mTextureSize.x, mTextureSize.y, 1);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 

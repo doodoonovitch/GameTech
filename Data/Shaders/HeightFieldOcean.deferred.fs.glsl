@@ -7,18 +7,7 @@ layout(location = 4) out vec3 outEmissive;
 uniform samplerCube u_SkyboxCubeMapSampler;
 uniform sampler2D u_textureSampler;
 
-#ifdef PER_VERTEX_NORMAL
-
-in TES_OUT
-{
-	vec2 TexUV;
-	vec3 ViewPosition;
-	vec3 Position;
-	vec3 Normal;
-	flat int MapIndex;
-} fs_in;
-
-#else
+#ifdef PER_PIXEL_NORMAL
 
 uniform sampler2D u_HeightMapSampler;
 
@@ -30,6 +19,19 @@ in TES_OUT
 	vec2 TexUV;
 	vec3 ViewPosition;
 	vec3 Position;
+	flat int MapIndex;
+} fs_in;
+
+
+#else
+
+
+in TES_OUT
+{
+	vec2 TexUV;
+	vec3 ViewPosition;
+	vec3 Position;
+	vec3 Normal;
 	flat int MapIndex;
 } fs_in;
 
@@ -48,12 +50,12 @@ void main()
 {
 	vec2 texUV = fs_in.TexUV;
 
-#ifdef PER_VERTEX_NORMAL
-	vec3 normal = normalize(fs_in.Normal);
-#else
+#ifdef PER_PIXEL_NORMAL
 	float nX = textureOffset(u_HeightMapSampler, texUV, ivec2(-1, 0)).r - textureOffset(u_HeightMapSampler, texUV, ivec2(1, 0)).r;
 	float nZ = textureOffset(u_HeightMapSampler, texUV, ivec2(0, -1)).r - textureOffset(u_HeightMapSampler, texUV, ivec2(0, 1)).r;
 	vec3 normal = normalize(vec3(nX, 2, nZ));
+#else
+	vec3 normal = normalize(fs_in.Normal);
 #endif
 
 	Material mat;

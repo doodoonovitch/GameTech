@@ -126,10 +126,10 @@ void Renderer::LoadMainShader(const Desc & desc)
 
 	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
-	if (desc.mNormalMode == ENormalMode::PerVertexNormal)
+	if (desc.mNormalMode == ENormalMode::PerPixelNormal)
 	{
 		std::vector<std::string> shaderSources;
-		shaderSources.push_back("#define PER_VERTEX_NORMAL\n");
+		shaderSources.push_back("#define PER_PIXEL_NORMAL\n");
 
 		std::string csSource;
 		Shader::MergeFile(csSource, "shaders/HeightFieldOcean.deferred.fs.glsl");

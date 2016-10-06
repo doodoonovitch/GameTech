@@ -10,6 +10,8 @@ namespace CoreFx
 	std::string Shader::sComputeShadersCommon;
 
 	int Shader::sComputeWorkgroupCount[3] = { 1, 1, 1 };
+	int Shader::sComputeWorkgroupSize[3] = { 1, 1, 1 };
+	int Shader::sComputeWorkgroupInvocations = 1;
 	bool Shader::sIsComputeWorkgroupCountInit = false;
 
 
@@ -34,6 +36,14 @@ void Shader::InitializeComputeWorkgroupCount()
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &sComputeWorkgroupCount[0]);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &sComputeWorkgroupCount[1]);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &sComputeWorkgroupCount[2]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &sComputeWorkgroupSize[0]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &sComputeWorkgroupSize[1]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &sComputeWorkgroupSize[2]);
+	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &sComputeWorkgroupInvocations);
+
+	PRINT_ERROR("[Shader-Info] Compute Workgroup Count : (%i, %i, %i).", sComputeWorkgroupCount[0], sComputeWorkgroupCount[1], sComputeWorkgroupCount[2], 0);
+	PRINT_ERROR("[Shader-Info] Compute Workgroup Size : (%i, %i, %i).", sComputeWorkgroupSize[0], sComputeWorkgroupSize[1], sComputeWorkgroupSize[2], 0);
+	PRINT_ERROR("[Shader-Info] Compute Workgroup invocations : %i.", sComputeWorkgroupInvocations, 0);
 }
 
 void Shader::DeleteShaderProgram()
@@ -151,9 +161,12 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 					char buffer[bufferCount];
 					for (int i = 0; i < 3; ++i)
 					{
+						sprintf_s(buffer, bufferCount, "#define MAX_COMPUTE_WORKGROUP_SIZE_%s \t %i\n", wrkgrpName[i], GetComputeWorkgroupSize((EComputeWorkgroupId)i));
 						sprintf_s(buffer, bufferCount, "#define MAX_COMPUTE_WORKGROUP_COUNT_%s \t %i\n", wrkgrpName[i], GetComputeWorkgroupCount((EComputeWorkgroupId)i));
 						sComputeShadersCommon.append(buffer);
 					}
+					sprintf_s(buffer, bufferCount, "#define MAX_COMPUTE_WORKGROUP_INVOCATIONS \t %i\n", GetComputeWorkgroupInvocations());
+					sComputeShadersCommon.append(buffer);
 				}
 				if (!LoadCommonInclude(sComputeShadersCommon, includes))
 				{

@@ -19,8 +19,9 @@ uniform float u_Time;
 uniform sampler2D u_NoiseSampler;
 
 
-layout (local_size_x = 32, local_size_y = 32) in;
-//layout (local_size_x = MAX_COMPUTE_WORKGROUP_COUNT_X, local_size_y = MAX_COMPUTE_WORKGROUP_COUNT_Y) in;
+layout (local_size_x = 1, local_size_y = 1) in;
+//layout (local_size_x = 32, local_size_y = 32) in;
+//layout (local_size_x = MAX_COMPUTE_WORKGROUP_SIZE_X, local_size_y = MAX_COMPUTE_WORKGROUP_SIZE_Y) in;
 
 void main(void)
 {

@@ -107,6 +107,26 @@ public:
 		return sComputeWorkgroupCount[(GLint)groupId];
 	}
 
+	static GLint GetComputeWorkgroupSize(EComputeWorkgroupId groupId)
+	{
+		if (!sIsComputeWorkgroupCountInit)
+		{
+			InitializeComputeWorkgroupCount();
+		}
+
+		return sComputeWorkgroupSize[(GLint)groupId];
+	}
+
+	static GLint GetComputeWorkgroupInvocations()
+	{
+		if (!sIsComputeWorkgroupCountInit)
+		{
+			InitializeComputeWorkgroupCount();
+		}
+
+		return sComputeWorkgroupInvocations;
+	}
+
 protected:
 
 	static const char * GetCommonIncludeFilename(GLuint includeFileId);
@@ -119,6 +139,8 @@ protected:
 	static std::string sRendererShadersCommon;
 	static std::string sComputeShadersCommon;
 	static int sComputeWorkgroupCount[3];
+	static int sComputeWorkgroupSize[3];
+	static int sComputeWorkgroupInvocations;
 	static bool sIsComputeWorkgroupCountInit;
 
 	GLuint mProgram;
