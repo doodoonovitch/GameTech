@@ -4,7 +4,7 @@ layout (quads, equal_spacing) in;
 
 uniform ivec2 u_PatchCount;
 uniform ivec2 u_MapSize;
-uniform vec3 u_Scale;
+uniform ivec2 u_HeightMapTextureSize;
 uniform sampler2D u_HeightMapSampler;
 
 
@@ -49,6 +49,8 @@ void main()
 	vec4 p = mix(p2, p1, gl_TessCoord.y);
 
 	p.y = texture(u_HeightMapSampler, tc).r;
+	//ivec2 itc = ivec2(tc * u_HeightMapTextureSize);
+	//p.y = texelFetch(u_HeightMapSampler, itc, 0).r;
 
 #ifdef PER_VERTEX_NORMAL
 	float nX = textureOffset(u_HeightMapSampler, tc, ivec2(-1, 0)).r - textureOffset(u_HeightMapSampler, tc, ivec2(1, 0)).r;

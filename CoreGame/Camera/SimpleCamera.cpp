@@ -240,7 +240,7 @@ void SimpleCamera::OnInit()
 #endif // DEEP_OCEAN_SAMPLE
 #ifdef PERLIN_NOISE_OCEAN_SAMPLE
 		{
-			Renderers::PerlinNoiseOcean::Renderer::Desc desc(512, 512, "medias/CubeMaps/uvCubeMap", Renderers::PerlinNoiseOcean::Renderer::ENormalMode::PerPixelNormal);
+			Renderers::PerlinNoiseOcean::Renderer::Desc desc(512, 512, "medias/CubeMaps/uvCubeMap", Renderers::PerlinNoiseOcean::Renderer::ENormalMode::PerVertexNormal);
 			//desc.mHeightMapTextureSize = glm::ivec2(128);
 
 			const float AmpCoef = 2.0f;
