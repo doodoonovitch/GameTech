@@ -16,6 +16,9 @@ in TCS_OUT
 
 #ifdef PER_VERTEX_NORMAL
 
+uniform float u_MaxAmplitude;
+uniform sampler2D u_NormalMapSampler;
+
 out TES_OUT
 {
 	vec2 TexUV;
@@ -53,11 +56,12 @@ void main()
 	//p.y = texelFetch(u_HeightMapSampler, itc, 0).r;
 
 #ifdef PER_VERTEX_NORMAL
-	float nX = textureOffset(u_HeightMapSampler, tc, ivec2(-1, 0)).r - textureOffset(u_HeightMapSampler, tc, ivec2(1, 0)).r;
-	float nZ = textureOffset(u_HeightMapSampler, tc, ivec2(0, -1)).r - textureOffset(u_HeightMapSampler, tc, ivec2(0, 1)).r;
-	tes_out.Normal = normalize(vec3(nX, 2, nZ));
-
+	//float nX = textureOffset(u_HeightMapSampler, tc, ivec2(-1, 0)).r - textureOffset(u_HeightMapSampler, tc, ivec2(1, 0)).r;
+	//float nZ = textureOffset(u_HeightMapSampler, tc, ivec2(0, -1)).r - textureOffset(u_HeightMapSampler, tc, ivec2(0, 1)).r;
+	//tes_out.Normal = normalize(vec3(-nX, 2, nZ));
+	tes_out.Normal = normalize(texture(u_NormalMapSampler, tc).rgb);
 #endif
+
 	vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1);
 
 	tes_out.Position = p.xyz;

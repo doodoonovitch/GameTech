@@ -76,8 +76,10 @@ private:
 		u_PatchCount,
 		u_MapSize,
 		u_HeightMapTextureSize,
+		u_MaxAmplitude,
 		u_HeightMapSampler,
 		u_PerMapDataSampler,
+
 		u_SkyboxCubeMapSampler,
 		u_textureSampler,
 		u_NormalMapSampler,
@@ -100,7 +102,6 @@ private:
 	HeightMapCS * mHeightMapCS;
 	CubeMapTexture const * mCubeMapTexture;
 	Texture2D const * mOceanColorTexture;
-	GLuint mNormalTextureId;
 
 	glm::ivec2 mHeightMapTextureSize;
 	glm::ivec2 mMapSize;

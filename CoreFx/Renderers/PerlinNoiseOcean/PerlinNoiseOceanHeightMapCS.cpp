@@ -17,6 +17,9 @@ HeightMapCS::HeightMapCS()
 	, mNoiseTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/noise.tif", GL_REPEAT, GL_REPEAT))
 	, mWaveCount(0)
 	, mHeightMapTextureId(0)
+	, mMaxAmplitude(0)
+	, mNormalCS("NormalMapComputeShader")
+	, mNormalMapTextureId(0)
 {
 	CreateBuffers();
 }
@@ -25,6 +28,8 @@ HeightMapCS::~HeightMapCS()
 {
 	glDeleteTextures(1, &mHeightMapTextureId);
 	Engine::GetInstance()->GetTextureManager()->ReleaseTexture2D(mNoiseTexture);
+
+	glDeleteTextures(1, &mNormalMapTextureId);
 }
 
 
@@ -47,6 +52,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 		for (int i = 0; i < mWaveCount; ++i)
 		{
 			const WaveProperty & src = waveProps[i];
+			mMaxAmplitude += src.mAmplitude;
 			wavePropsBuffer[WaveParams_Amplitude] = src.mAmplitude;
 			wavePropsBuffer[WaveParams_DirectionX] = src.mDirection.x;
 			wavePropsBuffer[WaveParams_DirectionY] = src.mDirection.z;
@@ -61,7 +67,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 
 	glGenTextures(1, &mHeightMapTextureId);
 	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
-	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_R32F, GL_RED, GL_FLOAT);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_R16F, GL_RED, GL_FLOAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// ---------------------------------------
@@ -71,7 +77,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 
-	const char * uniformNames[__hmap_cs_uniforms_count__] =
+	const char * uniformNames[(int)EHMapCSUniforms::__hmap_cs_uniforms_count__] =
 	{
 		"u_WaveCount",
 		"u_TextureSize",
@@ -80,12 +86,12 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 		"u_NoiseSampler"
 	};
 
-	mShader.AddUniforms(uniformNames, __hmap_cs_uniforms_count__);
+	mShader.AddUniforms(uniformNames, (int)EHMapCSUniforms::__hmap_cs_uniforms_count__);
 
-	glUniform1i(mShader.GetUniform(u_WaveCount), mWaveCount); GL_CHECK_ERRORS;
-	glUniform2iv(mShader.GetUniform(u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
-	glUniform2fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_NoiseSampler), 0); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform((int)EHMapCSUniforms::u_WaveCount), mWaveCount); GL_CHECK_ERRORS;
+	glUniform2iv(mShader.GetUniform((int)EHMapCSUniforms::u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
+	glUniform2fv(mShader.GetUniform((int)EHMapCSUniforms::u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform((int)EHMapCSUniforms::u_NoiseSampler), 0); GL_CHECK_ERRORS;
 
 
 	mShader.UnUse();
@@ -96,15 +102,52 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 	mIsInitialized = true;
 
 	PRINT_MESSAGE(".....done.");
+
+	LoadNormalMapShader();
+}
+
+void HeightMapCS::LoadNormalMapShader()
+{
+	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Normal Map Compute) Shaders : .....");
+
+	glGenTextures(1, &mNormalMapTextureId);
+	glBindTexture(GL_TEXTURE_2D, mNormalMapTextureId);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT, GL_RGBA8_SNORM, GL_RGBA, GL_UNSIGNED_BYTE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// ---------------------------------------
+
+	mNormalCS.LoadFromFile(GL_COMPUTE_SHADER, "shaders/HeightFieldOcean.normal.cs.glsl", Shader::EInclude::ComputeShadersCommon);
+
+	mNormalCS.CreateAndLinkProgram();
+	mNormalCS.Use();
+
+	const char * uniformNames[(int)ENMapCSUniforms::__nmap_cs_uniforms_count__] =
+	{
+		"u_TextureSize",
+		"u_HeightMapSampler"
+	};
+
+	mNormalCS.AddUniforms(uniformNames, (int)ENMapCSUniforms::__nmap_cs_uniforms_count__);
+
+	glUniform2iv(mNormalCS.GetUniform((int)ENMapCSUniforms::u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
+	glUniform1i(mNormalCS.GetUniform((int)ENMapCSUniforms::u_HeightMapSampler), 0); GL_CHECK_ERRORS;
+
+	mNormalCS.UnUse();
+
+	PRINT_MESSAGE("Normal map texture id : %li", mNormalMapTextureId);
+
+
+	PRINT_MESSAGE(".....done.");
 }
 
 void HeightMapCS::GenerateHeightMap()
 {
 	mShader.Use();
 
-	glUniform1f(mShader.GetUniform(u_Time), Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
+	glUniform1f(mShader.GetUniform((int)EHMapCSUniforms::u_Time), Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
 
-	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mHeightMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
+	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mHeightMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)EHMapCSBindings::u_WaveParamsBlock, mBufferIds[WavePropsBufferIndex]); GL_CHECK_ERRORS;
 
 	glActiveTexture(GL_TEXTURE0);
@@ -119,9 +162,32 @@ void HeightMapCS::GenerateHeightMap()
 	mShader.UnUse();
 }
 
+void HeightMapCS::GenerateNormalMap()
+{
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	mNormalCS.Use();
+
+	glUniform1f(mNormalCS.GetUniform((int)EHMapCSUniforms::u_Time), Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
+
+	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mNormalMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8_SNORM);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
+
+	//glDispatchCompute(mTextureSize.x / Shader::GetComputeWorkgroupSize(Shader::EComputeWorkgroupId::X), mTextureSize.y / Shader::GetComputeWorkgroupSize(Shader::EComputeWorkgroupId::Y), 1);
+	//glDispatchCompute(mTextureSize.x / 32, mTextureSize.y / 32, 1);
+	glDispatchCompute(mTextureSize.x, mTextureSize.y, 1);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	mNormalCS.UnUse();
+}
+
 void HeightMapCS::Compute()
 {
 	GenerateHeightMap();
+	GenerateNormalMap();
 }
 
 

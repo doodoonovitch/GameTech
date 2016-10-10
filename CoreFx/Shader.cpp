@@ -40,10 +40,11 @@ void Shader::InitializeComputeWorkgroupCount()
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &sComputeWorkgroupSize[1]);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &sComputeWorkgroupSize[2]);
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &sComputeWorkgroupInvocations);
+	sIsComputeWorkgroupCountInit = true;
 
-	PRINT_ERROR("[Shader-Info] Compute Workgroup Count : (%i, %i, %i).", sComputeWorkgroupCount[0], sComputeWorkgroupCount[1], sComputeWorkgroupCount[2], 0);
-	PRINT_ERROR("[Shader-Info] Compute Workgroup Size : (%i, %i, %i).", sComputeWorkgroupSize[0], sComputeWorkgroupSize[1], sComputeWorkgroupSize[2], 0);
-	PRINT_ERROR("[Shader-Info] Compute Workgroup invocations : %i.", sComputeWorkgroupInvocations, 0);
+	PRINT_MESSAGE("[Shader-Info] Compute Workgroup Count : (%i, %i, %i).", sComputeWorkgroupCount[0], sComputeWorkgroupCount[1], sComputeWorkgroupCount[2], 0);
+	PRINT_MESSAGE("[Shader-Info] Compute Workgroup Size : (%i, %i, %i).", sComputeWorkgroupSize[0], sComputeWorkgroupSize[1], sComputeWorkgroupSize[2], 0);
+	PRINT_MESSAGE("[Shader-Info] Compute Workgroup invocations : %i.", sComputeWorkgroupInvocations, 0);
 }
 
 void Shader::DeleteShaderProgram()

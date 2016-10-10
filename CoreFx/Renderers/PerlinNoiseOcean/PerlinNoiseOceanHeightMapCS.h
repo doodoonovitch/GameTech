@@ -27,12 +27,17 @@ public:
 	virtual void Compute() override;
 
 	GLuint GetHeightMapTextureId() const { return mHeightMapTextureId; }
+	GLfloat GetMaxAmplitude() const	{ return mMaxAmplitude;	}
+	GLuint GetNormalMapTextureId() const { return mNormalMapTextureId; }
 
 	void LoadShader(const WavePropertyList & waveProps, const glm::ivec2 & textureSize, const glm::vec2 & scale);
 
 private:
 
 	void GenerateHeightMap();
+
+	void LoadNormalMapShader();
+	void GenerateNormalMap();
 
 private:
 
@@ -47,7 +52,7 @@ private:
 		u_WaveParamsBlock,
 	};
 
-	enum EHMapCSUniforms
+	enum class EHMapCSUniforms
 	{
 		u_WaveCount,
 		u_TextureSize,
@@ -55,6 +60,13 @@ private:
 		u_Time,
 		u_NoiseSampler,
 		__hmap_cs_uniforms_count__
+	};
+
+	enum class ENMapCSUniforms
+	{
+		u_TextureSize,
+		u_HeightMapSampler,
+		__nmap_cs_uniforms_count__
 	};
 
 	enum EWaveParamsOffset
@@ -72,9 +84,13 @@ private:
 
 	GLint mWaveCount;
 	GLuint mHeightMapTextureId;
+	GLfloat mMaxAmplitude;
 
 	glm::ivec2 mTextureSize;
 	glm::vec2 mScale;
+
+	Shader mNormalCS;
+	GLuint mNormalMapTextureId;
 };
 
 

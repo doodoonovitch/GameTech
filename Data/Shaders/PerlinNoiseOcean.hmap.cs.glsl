@@ -6,7 +6,7 @@
 
 #define WAVEPARAM_ITEMS_COUNT	5
 
-layout (binding = 0, r32f) uniform image2D u_ImageOut;
+layout (binding = 0, r16f) uniform image2D u_ImageOut;
 layout (binding = 1, std430) coherent readonly buffer u_WaveParamsBlock
 {
 	float u_WaveParams[];

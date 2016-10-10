@@ -251,6 +251,7 @@
     <None Include="..\Data\Shaders\GerstnerWaves.hmap.cs.glsl" />
     <None Include="..\Data\Shaders\GerstnerWaves.tes.glsl" />
     <None Include="..\Data\Shaders\HeightFieldOcean.deferred.fs.glsl" />
+    <None Include="..\Data\Shaders\HeightFieldOcean.normal.cs.glsl" />
     <None Include="..\Data\Shaders\HeightFieldOcean.tcs.glsl" />
     <None Include="..\Data\Shaders\HeightFieldOcean.vs.glsl" />
     <None Include="..\Data\Shaders\HeightFieldOcean.wireframe.fs.glsl" />

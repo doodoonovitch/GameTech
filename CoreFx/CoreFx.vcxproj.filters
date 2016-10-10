@@ -551,6 +551,9 @@
     <None Include="..\Data\Shaders\HeightFieldOcean.wireframe.fs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
+    <None Include="..\Data\Shaders\HeightFieldOcean.normal.cs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">
