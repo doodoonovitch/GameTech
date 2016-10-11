@@ -154,10 +154,10 @@ void Renderer::LoadMainShader(const Desc & desc)
 	glUniform2iv(mShader.GetUniform(u_HeightMapTextureSize), 1, glm::value_ptr(mHeightMapTextureSize)); GL_CHECK_ERRORS;	
 	glUniform1f(mShader.GetUniform(u_MaxAmplitude), mHeightMapCS->GetMaxAmplitude()); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_HeightMapSampler), 0); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
+	//glUniform1i(mShader.GetUniform(u_PerMapDataSampler), 1); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 2); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_textureSampler), 3); GL_CHECK_ERRORS;
-	glUniform1i(mWireFrameShader.GetUniform(u_NormalMapSampler), 4); GL_CHECK_ERRORS;
+	glUniform1i(mWireFrameShader.GetUniform(u_NormalMapSampler), 1); GL_CHECK_ERRORS;
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -239,8 +239,8 @@ void Renderer::Render()
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, mHeightMapCS->GetHeightMapTextureId());
 
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+			//glActiveTexture(GL_TEXTURE1);
+			//glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
 	
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(mCubeMapTexture->GetTarget(), mCubeMapTexture->GetResourceId());
@@ -248,7 +248,7 @@ void Renderer::Render()
 			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, mOceanColorTexture->GetResourceId());
 
-			glActiveTexture(GL_TEXTURE4);
+			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, mHeightMapCS->GetNormalMapTextureId());
 
 			glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);

@@ -7,21 +7,21 @@ layout(location = 4) out vec3 outEmissive;
 uniform samplerCube u_SkyboxCubeMapSampler;
 uniform sampler2D u_textureSampler;
 
-#ifdef PER_PIXEL_NORMAL
+//#ifdef PER_PIXEL_NORMAL
 
-uniform sampler2D u_NormalMapSampler;
-uniform float u_MaxAmplitude;
+//uniform sampler2D u_NormalMapSampler;
+//uniform float u_MaxAmplitude;
 
-in TES_OUT
-{
-	vec2 TexUV;
-	vec3 ViewPosition;
-	vec3 Position;
-	flat int MapIndex;
-} fs_in;
+//in TES_OUT
+//{
+//	vec2 TexUV;
+//	vec3 ViewPosition;
+//	vec3 Position;
+//	flat int MapIndex;
+//} fs_in;
 
 
-#else
+//#else
 
 
 in TES_OUT
@@ -33,7 +33,7 @@ in TES_OUT
 	flat int MapIndex;
 } fs_in;
 
-#endif
+//#endif
 
 struct Material
 {
@@ -48,15 +48,16 @@ void main()
 {
 	vec2 texUV = fs_in.TexUV;
 
-#ifdef PER_PIXEL_NORMAL
-	float nX = textureOffset(u_NormalMapSampler, texUV, ivec2(-1, 0)).r - textureOffset(u_NormalMapSampler, texUV, ivec2(1, 0)).r;
-	float nZ = textureOffset(u_NormalMapSampler, texUV, ivec2(0, -1)).r - textureOffset(u_NormalMapSampler, texUV, ivec2(0, 1)).r;
-	vec3 normal = normalize(vec3(-nX, 2, -nZ));
-#else
+//#ifdef PER_PIXEL_NORMAL
+//	float nX = textureOffset(u_NormalMapSampler, texUV, ivec2(-1, 0)).r - textureOffset(u_NormalMapSampler, texUV, ivec2(1, 0)).r;
+//	float nZ = textureOffset(u_NormalMapSampler, texUV, ivec2(0, -1)).r - textureOffset(u_NormalMapSampler, texUV, ivec2(0, 1)).r;
+//	vec3 normal = normalize(vec3(-nX, 2, -nZ));
+//#else
 	vec3 normal = normalize(fs_in.Normal);
-#endif
+//#endif
 
 	Material mat;
+	mat.DiffuseColor = vec3(0, 0, 0);
 	mat.SpecularColor = vec3(0.2);
 	mat.Roughness = .1;
 
@@ -65,6 +66,8 @@ void main()
 	//vec3 R = reflect(viewDir, normal);
 	//vec3 reflectColor = texture(u_SkyboxCubeMapSampler, R).rgb;
 	mat.SpecularColor = refractColor;
+	
+	mat.SpecularColor = normal;
 
 	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.Roughness, vec3(0));
 	outPosition = fs_in.ViewPosition;

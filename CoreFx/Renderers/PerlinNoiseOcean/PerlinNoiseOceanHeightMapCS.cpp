@@ -112,7 +112,7 @@ void HeightMapCS::LoadNormalMapShader()
 
 	glGenTextures(1, &mNormalMapTextureId);
 	glBindTexture(GL_TEXTURE_2D, mNormalMapTextureId);
-	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT, GL_RGBA8_SNORM, GL_RGBA, GL_UNSIGNED_BYTE);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT, GL_RGBA32F, GL_RGBA, GL_UNSIGNED_BYTE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// ---------------------------------------
@@ -170,7 +170,7 @@ void HeightMapCS::GenerateNormalMap()
 
 	glUniform1f(mNormalCS.GetUniform((int)EHMapCSUniforms::u_Time), Engine::GetInstance()->GetTime()); GL_CHECK_ERRORS;
 
-	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mNormalMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8_SNORM);
+	glBindImageTexture((GLuint)EHMapCSBindings::u_ImageOut, mNormalMapTextureId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);

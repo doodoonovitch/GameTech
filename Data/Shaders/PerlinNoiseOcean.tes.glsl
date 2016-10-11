@@ -14,7 +14,7 @@ in TCS_OUT
 	int MapIndex;
 } tes_in[];
 
-#ifdef PER_VERTEX_NORMAL
+//#ifdef PER_VERTEX_NORMAL
 
 uniform float u_MaxAmplitude;
 uniform sampler2D u_NormalMapSampler;
@@ -28,17 +28,17 @@ out TES_OUT
 	flat int MapIndex;
 } tes_out;
 
-#else
+//#else
 
-out TES_OUT
-{
-	vec2 TexUV;
-	vec3 ViewPosition;
-	vec3 Position;
-	flat int MapIndex;
-} tes_out;
+//out TES_OUT
+//{
+//	vec2 TexUV;
+//	vec3 ViewPosition;
+//	vec3 Position;
+//	flat int MapIndex;
+//} tes_out;
 
-#endif
+//#endif
 
 
 void main()
@@ -55,12 +55,12 @@ void main()
 	//ivec2 itc = ivec2(tc * u_HeightMapTextureSize);
 	//p.y = texelFetch(u_HeightMapSampler, itc, 0).r;
 
-#ifdef PER_VERTEX_NORMAL
+//#ifdef PER_VERTEX_NORMAL
 	//float nX = textureOffset(u_HeightMapSampler, tc, ivec2(-1, 0)).r - textureOffset(u_HeightMapSampler, tc, ivec2(1, 0)).r;
 	//float nZ = textureOffset(u_HeightMapSampler, tc, ivec2(0, -1)).r - textureOffset(u_HeightMapSampler, tc, ivec2(0, 1)).r;
 	//tes_out.Normal = normalize(vec3(-nX, 2, nZ));
 	tes_out.Normal = normalize(texture(u_NormalMapSampler, tc).rgb);
-#endif
+//#endif
 
 	vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1);
 
