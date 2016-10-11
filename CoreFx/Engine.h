@@ -73,6 +73,7 @@ private:
 		u_TimeDeltaTime,
 		u_NormalMagnitude,
 		u_Exposure,
+		u_InvGamma,
 		u_PointLightCount,
 		u_SpotLightCount,
 		u_DirectionalLightCount,
@@ -94,12 +95,29 @@ public:
 		__UsedExtensions_count__
 	};
 
+	enum class EDeferredDebug
+	{
+		ShowNormalBuffer		= 1,
+		ShowAlbedoBuffer		= 2,
+		ShowSpecularBuffer		= 3,
+		ShowRoughnessBuffer		= 4,
+	};
+
 public:
 
 	static void Initialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	static void Release();
 
 	static Engine* GetInstance();
+
+	void EnableDeferredDebug(EDeferredDebug showBuffer)
+	{
+		mDeferredDebugState = (GLint)showBuffer;
+	}
+	void DisableDeferredDebug()
+	{
+		mDeferredDebugState = 0;
+	}
 
 	bool IsUsedExtensionSupported(UsedExtensions extension) const
 	{
@@ -378,7 +396,6 @@ private:
 
 	enum EToneMappingShaderUniformIndex
 	{
-		u_InvGamma,
 		u_HdrBuffer,
 
 		__tonemapping_uniforms_count__
@@ -475,6 +492,7 @@ private:
 		"u_TimeDeltaTime",
 		"u_NormalMagnitude",
 		"u_Exposure",
+		"u_InvGamma",
 		"u_PointLightCount",
 		"u_SpotLightCount",
 		"u_DirectionalLightCount",
@@ -572,6 +590,9 @@ private:
 
 	const Texture * mDisplayTexture;
 	GLint mDisplayTextureLayerIndex;
+
+	GLint mDeferredDebugState = 0;
+
 };
 
 

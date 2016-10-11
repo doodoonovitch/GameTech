@@ -32,7 +32,7 @@ Engine::Engine()
 	, mViewportHeight(1080)
 	, mExposure(0.1f)
 	, mGamma(1.0f)
-	, mInvGamma(1.0f)
+	, mInvGamma(1.0f/mGamma)
 	, mAmbientLight(0.1f, 0.1f, 0.1f, 0.f)
 	, mWireFrameColor(1.0f, 0.576f, 0.0f, 1.0f)
 	, mDrawVertexNormalColor(1.f, 1.f, 0.f, 0.f)
@@ -546,7 +546,6 @@ void Engine::InternalInitializeToneMappingShader()
 
 	const char * uniformNames[__tonemapping_uniforms_count__] =
 	{
-		"u_InvGamma",
 		"u_HdrBuffer"
 	};
 
@@ -810,6 +809,8 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_TimeDeltaTime], mTimeDeltaTime, sizeof(GLfloat) * 2);
 	memcpy(buffer + mFrameDataUniformOffsets[u_NormalMagnitude], &mDrawVertexNormalMagnitude, sizeof(GLfloat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_Exposure], &mExposure, sizeof(GLfloat));
+	memcpy(buffer + mFrameDataUniformOffsets[u_InvGamma], &mInvGamma, sizeof(GLfloat));
+	
 
 	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
@@ -957,8 +958,6 @@ void Engine::InternalRenderObjects()
 	glDisable(GL_DEPTH_TEST);
 
 	mToneMappingShader.Use();
-
-	glUniform1f(mToneMappingShader.GetUniform(u_InvGamma), mInvGamma);
 
 	glBindVertexArray(mQuad->GetVao());
 

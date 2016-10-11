@@ -103,6 +103,7 @@ layout (std140, shared) uniform FrameData
 	float u_NormalMagnitude;
 	
 	float u_Exposure;
+	float u_InvGamma;
 
 	int u_PointLightCount; 
 	int u_SpotLightCount;
