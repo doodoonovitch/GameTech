@@ -65,22 +65,25 @@ public:
 					done = TRUE;
 					break;
 
-				case WM_KEYDOWN:
-				case WM_KEYUP:
-				{
-					bool wasPressed = (msg.lParam & (1L << 30)) != 0;
-					int repeatCount = (int)(msg.lParam & 0x7FFF);
-					bool altPressed = (msg.lParam & (1L << 29)) != 0;
-					if ((msg.lParam & (1L << 31)) != 0)
-					{
-						OnKeyUp((wchar_t)msg.wParam, wasPressed, repeatCount, altPressed);
-					}
-					else
-					{
-						OnKeyDown((wchar_t)msg.wParam, wasPressed, repeatCount, altPressed);
-					}
-				}
-				break;
+				//case WM_KEYDOWN:
+				//{
+				//	bool wasPressed = (msg.lParam & (1L << 30)) != 0;
+				//	int repeatCount = (int)(msg.lParam & 0x7FFF);
+				//	bool altPressed = (msg.lParam & (1L << 29)) != 0;
+
+				//	OnKeyDown(msg.wParam, wasPressed, repeatCount, altPressed);
+				//}
+				//break;
+
+				//case WM_KEYUP:
+				//{
+				//	bool wasPressed = (msg.lParam & (1L << 30)) != 0;
+				//	int repeatCount = (int)(msg.lParam & 0x7FFF);
+				//	bool altPressed = (msg.lParam & (1L << 29)) != 0;
+
+				//	OnKeyUp(msg.wParam, wasPressed, repeatCount, altPressed);
+				//}
+				//break;
 
 				default:
 					TranslateMessage(&msg);
@@ -408,6 +411,22 @@ protected:
 			case WM_MOUSEMOVE:
 			{
 				OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+				return 0;
+			}
+
+			case WM_CHAR:
+			{
+				bool wasPressed = (lParam & (1L << 30)) != 0;
+				int repeatCount = (int)(lParam & 0x7FFF);
+				bool altPressed = (lParam & (1L << 29)) != 0;
+				if ((lParam & (1L << 31)) != 0)
+				{
+					OnKeyUp((wchar_t)wParam, wasPressed, repeatCount, altPressed);
+				}
+				else
+				{
+					OnKeyDown((wchar_t)wParam, wasPressed, repeatCount, altPressed);
+				}
 				return 0;
 			}
 		}

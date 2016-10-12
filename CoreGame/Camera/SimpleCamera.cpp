@@ -666,9 +666,6 @@ void SimpleCamera::OnMouseMove(int x, int y)
 
 void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, bool /*altPressed*/)
 {
-	if (wasPressed)
-		return;
-
 	float exposureInc = 0.01f;
 	float gammaInc = 0.01f;
 	switch (key)
@@ -782,16 +779,6 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 			UpdateSunPosition();
 		}
 		break;
-
-	case VK_F2:
-	{
-		mShowDeferredBufferState = (mShowDeferredBufferState + 1) % 5;
-		if (mShowDeferredBufferState == 0)
-			Engine::GetInstance()->DisableDeferredDebug();
-		else
-			Engine::GetInstance()->EnableDeferredDebug((Engine::EDeferredDebug)mShowDeferredBufferState);
-	}
-	break;
 	}
 	//glutPostRedisplay();
 }
@@ -870,6 +857,22 @@ void SimpleCamera::OnUpdate()
 		bStrafe = true;
 	}
 
+	static bool wasF2Pressed = false;
+	if (GetAsyncKeyState(VK_F2) & 0x8000)
+	{
+		if (!wasF2Pressed)
+		{
+			mShowDeferredBufferState = (mShowDeferredBufferState + 1) % 5;
+			if (mShowDeferredBufferState == 0)
+				Engine::GetInstance()->DisableDeferredDebug();
+			else
+				Engine::GetInstance()->EnableDeferredDebug((Engine::EDeferredDebug)mShowDeferredBufferState);
+		}
+		wasF2Pressed = true;
+	}
+	else
+		wasF2Pressed = false;
+	
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
 	}
