@@ -45,6 +45,7 @@ Engine::Engine()
 	, mToneMappingShader("ToneMappingShader")
 	, mCopyShader("CopyShader")
 	, mViewTex2DArrayShader("CopyTex2DArrayShader")
+	, mShowDeferredBuffersShader("ShowDeferredBuffersShader")
 	, mPointLightPositionRenderer(nullptr)
 	, mSpotLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
@@ -225,6 +226,7 @@ void Engine::CreateDynamicResources()
 	InternalInitializeToneMappingShader();
 	InternalInitializeCopyShader();
 	InternalInitializeViewTex2DArrayShader();
+	InternalInitializeShowDeferredBuffersShader();
 }
 
 void Engine::InternalCreateGBuffers()
@@ -630,7 +632,51 @@ void Engine::InternalInitializeViewTex2DArrayShader()
 	PRINT_END_SECTION;
 }
 
+void Engine::InternalInitializeShowDeferredBuffersShader()
+{
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize Show Deferred Buffers shader (debugging purpose).....");
 
+	//setup shader
+
+	// vertex shader
+	mShowDeferredBuffersShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+	mShowDeferredBuffersShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/ShowDeferredBuffers.fs.glsl");
+
+	mShowDeferredBuffersShader.CreateAndLinkProgram();
+
+	const char * uniformNames[(int)EShowDeferredShaderUniformIndex::__uniforms_count__] =
+	{
+		"u_gBufferPosition",
+		"u_gBufferNormal",
+		"u_gBufferAlbedoAndStatus",
+		"u_gBufferSpecularRoughness",
+		"u_gBufferEmissive",
+		"u_lightDescSampler",
+		"u_lightDataSampler",
+		"u_BufferToShow"
+	};
+
+	mShowDeferredBuffersShader.Use();
+
+	mShowDeferredBuffersShader.AddUniforms(uniformNames, (int)EShowDeferredShaderUniformIndex::__uniforms_count__);
+
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_lightDescSampler), 0);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_lightDataSampler), 1);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferPosition), 2);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferNormal), 3);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferAlbedoAndStatus), 4);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferSpecularRoughness), 5);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferEmissive), 6);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_BufferToShow), mDeferredDebugState);
+
+	mShowDeferredBuffersShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
+}
 
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
 {
@@ -900,182 +946,239 @@ void Engine::InternalRenderObjects()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	// -----------------------------------------------------------------------
-	// light pass
-	// -----------------------------------------------------------------------
+	if (mDeferredDebugState == 0)
+	{
+		// -----------------------------------------------------------------------
+		// light pass
+		// -----------------------------------------------------------------------
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
 
-	glClear(GL_COLOR_BUFFER_BIT); 
+		glClear(GL_COLOR_BUFFER_BIT);
 
-	glDepthMask(GL_FALSE); 
-	glDisable(GL_DEPTH_TEST); 
+		glDepthMask(GL_FALSE);
+		glDisable(GL_DEPTH_TEST);
 
-	mDeferredShader.Use();
+		mDeferredShader.Use();
 		glBindVertexArray(mQuad->GetVao());
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
 
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
 
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
 
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
 
-			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
 
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
 
-			//glActiveTexture(GL_TEXTURE2);
-			//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
+		//glActiveTexture(GL_TEXTURE2);
+		//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
 
-			//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
-			//{
-			//	glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
-			//	glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
-			//}
+		//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
+		//{
+		//	glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
+		//	glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
+		//}
 
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-	mDeferredShader.UnUse();
+		mDeferredShader.UnUse();
 
-	// -----------------------------------------------------------------------
-	// tone mapping pass
-	// -----------------------------------------------------------------------
+		// -----------------------------------------------------------------------
+		// tone mapping pass
+		// -----------------------------------------------------------------------
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	glDepthMask(GL_FALSE);
-	glDisable(GL_DEPTH_TEST);
-
-	mToneMappingShader.Use();
-
-	glBindVertexArray(mQuad->GetVao());
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
-
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-	mToneMappingShader.UnUse();
-
-	// -----------------------------------------------------------------------
-	// forward pass
-	// -----------------------------------------------------------------------
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthMask(GL_TRUE);
-
-	//glDisable(GL_CULL_FACE);
-	mForwardRenderers->ForEach([](Renderer * renderer)
-	{
-		if(renderer->GetIsInitialized())
-			renderer->Render();
-	});
-	//glEnable(GL_CULL_FACE);
-
-	if (mIsDrawLightPositionEnabled)
-	{
-		if(mPointLightPositionRenderer->GetIsInitialized())
-			mPointLightPositionRenderer->Render();
-		if (mSpotLightPositionRenderer->GetIsInitialized())
-			mSpotLightPositionRenderer->Render();
-	}
-
-	// -----------------------------------------------------------------------
-	// wire frame pass
-	// -----------------------------------------------------------------------
-
-	if (GetWireFrame())
-	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
+		//glClear(GL_COLOR_BUFFER_BIT);
 		glDepthMask(GL_FALSE);
-		glDepthFunc(GL_LEQUAL);
+		glDisable(GL_DEPTH_TEST);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		mToneMappingShader.Use();
 
-		mRenderers->ForEach([](Renderer * renderer)
+		glBindVertexArray(mQuad->GetVao());
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+		mToneMappingShader.UnUse();
+
+		// -----------------------------------------------------------------------
+		// forward pass
+		// -----------------------------------------------------------------------
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthMask(GL_TRUE);
+
+		//glDisable(GL_CULL_FACE);
+		mForwardRenderers->ForEach([](Renderer * renderer)
 		{
-			if(renderer->GetIsInitialized())
-				renderer->RenderWireFrame();
+			if (renderer->GetIsInitialized())
+				renderer->Render();
 		});
-
-		if(mSkybox != nullptr && mSkybox->GetIsInitialized())
-			mSkybox->RenderWireFrame();
-		else if (mSkydome != nullptr && mSkydome->GetIsInitialized())
-			mSkydome->RenderWireFrame();
+		//glEnable(GL_CULL_FACE);
 
 		if (mIsDrawLightPositionEnabled)
 		{
 			if (mPointLightPositionRenderer->GetIsInitialized())
-				mPointLightPositionRenderer->RenderWireFrame();
+				mPointLightPositionRenderer->Render();
 			if (mSpotLightPositionRenderer->GetIsInitialized())
-				mSpotLightPositionRenderer->RenderWireFrame();
+				mSpotLightPositionRenderer->Render();
 		}
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
+		// -----------------------------------------------------------------------
+		// wire frame pass
+		// -----------------------------------------------------------------------
 
-	// -----------------------------------------------------------------------
-	// draw normal (from GBuffer) pass
-	// -----------------------------------------------------------------------
+		if (GetWireFrame())
+		{
+			glDepthMask(GL_FALSE);
+			glDepthFunc(GL_LEQUAL);
 
-	if (mIsDrawGBufferNormalEnabled)
-	{
-		//glEnable(GL_BLEND);
-		//glBlendEquation(GL_FUNC_ADD);
-		//glBlendFunc(GL_ONE, GL_ONE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			mRenderers->ForEach([](Renderer * renderer)
+			{
+				if (renderer->GetIsInitialized())
+					renderer->RenderWireFrame();
+			});
+
+			if (mSkybox != nullptr && mSkybox->GetIsInitialized())
+				mSkybox->RenderWireFrame();
+			else if (mSkydome != nullptr && mSkydome->GetIsInitialized())
+				mSkydome->RenderWireFrame();
+
+			if (mIsDrawLightPositionEnabled)
+			{
+				if (mPointLightPositionRenderer->GetIsInitialized())
+					mPointLightPositionRenderer->RenderWireFrame();
+				if (mSpotLightPositionRenderer->GetIsInitialized())
+					mSpotLightPositionRenderer->RenderWireFrame();
+			}
+
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
+		// -----------------------------------------------------------------------
+		// draw normal (from GBuffer) pass
+		// -----------------------------------------------------------------------
+
+		if (mIsDrawGBufferNormalEnabled)
+		{
+			//glEnable(GL_BLEND);
+			//glBlendEquation(GL_FUNC_ADD);
+			//glBlendFunc(GL_ONE, GL_ONE);
+			glDepthMask(GL_FALSE);
+			glDisable(GL_DEPTH_TEST);
+
+			mDrawGBufferNormalShader.Use();
+
+			glBindVertexArray(mQuad->GetVao());
+
+			glUniform2iv(mDrawGBufferNormalShader.GetUniform(Renderers::DrawGBufferNormalShader::u_PatchCount), 1, glm::value_ptr(mDrawGBufferNormalPatchCount));
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mDrawGBufferNormalPatchCount.x * mDrawGBufferNormalPatchCount.y);
+
+			glBindVertexArray(0);
+			mDrawGBufferNormalShader.UnUse();
+		}
+
+		// -----------------------------------------------------------------------
+		// copy to main framebuffer
+		// -----------------------------------------------------------------------
+
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
 		glDepthMask(GL_FALSE);
 		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
 
-		mDrawGBufferNormalShader.Use();
-
+		mCopyShader.Use();
 		glBindVertexArray(mQuad->GetVao());
 
-		glUniform2iv(mDrawGBufferNormalShader.GetUniform(Renderers::DrawGBufferNormalShader::u_PatchCount), 1, glm::value_ptr(mDrawGBufferNormalPatchCount));
-
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
+		glBindTexture(GL_TEXTURE_2D, mForwardBuffer);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
-
-		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mDrawGBufferNormalPatchCount.x * mDrawGBufferNormalPatchCount.y);
-
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
-		mDrawGBufferNormalShader.UnUse();
+		mCopyShader.UnUse();
 	}
+	else
+	{
+		InternalRenderDeferredBuffers();
+	}
+}
 
-	// -----------------------------------------------------------------------
-	// copy to main framebuffer
-	// -----------------------------------------------------------------------
-
-
+void Engine::InternalRenderDeferredBuffers()
+{
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	mCopyShader.Use();
+	mShowDeferredBuffersShader.Use();
 	glBindVertexArray(mQuad->GetVao());
 
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_BufferToShow), mDeferredDebugState);
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mForwardBuffer);
+	glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
+
+	//glActiveTexture(GL_TEXTURE2);
+	//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
+
+	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
+	//{
+	//	glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
+	//	glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
+	//}
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
-	mCopyShader.UnUse();
+	mShowDeferredBuffersShader.UnUse();
 }
 
 void Engine::InternalDisplayTexture()

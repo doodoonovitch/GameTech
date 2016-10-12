@@ -364,12 +364,14 @@ private:
 	void InternalInitializeToneMappingShader();
 	void InternalInitializeCopyShader();
 	void InternalInitializeViewTex2DArrayShader();
+	void InternalInitializeShowDeferredBuffersShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
 
 	void InternalComputePass();
 	void InternalRenderObjects();
 	void InternalDisplayTexture();
+	void InternalRenderDeferredBuffers();
 
 	Engine();
 	~Engine();
@@ -416,6 +418,20 @@ private:
 		__copytex2Darrayshader_uniforms_count__
 	};
 
+	enum class EShowDeferredShaderUniformIndex 
+	{
+		u_gBufferPosition,
+		u_gBufferNormal,
+		u_gBufferAlbedoAndStatus,
+		u_gBufferSpecularRoughness,
+		u_gBufferEmissive,
+		u_lightDescSampler,
+		u_lightDataSampler,
+		u_BufferToShow,
+
+		__uniforms_count__
+	};
+
 	static Engine* sInstance;
 	static bool sIsUsedExtensionSupported[__UsedExtensions_count__ + 1];
 
@@ -437,6 +453,7 @@ private:
 	Shader mToneMappingShader;
 	Shader mCopyShader;
 	Shader mViewTex2DArrayShader;
+	Shader mShowDeferredBuffersShader;
 
 	GLuint mDeferredFBO;
 	GLuint mDepthRBO;

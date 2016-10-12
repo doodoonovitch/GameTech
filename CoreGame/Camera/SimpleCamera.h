@@ -26,7 +26,8 @@ public:
 
 	void OnMouseButton(MouseState mouseState, int x, int y);
 	void OnMouseMove(int x, int y);
-	void OnKeyDown(wchar_t key);
+	void OnKeyDown(WPARAM key, bool wasPressed, int repeatCount, bool altPressed);
+	void OnKeyUp(WPARAM key, bool wasPressed, int repeatCount, bool altPressed);
 
 	void OnWindowActivate() {}
 	void OnWindowUnactivate() {}
@@ -74,6 +75,8 @@ private:
 	float mMouseX = 0, mMouseY = 0; //filtered mouse values
 	bool mUseFiltering = true;
 	bool mFreezeTimer = false;
+
+	GLint mShowDeferredBufferState = 0;
 
 };
 

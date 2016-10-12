@@ -664,13 +664,16 @@ void SimpleCamera::OnMouseMove(int x, int y)
 	}
 }
 
-void SimpleCamera::OnKeyDown(wchar_t key)
+void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, bool /*altPressed*/)
 {
+	if (wasPressed)
+		return;
+
 	float exposureInc = 0.01f;
 	float gammaInc = 0.01f;
 	switch (key)
 	{
-	case L' ':
+	case VK_SPACE:
 		mUseFiltering = !mUseFiltering;
 		break;
 
@@ -779,8 +782,22 @@ void SimpleCamera::OnKeyDown(wchar_t key)
 			UpdateSunPosition();
 		}
 		break;
+
+	case VK_F2:
+	{
+		mShowDeferredBufferState = (mShowDeferredBufferState + 1) % 5;
+		if (mShowDeferredBufferState == 0)
+			Engine::GetInstance()->DisableDeferredDebug();
+		else
+			Engine::GetInstance()->EnableDeferredDebug((Engine::EDeferredDebug)mShowDeferredBufferState);
+	}
+	break;
 	}
 	//glutPostRedisplay();
+}
+
+void SimpleCamera::OnKeyUp(WPARAM /*key*/, bool /*wasPressed*/, int /*repeatCount*/, bool /*altPressed*/)
+{
 }
 
 void SimpleCamera::filterMouseMoves(float dx, float dy)

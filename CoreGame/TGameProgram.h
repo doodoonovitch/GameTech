@@ -59,14 +59,33 @@ public:
 		{
 			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
-				if (msg.message == WM_QUIT)
+				switch (msg.message)
 				{
+				case WM_QUIT:
 					done = TRUE;
-				}
-				else
+					break;
+
+				case WM_KEYDOWN:
+				case WM_KEYUP:
 				{
+					bool wasPressed = (msg.lParam & (1L << 30)) != 0;
+					int repeatCount = (int)(msg.lParam & 0x7FFF);
+					bool altPressed = (msg.lParam & (1L << 29)) != 0;
+					if ((msg.lParam & (1L << 31)) != 0)
+					{
+						OnKeyUp((wchar_t)msg.wParam, wasPressed, repeatCount, altPressed);
+					}
+					else
+					{
+						OnKeyDown((wchar_t)msg.wParam, wasPressed, repeatCount, altPressed);
+					}
+				}
+				break;
+
+				default:
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
+					break;
 				}
 			}
 			else
@@ -391,12 +410,6 @@ protected:
 				OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 				return 0;
 			}
-
-			case WM_CHAR:
-			{
-				OnKeyDown((wchar_t)wParam);
-				return 0;
-			}
 		}
 
 		// Pass All Unhandled Messages To DefWindowProc
@@ -461,9 +474,14 @@ private:
 		sGameProgram->mGameEngine.OnMouseMove(x, y);
 	}
 
-	static void OnKeyDown(wchar_t key)
+	static void OnKeyDown(WPARAM key, bool wasPressed, int repeatCount, bool altPressed)
 	{
-		sGameProgram->mGameEngine.OnKeyDown(key);
+		sGameProgram->mGameEngine.OnKeyDown(key, wasPressed, repeatCount, altPressed);
+	}
+
+	static void OnKeyUp(WPARAM key, bool wasPressed, int repeatCount, bool altPressed)
+	{
+		sGameProgram->mGameEngine.OnKeyUp(key, wasPressed, repeatCount, altPressed);
 	}
 
 protected:
