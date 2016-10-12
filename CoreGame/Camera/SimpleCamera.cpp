@@ -246,7 +246,7 @@ void SimpleCamera::OnInit()
 			const float AmpCoef = 2.0f;
 			const float WaveLengthCoef = 1.0f;
 			const float VelocityCoef = 0.01f;
-			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(090.0f, WaveLengthCoef / 4.00f, AmpCoef * 5.0f, VelocityCoef * 1.0f));
+			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(090.0f, WaveLengthCoef / 4.00f, AmpCoef * 8.0f, VelocityCoef * 1.0f));
 			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(005.0f, WaveLengthCoef / 0.70f, AmpCoef * 0.4f, VelocityCoef * 2.0f));
 			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(200.0f, WaveLengthCoef / 0.03f, AmpCoef * 0.2f, VelocityCoef * 3.0f));
 			desc.mWaveProps.push_back(Renderers::PerlinNoiseOcean::WaveProperty(305.0f, WaveLengthCoef / 0.50f, AmpCoef * 0.1f, VelocityCoef * 4.0f));
