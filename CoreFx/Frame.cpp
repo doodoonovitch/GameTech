@@ -11,8 +11,9 @@ namespace CoreFx
 
 
 
-Frame::Frame()
-	: mDQ()
+Frame::Frame(SceneObjectType sceneObjectType)
+	: mSceneObjectType(sceneObjectType)
+	, mDQ()
 	, mScale(1.f)
 	, mIsModified(true)
 {

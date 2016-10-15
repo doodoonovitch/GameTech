@@ -16,6 +16,7 @@ Engine::Engine()
 	, mRenderers(nullptr)
 	, mForwardRenderers(nullptr)
 	, mComputes(nullptr)
+	, mFrameContainers(nullptr)
 	, mCamera(nullptr)
 	, mSkybox(nullptr)
 	, mQuad(nullptr)
@@ -74,6 +75,8 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 {
 	if (!mInitialized)
 	{
+		InternalInitializeFrameConstainers();
+
 		mPointLightPositionRenderer = new PointLightPositionRenderer();
 		mSpotLightPositionRenderer = new SpotLightPositionRenderer();
 
@@ -152,8 +155,29 @@ void Engine::InternalRelease()
 
 		SAFE_DELETE(mQuad);
 
+		InternalReleaseFrameConstainers();
+
 		mInitialized = false;
 		mIsDrawVertexNormalEnabled = false;
+	}
+}
+
+void Engine::InternalInitializeFrameConstainers()
+{
+	mFrameContainers = new FrameContainerContainer(SceneObjectTypeId::__count__, nullptr);
+}
+
+void Engine::InternalReleaseFrameConstainers()
+{
+	if (mFrameContainers != nullptr)
+	{
+		for (FrameContainerContainer::iterator it = mFrameContainers->begin(); it != mFrameContainers->end(); ++it)
+		{
+			FrameContainer *& container = *it;
+			SAFE_DELETE(container);
+		}
+
+		SAFE_DELETE(mFrameContainers);
 	}
 }
 
@@ -1415,6 +1439,62 @@ void Engine::UndisplayTexture2DArray()
 {
 	mDisplayTexture = nullptr;
 }
+
+
+
+
+// =======================================================================
+// =======================================================================
+// =======================================================================
+
+
+
+
+
+
+Frame * Engine::CreateObjectLocation(SceneObjectType sceneObjectType, size_t defaultContainerCapacity, size_t defaultContainerPageSize)
+{
+	assert(mFrameContainers != nullptr);
+	assert(sceneObjectType < mFrameContainers->size());
+	FrameContainer *& container = (*mFrameContainers)[sceneObjectType];
+	if (container == nullptr)
+	{
+		container = new FrameContainer(defaultContainerCapacity, defaultContainerPageSize);
+	}
+	Frame * frame = new Frame(sceneObjectType);
+	container->Attach(frame);
+	return frame;
+}
+
+void Engine::DeleteObjectLocation(Frame *& frame)
+{
+	if (frame == nullptr)
+		return;
+
+	SceneObjectType sceneObjectType = frame->GetSceneObjectType();
+	assert(sceneObjectType < mFrameContainers->size());
+
+	FrameContainer * container = (*mFrameContainers)[sceneObjectType];
+	container->Detach(frame);
+	SAFE_DELETE(frame);
+}
+
+
+
+
+
+// =======================================================================
+// =======================================================================
+// =======================================================================
+
+
+
+
+
+
+// =======================================================================
+// =======================================================================
+
 
 
 

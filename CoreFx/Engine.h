@@ -218,6 +218,12 @@ public:
 	// Lights
 public:
 
+	Frame * CreateObjectLocation(SceneObjectType sceneObjectType, size_t defaultContainerCapacity = 100, size_t defaultContainerPageSize = 100);
+	void DeleteObjectLocation(Frame *& frame);
+
+	// Lights
+public:
+
 	const glm::vec4 & GetAmbientLight() const
 	{
 		return mAmbientLight;
@@ -338,9 +344,11 @@ public:
 
 private:
 
+	typedef InstanceContainer<Frame> FrameContainer;
 	typedef InstanceContainer<ComputeShader> ComputeShaderContainer;
 	typedef InstanceContainer<Renderer> RendererContainer;
 	typedef InstanceContainer<Lights::Light> LightContainer;
+	typedef std::vector<FrameContainer *> FrameContainerContainer;
 
 private:
 
@@ -372,6 +380,9 @@ private:
 	void InternalRenderObjects();
 	void InternalDisplayTexture();
 	void InternalRenderDeferredBuffers();
+
+	void InternalInitializeFrameConstainers();
+	void InternalReleaseFrameConstainers();
 
 	Engine();
 	~Engine();
@@ -441,6 +452,7 @@ private:
 	ComputeShaderContainer * mComputes;
 	LightContainer * mLights[Lights::Light::__light_type_count__];
 	GLint mLightDescIndexOffsets[Lights::Light::__light_type_count__];
+	FrameContainerContainer * mFrameContainers;
 
 	Camera * mCamera;
 	Renderers::SkyboxRenderer  * mSkybox;

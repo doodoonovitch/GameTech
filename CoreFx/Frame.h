@@ -9,13 +9,34 @@ namespace CoreFx
 	// =======================================================================
 
 
+class Engine;
 
+typedef std::uint32_t SceneObjectType;
 
-class Frame 
+class SceneObjectTypeId
 {
 public:
+	enum ESceneObjectType
+	{
+		NoLocationObject,
+		StaticLocationObject,
+		LightObject,
+		DynamicObject_1,
+		DynamicObject_2,
+		DynamicObject_3,
 
-	Frame();
+		__count__
+	};
+};
+
+
+class Frame : public ObjectInstance
+{
+	friend class Engine;
+
+protected:
+
+	Frame(SceneObjectType sceneObjectType);
 	~Frame();
 
 public:
@@ -37,6 +58,8 @@ public:
 	inline const glm::vec3 & GetScale() const;
 	inline void SetScale(const glm::vec3 &value);
 
+	SceneObjectType GetSceneObjectType() const { return mSceneObjectType; }
+
 private:
 
 	Frame(const Frame& rhs) = delete;
@@ -44,8 +67,11 @@ private:
 
 private:
 
+	SceneObjectType mSceneObjectType;
+
 	Maths::DualQuaternion mDQ;
 	glm::vec3 mScale;
+
 
 	bool mIsModified;
 };

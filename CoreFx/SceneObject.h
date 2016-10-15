@@ -17,13 +17,13 @@ class SceneObject : public ObjectInstance
 {
 public:
 
-	SceneObject(bool hasFrame = false);
+	SceneObject(SceneObjectType objectType = SceneObjectTypeId::NoLocationObject);
 
 	virtual ~SceneObject();
 
 	inline Frame* GetFrame() const;
-	inline void SetFrame(Frame* frame);
-	inline void SwapFrame(Frame*& frame);
+	//inline void SetFrame(Frame* frame);
+	//inline void SwapFrame(Frame*& frame);
 
 private:
 
@@ -48,16 +48,16 @@ inline Frame* SceneObject::GetFrame() const
 }
 
 
-inline void SceneObject::SetFrame(Frame* frame)
-{
-	delete mFrame;
-	mFrame = frame;
-}
+//inline void SceneObject::SetFrame(Frame* frame)
+//{
+//	delete mFrame;
+//	mFrame = frame;
+//}
 
-inline void SceneObject::SwapFrame(Frame*& frame)
-{
-	std::swap(mFrame, frame);
-}
+//inline void SceneObject::SwapFrame(Frame*& frame)
+//{
+//	std::swap(mFrame, frame);
+//}
 
 
 

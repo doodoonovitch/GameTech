@@ -6,16 +6,15 @@ namespace CoreFx
 
 
 
-SceneObject::SceneObject(bool hasFrame /*= false*/)
-	: mFrame(hasFrame ? new Frame() : nullptr)
+SceneObject::SceneObject(SceneObjectType objectType)
+	: mFrame(objectType != SceneObjectTypeId::NoLocationObject ? Engine::GetInstance()->CreateObjectLocation(objectType) : nullptr)
 {
 }
 
 
 SceneObject::~SceneObject()
 {
-	delete mFrame;
-	mFrame = nullptr;
+	Engine::GetInstance()->DeleteObjectLocation(mFrame);
 }
 
 //void SceneObject::Update()
