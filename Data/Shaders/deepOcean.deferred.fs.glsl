@@ -1,5 +1,5 @@
 layout(location = 0) out vec3 outPosition;
-layout(location = 1) out vec3 outNormal;
+layout(location = 1) out vec4 outNormal;
 layout(location = 2) out uvec4 outAlbedoAndStatus;
 layout(location = 3) out vec4 outSpecularAndRoughness;
 layout(location = 4) out vec3 outEmissive;
@@ -87,10 +87,9 @@ void main()
 	//vec3 R = reflect(viewDir, normal);
 	//mat.DiffuseColor = texture(u_SkyboxCubeMapSampler, R).xyz;
 
+	normal = dqTransformNormal(normal, u_ViewDQ);
+
 	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.SpecularPower, vec3(0));
 	outPosition = fs_in.ViewPosition;
-	//outNormal = dqTransformNormal(normal, fs_in.ViewModelDQ);
-	outNormal = dqTransformNormal(normal, u_ViewDQ);
-	//outNormal = (u_ViewMatrix * vec4(normal, 0)).xyz;
-	//outNormal = vec3(0, 1, 0);
+	outNormal = vec4(normal.xyz, gl_FragCoord.z);
 }

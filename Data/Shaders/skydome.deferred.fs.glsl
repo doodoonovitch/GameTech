@@ -1,5 +1,5 @@
 layout(location = 0) out vec3 outPosition;
-layout(location = 1) out vec3 outNormal;
+layout(location = 1) out vec4 outNormal;
 layout(location = 2) out uvec4 outAlbedoAndStatus;
 layout(location = 3) out vec4 outSpecularAndRoughness;
 layout(location = 4) out vec3 outEmissive;
@@ -13,5 +13,5 @@ void main(void)
 {
 	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, SKYBOX_RENDERER_ID , vec3(0), fs_in.Color, 0, vec3(0));
 	outPosition = vec3(0);
-	outNormal = vec3(0);
+	outNormal = vec4(0, 0, 0, gl_FragCoord.z);
 }

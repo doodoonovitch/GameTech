@@ -307,10 +307,10 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
 //#define ARTORIAS_SWORD_MODEL
-#define BOX_MODEL
+//#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
-//#define CERBERUS_MODEL
+#define CERBERUS_MODEL
 
 
 #ifdef ARTORIAS_SWORD_MODEL

@@ -1,5 +1,5 @@
 layout(location = 0) out vec3 outPosition;
-layout(location = 1) out vec3 outNormal;
+layout(location = 1) out vec4 outNormal;
 layout(location = 2) out uvec4 outAlbedoAndStatus;
 layout(location = 3) out vec4 outSpecularAndRoughness;
 layout(location = 4) out vec3 outEmissive;
@@ -82,7 +82,7 @@ void main(void)
 	}
 	
 	outPosition = fs_in.Position.xyz;
-	outNormal = normal.xyz;
+	outNormal = vec4(normal.xyz, gl_FragCoord.z);
 
 	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);
 

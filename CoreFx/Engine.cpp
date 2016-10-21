@@ -281,7 +281,7 @@ void Engine::InternalCreateGBuffers()
 	GL_CHECK_ERRORS;
 
 	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBuffers[gBuffer_NormalBuffer], 0);
@@ -864,6 +864,7 @@ void Engine::RenderObjects()
 	glm::mat4 viewMatrix(mCamera->GetViewMatrix());
 	glm::vec4 depthRangeFovAspect(mCamera->GetNearZ(), mCamera->GetFarZ(), mCamera->GetFovY(), mCamera->GetAspect());
 	glm::vec4 bufferViewportSize(mGBufferWidth, mGBufferHeight, mViewportWidth, mViewportHeight);
+	glm::vec4 leftRightTopBottom(0, 0, mViewportWidth, mViewportHeight);
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(mCamera->GetInverseProjectionMatrix()), sizeof(glm::mat4));
@@ -875,7 +876,8 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_WireFrameDrawColor], glm::value_ptr(mWireFrameColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_VertexNormalColor], glm::value_ptr(mDrawVertexNormalColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_BufferViewportSize], glm::value_ptr(bufferViewportSize), sizeof(glm::vec4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_DepthRangeFovYAspect], glm::value_ptr(depthRangeFovAspect), sizeof(glm::vec4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_NearFarFovYAspect], glm::value_ptr(depthRangeFovAspect), sizeof(glm::vec4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_LeftRightTopBottom], glm::value_ptr(leftRightTopBottom), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_TimeDeltaTime], mTimeDeltaTime, sizeof(GLfloat) * 2);
 	memcpy(buffer + mFrameDataUniformOffsets[u_NormalMagnitude], &mDrawVertexNormalMagnitude, sizeof(GLfloat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_Exposure], &mExposure, sizeof(GLfloat));

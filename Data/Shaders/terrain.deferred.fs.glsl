@@ -1,5 +1,5 @@
 layout(location = 0) out vec3 outPosition;
-layout(location = 1) out vec3 outNormal;
+layout(location = 1) out vec4 outNormal;
 layout(location = 2) out uvec4 outAlbedoAndStatus;
 layout(location = 3) out vec4 outSpecularAndRoughness;
 layout(location = 4) out vec3 outEmissive;
@@ -128,7 +128,7 @@ void main()
 
 	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, TERRAIN_RENDERER_ID / 255)), packUnorm4x8(vec4(mat.SpecularColor, mat.Roughness / 255)), 0);
 	outPosition = fs_in.ViewPosition;
-	outNormal = normal;
+	outNormal = vec4(normal.xyz, gl_FragCoord.z);
 }
 /*
 void GetMaterial(out Material blendedMat, vec3 uvs, vec3 blendWeights, vec3 normal, vec3 position)
