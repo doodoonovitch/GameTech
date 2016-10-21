@@ -57,10 +57,9 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 	vec4 temp;
 
 	temp = texture(u_gBufferNormal, fs_in.TexUV, 0);
-	fi.Normal = temp.xyz;
+	fi.Normal = normalize(temp.xyz);
 
 	//fi.Position = texture(u_gBufferPosition, fs_in.TexUV, 0).xyz;
-	//fi.Position.z = ReconstructZ(temp.w);
 	fi.Position = ReconstructPosition(temp.w);
 
 	uvec4 data = texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0);
