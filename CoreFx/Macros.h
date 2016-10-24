@@ -19,6 +19,8 @@
 	delete [] p; \
 	p = nullptr
 
+#define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
+
 //namespace CoreFx
 //{
 //	namespace Log

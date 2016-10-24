@@ -3,6 +3,7 @@ layout(location = 0) out vec4 vFragColor;
 in VS_OUT
 {
 	vec2 TexUV;
+	vec2 ViewRay;
 } fs_in;
 
 
@@ -11,6 +12,7 @@ uniform sampler2D u_gBufferNormal;
 uniform usampler2D u_gBufferAlbedoAndStatus;
 uniform sampler2D u_gBufferSpecularRoughness;
 uniform sampler2D u_gBufferEmissive;
+uniform sampler2D u_gDepthMap;
 
 uniform isamplerBuffer u_lightDescSampler;
 uniform samplerBuffer u_lightDataSampler;
@@ -29,52 +31,12 @@ struct FragmentInfo
 };
 
 
-vec3 ReconstructPosition(float zPixel)
-{
-	vec3 xyzNDC = vec3(gl_FragCoord.xy / u_BufferViewportSize.xy, zPixel) * 2.0 - vec3(1.0);
-
-	float n = u_NearFarFovYAspect.x;
-	float f = u_NearFarFovYAspect.y;
-	//float l = u_LeftRightTopBottom.x;
-	//float r = u_LeftRightTopBottom.y;
-	//float t = u_LeftRightTopBottom.z;
-	//float b = u_LeftRightTopBottom.w;
-
-	float zEye = 2 * f * n / (xyzNDC.z * (f - n) - (f + n));
-	vec2 xyEye = -zEye * (xyzNDC.xy * (u_LeftRightTopBottom.yz - u_LeftRightTopBottom.xw) + (u_LeftRightTopBottom.yz + u_LeftRightTopBottom.xw)) / (2.0 * n);
-
-	return vec3(xyEye, zEye);
-}
-
-
 
 // ---------------------------------------------------------------------------
 // GBuffer data extraction helpers
 //
 // ---------------------------------------------------------------------------
-void UnpackFromGBuffer(out FragmentInfo fi)
-{
-	vec4 temp;
-
-	temp = texture(u_gBufferNormal, fs_in.TexUV, 0);
-	fi.Normal = normalize(temp.xyz);
-
-	//fi.Position = texture(u_gBufferPosition, fs_in.TexUV, 0).xyz;
-	fi.Position = ReconstructPosition(temp.w);
-
-	uvec4 data = texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0);
-	fi.RendererId = int(data.w & 15);
-
-	uvec3 matD = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
-	fi.DiffuseMaterial = data.xyz / 255.f;
-
-	
-	temp = texture(u_gBufferSpecularRoughness, fs_in.TexUV, 0);
-	fi.Roughness = temp.w;
-	fi.SpecularMaterial = temp.xyz;
-
-	fi.EmissiveMaterial = texture(u_gBufferEmissive, fs_in.TexUV, 0).xyz;
-}
+void UnpackFromGBuffer(out FragmentInfo fi);
 
 
 //

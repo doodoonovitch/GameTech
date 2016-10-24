@@ -93,6 +93,14 @@ void SimpleCamera::OnInit()
 
 		Engine* engine = Engine::GetInstance();
 
+		mCamera = new Camera();
+		mCamera->LookAt(glm::vec3(10, 10.f, 20.f), glm::vec3(10.f, 10.f, 5.f), glm::vec3(0, 1, 0));
+		engine->SetCamera(mCamera);
+
+		SetupViewportAndProjection();
+
+		mCamera->Update();
+
 		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
 		engine->AttachRenderer(gridRenderer);
 
@@ -307,10 +315,10 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
 //#define ARTORIAS_SWORD_MODEL
-//#define BOX_MODEL
+#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
-#define CERBERUS_MODEL
+//#define CERBERUS_MODEL
 
 
 #ifdef ARTORIAS_SWORD_MODEL
@@ -519,29 +527,21 @@ void SimpleCamera::OnInit()
 		}
 
 	// Setup Lights
-		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 8.f, 15.f), glm::vec3(1.f, 1.f, 1.f), 50000.f, 10000.f, glm::normalize(glm::vec3(.3f, -0.7f, 1.f)), glm::radians(15.f), glm::radians(25.f));
-		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
+		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 8.f, 15.f), glm::vec3(1.f, 1.f, 1.f), 50000.f, 10000.f, glm::normalize(glm::vec3(.3f, -0.7f, 1.f)), glm::radians(15.f), glm::radians(25.f));
+		//Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
 
 
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
-		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
-		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
-		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
-		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
+		//Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
+		//Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
+		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
+		//Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
+		//Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
 
 
 		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);
 		//Lights::DirectionalLight * dirLight1 = engine->CreateDirectionalLight(glm::normalize(glm::vec3(0.f, 0.f, 1.f)), glm::vec3(1.f, 1.f, 1.f), 1.8f);
 
 	//setup camera
-	mCamera = new Camera();
-	//mCamera->LookAt(glm::vec3(10, 6.f, 20.f), glm::vec3(0, 4.f, 0.f), glm::vec3(0, 1, 0));
-	mCamera->LookAt(glm::vec3(10, 10.f, 20.f), glm::vec3(10.f, 10.f, 5.f), glm::vec3(0, 1, 0));
-	engine->SetCamera(mCamera);
-
-	SetupViewportAndProjection();
-
-	mCamera->Update();
 
 	UpdateSunPosition();
 
@@ -862,7 +862,7 @@ void SimpleCamera::OnUpdate()
 	{
 		if (!wasF2Pressed)
 		{
-			mShowDeferredBufferState = (mShowDeferredBufferState + 1) % 5;
+			mShowDeferredBufferState = (mShowDeferredBufferState + 1) % 6;
 			if (mShowDeferredBufferState == 0)
 				Engine::GetInstance()->DisableDeferredDebug();
 			else

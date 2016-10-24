@@ -45,7 +45,7 @@ private:
 		gBuffer_AlbedoAndStatus,
 		gBuffer_SpecularRoughness,
 		gBuffer_Emissive,
-		//gBuffer_DepthBuffer,
+		gBuffer_DepthBuffer,
 
 		__gBuffer_count__
 	};
@@ -102,6 +102,7 @@ public:
 		ShowAlbedoBuffer		= 2,
 		ShowSpecularBuffer		= 3,
 		ShowRoughnessBuffer		= 4,
+		ShowPositionBuffer		= 5,
 	};
 
 public:
@@ -404,6 +405,7 @@ private:
 		//u_materialDataSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,
+		u_gDepthMap,
 
 		__deferred_uniforms_count__
 	};
@@ -440,6 +442,7 @@ private:
 		u_lightDescSampler,
 		u_lightDataSampler,
 		u_BufferToShow,
+		u_gDepthMap,
 
 		__uniforms_count__
 	};

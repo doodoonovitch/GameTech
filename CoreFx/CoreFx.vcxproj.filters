@@ -557,6 +557,15 @@
     <None Include="..\Data\Shaders\ssao.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Data\Shaders\UnpackFromGBuffer.incl.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="..\Data\Shaders\ShowDeferredBuffers.fs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\screenquad.vs.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

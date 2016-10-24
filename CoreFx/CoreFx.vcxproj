@@ -296,6 +296,7 @@
     <None Include="..\Data\Shaders\PerlinNoiseOcean.tes.glsl" />
     <None Include="..\Data\Shaders\Quaternions.incl.glsl" />
     <None Include="..\Data\Shaders\RendererShaders.header.glsl" />
+    <None Include="..\Data\Shaders\ShowDeferredBuffers.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skybox.vs.glsl" />
@@ -312,6 +313,8 @@
     <None Include="..\Data\Shaders\terrain.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\tonemapping.fs.glsl" />
+    <None Include="..\Data\Shaders\screenquad.vs.glsl" />
+    <None Include="..\Data\Shaders\UnpackFromGBuffer.incl.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.fs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.vs.glsl" />

@@ -338,13 +338,13 @@ int Shader::AddUniforms(const char * names[], int count)
 
 GLint Shader::GetAttribute(int index) const
 {
-	assert(index < (int)mAttributeList.size());
+	//assert(index < (int)mAttributeList.size());
 	return index < (int)mAttributeList.size() ? mAttributeList[index] : -1;
 }
 
 GLint Shader::GetUniform(int index) const
 {
-	assert(index < (int)mUniformLocationList.size());
+	//assert(index < (int)mUniformLocationList.size());
 	return index < (int)mUniformLocationList.size() ? mUniformLocationList[index] : -1;
 }
 
