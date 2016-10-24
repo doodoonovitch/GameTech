@@ -19,7 +19,6 @@ in VS_OUT
 
 out GS_OUT
 {
-	vec4 Position;
 	vec3 Normal;
 	vec3 Tangent;
 	vec2 TexUV;
@@ -43,8 +42,8 @@ void main()
 		gs_out.MaterialIndex = matIndex;
 		gs_out.ViewModelDQ = viewModelDQ;
 		
-		gs_out.Position = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
-		gl_Position = u_ProjMatrix * gs_out.Position;
+		vec4 pos = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
+		gl_Position = u_ProjMatrix * pos;
 
 		gs_out.Normal = gs_in[i].Normal;
 		gs_out.Tangent = gs_in[i].Tangent;

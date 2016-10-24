@@ -20,7 +20,6 @@ in VS_OUT
 
 out GS_OUT
 {
-	vec4 Position;
 	vec3 Normal;
 	vec3 Tangent;
 	vec2 TexUV;
@@ -47,8 +46,8 @@ void main()
 		gs_out.ViewModelDQ = viewModelDQ;
 		
 		vec3 position = scale * gl_in[i].gl_Position.xyz;
-		gs_out.Position = vec4(dqTransformPoint(viewModelDQ, position), 1);
-		gl_Position = u_ProjMatrix * gs_out.Position;
+		vec4 pos = vec4(dqTransformPoint(viewModelDQ, position), 1);
+		gl_Position = u_ProjMatrix * pos;
 
 		gs_out.Normal = scale * gs_in[i].Normal; 
 		gs_out.Tangent = scale * gs_in[i].Tangent; 

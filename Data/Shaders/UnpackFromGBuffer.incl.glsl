@@ -20,12 +20,7 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 	//float zView = u_ProjMatrix[3][2] / (2.0 * depth - 1.0 - u_ProjMatrix[2][2]);
 
 	vec2 xyView = fs_in.ViewRay * -zView;
-	//fi.Position.z = zView;
 	fi.Position = vec3(xyView, zView);
-
-	//vec3 p = ReconstructPosition(temp.w);
-	//fi.Position.z = p.z;
-	//fi.Position = p;
 
 	uvec4 data = texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0);
 	fi.RendererId = int(data.w & 15);

@@ -5,7 +5,6 @@ layout(location = 3) out vec3 outEmissive;
 
 in VS_OUT
 {
-	vec4 Position;
 	vec2 TexUV;
 } fs_in;
 
