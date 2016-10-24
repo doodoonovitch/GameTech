@@ -7,7 +7,7 @@ in VS_OUT
 } fs_in;
 
 
-uniform sampler2D u_gBufferPosition;
+//uniform sampler2D u_gBufferPosition;
 uniform sampler2D u_gBufferNormal;
 uniform usampler2D u_gBufferAlbedoAndStatus;
 uniform sampler2D u_gBufferSpecularRoughness;

@@ -40,7 +40,7 @@ private:
 
 	enum GBufferType
 	{
-		gBuffer_PositionBuffer,
+		//gBuffer_PositionBuffer,
 		gBuffer_NormalBuffer,
 		gBuffer_AlbedoAndStatus,
 		gBuffer_SpecularRoughness,
@@ -397,7 +397,8 @@ private:
 
 	enum EDeferredShaderUniformIndex
 	{
-		u_gBufferPosition,
+		//u_gBufferPosition,
+		u_gDepthMap,
 		u_gBufferNormal,
 		u_gBufferAlbedoAndStatus,
 		u_gBufferSpecularRoughness,
@@ -405,7 +406,6 @@ private:
 		//u_materialDataSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,
-		u_gDepthMap,
 
 		__deferred_uniforms_count__
 	};
@@ -434,7 +434,8 @@ private:
 
 	enum class EShowDeferredShaderUniformIndex 
 	{
-		u_gBufferPosition,
+		//u_gBufferPosition,
+		u_gDepthMap,
 		u_gBufferNormal,
 		u_gBufferAlbedoAndStatus,
 		u_gBufferSpecularRoughness,
@@ -442,7 +443,6 @@ private:
 		u_lightDescSampler,
 		u_lightDataSampler,
 		u_BufferToShow,
-		u_gDepthMap,
 
 		__uniforms_count__
 	};

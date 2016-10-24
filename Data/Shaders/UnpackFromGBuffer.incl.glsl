@@ -1,38 +1,10 @@
 
-
-//vec3 ReconstructPosition(float zPixel)
-//{
-//	vec3 xyzNDC = vec3(gl_FragCoord.xy / u_BufferViewportSize.zw, zPixel) * vec3(2.0) - vec3(1.0);
-//	float zEye = u_ProjMatrix[3][2] / (xyzNDC.z - u_ProjMatrix[2][2]); 
-
-//	float n = u_NearFarFovYAspect.x;
-//	//float f = u_NearFarFovYAspect.y;
-//	////float l = u_LeftRightTopBottom.x;
-//	////float r = u_LeftRightTopBottom.y;
-//	////float t = u_LeftRightTopBottom.z;
-//	////float b = u_LeftRightTopBottom.w;
-
-//	////vec2 rt = u_LeftRightTopBottom.yz;
-//	////vec2 lb = u_LeftRightTopBottom.xw;
-//	vec2 rt = vec2(u_BufferViewportSize.z - 1.0, 0.0);
-//	vec2 lb = vec2(0.0, u_BufferViewportSize.w - 1.0);
-
-//	//float zEye = 2 * f * n / (xyzNDC.z * (f - n) - (f + n));
-//	vec2 xyEye = vec2(-zEye) * (xyzNDC.xy * (rt - lb) + (rt + lb)) / vec2(2.0 * n);
-
-//	return vec3(xyEye.x, xyEye.y, zEye);	
-//}
-
-
-
 // ---------------------------------------------------------------------------
 // GBuffer data extraction helpers
 //
 // ---------------------------------------------------------------------------
 void UnpackFromGBuffer(out FragmentInfo fi)
 {
-	//fi.Position = texture(u_gBufferPosition, fs_in.TexUV, 0).xyz;
-
 	vec4 temp;
 
 	temp = texture(u_gBufferNormal, fs_in.TexUV, 0);
