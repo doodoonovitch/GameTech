@@ -527,15 +527,15 @@ void SimpleCamera::OnInit()
 		}
 
 	// Setup Lights
-		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 8.f, 15.f), glm::vec3(1.f, 1.f, 1.f), 50000.f, 10000.f, glm::normalize(glm::vec3(.3f, -0.7f, 1.f)), glm::radians(15.f), glm::radians(25.f));
-		//Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
+		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 8.f, 15.f), glm::vec3(1.f, 1.f, 1.f), 50000.f, 10000.f, glm::normalize(glm::vec3(.3f, -0.7f, 1.f)), glm::radians(15.f), glm::radians(25.f));
+		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
 
 
-		//Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
-		//Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
-		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
-		//Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
-		//Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
+		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
+		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
+		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
 
 
 		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);
@@ -666,6 +666,8 @@ void SimpleCamera::OnMouseMove(int x, int y)
 
 void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, bool /*altPressed*/)
 {
+	Engine * engine = Engine::GetInstance();
+
 	float exposureInc = 0.01f;
 	float gammaInc = 0.01f;
 	switch (key)
@@ -676,13 +678,13 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 
 	case L'N':
 	case L'n':
-		Engine::GetInstance()->EnableDrawVertexNormal(!Engine::GetInstance()->IsDrawVertexNormalEnabled());
+		engine->EnableDrawVertexNormal(!engine->IsDrawVertexNormalEnabled());
 		//glutPostRedisplay();
 		break;
 
 	case L'B':
 	case L'b':
-		Engine::GetInstance()->EnableDrawGBufferNormal(!Engine::GetInstance()->IsDrawGBufferNormalEnabled());
+		engine->EnableDrawGBufferNormal(!engine->IsDrawGBufferNormalEnabled());
 		//glutPostRedisplay();
 		break;
 
@@ -690,9 +692,9 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		exposureInc = -exposureInc;
 	case 'E':
 		{
-			float exposure = Engine::GetInstance()->GetExposure();
+			float exposure = engine->GetExposure();
 			exposure = glm::clamp(exposure + exposureInc, 0.01f, 10.0f);
-			Engine::GetInstance()->SetExposure(exposure);
+			engine->SetExposure(exposure);
 		}
 		break;
 
@@ -700,23 +702,23 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		gammaInc = -gammaInc;
 	case 'G':
 		{
-			float gamma = Engine::GetInstance()->GetGamma();
+			float gamma = engine->GetGamma();
 			gamma = glm::clamp(gamma + gammaInc, 0.01f, 10.0f);
-			Engine::GetInstance()->SetGamma(gamma);
+			engine->SetGamma(gamma);
 		}
 		break;
 
 	case 'x':
 	case 'X':
 		{
-			Engine::GetInstance()->SetWireFrame(!Engine::GetInstance()->GetWireFrame());
+		engine->SetWireFrame(!engine->GetWireFrame());
 		}
 		break;
 
 	case 'l':
 	case 'L':
 	{
-		Engine::GetInstance()->SetIsDrawLightPositionEnabled(!Engine::GetInstance()->IsDrawLightPositionEnabled());
+		engine->SetIsDrawLightPositionEnabled(!engine->IsDrawLightPositionEnabled());
 	}
 	break;
 
@@ -736,10 +738,10 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 
 	case 'v':
 	{
-		glm::ivec2 grid = Engine::GetInstance()->GetDrawGBufferNormalGrid();
+		glm::ivec2 grid = engine->GetDrawGBufferNormalGrid();
 		grid += glm::ivec2(1);
 		grid = glm::clamp(grid, glm::ivec2(5, 5), glm::ivec2(50, 50));
-		Engine::GetInstance()->SetDrawGBufferNormalGrid(grid.x, grid.y);
+		engine->SetDrawGBufferNormalGrid(grid.x, grid.y);
 
 	}
 	break;
@@ -749,7 +751,21 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		glm::ivec2 grid = Engine::GetInstance()->GetDrawGBufferNormalGrid();
 		grid -= glm::ivec2(1);
 		grid = glm::clamp(grid, glm::ivec2(5, 5), glm::ivec2(50, 50));
-		Engine::GetInstance()->SetDrawGBufferNormalGrid(grid.x, grid.y);
+		engine->SetDrawGBufferNormalGrid(grid.x, grid.y);
+	}
+	break;
+
+	case ',':
+	{
+		GLfloat x = engine->GetDrawVertexNormalMagnitude() * 2.f;
+		engine->SetDrawVertexNormalMagnitude(x);
+	}
+	break;
+
+	case '?':
+	{
+		GLfloat x = engine->GetDrawVertexNormalMagnitude() * 0.5f;
+		engine->SetDrawVertexNormalMagnitude(x);
 	}
 	break;
 

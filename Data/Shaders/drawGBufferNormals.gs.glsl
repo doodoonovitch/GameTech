@@ -4,12 +4,6 @@ layout (line_strip, max_vertices = 6) out;
 uniform sampler2D u_gDepthMap;
 uniform sampler2D u_gBufferNormal;
 
-in VS_OUT
-{
-	vec2 TexUV;
-	vec2 ViewRay;
-} gs_in[3];
-
 out GS_OUT
 {
 	vec4 Color;
@@ -32,7 +26,7 @@ void main()
 	FragmentInfo fi;
 	for(int i = 0; i < gl_in.length(); ++i )
 	{
-		UnpackFromGBuffer(fi, gs_in[i].TexUV, gs_in[i].ViewRay);
+		UnpackFromGBuffer(fi, gl_in[i].gl_Position.xy, gl_in[i].gl_Position.zw);
 
 		vec4 projPos = u_ProjMatrix * vec4(fi.Position, 1);
 		gl_Position = projPos;
