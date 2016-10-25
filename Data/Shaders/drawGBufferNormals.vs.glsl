@@ -5,6 +5,7 @@ uniform ivec2 u_PatchCount;
 out VS_OUT
 {
 	vec2 TexUV;
+	vec2 ViewRay;
 } vs_out;
 
 void main()
@@ -14,8 +15,12 @@ void main()
 	vec2 pos = (in_Position.xy + vec2(1.0)) * 0.5;
 	vec2 texUV = (pos + vec2(patchIndex.x, patchIndex.y)) / vec2(u_PatchCount.x, u_PatchCount.y);
 
-	//gl_Position = vec4(texUV, 0, 1);
+	vec2 coef = vec2(u_ProjMatrix[0][0], u_ProjMatrix[1][1]);
+	vec2 viewRay = pos /  coef;
+
+
 	gl_Position = vec4(in_Position, 1);
 	vs_out.TexUV = texUV;
+	vs_out.ViewRay = viewRay;
 }
 

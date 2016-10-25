@@ -1,4 +1,3 @@
-
 // ---------------------------------------------------------------------------
 // GBuffer data extraction helpers
 //
@@ -12,15 +11,7 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 
 	float depth = texture(u_gDepthMap, fs_in.TexUV).r;
 
-	float n = u_NearFarFovYAspect.x;
-	float f = u_NearFarFovYAspect.y;
-	depth = depth * 2.0 - 1.0;
-	float zView = 2 * f * n / (depth * (f - n) - (f + n));
-
-	//float zView = u_ProjMatrix[3][2] / (2.0 * depth - 1.0 - u_ProjMatrix[2][2]);
-
-	vec2 xyView = fs_in.ViewRay * -zView;
-	fi.Position = vec3(xyView, zView);
+	fi.Position = PositionFromDepth(depth, fs_in.ViewRay);
 
 	uvec4 data = texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0);
 	fi.RendererId = int(data.w & 15);

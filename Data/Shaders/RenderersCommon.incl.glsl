@@ -121,6 +121,31 @@ layout (std140, shared) uniform FrameData
 
 
 
+// ---------------------------------------------------------------------------
+// Position reconstruction from depth
+//
+// ---------------------------------------------------------------------------
+vec3 PositionFromDepth(float depth, vec2 viewRay)
+{
+	float n = u_NearFarFovYAspect.x;
+	float f = u_NearFarFovYAspect.y;
+	depth = depth * 2.0 - 1.0;
+	float zView = 2 * f * n / (depth * (f - n) - (f + n));
+
+	//float zView = u_ProjMatrix[3][2] / (2.0 * depth - 1.0 - u_ProjMatrix[2][2]);
+
+	vec2 xyView = viewRay * -zView;
+
+	return vec3(xyView, zView);
+}
+
+
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
 
 
 

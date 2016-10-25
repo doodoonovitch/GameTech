@@ -1,12 +1,13 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-uniform sampler2D u_gBufferPosition;
+uniform sampler2D u_gDepthMap;
 uniform sampler2D u_gBufferNormal;
 
 in VS_OUT
 {
 	vec2 TexUV;
+	vec2 ViewRay;
 } gs_in[3];
 
 out GS_OUT
@@ -20,9 +21,9 @@ struct FragmentInfo
     vec3 Normal;
 };
 
-void UnpackFromGBuffer(out FragmentInfo fi, vec2 texUV)
+void UnpackFromGBuffer(out FragmentInfo fi, vec2 texUV, vec2 viewRay)
 {
-    fi.Position = texture(u_gBufferPosition, texUV, 0).xyz;
+    fi.Position = PositionFromDepth(texture(u_gDepthMap, texUV, 0).x, viewRay);
 	fi.Normal = texture(u_gBufferNormal, texUV, 0).xyz;
 }
 
@@ -31,9 +32,7 @@ void main()
 	FragmentInfo fi;
 	for(int i = 0; i < gl_in.length(); ++i )
 	{
-		//vec2 texUV = gl_in[i].gl_Position.xy;
-		//UnpackFromGBuffer(fi, texUV);
-		UnpackFromGBuffer(fi, gs_in[i].TexUV);
+		UnpackFromGBuffer(fi, gs_in[i].TexUV, gs_in[i].ViewRay);
 
 		vec4 projPos = u_ProjMatrix * vec4(fi.Position, 1);
 		gl_Position = projPos;

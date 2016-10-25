@@ -17,7 +17,7 @@ public:
 	enum EUniformIndex
 	{
 		u_PatchCount,
-		u_gBufferPosition,
+		u_gDepthMap,
 		u_gBufferNormal,
 
 		__uniforms_count__

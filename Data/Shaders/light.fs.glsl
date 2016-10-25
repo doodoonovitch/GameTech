@@ -510,15 +510,11 @@ void main(void)
 
 	UnpackFromGBuffer(fi);
 	
-	//if (fi.RendererId == DEEPOCEAN_RENDERER_ID)
-	//{
-	//	vFragColor = vec4((fi.Normal + 1) * 0.5, 1);
-	//}
 	if (fi.RendererId == SKYBOX_RENDERER_ID)
 	{
 		vFragColor = vec4(fi.SpecularMaterial, 1);
 	}
-	else
+	else if(fi.RendererId > 0)
 	{
 		//vFragColor = ADSLight(fi);
 		vFragColor = BRDFLight(fi);
