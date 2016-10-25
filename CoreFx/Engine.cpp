@@ -1097,10 +1097,16 @@ void Engine::InternalRenderObjects()
 
 		if (GetWireFrame())
 		{
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_LINE_SMOOTH);
+			glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
 			glDepthMask(GL_FALSE);
 			glDepthFunc(GL_LEQUAL);
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glPolygonOffset(1.0f, 1.0f);
 
 			mRenderers->ForEach([](Renderer * renderer)
 			{
@@ -1122,6 +1128,9 @@ void Engine::InternalRenderObjects()
 			}
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glPolygonOffset(0.0f, 0.0f);
+
+			glDisable(GL_LINE_SMOOTH);
 		}
 
 		// -----------------------------------------------------------------------
