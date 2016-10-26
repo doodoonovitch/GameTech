@@ -54,9 +54,6 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 			mLights[i] = new LightContainer(1, 1);
 		}
 
-		mDrawGBufferNormalShader.LoadShaders();
-		InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
-
 		PRINT_MESSAGE("Initializing PointLightHelper Renderer...");
 		PRINT_MESSAGE("... end.");
 
@@ -224,6 +221,30 @@ void Engine::InternalCreateHdrBuffers()
 	PRINT_END_SECTION;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Engine::InternalCreateSSAOBuffers()
+{
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize SSAO buffers.....");
+
+	glGenTextures(ARRAY_SIZE_IN_ELEMENTS(mSSAOBuffers), mSSAOBuffers);
+	GL_CHECK_ERRORS;
+
+	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Main]);
+	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Temp]);
+
+	for (GLuint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(mSSAOBuffers); ++i)
+	{
+		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		GL_CHECK_ERRORS;
+	}
+
+	PRINT_MESSAGE("...complete!");
+	PRINT_END_SECTION;
 }
 
 void Engine::InternalCreateMaterialBuffer()

@@ -365,6 +365,9 @@ private:
 	void InternalCreateHdrBuffers();
 	void InternalReleaseHdrBuffers();
 
+	void InternalCreateSSAOBuffers();
+	void InternalReleaseSSAOBuffers();
+
 	void InternalCreateMaterialBuffer();
 	static void InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex);
 	//void InternalCreateTextures();
@@ -377,6 +380,7 @@ private:
 	void InternalInitializeShowDeferredBuffersShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
+
 
 	void InternalComputePass();
 	void InternalRenderObjects();
@@ -470,6 +474,7 @@ private:
 	Shader mCopyShader;
 	Shader mViewTex2DArrayShader;
 	Shader mShowDeferredBuffersShader;
+	Shader mSSAOShader;
 
 	GLuint mDeferredFBO;
 	//GLuint mDepthRBO;
@@ -480,6 +485,15 @@ private:
 
 	GLuint mHdrFBO;
 	GLuint mHdrBuffer;
+
+	enum ESSAOBufferIndex
+	{
+		SSAOBuffer_Main,
+		SSAOBuffer_Temp,
+
+		__ssaobuffer_count__
+	};
+	GLuint mSSAOBuffers[2];
 
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;

@@ -47,6 +47,7 @@ Engine::Engine()
 	, mCopyShader("CopyShader")
 	, mViewTex2DArrayShader("CopyTex2DArrayShader")
 	, mShowDeferredBuffersShader("ShowDeferredBuffersShader")
+	, mSSAOShader("SSAOComputeShader")
 	, mPointLightPositionRenderer(nullptr)
 	, mSpotLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
@@ -128,6 +129,9 @@ void Engine::CreateDynamicResources()
 		PRINT_GEN_TEXTUREBUFFER("[Engine]", mLightDataBuffer);
 	}
 	// -----------------------------------------------------------------------
+
+	mDrawGBufferNormalShader.LoadShaders();
+	InternalCreateFrameDataBuffer(mDrawGBufferNormalShader.GetProgram());
 
 	// material and texture creation
 	// -----------------------------------------------------------------------

@@ -85,6 +85,11 @@ void Engine::InternalReleaseHdrBuffers()
 	mForwardFBO = 0;
 }
 
+void Engine::InternalReleaseSSAOBuffers()
+{
+	glDeleteTextures(ARRAY_SIZE_IN_ELEMENTS(mSSAOBuffers), mSSAOBuffers);
+	memset(mSSAOBuffers, 0, sizeof(mSSAOBuffers));
+}
 
 
 	// =======================================================================
