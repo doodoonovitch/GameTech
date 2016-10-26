@@ -66,6 +66,9 @@
     <Filter Include="Renderers\DeepOcean">
       <UniqueIdentifier>{6267aa42-6702-4a81-b0b4-9c3077e02aac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderers\DebugTools">
+      <UniqueIdentifier>{2bf81a86-9492-445a-ba6d-05c43eaa4a31}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -133,16 +136,7 @@
       <Filter>Renderers</Filter>
     </ClInclude>
     <ClInclude Include="DebugOutput.h" />
-    <ClInclude Include="Renderers\DrawGBufferNormalShader.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
     <ClInclude Include="Renderers\SkyboxRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderers\IcosahedronRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderers\ConeRenderer.h">
       <Filter>Renderers</Filter>
     </ClInclude>
     <ClInclude Include="Renderers\SkydomeRenderer.h">
@@ -197,6 +191,18 @@
     </ClInclude>
     <ClInclude Include="Renderers\DeepOcean\DeepOceanWaveProperty.h">
       <Filter>Renderers\DeepOcean</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DebugTools\DrawGBufferNormalShader.h">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DebugTools\IcosahedronRenderer.h">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DebugTools\LightPositionRenderer.h">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DebugTools\ConeRenderer.h">
+      <Filter>Renderers\DebugTools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -253,16 +259,7 @@
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="DebugOutput.cpp" />
-    <ClCompile Include="Renderers\DrawGBufferNormalShader.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
     <ClCompile Include="Renderers\SkyboxRenderer.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\IcosahedronRenderer.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\ConeRenderer.cpp">
       <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Renderers\SkydomeRenderer.cpp">
@@ -305,6 +302,18 @@
     </ClCompile>
     <ClCompile Include="Renderers\DeepOcean\DeepOceanRenderer.cpp">
       <Filter>Renderers\DeepOcean</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DebugTools\DrawGBufferNormalShader.cpp">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DebugTools\IcosahedronRenderer.cpp">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DebugTools\LightPositionRenderer.cpp">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DebugTools\ConeRenderer.cpp">
+      <Filter>Renderers\DebugTools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

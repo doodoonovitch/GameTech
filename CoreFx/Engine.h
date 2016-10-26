@@ -531,68 +531,8 @@ private:
 		"u_SpotLightCount",
 		"u_DirectionalLightCount",
 	};
-
-
-	class PointLightPositionRenderer : Renderers::IcosahedronRendererBase
-	{
-		friend class Engine;
-
-	public:
-		PointLightPositionRenderer();
-		virtual ~PointLightPositionRenderer();
-
-		virtual void Render() override;
-		virtual void RenderWireFrame() override;
-
-	protected:
-
-
-		enum EUniformIndex
-		{
-			u_InnerTessLevel,
-			u_OuterTessLevel,
-			u_LightDescSampler,
-			u_LightDataSampler,
-			u_LightOffset,
-
-			__uniforms_count__
-		};
-
-
-		void InitializeUniforms(Shader & shader);
-		void InternalRender(Shader & shader, GLsizei instanceCount, GLint lightOffset, GLuint lightDescBufferId, GLuint lightDataBufferId);
-
-	};
-	friend class PointLightPositionRenderer;
-
-	class SpotLightPositionRenderer : Renderers::ConeRendererBase
-	{
-		friend class Engine;
-
-	public:
-		SpotLightPositionRenderer(GLuint numStrips = 18);
-		virtual ~SpotLightPositionRenderer();
-
-		virtual void Render() override;
-		virtual void RenderWireFrame() override;
-
-	protected:
-
-
-		enum EUniformIndex
-		{
-			u_LightDescSampler,
-			u_LightDataSampler,
-			u_LightOffset,
-
-			__uniforms_count__
-		};
-
-
-		void InitializeUniforms(Shader & shader);
-		void InternalRender(Shader & shader, GLsizei instanceCount, GLint lightOffset, GLuint lightDescBufferId, GLuint lightDataBufferId);
-	};
-	friend class SpotLightPositionRenderer;
+	friend class Renderers::PointLightPositionRenderer;
+	friend class Renderers::SpotLightPositionRenderer;
 
 	// Light description buffer : 
 	//	- index 0 : light count (same value with u_LightCount)
@@ -604,8 +544,8 @@ private:
 	TextureBuffer mLightDataBuffer;
 
 
-	PointLightPositionRenderer * mPointLightPositionRenderer;
-	SpotLightPositionRenderer * mSpotLightPositionRenderer;
+	Renderers::PointLightPositionRenderer * mPointLightPositionRenderer;
+	Renderers::SpotLightPositionRenderer * mSpotLightPositionRenderer;
 
 	TextureBuffer mMaterialBuffer;
 	std::vector<GLfloat> mMaterials;
