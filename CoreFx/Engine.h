@@ -472,7 +472,7 @@ private:
 	Shader mShowDeferredBuffersShader;
 
 	GLuint mDeferredFBO;
-	GLuint mDepthRBO;
+	//GLuint mDepthRBO;
 	GLuint mGBuffers[__gBuffer_count__];
 
 	GLuint mForwardFBO;

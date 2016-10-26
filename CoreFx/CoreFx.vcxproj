@@ -198,6 +198,8 @@
     <ClCompile Include="DDS.cpp" />
     <ClCompile Include="DebugOutput.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Engine_Initialize.cpp" />
+    <ClCompile Include="Engine_Release.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Geometry\ModelData.cpp" />
     <ClCompile Include="Lights\DirectionalLight.cpp" />

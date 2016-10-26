@@ -315,6 +315,8 @@
     <ClCompile Include="Renderers\DebugTools\ConeRenderer.cpp">
       <Filter>Renderers\DebugTools</Filter>
     </ClCompile>
+    <ClCompile Include="Engine_Release.cpp" />
+    <ClCompile Include="Engine_Initialize.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
