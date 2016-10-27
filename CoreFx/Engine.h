@@ -491,9 +491,13 @@ private:
 		SSAOBuffer_Main,
 		SSAOBuffer_Temp,
 
+		SSAOBuffer_Kernel,
+		SSAOBuffer_Noise,
+
 		__ssaobuffer_count__
 	};
 	GLuint mSSAOBuffers[2];
+	const GLuint mSSAOKernelSize = 64;
 
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;

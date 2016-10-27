@@ -45,6 +45,7 @@
 #include <algorithm>
 #include <memory>
 #include <type_traits>
+#include <random>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

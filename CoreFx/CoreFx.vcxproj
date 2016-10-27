@@ -308,7 +308,7 @@
     <None Include="..\Data\Shaders\skydome.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\skydome.forward.fs.glsl" />
     <None Include="..\Data\Shaders\skydome.vs.glsl" />
-    <None Include="..\Data\Shaders\ssao.fs.glsl" />
+    <None Include="..\Data\Shaders\ssao.cs.glsl" />
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\terrain.gs.glsl" />
     <None Include="..\Data\Shaders\terrain.tcs.glsl" />

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "CoreFx.h"
-
+#include <random>
 
 namespace CoreFx
 {
@@ -233,16 +233,57 @@ void Engine::InternalCreateSSAOBuffers()
 
 	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Main]);
 	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Temp]);
+	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Kernel]);
+	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Noise]);
 
-	for (GLuint i = 0; i < ARRAY_SIZE_IN_ELEMENTS(mSSAOBuffers); ++i)
+	for (GLuint i = 0; i < 2; ++i)
 	{
 		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[i]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		GL_CHECK_ERRORS;
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	// Sample kernel
+	std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+	std::default_random_engine generator;
+	std::vector<glm::vec3> ssaoKernel; 
+	ssaoKernel.reserve(mSSAOKernelSize);
+
+	for (GLuint i = 0; i < mSSAOKernelSize; ++i)
+	{
+		glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+		sample = glm::normalize(sample);
+		sample *= randomFloats(generator);
+		GLfloat scale = GLfloat(i) / (GLfloat)mSSAOKernelSize;
+
+		// Scale samples s.t. they're more aligned to center of kernel
+		scale = glm::lerp(0.1f, 1.0f, scale * scale);
+		sample *= scale;
+		ssaoKernel.push_back(sample);
+	}
+
+	glBindTexture(GL_TEXTURE_1D, mSSAOBuffers[SSAOBuffer_Kernel]);
+	glTexStorage1D(GL_TEXTURE_1D, 0, GL_RGB16F, mSSAOKernelSize);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mSSAOKernelSize, GL_RGB, GL_FLOAT, ssaoKernel.data());
+	GL_CHECK_ERRORS;
+	glBindTexture(GL_TEXTURE_1D, 0);
+
+	// Noise texture
+	std::vector<glm::vec3> ssaoNoise;
+	for (GLuint i = 0; i < 16; i++)
+	{
+		glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
+		ssaoNoise.push_back(noise);
+	}
+	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Noise]);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, 4, 4, ssaoNoise.data(), false, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_RGB16F, GL_RGB, GL_FLOAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	
 	PRINT_MESSAGE("...complete!");
 	PRINT_END_SECTION;
 }
