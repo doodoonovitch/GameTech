@@ -519,5 +519,9 @@ void main(void)
 		//vFragColor = ADSLight(fi);
 		vFragColor = BRDFLight(fi);
 	}
+	else 
+	{
+		vFragColor = vec4(0, 0, 0, 1);
+	}
 }
 

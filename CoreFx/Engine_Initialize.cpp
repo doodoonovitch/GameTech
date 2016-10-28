@@ -656,6 +656,57 @@ void Engine::InternalInitializeShowDeferredBuffersShader()
 	PRINT_END_SECTION;
 }
 
+void Engine::InternalInitializeSSAOShader()
+{
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize SSAO shader .....");
+
+	//setup shader
+
+	// vertex shader
+	mSSAOShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
+
+	{
+		std::vector<std::string> shaderFilenames(2);
+		shaderFilenames[0] = "shaders/ssao.fs.glsl";
+		shaderFilenames[1] = "shaders/UnpackFromGBuffer.incl.glsl";
+		mSSAOShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
+	}
+
+	mSSAOShader.CreateAndLinkProgram();
+
+	const char * uniformNames[(int)ESSAOShaderUniformIndex::__uniforms_count__] =
+	{
+		//"u_gBufferPosition",
+		"u_gDepthMap",
+		"u_gBufferNormal",
+		"u_gBufferAlbedoAndStatus",
+		"u_gNoiseMap",
+		"u_gKernel",
+		"u_KernelSize",
+		"u_Radius",
+		"u_NoiseScale",
+	};
+
+	mSSAOShader.Use();
+
+	mSSAOShader.AddUniforms(uniformNames, (int)ESSAOShaderUniformIndex::__uniforms_count__);
+
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gNoiseMap), 0);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gKernel), 1);
+	//glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gBufferPosition), 2);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gDepthMap), 2);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gBufferNormal), 3);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gBufferAlbedoAndStatus), 4);
+
+	mSSAOShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
+}
+
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
 {
 	renderers->ForEach([&offset, &baseIndex](Renderer * renderer)

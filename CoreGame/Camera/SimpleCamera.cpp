@@ -878,7 +878,7 @@ void SimpleCamera::OnUpdate()
 	{
 		if (!wasF2Pressed)
 		{
-			mShowDeferredBufferState = (mShowDeferredBufferState + 1) % 6;
+			mShowDeferredBufferState = (mShowDeferredBufferState + 1) % (GLint)Engine::EDeferredDebug::__count__;
 			if (mShowDeferredBufferState == 0)
 				Engine::GetInstance()->DisableDeferredDebug();
 			else

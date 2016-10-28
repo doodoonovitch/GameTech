@@ -119,7 +119,19 @@ layout (std140, shared) uniform FrameData
 // ===========================================================================
 
 
+// ---------------------------------------------------------------------------
+// Linearize depth
+//
+// ---------------------------------------------------------------------------
+float LinearizeDepth(float depth)
+{
+	float n = u_NearFarFovYAspect.x;
+	float f = u_NearFarFovYAspect.y;
+	depth = depth * 2.0 - 1.0;
+	float zView = 2 * f * n / (depth * (f - n) - (f + n));
 
+	return zView;
+}
 
 // ---------------------------------------------------------------------------
 // Position reconstruction from depth
@@ -127,13 +139,9 @@ layout (std140, shared) uniform FrameData
 // ---------------------------------------------------------------------------
 vec3 PositionFromDepth(float depth, vec2 viewRay)
 {
-	float n = u_NearFarFovYAspect.x;
-	float f = u_NearFarFovYAspect.y;
-	depth = depth * 2.0 - 1.0;
-	float zView = 2 * f * n / (depth * (f - n) - (f + n));
 
 	//float zView = u_ProjMatrix[3][2] / (2.0 * depth - 1.0 - u_ProjMatrix[2][2]);
-
+	float zView = LinearizeDepth(depth);
 	vec2 xyView = viewRay * -zView;
 
 	return vec3(xyView, zView);

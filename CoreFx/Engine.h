@@ -103,6 +103,9 @@ public:
 		ShowSpecularBuffer		= 3,
 		ShowRoughnessBuffer		= 4,
 		ShowPositionBuffer		= 5,
+		//ShowSSAOBuffer			= 6,
+
+		__count__
 	};
 
 public:
@@ -381,6 +384,7 @@ private:
 	void InternalInitializeCopyShader();
 	void InternalInitializeViewTex2DArrayShader();
 	void InternalInitializeShowDeferredBuffersShader();
+	void InternalInitializeSSAOShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
 
@@ -450,6 +454,21 @@ private:
 		u_lightDescSampler,
 		u_lightDataSampler,
 		u_BufferToShow,
+
+		__uniforms_count__
+	};
+
+	enum class ESSAOShaderUniformIndex
+	{
+		//u_gBufferPosition,
+		u_gDepthMap,
+		u_gBufferNormal,
+		u_gBufferAlbedoAndStatus,
+		u_gNoiseMap,
+		u_gKernel,
+		u_KernelSize,
+		u_Radius,
+		u_NoiseScale,
 
 		__uniforms_count__
 	};

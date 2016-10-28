@@ -35,6 +35,7 @@ struct FragmentInfo
 // ---------------------------------------------------------------------------
 void UnpackFromGBuffer(out FragmentInfo fi);
 
+uniform sampler2D u_gBufferSSAO;
 
 //
 // ---------------------------------------------------------------------------
@@ -44,6 +45,7 @@ void UnpackFromGBuffer(out FragmentInfo fi);
 #define SPECULAR_BUFFER		3
 #define ROUGHNESS_BUFFER	4
 #define POSITION_BUFFER		5
+#define SSAO_BUFFER			6
 
 
 void main(void)
@@ -81,6 +83,15 @@ void main(void)
 		{
 			vFragColor = vec4(fi.Position, 1);
 		}
+		else if(u_BufferToShow == POSITION_BUFFER)
+		{
+			float occlusion = texture(u_gBufferSSAO, fs_in.TexUV, 0).r;
+			vFragColor = vec4(occlusion, occlusion, occlusion, 1);
+		}
+	}
+	else
+	{
+		vFragColor = vec4(0, 0, 0, 1);
 	}
 }
 
