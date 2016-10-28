@@ -359,6 +359,9 @@ private:
 
 	void InternalCreateFrameDataBuffer(GLuint program);
 
+	void InternalGenerateBuffersAndFBOs();
+	void InternalReleaseBuffersAndFBOs();
+
 	void InternalCreateGBuffers();
 	void InternalReleaseGBuffers();
 
@@ -476,14 +479,22 @@ private:
 	Shader mShowDeferredBuffersShader;
 	Shader mSSAOShader;
 
-	GLuint mDeferredFBO;
+	enum EFBOIndex
+	{
+		Deferred_FBO,
+		HDR_FBO,
+		Forward_FBO,
+		SSAO_FBO,
+
+		__fbo_count__
+	};
+	GLuint mFBOs[__fbo_count__];
 	//GLuint mDepthRBO;
+
 	GLuint mGBuffers[__gBuffer_count__];
 
-	GLuint mForwardFBO;
 	GLuint mForwardBuffer;
 
-	GLuint mHdrFBO;
 	GLuint mHdrBuffer;
 
 	enum ESSAOBufferIndex

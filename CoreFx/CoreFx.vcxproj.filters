@@ -574,7 +574,7 @@
     <None Include="..\Data\Shaders\screenquad.vs.glsl">
       <Filter>Shaders\Deferred</Filter>
     </None>
-    <None Include="..\Data\Shaders\ssao.cs.glsl">
+    <None Include="..\Data\Shaders\ssao.fs.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

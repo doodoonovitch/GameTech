@@ -52,9 +52,9 @@ void Engine::InternalRelease()
 		mTextureManager->Release();
 		SAFE_DELETE(mTextureManager);
 
-		InternalReleaseGBuffers();
-
 		SAFE_DELETE(mQuad);
+
+		InternalReleaseBuffersAndFBOs();
 
 		InternalReleaseFrameConstainers();
 
@@ -63,14 +63,22 @@ void Engine::InternalRelease()
 	}
 }
 
+void Engine::InternalReleaseBuffersAndFBOs()
+{
+	InternalReleaseSSAOBuffers();
+	InternalReleaseHdrBuffers();
+	InternalReleaseGBuffers();
+
+	glDeleteFramebuffers(__fbo_count__, mFBOs);
+	memset(mFBOs, 0, sizeof(mFBOs));
+}
+
 void Engine::InternalReleaseGBuffers()
 {
 	//glDeleteRenderbuffers(1, &mDepthRBO);
 	//mDepthRBO = 0;
 	glDeleteTextures(__gBuffer_count__, mGBuffers);
 	memset(mGBuffers, 0, sizeof(mGBuffers));
-	glDeleteFramebuffers(1, &mDeferredFBO);
-	mDeferredFBO = 0;
 }
 
 void Engine::InternalReleaseHdrBuffers()
@@ -79,10 +87,6 @@ void Engine::InternalReleaseHdrBuffers()
 	mHdrBuffer = 0;
 	glDeleteTextures(1, &mForwardBuffer);
 	mForwardBuffer = 0;
-	glDeleteFramebuffers(1, &mHdrFBO);
-	mHdrFBO = 0;
-	glDeleteFramebuffers(1, &mForwardFBO);
-	mForwardFBO = 0;
 }
 
 void Engine::InternalReleaseSSAOBuffers()

@@ -21,10 +21,6 @@ Engine::Engine()
 	, mSkybox(nullptr)
 	, mQuad(nullptr)
 	, mSkydome(nullptr)
-	, mDeferredFBO(0)
-	//, mDepthRBO(0)
-	, mHdrFBO(0)
-	, mHdrBuffer(0)
 	, mGBufferWidth(1920)
 	, mGBufferHeight(1080)
 	, mViewportX(0)
@@ -64,6 +60,8 @@ Engine::Engine()
 	}
 	memset(mBufferIds, 0, sizeof(mBufferIds));
 	memset(mGBuffers, 0, sizeof(mGBuffers));
+	memset(mFBOs, 0, sizeof(mFBOs));
+	memset(mSSAOBuffers, 0, sizeof(mSSAOBuffers));
 }
 
 
@@ -154,12 +152,6 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 
 		bool recreateGBuffers = mGBufferWidth != gBufferWidth || mGBufferHeight != gBufferHeight;
 
-		if (recreateGBuffers)
-		{
-			InternalReleaseGBuffers();
-			InternalReleaseHdrBuffers();
-		}
-
 		mViewportX = viewportX;
 		mViewportY = viewportY;
 		mViewportWidth = viewportWidth;
@@ -169,6 +161,11 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 
 		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
 		mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(mViewportX), static_cast<GLfloat>(mViewportX + mViewportWidth), static_cast<GLfloat>(mViewportY), static_cast<GLfloat>(mViewportY + mViewportHeight));
+
+		if (recreateGBuffers)
+		{
+			InternalGenerateBuffersAndFBOs();
+		}
 
 		InternalUpdateDrawGBufferNormalsPatchCount();
 	}
@@ -218,10 +215,9 @@ void Engine::UpdateObjects()
 
 void Engine::RenderObjects()
 {
-	if (mDeferredFBO == 0)
+	if (mFBOs[Deferred_FBO] == 0)
 	{
-		InternalCreateGBuffers();
-		InternalCreateHdrBuffers();
+		InternalGenerateBuffersAndFBOs();
 	}
 
 	// Fill light data buffer 
@@ -315,7 +311,7 @@ void Engine::InternalRenderObjects()
 	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDeferredFBO); 
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[Deferred_FBO]);
 
 	glDisable(GL_BLEND); 
 
@@ -367,7 +363,7 @@ void Engine::InternalRenderObjects()
 		// light pass
 		// -----------------------------------------------------------------------
 
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[HDR_FBO]);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -418,7 +414,7 @@ void Engine::InternalRenderObjects()
 		// tone mapping pass
 		// -----------------------------------------------------------------------
 
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mForwardFBO);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[Forward_FBO]);
 		//glClear(GL_COLOR_BUFFER_BIT);
 		glDepthMask(GL_FALSE);
 		glDisable(GL_DEPTH_TEST);
@@ -574,7 +570,7 @@ void Engine::InternalRenderDeferredBuffers()
 		break;
 
 	case (int)EDeferredDebug::ShowPositionBuffer:
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mHdrFBO);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[HDR_FBO]);
 		break;
 	}
 
