@@ -583,6 +583,9 @@
     <None Include="..\Data\Shaders\ssao.fs.glsl">
       <Filter>Shaders\SSAO</Filter>
     </None>
+    <None Include="..\Data\Shaders\light.pbr.fs.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

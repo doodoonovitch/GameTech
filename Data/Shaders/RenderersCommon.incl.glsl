@@ -208,3 +208,38 @@ void WriteOutData(out uvec4 outAlbedoAndStatus, out vec4 outSpecularAndRoughness
 
 
 
+float AngleAttenuation(in vec3 lightDirection, in vec3 spotDirection, in float innerConeCos, in float outerConeCos)
+{
+	float theta = dot(lightDirection, spotDirection); 
+	float epsilon = max(innerConeCos - outerConeCos, 0.001);
+	float spotIntensity = clamp((theta - outerConeCos) / epsilon, 0.0, 1.0);
+	return spotIntensity;
+}
+
+float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
+{
+	//float lightDistance = length(unnormalizedLightVector);
+	//float fact1 = saturate(1 - pow(lightDistance / lightRadius, 4));
+	//float fact2 = 1 / (lightDistance * lightDistance + 1);
+	//float attenuation = fact1 * fact1 * fact2;
+
+	float dist2 = dot(unnormalizedLightVector, unnormalizedLightVector);
+	float invDist2 = 1 / max(dist2, 0.01 * 0.01);
+	int N = 4;
+	float lightRadiusN = pow(lightRadius, N);
+	float distN = pow(dist2, N /2);
+	float fact2 = saturate(1 - (distN / lightRadiusN));
+	float attenuation = invDist2 * fact2 * fact2;
+	return attenuation;
+}
+
+
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+
+

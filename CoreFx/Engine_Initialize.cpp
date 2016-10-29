@@ -451,9 +451,10 @@ void Engine::InternalInitializeDeferredPassShader()
 	mDeferredShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
 
 	{
-		std::vector<std::string> shaderFilenames(2);
+		std::vector<std::string> shaderFilenames(3);
 		shaderFilenames[0] = "shaders/light.fs.glsl";
 		shaderFilenames[1] = "shaders/UnpackFromGBuffer.incl.glsl";
+		shaderFilenames[2] = "shaders/light.pbr.fs.glsl";
 		mDeferredShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
 	}
 

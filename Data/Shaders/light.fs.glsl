@@ -39,198 +39,16 @@ struct FragmentInfo
 void UnpackFromGBuffer(out FragmentInfo fi);
 
 
+// ---------------------------------------------------------------------------
+// BRDF
 //
 // ---------------------------------------------------------------------------
-
-/*
-// ---------------------------------------------------------------------------
-// BRDF Dpl(n, h)
-//	alpha = pow(8192, glossPower)
-// ---------------------------------------------------------------------------
-float BRDF_Dpl(in float NdotH, in float alpha)
-{
-	return ((alpha + 2) / 8) * pow(NdotH, alpha);
-}
-
+vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughness, in vec3 l, in vec3 v, in vec3 n, in vec3 lightColorIntensity, in float attenuation);
 
 //
 // ---------------------------------------------------------------------------
 
 
-
-// ---------------------------------------------------------------------------
-// BRDF F(rf0, l, h)
-//
-// ---------------------------------------------------------------------------
-vec3 BRDF_F(in vec3 rf0, in float HdotV)
-{
-	return rf0 + (vec3(1) - rf0) * pow(1 - HdotV, 5);
-}
-
-
-//
-// ---------------------------------------------------------------------------
-
-
-
-
-// ---------------------------------------------------------------------------
-// BRDF V(l, v, n)
-//
-// ---------------------------------------------------------------------------
-float BRDF_V(in float NdotL, in float NdotV, in float alpha)
-{
-	float k = 2 / sqrt(PI * (alpha + 2));
-	float oneMinusK = 1 - k;
-	return 1 / ((NdotL * oneMinusK + k) * (NdotV * oneMinusK + k));
-}
-
-
-//
-// ---------------------------------------------------------------------------
-
-
-
-
-// ---------------------------------------------------------------------------
-// BRDF(rf0, l, h, v, n, glossPower)
-//
-// ---------------------------------------------------------------------------
-vec3 BRDF_Specular(in vec3 rf0, in float NdotL, in float NdotV, in float NdotH, in float HdotV, in float glossPower)
-{
-	float alpha = pow(2, glossPower);
-	return BRDF_Dpl(NdotH, alpha) * BRDF_V(NdotL, NdotV, alpha) * BRDF_F(rf0, HdotV);
-}
-*/
-
-// ---------------------------------------------------------------------------
-// BRDF_LambertDiffuse(Kd)
-//
-// ---------------------------------------------------------------------------
-vec3 BRDF_LambertDiffuse(in vec3 Kd)
-{
-	return Kd / PI;
-}
-
-// ---------------------------------------------------------------------------
-// BRDF_Diffuse(Kd, LdotH)
-//
-// ---------------------------------------------------------------------------
-vec3 BRDF_Diffuse(in vec3 Kd, in vec3 fresnel)
-{
-	return (vec3(1) -  fresnel) * Kd / PI;
-}
-
-
-
-// ===============================================================================
-// Calculates the Fresnel factor using Schlick's approximation
-//
-//		float LdotH = saturate(dot(l, h));
-// ===============================================================================
-vec3 BRDF_Fresnel(in vec3 specAlbedo, in float LdotH)
-{
-	return specAlbedo + (1.0f - specAlbedo) * pow((1.0f - LdotH), 5.0f);
-}
-// ===============================================================================
-// Helper for computing the GGX visibility term
-// ===============================================================================
-float GGX_V1(in float m2, in float NdotX)
-{
-	return 1.0f / (NdotX + sqrt(m2 + (1 - m2) * NdotX * NdotX));
-}
-// ===============================================================================
-// Computes the specular term using a GGX microfacet distribution, with a matching
-// geometry factor and visibility term. m is roughness, n is the surface normal,
-// h is the half vector, l is the direction to the light source, and specAlbedo is
-// the RGB specular albedo
-//
-//	float NdotL = saturate(dot(n, l));
-//	float NdotH = saturate(dot(n, h));
-//	float NdotV = max(dot(n, v), 0.0001f);
-//	float LdotH = saturate(dot(l, h));
-// ===============================================================================
-vec3 GGX_Specular(in vec3 specAlbedo, in float m, in float NdotL, in float NdotH, in float NdotV, in float LdotH)
-{
-	if(NdotL <= 0.0f)
-		return vec3(0.0f);
-
-	float NdotH2 = NdotH * NdotH;
-	float m2 = m * m;
-	
-	// Calculate the distribution term
-	float d = m2 / (PI * pow(NdotH2 * (m2 - 1) + 1, 2.0f));
-
-	// Calculate the matching visibility term
-	float v1i = GGX_V1(m2, NdotL);
-	float v1o = GGX_V1(m2, NdotV);
-	float vis = v1i * v1o;
-
-	// Calculate the fresnel term
-	vec3 f = BRDF_Fresnel(specAlbedo, LdotH);
-	// Put it all together
-	return d * f * vis;
-}
-//
-// ---------------------------------------------------------------------------
-
-vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughness, 
-	in float NdotL, in float NdotH, in float NdotV, in float LdotH, 
-	in vec3 lightColorIntensity, in float attenuation)
-{
-	if(NdotL <= 0.0f)
-		return vec3(0.0f);
-
-	float NdotH2 = NdotH * NdotH;
-	float m2 = roughness * roughness;
-	
-	// Calculate the distribution term
-	float d = m2 / (PI * pow(NdotH2 * (m2 - 1) + 1, 2.0f));
-
-	// Calculate the matching visibility term
-	float v1i = GGX_V1(m2, NdotL);
-	float v1o = GGX_V1(m2, NdotV);
-	float vis = v1i * v1o;
-
-	// Calculate the fresnel term
-	vec3 f = BRDF_Fresnel(specularMaterial, LdotH);
-	//vec3 f2 = BRDF_Fresnel(diffuseMaterial, LdotH);
-
-	//vec3 brdf = BRDF_Diffuse(diffuseMaterial, f2) 
-	vec3 brdf = BRDF_LambertDiffuse(diffuseMaterial)
-		+ d * f * vis;
-
-	brdf = brdf * lightColorIntensity * NdotL * attenuation;
-
-	return brdf;
-}
-
-
-
-float AngleAttenuation(in vec3 lightDirection, in vec3 spotDirection, in float innerConeCos, in float outerConeCos)
-{
-	float theta = dot(lightDirection, spotDirection); 
-	float epsilon = max(innerConeCos - outerConeCos, 0.001);
-	float spotIntensity = clamp((theta - outerConeCos) / epsilon, 0.0, 1.0);
-	return spotIntensity;
-}
-
-float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
-{
-	//float lightDistance = length(unnormalizedLightVector);
-	//float fact1 = saturate(1 - pow(lightDistance / lightRadius, 4));
-	//float fact2 = 1 / (lightDistance * lightDistance + 1);
-	//float attenuation = fact1 * fact1 * fact2;
-
-	float dist2 = dot(unnormalizedLightVector, unnormalizedLightVector);
-	float invDist2 = 1 / max(dist2, 0.01 * 0.01);
-	int N = 4;
-	float lightRadiusN = pow(lightRadius, N);
-	float distN = pow(dist2, N /2);
-	float fact2 = saturate(1 - (distN / lightRadiusN));
-	float attenuation = invDist2 * fact2 * fact2;
-	return attenuation;
-}
 
 // ---------------------------------------------------------------------------
 // Renderers
@@ -261,14 +79,7 @@ vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
 	
 	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
 
-	vec3 h = normalize(l + v);
-
-	float NdotL = saturate(dot(fi.Normal, l));
-	float NdotV = max(dot(fi.Normal, v), 0.0001f);
-	float NdotH = saturate(dot(fi.Normal, h));
-	float LdotH = saturate(dot(l, h));
-
-	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH, lightColorIntensity, attenuation);
+	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, l, v, fi.Normal, lightColorIntensity, attenuation);
 }
 
 vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
@@ -292,14 +103,7 @@ vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
 	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
 	attenuation *= AngleAttenuation(l, spotDirection, innerConeCos, outerConeCos);
 
-	vec3 h = normalize(l + v);
-
-	float NdotL = saturate(dot(fi.Normal, l));
-	float NdotV = max(dot(fi.Normal, v), 0.0001f);
-	float NdotH = saturate(dot(fi.Normal, h));
-	float LdotH = saturate(dot(l, h));
-
-	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH, lightColorIntensity, attenuation);
+	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, l, v, fi.Normal, lightColorIntensity, attenuation);
 }
 
 vec3 BRDF_DirectionalLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
@@ -311,14 +115,7 @@ vec3 BRDF_DirectionalLight(in vec3 v, in FragmentInfo fi, in int lightIndex)
 
 	vec3 l = texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
 
-	vec3 h = normalize(l + v);
-
-	float NdotL = saturate(dot(fi.Normal, l));
-	float NdotV = max(dot(fi.Normal, v), 0.0001f);
-	float NdotH = saturate(dot(fi.Normal, h));
-	float LdotH = saturate(dot(l, h));
-
-	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, NdotL, NdotH, NdotV, LdotH, lightColorIntensity, 1.0);
+	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, l, v, fi.Normal, lightColorIntensity, 1.0f);
 }
 
 
@@ -352,6 +149,29 @@ vec4 BRDFLight(FragmentInfo fi)
 	
 	return vec4(color, 1);
 }
+
+void main(void)
+{
+	FragmentInfo fi;
+
+	UnpackFromGBuffer(fi);
+	
+	if (fi.RendererId == SKYBOX_RENDERER_ID)
+	{
+		vFragColor = vec4(fi.SpecularMaterial, 1);
+	}
+	else if(fi.RendererId > 0)
+	{
+		//vFragColor = ADSLight(fi);
+		vFragColor = BRDFLight(fi);
+	}
+	else 
+	{
+		vFragColor = vec4(0, 0, 0, 1);
+	}
+}
+
+
 
 /*
 vec4 ADSLight(FragmentInfo fi)
@@ -503,25 +323,4 @@ vec4 ADSLight(FragmentInfo fi)
 //
 // ---------------------------------------------------------------------------
 
-
-void main(void)
-{
-	FragmentInfo fi;
-
-	UnpackFromGBuffer(fi);
-	
-	if (fi.RendererId == SKYBOX_RENDERER_ID)
-	{
-		vFragColor = vec4(fi.SpecularMaterial, 1);
-	}
-	else if(fi.RendererId > 0)
-	{
-		//vFragColor = ADSLight(fi);
-		vFragColor = BRDFLight(fi);
-	}
-	else 
-	{
-		vFragColor = vec4(0, 0, 0, 1);
-	}
-}
 
