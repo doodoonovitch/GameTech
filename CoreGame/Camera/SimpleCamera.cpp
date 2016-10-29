@@ -777,6 +777,14 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		}
 		break;
 
+	case 'K':
+	case 'k':
+		{
+			GLuint inc = key == 'k' ? +1 : -1;
+			engine->SetSSAOKernelSize(max(16, engine->GetSSAOKernelSize() + inc));
+		}
+		break;
+
 	case 'p':
 	case 'P':
 		mFreezeTimer = !mFreezeTimer;

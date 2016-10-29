@@ -272,6 +272,16 @@ public:
 		mSSAORadius = value;
 	}
 
+	GLuint GetSSAOKernelSize() const
+	{
+		return mSSAOKernelSize;
+	}
+
+	void SetSSAOKernelSize(GLuint value)
+	{
+		mSSAOKernelSize = value;
+	}
+
 
 	// ---------------------------------------------------------------------------
 	// Debug Tools
@@ -555,7 +565,7 @@ private:
 		__ssaobuffer_count__
 	};
 	GLuint mSSAOBuffers[__ssaobuffer_count__];
-	const GLuint mSSAOKernelSize = 64;
+	GLuint mSSAOKernelSize = 64;
 	GLfloat mSSAORadius = 1.0f;
 	glm::vec2 mNoiseScale;
 
