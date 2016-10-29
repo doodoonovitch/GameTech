@@ -220,6 +220,7 @@ void TextureManager::CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, c
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+	GL_CHECK_ERRORS;
 }
 
 bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, GLenum wrapS, GLenum wrapT, bool generateMipMap)

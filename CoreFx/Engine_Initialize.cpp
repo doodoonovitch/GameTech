@@ -23,14 +23,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 		mPointLightPositionRenderer = new Renderers::PointLightPositionRenderer();
 		mSpotLightPositionRenderer = new Renderers::SpotLightPositionRenderer();
 
-		mViewportX = viewportX;
-		mViewportY = viewportY;
-		mViewportWidth = viewportWidth;
-		mViewportHeight = viewportHeight;
-		mGBufferWidth = gBufferWidth;
-		mGBufferHeight = gBufferHeight;
-
-		InternalUpdateDrawGBufferNormalsPatchCount();
+		InternalInitializeViewportParams(viewportX, viewportY, viewportWidth, viewportHeight, gBufferWidth, gBufferHeight);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -38,9 +31,6 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
-
-		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
-		mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(mViewportX), static_cast<GLfloat>(mViewportX + mViewportWidth), static_cast<GLfloat>(mViewportY), static_cast<GLfloat>(mViewportY + mViewportHeight));
 
 		mTextureManager = new TextureManager();
 		mTextureManager->Initialize();
@@ -59,6 +49,23 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 
 		mInitialized = true;
 	}
+}
+
+void Engine::InternalInitializeViewportParams(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
+{
+	mViewportX = viewportX;
+	mViewportY = viewportY;
+	mViewportWidth = viewportWidth;
+	mViewportHeight = viewportHeight;
+	mGBufferWidth = gBufferWidth;
+	mGBufferHeight = gBufferHeight;
+	mNoiseScale.x = (GLfloat)mGBufferWidth / 4.0f;
+	mNoiseScale.y = (GLfloat)mGBufferHeight / 4.0f;
+
+	InternalUpdateDrawGBufferNormalsPatchCount();
+
+	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+	mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(mViewportX), static_cast<GLfloat>(mViewportX + mViewportWidth), static_cast<GLfloat>(mViewportY), static_cast<GLfloat>(mViewportY + mViewportHeight));
 }
 
 void Engine::InternalGenerateBuffersAndFBOs()
@@ -241,15 +248,15 @@ void Engine::InternalCreateSSAOBuffers()
 	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Kernel]);
 	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Noise]);
 
-	for (GLuint i = 0; i < 2; ++i)
-	{
-		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		GL_CHECK_ERRORS;
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
+	//for (GLuint i = 0; i < 2; ++i)
+	//{
+	//	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[i]);
+	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//	GL_CHECK_ERRORS;
+	//	glBindTexture(GL_TEXTURE_2D, 0);
+	//}
 
 	// Sample kernel
 	std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
@@ -271,11 +278,12 @@ void Engine::InternalCreateSSAOBuffers()
 	}
 
 	glBindTexture(GL_TEXTURE_1D, mSSAOBuffers[SSAOBuffer_Kernel]);
-	glTexStorage1D(GL_TEXTURE_1D, 0, GL_RGB16F, mSSAOKernelSize);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexStorage1D(GL_TEXTURE_1D, 1, GL_RGB16F, mSSAOKernelSize);
+	GL_CHECK_ERRORS;
 	glTexSubImage1D(GL_TEXTURE_1D, 0, 0, mSSAOKernelSize, GL_RGB, GL_FLOAT, ssaoKernel.data());
 	GL_CHECK_ERRORS;
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_1D, 0);
 
 	// Noise texture
@@ -286,13 +294,21 @@ void Engine::InternalCreateSSAOBuffers()
 		ssaoNoise.push_back(noise);
 	}
 	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Noise]);
-	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, 4, 4, ssaoNoise.data(), false, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_RGB16F, GL_RGB, GL_FLOAT);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, 4, 4, ssaoNoise.data(), false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_RGB16F, GL_RGB, GL_FLOAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
+
+	//
+
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBOs[SSAO_FBO]);
+	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RED, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mSSAOBuffers[SSAOBuffer_Main], 0);
-	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, drawBuffers); GL_CHECK_ERRORS;
+	GL_CHECK_ERRORS;
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -302,6 +318,7 @@ void Engine::InternalCreateSSAOBuffers()
 	{
 		PRINT_MESSAGE("...complete!");
 	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	PRINT_END_SECTION;
@@ -631,6 +648,7 @@ void Engine::InternalInitializeShowDeferredBuffersShader()
 		"u_lightDescSampler",
 		"u_lightDataSampler",
 		"u_BufferToShow",
+		"u_gBufferSSAO"
 	};
 
 	mShowDeferredBuffersShader.Use();
@@ -645,6 +663,8 @@ void Engine::InternalInitializeShowDeferredBuffersShader()
 	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferAlbedoAndStatus), 4);
 	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferSpecularRoughness), 5);
 	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferEmissive), 6);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferSSAO), 7);
+	
 	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_BufferToShow), mDeferredDebugState);
 
 
@@ -665,13 +685,7 @@ void Engine::InternalInitializeSSAOShader()
 
 	// vertex shader
 	mSSAOShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
-
-	{
-		std::vector<std::string> shaderFilenames(2);
-		shaderFilenames[0] = "shaders/ssao.fs.glsl";
-		shaderFilenames[1] = "shaders/UnpackFromGBuffer.incl.glsl";
-		mSSAOShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
-	}
+	mSSAOShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/ssao.fs.glsl");
 
 	mSSAOShader.CreateAndLinkProgram();
 

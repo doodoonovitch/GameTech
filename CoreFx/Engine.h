@@ -103,7 +103,7 @@ public:
 		ShowSpecularBuffer		= 3,
 		ShowRoughnessBuffer		= 4,
 		ShowPositionBuffer		= 5,
-		//ShowSSAOBuffer			= 6,
+		ShowSSAOBuffer			= 6,
 
 		__count__
 	};
@@ -360,6 +360,8 @@ private:
 	void InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 	void InternalRelease();
 
+	void InternalInitializeViewportParams(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
+
 	void InternalCreateFrameDataBuffer(GLuint program);
 
 	void InternalGenerateBuffersAndFBOs();
@@ -454,6 +456,7 @@ private:
 		u_lightDescSampler,
 		u_lightDataSampler,
 		u_BufferToShow,
+		u_gBufferSSAO,
 
 		__uniforms_count__
 	};
@@ -526,8 +529,10 @@ private:
 
 		__ssaobuffer_count__
 	};
-	GLuint mSSAOBuffers[2];
+	GLuint mSSAOBuffers[__ssaobuffer_count__];
 	const GLuint mSSAOKernelSize = 64;
+	GLfloat mSSAORadius = 1.0f;
+	glm::vec2 mNoiseScale;
 
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;

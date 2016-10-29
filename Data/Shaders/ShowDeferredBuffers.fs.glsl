@@ -12,6 +12,7 @@ uniform usampler2D u_gBufferAlbedoAndStatus;
 uniform sampler2D u_gBufferSpecularRoughness;
 uniform sampler2D u_gBufferEmissive;
 uniform sampler2D u_gDepthMap;
+uniform sampler2D u_gBufferSSAO;
 
 uniform int u_BufferToShow;
 
@@ -35,7 +36,6 @@ struct FragmentInfo
 // ---------------------------------------------------------------------------
 void UnpackFromGBuffer(out FragmentInfo fi);
 
-uniform sampler2D u_gBufferSSAO;
 
 //
 // ---------------------------------------------------------------------------
@@ -83,7 +83,7 @@ void main(void)
 		{
 			vFragColor = vec4(fi.Position, 1);
 		}
-		else if(u_BufferToShow == POSITION_BUFFER)
+		else if(u_BufferToShow == SSAO_BUFFER)
 		{
 			float occlusion = texture(u_gBufferSSAO, fs_in.TexUV, 0).r;
 			vFragColor = vec4(occlusion, occlusion, occlusion, 1);

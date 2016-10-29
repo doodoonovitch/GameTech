@@ -31,7 +31,7 @@ void main(void)
 	float depth = texture(u_gDepthMap, fs_in.TexUV).r;
 	vec3 position = PositionFromDepth(depth, fs_in.ViewRay);
 
-	vec3 randomVec = texture(u_gNoiseMap, fs_in.TexUV * u_NoiseScale).xyz;
+	vec3 randomVec = texture(u_gNoiseMap, fs_in.TexUV).xyz;
 
 	vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
 	vec3 bitangent = cross(normal, tangent);
@@ -41,11 +41,11 @@ void main(void)
 	for(int i = 0; i < u_KernelSize; ++i)
 	{
 		// get sample position
-		vec3 sample = TBN * texelFetch(u_gKernel, i).xyz; 
-		sample = position + sample * u_Radius; 
+		vec3 smp = TBN * texelFetch(u_gKernel, i, 0).xyz; 
+		smp = position + smp * u_Radius; 
         
 		// project sample position (to sample texture) (to get position on screen/texture)
-		vec4 offset = vec4(sample, 1.0);
+		vec4 offset = vec4(smp, 1.0);
 		offset = u_ProjMatrix * offset; 
 		offset.xyz /= offset.w;      
 		offset.xyz = offset.xyz * 0.5 + 0.5; 
@@ -55,7 +55,8 @@ void main(void)
         
 		// range check & accumulate
 		float rangeCheck = smoothstep(0.0, 1.0, u_Radius / abs(position.z - sampleDepth));
-		occlusion += (sampleDepth >= sample.z ? 1.0 : 0.0) * rangeCheck;           
+		occlusion += (sampleDepth >= smp.z ? 1.0 : 0.0) * rangeCheck;
+
 	}
 	occlusion = 1.0 - (occlusion / u_KernelSize);
 

@@ -138,6 +138,7 @@ void Engine::CreateDynamicResources()
 	// -----------------------------------------------------------------------
 	
 	InternalInitializeQuadVAO();
+	InternalInitializeSSAOShader();
 	InternalInitializeDeferredPassShader();
 	InternalInitializeToneMappingShader();
 	InternalInitializeCopyShader();
@@ -149,25 +150,14 @@ void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth
 {
 	if (mInitialized)
 	{
-
 		bool recreateGBuffers = mGBufferWidth != gBufferWidth || mGBufferHeight != gBufferHeight;
 
-		mViewportX = viewportX;
-		mViewportY = viewportY;
-		mViewportWidth = viewportWidth;
-		mViewportHeight = viewportHeight;
-		mGBufferWidth = gBufferWidth;
-		mGBufferHeight = gBufferHeight;
-
-		glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
-		mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(mViewportX), static_cast<GLfloat>(mViewportX + mViewportWidth), static_cast<GLfloat>(mViewportY), static_cast<GLfloat>(mViewportY + mViewportHeight));
+		InternalInitializeViewportParams(viewportX, viewportY, viewportWidth, viewportHeight, gBufferWidth, gBufferHeight);
 
 		if (recreateGBuffers)
 		{
 			InternalGenerateBuffersAndFBOs();
 		}
-
-		InternalUpdateDrawGBufferNormalsPatchCount();
 	}
 }
 
@@ -337,6 +327,10 @@ void Engine::InternalRenderObjects()
 		}			
 	});
 
+	// -----------------------------------------------------------------------
+	// Render sky box / sky dome
+	// -----------------------------------------------------------------------
+
 	glDepthMask(GL_FALSE);
 	glDepthFunc(GL_LEQUAL);
 	if (mSkybox != nullptr)
@@ -354,8 +348,47 @@ void Engine::InternalRenderObjects()
 		}
 	}
 
+	// -----------------------------------------------------------------------
+	// SSAO pass
+	// -----------------------------------------------------------------------
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[SSAO_FBO]);
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+
+	mSSAOShader.Use();
+
+	glUniform1f(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_Radius), mSSAORadius);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_KernelSize), mSSAOKernelSize);
+	glUniform2fv(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_NoiseScale), 1, glm::value_ptr(mNoiseScale));
+
+	glBindVertexArray(mQuad->GetVao());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Noise]);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_1D, mSSAOBuffers[SSAOBuffer_Kernel]);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	mSSAOShader.UnUse();
+
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+
+	// -----------------------------------------------------------------------
+	// 
+	// -----------------------------------------------------------------------
 
 	if (mDeferredDebugState == 0)
 	{
@@ -608,6 +641,9 @@ void Engine::InternalRenderDeferredBuffers()
 
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
 
 	//glActiveTexture(GL_TEXTURE2);
 	//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
