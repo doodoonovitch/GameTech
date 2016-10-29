@@ -387,6 +387,7 @@ private:
 	void InternalInitializeViewTex2DArrayShader();
 	void InternalInitializeShowDeferredBuffersShader();
 	void InternalInitializeSSAOShader();
+	void InternalInitializeSSAOBlurShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
 
@@ -476,6 +477,14 @@ private:
 		__uniforms_count__
 	};
 
+	enum class ESSAOBlurShaderUniformIndex
+	{
+		u_ImageIn,
+		u_TexOffset,
+
+		__uniforms_count__
+	};
+
 	static Engine* sInstance;
 	static bool sIsUsedExtensionSupported[__UsedExtensions_count__ + 1];
 
@@ -500,6 +509,7 @@ private:
 	Shader mViewTex2DArrayShader;
 	Shader mShowDeferredBuffersShader;
 	Shader mSSAOShader;
+	Shader mSSAOBlurShader;
 
 	enum EFBOIndex
 	{

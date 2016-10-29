@@ -43,7 +43,8 @@ Engine::Engine()
 	, mCopyShader("CopyShader")
 	, mViewTex2DArrayShader("CopyTex2DArrayShader")
 	, mShowDeferredBuffersShader("ShowDeferredBuffersShader")
-	, mSSAOShader("SSAOComputeShader")
+	, mSSAOShader("SSAOShader")
+	, mSSAOBlurShader("SSAOBlurShader")
 	, mPointLightPositionRenderer(nullptr)
 	, mSpotLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
@@ -139,6 +140,7 @@ void Engine::CreateDynamicResources()
 	
 	InternalInitializeQuadVAO();
 	InternalInitializeSSAOShader();
+	InternalInitializeSSAOBlurShader();
 	InternalInitializeDeferredPassShader();
 	InternalInitializeToneMappingShader();
 	InternalInitializeCopyShader();
@@ -386,6 +388,36 @@ void Engine::InternalRenderObjects()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
+	// -----------------------------------------------------------------------
+	// SSAO blur
+	// -----------------------------------------------------------------------
+	
+	mSSAOBlurShader.Use();
+
+	glUniform2i(mSSAOBlurShader.GetUniform((int)ESSAOBlurShaderUniformIndex::u_TexOffset), 1, 0);
+	
+	glBindImageTexture(0, mSSAOBuffers[SSAOBuffer_Temp], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
+
+	glDispatchCompute(mGBufferWidth, mGBufferHeight, 1);
+
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	glUniform2i(mSSAOBlurShader.GetUniform((int)ESSAOBlurShaderUniformIndex::u_TexOffset), 0, 1);
+
+	glBindImageTexture(0, mSSAOBuffers[SSAOBuffer_Main], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Temp]);
+
+	glDispatchCompute(mGBufferWidth, mGBufferHeight, 1);
+
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	mSSAOBlurShader.UnUse();
+	
 	// -----------------------------------------------------------------------
 	// 
 	// -----------------------------------------------------------------------

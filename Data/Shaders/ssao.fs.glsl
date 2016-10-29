@@ -31,7 +31,7 @@ void main(void)
 	float depth = texture(u_gDepthMap, fs_in.TexUV).r;
 	vec3 position = PositionFromDepth(depth, fs_in.ViewRay);
 
-	vec3 randomVec = texture(u_gNoiseMap, fs_in.TexUV).xyz;
+	vec3 randomVec = texture(u_gNoiseMap, fs_in.TexUV * u_NoiseScale).xyz;
 
 	vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
 	vec3 bitangent = cross(normal, tangent);

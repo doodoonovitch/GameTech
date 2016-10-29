@@ -69,6 +69,9 @@
     <Filter Include="Renderers\DebugTools">
       <UniqueIdentifier>{2bf81a86-9492-445a-ba6d-05c43eaa4a31}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\SSAO">
+      <UniqueIdentifier>{1db766f4-21cb-40d0-bbad-0ceb0bd87ac6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -574,8 +577,11 @@
     <None Include="..\Data\Shaders\screenquad.vs.glsl">
       <Filter>Shaders\Deferred</Filter>
     </None>
+    <None Include="..\Data\Shaders\ssao.GaussianBlur.cs.glsl">
+      <Filter>Shaders\SSAO</Filter>
+    </None>
     <None Include="..\Data\Shaders\ssao.fs.glsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\SSAO</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

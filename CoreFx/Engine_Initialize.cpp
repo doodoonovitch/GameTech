@@ -248,15 +248,15 @@ void Engine::InternalCreateSSAOBuffers()
 	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Kernel]);
 	PRINT_GEN_TEXTURE("[Engine]", mSSAOBuffers[SSAOBuffer_Noise]);
 
-	//for (GLuint i = 0; i < 2; ++i)
-	//{
-	//	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[i]);
-	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//	GL_CHECK_ERRORS;
-	//	glBindTexture(GL_TEXTURE_2D, 0);
-	//}
+	for (GLuint i = 0; i < 2; ++i)
+	{
+		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		GL_CHECK_ERRORS;
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
 	// Sample kernel
 	std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
@@ -300,13 +300,8 @@ void Engine::InternalCreateSSAOBuffers()
 	//
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBOs[SSAO_FBO]);
-	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, mGBufferWidth, mGBufferHeight, 0, GL_RED, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mSSAOBuffers[SSAOBuffer_Main], 0);
 	GL_CHECK_ERRORS;
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glDrawBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
 
@@ -683,7 +678,6 @@ void Engine::InternalInitializeSSAOShader()
 
 	//setup shader
 
-	// vertex shader
 	mSSAOShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
 	mSSAOShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/ssao.fs.glsl");
 
@@ -714,6 +708,37 @@ void Engine::InternalInitializeSSAOShader()
 	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gBufferAlbedoAndStatus), 4);
 
 	mSSAOShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
+}
+
+void Engine::InternalInitializeSSAOBlurShader()
+{
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize SSAO Blur shader .....");
+
+	//setup shader
+
+	mSSAOBlurShader.LoadFromFile(GL_COMPUTE_SHADER, "shaders/ssao.GaussianBlur.cs.glsl");
+
+	mSSAOBlurShader.CreateAndLinkProgram();
+
+	const char * uniformNames[(int)ESSAOBlurShaderUniformIndex::__uniforms_count__] =
+	{
+		"u_ImageIn",
+		"u_TexOffset",
+	};
+
+	mSSAOBlurShader.Use();
+
+	mSSAOBlurShader.AddUniforms(uniformNames, (int)ESSAOBlurShaderUniformIndex::__uniforms_count__);
+
+	glUniform1i(mSSAOBlurShader.GetUniform((int)ESSAOBlurShaderUniformIndex::u_ImageIn), 0);
+
+	mSSAOBlurShader.UnUse();
 
 	GL_CHECK_ERRORS;
 
