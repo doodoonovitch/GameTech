@@ -474,6 +474,7 @@ void Engine::InternalInitializeDeferredPassShader()
 		"u_gBufferAlbedoAndStatus",
 		"u_gBufferSpecularRoughness",
 		"u_gBufferEmissive",
+		"u_gBufferSSAO",
 		//"u_materialDataSampler",
 		"u_lightDescSampler",
 		"u_lightDataSampler",
@@ -494,7 +495,8 @@ void Engine::InternalInitializeDeferredPassShader()
 	glUniform1i(mDeferredShader.GetUniform(u_gBufferAlbedoAndStatus), 4);
 	glUniform1i(mDeferredShader.GetUniform(u_gBufferSpecularRoughness), 5);
 	glUniform1i(mDeferredShader.GetUniform(u_gBufferEmissive), 6);
-
+	glUniform1i(mDeferredShader.GetUniform(u_gBufferSSAO), 7);
+	
 	//glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
 	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
 	//{

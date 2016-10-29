@@ -462,6 +462,9 @@ void Engine::InternalRenderObjects()
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
 
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
+
 		//glActiveTexture(GL_TEXTURE2);
 		//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
 

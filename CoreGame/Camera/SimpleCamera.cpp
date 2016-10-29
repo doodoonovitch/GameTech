@@ -769,6 +769,14 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 	}
 	break;
 
+	case 'O':
+	case 'o':
+		{
+			float inc = key == 'o' ? +0.1f : -0.1f;
+			engine->SetSSAORadius(max(0.1f, engine->GetSSAORadius() + inc));
+		}
+		break;
+
 	case 'p':
 	case 'P':
 		mFreezeTimer = !mFreezeTimer;

@@ -260,6 +260,19 @@ public:
 		return mMaterialBuffer;
 	}
 
+public:
+
+	float GetSSAORadius() const
+	{
+		return mSSAORadius;
+	}
+
+	void SetSSAORadius(GLfloat value)
+	{
+		mSSAORadius = value;
+	}
+
+
 	// ---------------------------------------------------------------------------
 	// Debug Tools
 	//
@@ -417,9 +430,11 @@ private:
 		u_gBufferAlbedoAndStatus,
 		u_gBufferSpecularRoughness,
 		u_gBufferEmissive,
+		u_gBufferSSAO,
 		//u_materialDataSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,
+
 
 		__deferred_uniforms_count__
 	};
