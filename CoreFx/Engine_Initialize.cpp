@@ -454,7 +454,8 @@ void Engine::InternalInitializeDeferredPassShader()
 		std::vector<std::string> shaderFilenames(3);
 		shaderFilenames[0] = "shaders/light.fs.glsl";
 		shaderFilenames[1] = "shaders/UnpackFromGBuffer.incl.glsl";
-		shaderFilenames[2] = "shaders/light.pbr.fs.glsl";
+		//shaderFilenames[2] = "shaders/light.pbr.fs.glsl";
+		shaderFilenames[2] = "shaders/light.pbr-tri-ace-2010.fs.glsl";
 		mDeferredShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
 	}
 

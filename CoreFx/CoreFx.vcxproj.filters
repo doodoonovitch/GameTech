@@ -586,6 +586,9 @@
     <None Include="..\Data\Shaders\light.pbr.fs.glsl">
       <Filter>Shaders\Deferred</Filter>
     </None>
+    <None Include="..\Data\Shaders\light.pbr-tri-ace-2010.fs.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

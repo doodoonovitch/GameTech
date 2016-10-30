@@ -252,6 +252,7 @@
     <None Include="..\Data\Shaders\axis.vs.glsl" />
     <None Include="..\Data\Shaders\ComputeShaders.header.glsl" />
     <None Include="..\Data\Shaders\DeepOcean.hmap.cs.glsl" />
+    <None Include="..\Data\Shaders\light.pbr-tri-ace-2010.fs.glsl" />
     <None Include="..\Data\Shaders\light.pbr.fs.glsl" />
     <None Include="..\Data\Shaders\ssao.GaussianBlur.cs.glsl" />
     <None Include="..\Data\Shaders\GerstnerWaves.hmap.cs.glsl" />

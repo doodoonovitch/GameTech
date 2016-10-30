@@ -243,3 +243,30 @@ float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
 
 
 
+// ===============================================================================
+// Calculates the Fresnel factor using Schlick's approximation
+//
+//		float LdotH = saturate(dot(l, h));
+// ===============================================================================
+vec3 BRDF_Fresnel(in vec3 f0, in float LdotH)
+{
+	return f0 + (1.0f - f0) * pow((1.0f - LdotH), 5.0f);
+}
+
+// ---------------------------------------------------------------------------
+// BRDF_LambertDiffuse(Kd)
+//
+// ---------------------------------------------------------------------------
+vec3 BRDF_LambertDiffuse(in vec3 Kd)
+{
+	return Kd / PI;
+}
+
+// ---------------------------------------------------------------------------
+// BRDF_BlinnPhongDiffuse(Kd, LdotH)
+//
+// ---------------------------------------------------------------------------
+vec3 BRDF_BlinnPhongDiffuse(in vec3 Kd, in vec3 fresnel)
+{
+	return (vec3(1) -  fresnel) * Kd / PI;
+}
