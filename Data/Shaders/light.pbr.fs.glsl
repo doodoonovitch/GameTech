@@ -88,9 +88,9 @@ vec3 BRDF_Diffuse(in vec3 Kd, in vec3 fresnel)
 //
 //		float LdotH = saturate(dot(l, h));
 // ===============================================================================
-vec3 BRDF_Fresnel(in vec3 specAlbedo, in float LdotH)
+vec3 BRDF_Fresnel(in vec3 f0, in float LdotH)
 {
-	return specAlbedo + (1.0f - specAlbedo) * pow((1.0f - LdotH), 5.0f);
+	return f0 + (1.0f - f0) * pow((1.0f - LdotH), 5.0f);
 }
 // ===============================================================================
 // Helper for computing the GGX visibility term
