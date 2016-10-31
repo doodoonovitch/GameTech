@@ -55,10 +55,10 @@ void SimpleCamera::SetupViewportAndProjection()
 }
 
 //#define CUBE_SAMPLES
-#define TERRAIN_SAMPLE
+//#define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
-#define PERLIN_NOISE_OCEAN_SAMPLE
+//#define PERLIN_NOISE_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
@@ -315,10 +315,11 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
 //#define ARTORIAS_SWORD_MODEL
-#define BOX_MODEL
+//#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
 //#define CERBERUS_MODEL
+#define SHIELD_MODEL
 
 
 #ifdef ARTORIAS_SWORD_MODEL
@@ -410,6 +411,30 @@ void SimpleCamera::OnInit()
 				modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt, &dataCtxBase);
 				const GLuint modelCount = 1;
 				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+			}
+#endif
+#ifdef SHIELD_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(2.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Shield/Shield.fbx", "Medias/Objects/Shield", opt, &dataCtxBase);
+
+				const GLuint modelCount = 1;
+				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Shield/shield_diffuse_map.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Shield/shield_metallic_map.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Shield/shield_roughness_map.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Shield/shield_normal_map.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.784314f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+
 			}
 #endif
 			// Iron : 0.56f, 0.57f, 0.58f
