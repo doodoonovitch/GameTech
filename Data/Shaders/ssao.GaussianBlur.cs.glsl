@@ -15,10 +15,12 @@ void main(void)
 
     float result = texture(u_ImageIn, tc).r * u_Weight[0]; // current fragment's contribution
 
+	vec2 texOffset = u_TexOffset / vec2(textureSize(u_ImageIn, 0));
+
     for(int i = 1; i < 5; ++i)
     {
-        result += textureOffset(u_ImageIn, tc, i * u_TexOffset).r * u_Weight[i];
-        result += textureOffset(u_ImageIn, tc, -i * u_TexOffset).r * u_Weight[i];
+        result += texture(u_ImageIn, tc + i * texOffset).r * u_Weight[i];
+        result += texture(u_ImageIn, tc - i * texOffset).r * u_Weight[i];
     }
 
 	imageStore(u_ImageOut, p, vec4(result));
