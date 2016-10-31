@@ -3,7 +3,8 @@ layout (location = POSITION_ATTRIBUTE) in vec3 in_Position;
 layout (location = NORMAL_ATTRIBUTE) in vec3 in_Normal;
 layout (location = TANGENT_ATTRIBUTE) in vec3 in_Tangent;
 layout (location = UV_ATTRIBUTE) in vec2 in_TexUV;
-#ifndef ARB_SHADER_DRAW_PARAMETERS
+#ifdef ARB_SHADER_DRAW_PARAMETERS
+#else
 layout (location = MESHID_ATTRIBUTE) in int in_MeshId;
 #endif
 

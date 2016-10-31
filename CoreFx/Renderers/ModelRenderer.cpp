@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 ModelRenderer::ModelRenderer(size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Model, 3>((GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
+	: SceneObjectRenderer<Renderables::Model, 4>((GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
 	, mMaterialCount(0)
 	, mDrawCmdCount(0)
 	, mMaterialTextureIndexesList(0)
@@ -86,8 +86,15 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 
 		if (!Engine::GetInstance()->IsUsedExtensionSupported(Engine::ARB_shader_draw_parameters))
 		{
+			glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[VBO_BaseInstanceARB]);
+			glBufferData(GL_ARRAY_BUFFER, GetCapacity() * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
+			GL_CHECK_ERRORS;
+			
 			glEnableVertexAttribArray(Shader::MESHID_ATTRIBUTE);
-			glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_UNSIGNED_INT, vertexDataSize, (GLvoid*)offsetof(Renderer::VertexData, mMeshId));
+			glVertexAttribIPointer(Shader::MESHID_ATTRIBUTE, 1, GL_INT, vertexDataSize, (GLvoid*)offsetof(Renderer::VertexData, mMeshId));
+			GL_CHECK_ERRORS;
+
+			glVertexAttribDivisor(Shader::MESHID_ATTRIBUTE, 1);
 			GL_CHECK_ERRORS;
 		}
 
@@ -379,8 +386,30 @@ void ModelRenderer::UpdateShaderData()
 {
 	if (!mIsShaderBufferSet)
 	{
-		// --------------------------------------------
+		if (!Engine::GetInstance()->IsUsedExtensionSupported(Engine::ARB_shader_draw_parameters))
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[VBO_BaseInstanceARB]);
+			GLuint * baseInstanceARBBuffer = (GLuint *)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
+			if (baseInstanceARBBuffer != nullptr)
+			{
+				GLuint index = 0;
+				for (DrawElementsIndirectCommandList::const_iterator it = mDrawCommandList.begin(); it != mDrawCommandList.end(); ++it)
+				{
+					const DrawElementsIndirectCommand & cmd = *it;
+					for (GLuint j = 0; j < cmd.mInstanceCount; ++j)
+					{
+						baseInstanceARBBuffer[index++] = cmd.mBaseInstance;
+					}
+				}
+			}
+
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+
+		// --------------------------------------------
+		
 		glBindBuffer(GL_TEXTURE_BUFFER, mInstanceMatrixIndexBuffer.GetBufferId());
 
 		GLuint index = 0;
@@ -407,7 +436,7 @@ void ModelRenderer::UpdateShaderData()
 
 			glUnmapBuffer(GL_TEXTURE_BUFFER);
 		}
-
+		
 		// --------------------------------------------
 
 		if (mUpdateObjMatrixIndexProp)

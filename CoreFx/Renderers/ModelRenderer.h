@@ -12,7 +12,7 @@ namespace CoreFx
 
 
 
-class ModelRenderer : public SceneObjectRenderer<Renderables::Model, 3>
+class ModelRenderer : public SceneObjectRenderer<Renderables::Model, 4>
 {
 public:
 
@@ -73,6 +73,7 @@ private:
 		VBO_Vertex,
 		VBO_Index,
 		VBO_Indirect,
+		VBO_BaseInstanceARB,
 	};
 
 #pragma pack(push, 1)
@@ -159,6 +160,9 @@ private:
 
 	Renderer::DrawElementsIndirectCommandList mDrawCommandList;
 	ModelInstanceMappingList mModelInstanceMappingList;
+
+	typedef std::vector<GLuint> BaseInstanceARBList;
+	BaseInstanceARBList mBaseInstanceARBList;
 
 	bool mIsModelSet;
 	bool mIsShaderBufferSet;
