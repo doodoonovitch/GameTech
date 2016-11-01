@@ -193,7 +193,7 @@ vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, sampler2DArray gNormalMap, v
 void WriteOutData(out uvec4 outAlbedoAndStatus, out vec4 outSpecularAndRoughness, out vec3 outEmissive,
 	int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, float roughness, vec3 matEmissive)
 {
-	outAlbedoAndStatus = uvec4(matDiffuseColor * 255, rendererId);
+	outAlbedoAndStatus = uvec4(clamp(matDiffuseColor, 0.f, 1.f) * 255, rendererId);
 	outSpecularAndRoughness = vec4(matSpecularColor, roughness);
 	outEmissive = matEmissive;
 }
@@ -250,7 +250,7 @@ float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
 // ===============================================================================
 vec3 BRDF_Fresnel(in vec3 f0, in float LdotH)
 {
-	return f0 + (1.0f - f0) * pow((1.0f - LdotH), 5.0f);
+	return f0 + (vec3(1.0f) - f0) * pow((1.0f - LdotH), 5.0f);
 }
 
 // ---------------------------------------------------------------------------
@@ -268,5 +268,5 @@ vec3 BRDF_LambertDiffuse(in vec3 Kd)
 // ---------------------------------------------------------------------------
 vec3 BRDF_BlinnPhongDiffuse(in vec3 Kd, in vec3 fresnel)
 {
-	return (vec3(1) -  fresnel) * Kd / PI;
+	return (vec3(1.0f) -  fresnel) * Kd / PI;
 }

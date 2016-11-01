@@ -7,16 +7,15 @@ vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughn
 	float NdotH = saturate(dot(n, h));
 	float LdotH = saturate(dot(l, h));
 
-	if(NdotL <= 0.0f)
-		return vec3(0.0f);
+	//if(NdotL <= 0.0f)
+	//	return vec3(0.0f);
 
-	float NdotH2 = NdotH * NdotH;
 	float m2 = roughness * roughness;
 	float shininess = (2.0f / m2) - 2.0f;
 	
 	// Calculate the distribution term
 	vec3 f = BRDF_Fresnel(specularMaterial, LdotH);
-	vec3 Fspec = (0.0397436 * shininess + 0.0856832) * f * pow(NdotH, shininess) / max(NdotL, NdotV);
+	vec3 Fspec = (0.0397436f * shininess + 0.0856832f) * f * pow(NdotH, shininess) / max(NdotL, NdotV);
 
 	// Calculate the fresnel term for diffuse part
 	vec3 f2 = BRDF_Fresnel(diffuseMaterial, NdotL);

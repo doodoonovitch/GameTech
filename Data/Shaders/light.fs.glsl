@@ -92,7 +92,7 @@ vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambi
 
 	vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_POSITION_PROPERTY);
 	float outerConeCos = lightPosition.w;
-	lightPosition.w = 1.0;
+	lightPosition.w = 1.0f;
 
 	vec3 unnormalizedLightVector = lightPosition.xyz - fi.Position.xyz;
 	vec3 l = normalize(unnormalizedLightVector);
@@ -125,7 +125,7 @@ vec4 BRDFLight(FragmentInfo fi, float ambientOcclusion)
 	vec3 v = normalize(-fi.Position);
 	int lightIndex = 1;
 
-	vec3 color = vec3(0);
+	vec3 color = vec3(0.f);
 
 	// point light evaluation
 	for(int pointLight = 0; pointLight < u_PointLightCount; ++pointLight)
@@ -148,7 +148,7 @@ vec4 BRDFLight(FragmentInfo fi, float ambientOcclusion)
 		++lightIndex;
 	}
 	
-	return vec4(color, 1);
+	return vec4(color, 1.0f);
 }
 
 void main(void)
@@ -169,7 +169,7 @@ void main(void)
 	}
 	else 
 	{
-		vFragColor = vec4(0, 0, 0, 1);
+		vFragColor = vec4(0.f, 0.f, 0.f, 1.f);
 	}
 }
 

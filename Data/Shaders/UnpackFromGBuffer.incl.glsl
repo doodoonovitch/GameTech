@@ -16,7 +16,6 @@ void UnpackFromGBuffer(out FragmentInfo fi)
 	uvec4 data = texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0);
 	fi.RendererId = int(data.w & 15);
 
-	uvec3 matD = uvec3(data.x & Mask_0x000000FF, (data.x >> 8) & Mask_0x000000FF, (data.x >> 16) & Mask_0x000000FF);
 	fi.DiffuseMaterial = data.xyz / 255.f;
 
 	

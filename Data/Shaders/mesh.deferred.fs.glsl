@@ -23,7 +23,7 @@ void main(void)
 	vec4 matData;
 
 	matData = texelFetch(u_MaterialDataSampler, fs_in.MaterialIndex);
-	vec3 materialDiffuse = matData.xyz;
+	vec3 materialDiffuse = matData.rgb;
 	uint bitfieldValue = floatBitsToUint(matData.w);
 	uint diffuseTextureIndex = ((bitfieldValue >> 16) & uint(255));
 	uint diffuseSamplerIndex = ((bitfieldValue >> 24) & uint(255));
@@ -31,14 +31,14 @@ void main(void)
 	uint specularSamplerIndex = ((bitfieldValue >> 8) & uint(255));
 
 	matData = texelFetch(u_MaterialDataSampler, fs_in.MaterialIndex + 1);
-	vec3 materialSpecular = matData.xyz;
+	vec3 materialSpecular = matData.rgb;
 	bitfieldValue = floatBitsToUint(matData.w);
 	float roughness = float((bitfieldValue & uint(32767)) / 32767.f);
 	uint roughnessTextureIndex = ((bitfieldValue >> 16) & uint(255));
 	uint roughnessSamplerIndex = ((bitfieldValue >> 24) & uint(255));
 	
 	matData = texelFetch(u_MaterialDataSampler, fs_in.MaterialIndex + 2);
-	vec3 materialEmissive = matData.xyz;
+	vec3 materialEmissive = matData.rgb;
 	bitfieldValue = floatBitsToUint(matData.w);
 	uint emissiveTextureIndex = ((bitfieldValue >> 16) & uint(255));
 	uint emissiveSamplerIndex = ((bitfieldValue >> 24) & uint(255));
