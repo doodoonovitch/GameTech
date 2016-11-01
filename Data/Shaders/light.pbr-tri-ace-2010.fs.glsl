@@ -18,8 +18,9 @@ vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughn
 	vec3 Fspec = (0.0397436f * shininess + 0.0856832f) * f * pow(NdotH, shininess) / max(NdotL, NdotV);
 
 	// Calculate the fresnel term for diffuse part
-	vec3 f2 = BRDF_Fresnel(diffuseMaterial, NdotL);
+	vec3 f2 = BRDF_Fresnel(specularMaterial, NdotL);
 	vec3 Fdiff = BRDF_BlinnPhongDiffuse(diffuseMaterial, f2);
+	//vec3 Fdiff = BRDF_LambertDiffuse(diffuseMaterial);
 		
 	vec3 brdf = (Fdiff + Fspec) * lightColorIntensity * NdotL * attenuation;
 

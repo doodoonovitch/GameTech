@@ -315,12 +315,13 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
 //#define ARTORIAS_SWORD_MODEL
-//#define BOX_MODEL
+#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
 //#define CERBERUS_MODEL
 //#define SHIELD_MODEL
-#define BBUNIT_MODEL
+//#define BBUNIT_MODEL
+//#define BARREL_MODEL
 
 
 #ifdef ARTORIAS_SWORD_MODEL
@@ -490,6 +491,32 @@ void SimpleCamera::OnInit()
 
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 4);
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 8);
+
+			}
+#endif
+
+#ifdef BARREL_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Barrel/Barrel_01.obj", "Medias/Objects/Barrel", opt, &dataCtxBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				const GLuint modelCount = 1;
+				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.5f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
 			}
 #endif
