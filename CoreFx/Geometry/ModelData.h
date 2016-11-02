@@ -127,6 +127,8 @@ public:
 	const ModelMappingList & GetModelMappingList() const { return mModelMappingList; }
 	ModelMappingList & GetModelMappingList() { return mModelMappingList; }
 
+	GLuint GetModelCount() const { return (GLuint)mModelMappingList.size(); }
+
 	bool CopyAndAddModel(GLuint sourceModelIndex, GLuint materialOffset);
 
 protected:

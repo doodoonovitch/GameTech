@@ -63,20 +63,6 @@ void SimpleCamera::SetupViewportAndProjection()
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
 
-struct ModelInfo
-{
-	ModelInfo(GLuint baseIndex = 0, GLuint count = 0)
-		: mBaseIndex(baseIndex)
-		, mCount(count)
-	{
-	}
-
-	GLuint mBaseIndex;
-	GLuint mCount;
-};
-
-typedef std::vector<ModelInfo> ModelInfoList;
-
 void SimpleCamera::OnInit()
 {
 	const glm::vec3 XAxis(1.f, 0.f, 0.f);
@@ -303,13 +289,21 @@ void SimpleCamera::OnInit()
 		}
 #endif // COMPASS_SAMPLE
 
+
+
+
+
+
+
+
+
 #ifdef MODEL_SAMPLE
 		{
 			Geometry::ModelData::LoadOptions opt;
 			opt.SetLogInfo(true);
 			//opt.SetLogBoneInfo(true);
 
-			ModelInfoList modelInfoList;
+			std::vector<glm::uvec3> instancePerModel;
 
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
@@ -341,7 +335,8 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				const GLuint modelCount = 4;
-				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::ivec2(5, 5, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
@@ -371,7 +366,8 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Nor.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				const GLuint modelCount = 5;
-				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.784314f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
@@ -397,12 +393,14 @@ void SimpleCamera::OnInit()
 
 #ifdef NANOSUIT_MODEL
 			{
-			glm::mat4 m = glm::scale(glm::vec3(0.5f));
-			opt.SetPreTransformVertices(m);
+				glm::mat4 m = glm::scale(glm::vec3(0.5f));
+				opt.SetPreTransformVertices(m);
 
-			modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt, &dataCtxBase);
-			const GLuint modelCount = 1;
-			modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				modelData.LoadModel("Medias/Objects/nanosuit/nanosuit.obj", "Medias/Objects/nanosuit", opt, &dataCtxBase);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
 			}
 #endif
 #ifdef LARACROFT_MODEL
@@ -411,8 +409,10 @@ void SimpleCamera::OnInit()
 				opt.SetPreTransformVertices(m);
 
 				modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt, &dataCtxBase);
+				
 				const GLuint modelCount = 1;
-				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
 			}
 #endif
 #ifdef SHIELD_MODEL
@@ -432,7 +432,8 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Shield/shield_normal_map.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				const GLuint modelCount = 5;
-				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
@@ -471,7 +472,8 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 7] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				
 				const GLuint modelCount = 3;
-				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(5, 1, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount * 4);
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
@@ -512,7 +514,8 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				const GLuint modelCount = 1;
-				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
@@ -546,47 +549,51 @@ void SimpleCamera::OnInit()
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.588235f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
 				const GLuint modelCount = 1;
-				modelInfoList.push_back(ModelInfo(dataCtxBase.mMaterialIndexBase, modelCount));
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
 			}
 #endif
 
-			ModelInfoList::const_iterator maxIt = std::max_element(modelInfoList.begin(), modelInfoList.end(), [](const ModelInfo & a, const ModelInfo & b) { return a.mCount < b.mCount; });
-			GLuint maxN = maxIt != modelInfoList.end() ? maxIt->mCount : 0;
-			GLuint n = maxN * (GLuint)modelInfoList.size();
-			glm::uvec3 count = glm::uvec3(n, glm::clamp(n, (GLuint)1, (GLuint)10), glm::clamp(n, (GLuint)1, (GLuint)5));
-			GLuint capacity = count.x * count.y * count.z;
+			GLuint capacity = 0;
+			GLuint modelCount = (GLuint)instancePerModel.size();
+			for (std::vector<glm::uvec3>::const_iterator it = instancePerModel.begin(); it != instancePerModel.end(); ++it)
+			{
+				capacity += it->x * it->y;
+			}
+
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData, capacity > 0 ? capacity : 1);
 			if (modelRenderer != nullptr)
 			{
+				GLuint modelCount = (GLuint)modelData.GetModelMappingList().size();
+
 				glm::vec3 position = glm::vec3(0.f, 0.f, 0.f);
 				glm::vec3 transl = glm::vec3(10.f, 10.f, -10.f);
-				glm::vec3 rot = glm::vec3(glm::two_pi<float>() / (float)count.x, glm::two_pi<float>() / (float)count.y, glm::two_pi<float>() / (float)count.z);
 
 				glm::vec3 rotAngle(0.f);
 				glm::vec3 p(0.f);
 
-				GLuint modelCount = (GLuint)modelData.GetModelMappingList().size();
-				for (GLuint i = 0; i < count.x; ++i)
+				for (GLuint i = 0; i < modelCount; ++i)
 				{
-					glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
-					rotAngle.x += rot.x;
+					const glm::uvec3 & modelInfo = instancePerModel[i];
 
-					const ModelInfo & modelInfo = modelInfoList[i % modelInfoList.size()];
-					GLuint modelId = (modelInfo.mBaseIndex + ((i / modelInfoList.size()) % modelInfo.mCount)) % modelCount;
+					float rotZ = glm::two_pi<float>() / (float)modelInfo.x;
+					float rotX = glm::two_pi<float>() / (float)modelInfo.y;
 
-					p.y = 0.f;
-					for (GLuint j = 0; j < count.y; ++j)
+					GLuint modelId = modelInfo.z;
+
+					p.z = 0.f;
+					for (GLuint j = 0; j < modelInfo.y; ++j)
 					{
-						glm::quat qY = glm::angleAxis(rotAngle.y, YAxis);
-						rotAngle.y += rot.y;
+						glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
+						rotAngle.x += rotX;
 
-						p.z = 0.f;
-						for (GLuint k = 0; k < count.z; ++k)
+						p.x = 0.f;
+						for (GLuint k = 0; k < modelInfo.x; ++k)
 						{
 							glm::quat qZ = glm::angleAxis(rotAngle.z, ZAxis);
-							rotAngle.z += rot.z;
+							rotAngle.z += rotZ;
 
-							glm::quat qRot = qX * qY * qZ;
+							glm::quat qRot = qX * qZ;
 
 							Renderables::Model * model = modelRenderer->CreateModelInstance(modelId);
 							if (model != nullptr)
@@ -596,13 +603,13 @@ void SimpleCamera::OnInit()
 								//model->GetFrame()->SetScale(scale);
 							}
 
-							p.z += transl.z;
+							p.x += transl.x;
 						}
 
-						p.y += transl.y;
+						p.z += transl.z;
 					}
 
-					p.x += transl.x;
+					p.y += transl.y;
 				}
 
 				PRINT_MESSAGE("Model instance count = %li.", modelRenderer->GetCount());
