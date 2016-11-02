@@ -131,6 +131,8 @@ public:
 
 	bool CopyAndAddModel(GLuint sourceModelIndex, GLuint materialOffset);
 
+	void SetMeshMaterial(GLuint meshId, GLuint materialId);
+
 protected:
 
 	typedef std::map<std::string, int> TextureIndexMap;

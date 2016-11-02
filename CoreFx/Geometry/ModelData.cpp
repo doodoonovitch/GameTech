@@ -589,6 +589,17 @@ bool ModelData::CopyAndAddModel(GLuint sourceModelIndex, GLuint materialOffset)
 	}
 }
 
+void ModelData::SetMeshMaterial(GLuint meshId, GLuint materialId)
+{
+	if (meshId < (GLuint)mMeshDrawInstanceList.size())
+	{
+		if (materialId < (GLuint)mMaterialList.size())
+		{
+			mMeshDrawInstanceList[meshId].mBaseInstance = materialId;
+		}
+	}
+}
+
 // =======================================================================
 // =======================================================================
 	} // namespace Geometry

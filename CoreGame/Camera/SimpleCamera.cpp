@@ -308,14 +308,14 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
-//#define ARTORIAS_SWORD_MODEL
+			//#define ARTORIAS_SWORD_MODEL
 #define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
 //#define CERBERUS_MODEL
 //#define SHIELD_MODEL
-//#define BBUNIT_MODEL
-//#define BARREL_MODEL
+#define BBUNIT_MODEL
+#define BARREL_MODEL
 
 
 #ifdef ARTORIAS_SWORD_MODEL
@@ -327,7 +327,7 @@ void SimpleCamera::OnInit()
 
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
-				
+
 				texList.resize(dataCtxBase.mTextureIndexBase + 4);
 				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
@@ -367,7 +367,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 5;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.784314f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
@@ -409,7 +409,7 @@ void SimpleCamera::OnInit()
 				opt.SetPreTransformVertices(m);
 
 				modelData.LoadModel("Medias/Objects/Lara_Croft_v1/Lara_Croft_v1.obj", "Medias/Objects/Lara_Croft_v1", opt, &dataCtxBase);
-				
+
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
 					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
@@ -470,29 +470,38 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 5] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Specular.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 6] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 7] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				
-				const GLuint modelCount = 3;
-				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(5, 1, dataCtxBase.mModelMappingIndexBase + i));
+
+				const GLuint modelCount = 1;
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount * 4);
+
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
 				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
 				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.56f, 0.57f, 0.58f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+
+				if (modelCount >= 2)
+				{
+					matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 5] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+					matList[dataCtxBase.mMaterialIndexBase + 6] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
+					matList[dataCtxBase.mMaterialIndexBase + 7] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+				}
+
+				if (modelCount >= 3)
+				{
+					matList[dataCtxBase.mMaterialIndexBase + 8] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 9] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+					matList[dataCtxBase.mMaterialIndexBase + 10] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
+					matList[dataCtxBase.mMaterialIndexBase + 11] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+				}
 				
-				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-				matList[dataCtxBase.mMaterialIndexBase + 5] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 6] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-				matList[dataCtxBase.mMaterialIndexBase + 7] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-
-				matList[dataCtxBase.mMaterialIndexBase + 8] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-				matList[dataCtxBase.mMaterialIndexBase + 9] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 10] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-				matList[dataCtxBase.mMaterialIndexBase + 11] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 4);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 8);
+				for (GLuint i = 0; i < modelCount; ++i)
+				{
+					instancePerModel.push_back(glm::uvec3(3, 1, dataCtxBase.mModelMappingIndexBase + i));
+					if (i >= 1)
+						modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, (i + 1) * 4);
+				}
 
 			}
 #endif
@@ -503,6 +512,7 @@ void SimpleCamera::OnInit()
 				opt.SetPreTransformVertices(m);
 
 				modelData.LoadModel("Medias/Objects/Barrel/Barrel_01.obj", "Medias/Objects/Barrel", opt, &dataCtxBase);
+				modelData.SetMeshMaterial(dataCtxBase.mMeshInstanceIndexBase, dataCtxBase.mMaterialIndexBase);
 
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
 				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
@@ -515,7 +525,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
@@ -566,34 +576,39 @@ void SimpleCamera::OnInit()
 			{
 				GLuint modelCount = (GLuint)modelData.GetModelMappingList().size();
 
-				glm::vec3 position = glm::vec3(0.f, 0.f, 0.f);
+				glm::vec3 position = glm::vec3(0.f, 10.f, 0.f);
 				glm::vec3 transl = glm::vec3(10.f, 10.f, -10.f);
 
 				glm::vec3 rotAngle(0.f);
 				glm::vec3 p(0.f);
 
+				float rotX = glm::two_pi<float>() / (float)modelCount;
+
 				for (GLuint i = 0; i < modelCount; ++i)
 				{
 					const glm::uvec3 & modelInfo = instancePerModel[i];
 
+					glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
+					rotAngle.x += rotX;
+
 					float rotZ = glm::two_pi<float>() / (float)modelInfo.x;
-					float rotX = glm::two_pi<float>() / (float)modelInfo.y;
+					float rotY = glm::two_pi<float>() / (float)modelInfo.y;
 
 					GLuint modelId = modelInfo.z;
 
-					p.z = 0.f;
-					for (GLuint j = 0; j < modelInfo.y; ++j)
+					p.y = 0.f;
+					for (GLuint j = 0; j < modelInfo.x; ++j)
 					{
-						glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
-						rotAngle.x += rotX;
+						glm::quat qY = glm::angleAxis(rotAngle.y, YAxis);
+						rotAngle.y += rotY;
 
-						p.x = 0.f;
-						for (GLuint k = 0; k < modelInfo.x; ++k)
+						p.z = 0.f;
+						for (GLuint k = 0; k < modelInfo.y; ++k)
 						{
 							glm::quat qZ = glm::angleAxis(rotAngle.z, ZAxis);
 							rotAngle.z += rotZ;
 
-							glm::quat qRot = qX * qZ;
+							glm::quat qRot = qX * qY * qZ;
 
 							Renderables::Model * model = modelRenderer->CreateModelInstance(modelId);
 							if (model != nullptr)
@@ -603,13 +618,13 @@ void SimpleCamera::OnInit()
 								//model->GetFrame()->SetScale(scale);
 							}
 
-							p.x += transl.x;
+							p.z += transl.z;
 						}
 
-						p.z += transl.z;
+						p.y += transl.y;
 					}
 
-					p.y += transl.y;
+					p.x += transl.x;
 				}
 
 				PRINT_MESSAGE("Model instance count = %li.", modelRenderer->GetCount());
