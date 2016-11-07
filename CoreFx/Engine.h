@@ -370,6 +370,10 @@ public:
 	void DisplayTexture2DArray(const Texture * texture, GLint layerIndex);
 	void UndisplayTexture2DArray();
 
+public:
+
+	void ComputeViewTransform(GLuint shaderStorageSourceId, GLuint shaderStorageTargetId, GLuint itemCount, GLuint sourceStride, GLuint targetStride);
+
 private:
 
 	typedef InstanceContainer<Frame> FrameContainer;
@@ -411,6 +415,7 @@ private:
 	void InternalInitializeShowDeferredBuffersShader();
 	void InternalInitializeSSAOShader();
 	void InternalInitializeSSAOBlurShader();
+	void InternalInitializePreComputeMatrixShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
 
@@ -510,6 +515,21 @@ private:
 		__uniforms_count__
 	};
 
+	enum class EPreComputeMatrixShaderUniformIndex
+	{
+		u_SourceStride,
+		u_TargetStride,
+
+		__uniforms_count__
+	};
+
+	enum class EPreComputeMatrixShaderBindingIndex
+	{
+		u_TargetBuffer,
+		u_SourceBuffer,
+	};
+
+
 	static Engine* sInstance;
 	static bool sIsUsedExtensionSupported[__UsedExtensions_count__ + 1];
 
@@ -535,6 +555,7 @@ private:
 	Shader mShowDeferredBuffersShader;
 	Shader mSSAOShader;
 	Shader mSSAOBlurShader;
+	Shader mPreCompMatrixShader;
 
 	enum EFBOIndex
 	{

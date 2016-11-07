@@ -35,6 +35,7 @@
 #include <memory>
 #include <type_traits>
 #include <string>
+#include <thread>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -73,6 +74,8 @@ namespace CoreFx
 #include "Shader.h"
 #include "Frame.h"
 #include "SceneObject.h"
+#include "ShaderStorageBuffer.h"
+#include "TextureBuffer.h"
 #include "Renderer.h"
 #include "ComputeShader.h"
 #include "Renderables\VertexArrayObject.h"
@@ -81,8 +84,6 @@ namespace CoreFx
 #include "Renderers\DebugTools\IcosahedronRenderer.h"
 #include "Renderers\DebugTools\ConeRenderer.h"
 #include "Renderers\DebugTools\LightPositionRenderer.h"
-
-#include "TextureBuffer.h"
 
 #include "Lights\Light.h"
 #include "Lights\PointLight.h"

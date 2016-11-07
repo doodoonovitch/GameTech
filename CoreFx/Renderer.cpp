@@ -6,17 +6,28 @@ namespace CoreFx
 {
 
 
-	Renderer::Renderer(GLuint propertyCount, ERenderPass renderPass)
-		: mMaterials(propertyCount)
-		, mMaterialBaseIndex(0)
-		, mRenderPass(renderPass)
-		, mIsInitialized(false)
+Renderer::Renderer(GLuint propertyCount, ERenderPass renderPass)
+	: mPerInstanceDataStuff(nullptr)
+	, mMaterialBaseIndex(0)
+	, mMaterials(propertyCount)
+	, mRenderPass(renderPass)
+	, mIsInitialized(false)
 {
 }
 
+Renderer::Renderer(bool hasPerInstanceDataStuff, GLuint perInstanceDataBufferCount, GLuint propertyCount, ERenderPass renderPass)
+	: mPerInstanceDataStuff(hasPerInstanceDataStuff ? new PerInstanceDataStuff(perInstanceDataBufferCount) : nullptr)
+	, mMaterialBaseIndex(0)
+	, mMaterials(propertyCount)
+	, mRenderPass(renderPass)
+	, mIsInitialized(false)
+{
+
+}
 
 Renderer::~Renderer()
 {
+	SAFE_DELETE(mPerInstanceDataStuff);
 }
 
 bool Renderer::AddTexture(const char * filename, TextureCategory category, TextureWrap wrapS, TextureWrap wrapT, bool invertY)

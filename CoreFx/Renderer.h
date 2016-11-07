@@ -199,8 +199,11 @@ public:
 public:
 
 	Renderer(GLuint propertyCount, ERenderPass renderPass = Deferred_Pass);
+	Renderer(bool hasPerInstanceDataStuff, GLuint perInstanceDataBufferCount, GLuint propertyCount, ERenderPass renderPass = Deferred_Pass);
+
 	virtual ~Renderer();
 
+	virtual void Update() = 0;
 	virtual void Render() = 0;
 	virtual void RenderWireFrame() = 0;
 
@@ -231,12 +234,63 @@ protected:
 
 protected:
 
-	PropertyData mMaterials;
+	enum class EPerInstanceDataBuffer
+	{
+		PrecomputeDataBuffer,
+		LocationRawDataBuffer,
+		IndexBuffer,
+
+		__count__
+	};
+	
+	struct PerInstanceDataStuff
+	{
+		ShaderStorageBuffer * mBuffers;
+		GLuint mBufferCount;
+		GLuint mInstanceCount;
+
+		PerInstanceDataStuff(GLuint bufferCount)
+			: mBuffers(bufferCount > 0 ? new ShaderStorageBuffer[bufferCount] : nullptr)
+			, mBufferCount(bufferCount)
+			, mInstanceCount(0)
+		{
+		}
+
+		~PerInstanceDataStuff()
+		{
+			SAFE_DELETE_ARRAY(mBuffers);
+		}
+
+		void CreateResource(GLuint bufferIndex, GLenum usage, GLsizeiptr itemCount, GLsizeiptr itemSize, const void * data = nullptr)
+		{
+			assert(bufferIndex < mBufferCount);
+			if (bufferIndex < mBufferCount)
+			{
+				mBuffers[bufferIndex].CreateResource(usage, itemCount * itemSize, data);
+			}
+		}
+
+		GLuint GetBufferId(GLuint bufferIndex) const
+		{
+			if (bufferIndex < mBufferCount)
+			{
+				return mBuffers[bufferIndex].GetBufferId();
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	};
+
+	PerInstanceDataStuff * mPerInstanceDataStuff;
 	GLint mMaterialBaseIndex;
+	PropertyData mMaterials;
 	TextureInfoList mTextureInfoList;
 	TextureMapping mTextureMapping;
 	ERenderPass mRenderPass;
 	bool mIsInitialized;
+
 };
 
 

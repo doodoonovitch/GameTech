@@ -91,6 +91,46 @@ public:
 		}
 	}
 
+	void ParallelForEach(std::function<void(typename TObjectInstance *)> func, unsigned int threadCount = 0)
+	{
+		if (threadCount == 0)
+			threadCount = std::thread::hardware_concurrency();
+
+		auto d = GetCount() / threadCount;
+		auto r = GetCount() % threadCount;
+
+		std::vector<std::thread> threads;
+		threads.reserve(threadCount);
+
+		size_t n = 0;
+		for (unsigned int i = 0; i < threadCount; ++i)
+		{
+			size_t startIndex = n;
+			size_t count = d * threadCount;
+			if (r > 0)
+			{
+				++count;
+				--r;
+			}
+
+			threads.push_back(std::thread([func, this](size_t startIndex, size_t count)
+			{
+				size_t end = startIndex + count;
+				for (size_t i = startIndex; i < end; ++i)
+				{
+					func(mObjs[i]);
+				}
+			}, startIndex, count));
+
+			n += count;
+		}
+
+		for (std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); ++it)
+		{
+			it->join();
+		}
+	}
+
 	void DirtyDetachAll()
 	{
 		mObjs.clear();

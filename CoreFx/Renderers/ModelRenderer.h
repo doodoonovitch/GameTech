@@ -29,6 +29,7 @@ public:
 
 	void SetModel(const Renderer::VertexDataVector & vertexList, const Renderer::IndexVector & indexList, const Renderer::MaterialDescList & materialDescList, const Renderer::TextureDescList & textureDescList, const Renderer::DrawElementsIndirectCommandList & meshDrawInstanceList, const Geometry::ModelData::ModelMappingList & modelMapping);
 
+	virtual void Update() override;
 	virtual void Render() override;
 	virtual void RenderWireFrame() override;
 
@@ -54,16 +55,6 @@ private:
 	{
 		u_MaterialBaseIndex,
 		u_MaterialDataSampler,
-		u_PerInstanceDataSampler,
-		u_PerInstanceDataIndexSampler,
-
-		__uniforms_count__
-	};
-
-	enum class EWireFrameShaderUniformIndex
-	{
-		u_PerInstanceDataSampler,
-		u_PerInstanceDataIndexSampler,
 
 		__uniforms_count__
 	};
@@ -73,6 +64,12 @@ private:
 		VBO_Vertex,
 		VBO_Index,
 		VBO_Indirect,
+	};
+
+	enum EBinding
+	{
+		u_PerInstanceDataBuffer,
+		u_PerInstanceDataIndexBuffer,
 	};
 
 #pragma pack(push, 1)
@@ -151,9 +148,6 @@ private:
 
 	GLuint mMaterialCount;
 	GLsizei mDrawCmdCount;
-
-	TextureBuffer mInstanceMatrixBuffer;
-	TextureBuffer mInstanceMatrixIndexBuffer;
 
 	MaterialTextureIndexesList mMaterialTextureIndexesList;
 

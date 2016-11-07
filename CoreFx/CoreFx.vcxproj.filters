@@ -207,6 +207,7 @@
     <ClInclude Include="Renderers\DebugTools\ConeRenderer.h">
       <Filter>Renderers\DebugTools</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderStorageBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -320,6 +321,7 @@
     </ClCompile>
     <ClCompile Include="Engine_Release.cpp" />
     <ClCompile Include="Engine_Initialize.cpp" />
+    <ClCompile Include="ShaderStorageBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -588,6 +590,12 @@
     </None>
     <None Include="..\Data\Shaders\light.pbr-tri-ace-2010.fs.glsl">
       <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="..\Data\Shaders\Precompute.Matrix.cs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Data\Shaders\FrameDataUniform.incl.glsl">
+      <Filter>Shaders\Incl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

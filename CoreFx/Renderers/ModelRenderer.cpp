@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 ModelRenderer::ModelRenderer(size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Model, 3>((GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
+	: SceneObjectRenderer<Renderables::Model, 3>(true, 3, (GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
 	, mMaterialCount(0)
 	, mDrawCmdCount(0)
 	, mMaterialTextureIndexesList(0)
@@ -53,7 +53,6 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 
 	const GLsizei vertexDataSize = sizeof(Renderer::VertexData);
 
-	//setup vao and vbo stuff
 	//setup vao and vbo stuff
 	CreateBuffers();
 
@@ -106,15 +105,16 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	GL_CHECK_ERRORS;
 
 
-	mInstanceMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (GetCapacity() * sizeof(PerInstanceData)), nullptr);
-
-	mInstanceMatrixIndexBuffer.CreateResource(GL_STATIC_DRAW, GL_R32UI, mMaterialCount * sizeof(GLuint), nullptr);
+	mPerInstanceDataStuff->CreateResource((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer, GL_DYNAMIC_COPY, GetCapacity(), sizeof(PerInstanceData));
+	mPerInstanceDataStuff->CreateResource((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer, GL_STATIC_DRAW, GetCapacity(), sizeof(PerInstanceData));
+	mPerInstanceDataStuff->CreateResource((GLuint)EPerInstanceDataBuffer::IndexBuffer, GL_STATIC_DRAW, mMaterialCount, sizeof(GLuint));
 
 	LoadTextures();
 	UpdateMaterialTextureIndex();
 
-	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mInstanceMatrixBuffer);
-	PRINT_GEN_TEXTUREBUFFER("[ModelRenderer]", mInstanceMatrixIndexBuffer);
+	PRINT_GEN_TEXTURE("[ModelRenderer]", mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer));
+	PRINT_GEN_TEXTURE("[ModelRenderer]", mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer));
+	PRINT_GEN_TEXTURE("[ModelRenderer]", mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
 
 	mIsInitialized = true;
 
@@ -125,22 +125,27 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 
 ModelRenderer::~ModelRenderer()
 {
-	mInstanceMatrixBuffer.ReleaseResource();
-	mInstanceMatrixIndexBuffer.ReleaseResource();
+}
+ 
+
+void ModelRenderer::Update()
+{
+	UpdateShaderData();
+	Engine * engine = Engine::GetInstance();
+	const GLuint itemSize = sizeof(PerInstanceData) / sizeof(glm::vec4);
+	engine->ComputeViewTransform(mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer), mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer), (GLuint)mObjs.GetCount(), itemSize, itemSize);
 }
 
- 
 void ModelRenderer::Render()
 {
 	UpdateShaderData();
 
 	mShader.Use();
 	glBindVertexArray(mVaoID);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixBuffer.GetTextureId());
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixIndexBuffer.GetTextureId());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer));
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_BUFFER, Engine::GetInstance()->GetMaterialDataBuffer().GetTextureId());
@@ -167,11 +172,10 @@ void ModelRenderer::RenderWireFrame()
 
 	mWireFrameShader.Use();
 	glBindVertexArray(mVaoID);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixBuffer.GetTextureId());
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, mInstanceMatrixIndexBuffer.GetTextureId());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer));
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
@@ -304,8 +308,6 @@ void ModelRenderer::InitializeMainShader()
 	{
 		"u_MaterialBaseIndex",
 		"u_MaterialDataSampler",
-		"u_PerInstanceDataSampler",
-		"u_PerInstanceDataIndexSampler"
 	};
 
 	mShader.CreateAndLinkProgram();
@@ -314,8 +316,6 @@ void ModelRenderer::InitializeMainShader()
 	mShader.AddUniforms(uniformNames, (int)EMainShaderUniformIndex::__uniforms_count__);
 
 	//pass values of constant uniforms at initialization
-	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_PerInstanceDataSampler), 0);
-	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_PerInstanceDataIndexSampler), 1);
 	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialDataSampler), 2);
 
 
@@ -352,20 +352,9 @@ void ModelRenderer::InitializeWireFrameShader()
 	mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/mesh.gs.glsl");
 	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh.wireframe.fs.glsl");
 
-	const char * uniformNames[(int)EWireFrameShaderUniformIndex::__uniforms_count__] =
-	{
-		"u_PerInstanceDataSampler",
-		"u_PerInstanceDataIndexSampler"
-	};
-
 	mWireFrameShader.CreateAndLinkProgram();
 
 	mWireFrameShader.Use();
-	mWireFrameShader.AddUniforms(uniformNames, (int)EWireFrameShaderUniformIndex::__uniforms_count__);
-
-	//pass values of constant uniforms at initialization
-	glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_PerInstanceDataSampler), 0);
-	glUniform1i(mWireFrameShader.GetUniform((int)EWireFrameShaderUniformIndex::u_PerInstanceDataIndexSampler), 1);
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -379,12 +368,16 @@ void ModelRenderer::UpdateShaderData()
 {
 	if (!mIsShaderBufferSet)
 	{
+		PRINT_MESSAGE("[ModelRenderer] *********************  Update shader buffers !  *********************");
+
+		GLenum target = GL_SHADER_STORAGE_BUFFER;
+
 		// --------------------------------------------
 
-		glBindBuffer(GL_TEXTURE_BUFFER, mInstanceMatrixIndexBuffer.GetBufferId());
+		glBindBuffer(target, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
 
 		GLuint index = 0;
-		GLuint * matIndexBuffer = (GLuint *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+		GLuint * matIndexBuffer = (GLuint *)glMapBuffer(target, GL_WRITE_ONLY);
 		assert(matIndexBuffer != nullptr);
 #ifdef _DEBUG
 		std::vector<GLuint> indexList(mMaterialCount);
@@ -405,7 +398,8 @@ void ModelRenderer::UpdateShaderData()
 				index += mapping.mInstanceCount;
 			}
 
-			glUnmapBuffer(GL_TEXTURE_BUFFER);
+			glUnmapBuffer(target);
+			glBindBuffer(target, 0);
 		}
 
 		// --------------------------------------------
@@ -417,9 +411,9 @@ void ModelRenderer::UpdateShaderData()
 
 		// --------------------------------------------
 
-		glBindBuffer(GL_TEXTURE_BUFFER, mInstanceMatrixBuffer.GetBufferId());
-		std::uint8_t * bufferBase = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
-		mObjs.ForEach([this, &bufferBase](Renderables::Model* obj)
+		glBindBuffer(target, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer));
+		std::uint8_t * bufferBase = (std::uint8_t *)glMapBuffer(target, GL_WRITE_ONLY);
+		mObjs.ForEach([this, bufferBase](Renderables::Model* obj)
 		{
 			GLuint matrixIndex = obj->GetMatrixIndex();
 			std::uint8_t * buffer = bufferBase + (matrixIndex * sizeof(PerInstanceData));
@@ -431,8 +425,8 @@ void ModelRenderer::UpdateShaderData()
 				obj->GetFrame()->SetIsModified(false);
 			}
 		});
-		glUnmapBuffer(GL_TEXTURE_BUFFER);
-		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+		glUnmapBuffer(target);
+		glBindBuffer(target, 0);
 
 		mUpdateObjMatrixIndexProp = false;
 		// --------------------------------------------

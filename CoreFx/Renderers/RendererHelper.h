@@ -27,6 +27,13 @@ protected:
 		std::memset(mVboIDs, 0, sizeof(mVboIDs));
 	}
 
+	RendererHelperBase(bool hasPerInstanceDataStuff, GLuint perInstanceDataBufferCount, GLuint propertyCount, ERenderPass renderPass = Deferred_Pass)
+		: Renderer(hasPerInstanceDataStuff, perInstanceDataBufferCount, propertyCount, renderPass)
+		, mVaoID(0)
+	{
+		std::memset(mVboIDs, 0, sizeof(mVboIDs));
+	}
+
 	virtual ~RendererHelperBase(void)
 	{
 		// Release buffers (vao & vbo)
@@ -59,6 +66,10 @@ protected:
 		return mVboIDs;
 	}
 
+	virtual void Update() override
+	{
+	}
+
 protected:
 
 	GLuint mVaoID;
@@ -72,6 +83,14 @@ protected:
 
 	RendererHelper(GLuint propertyCount, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
 		: RendererHelperBase<T_vbo_count>(propertyCount, renderPass)
+		, mShader(shaderTitle)
+		, mWireFrameShader(wireFramShaderTitle)
+	{
+		std::memset(mVboIDs, 0, sizeof(mVboIDs));
+	}
+
+	RendererHelper(bool hasPerInstanceDataStuff, GLuint perInstanceDataBufferCount, GLuint propertyCount, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
+		: RendererHelperBase<T_vbo_count>(hasPerInstanceDataStuff, perInstanceDataBufferCount, propertyCount, renderPass)
 		, mShader(shaderTitle)
 		, mWireFrameShader(wireFramShaderTitle)
 	{
@@ -121,6 +140,13 @@ protected:
 
 	SceneObjectRenderer(GLuint propertyCount, size_t capacity, size_t pageSize, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
 		: RendererHelper<T_vbo_count>(propertyCount, shaderTitle, wireFramShaderTitle, renderPass)
+		, mObjs(capacity, pageSize)
+	{
+
+	}
+
+	SceneObjectRenderer(bool hasPerInstanceDataStuff, GLuint perInstanceDataBufferCount, GLuint propertyCount, size_t capacity, size_t pageSize, const char * shaderTitle = nullptr, const char * wireFramShaderTitle = nullptr, ERenderPass renderPass = Deferred_Pass)
+		: RendererHelper<T_vbo_count>(hasPerInstanceDataStuff, perInstanceDataBufferCount, propertyCount, shaderTitle, wireFramShaderTitle, renderPass)
 		, mObjs(capacity, pageSize)
 	{
 

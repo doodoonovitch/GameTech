@@ -93,8 +93,11 @@ const char * Shader::GetCommonIncludeFilename(GLuint includeFileId)
 	case (GLuint)EIncludeCommon::Quaternions:
 		return "shaders/Quaternions.incl.glsl";
 
-	case (GLuint)EIncludeCommon::FrameCommon:
+	case (GLuint)EIncludeCommon::RendererCommon:
 		return "shaders/RenderersCommon.incl.glsl";
+
+	case (GLuint)EIncludeCommon::FrameDataUniform:
+		return "shaders/FrameDataUniform.incl.glsl";
 
 	default:
 		return nullptr;
@@ -103,7 +106,7 @@ const char * Shader::GetCommonIncludeFilename(GLuint includeFileId)
 
 bool Shader::LoadCommonInclude(std::string & buffer, EInclude includes)
 {
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		GLuint item = 1 << i;
 		if (((GLuint)includes & item) != 0)

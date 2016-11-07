@@ -45,6 +45,7 @@ Engine::Engine()
 	, mShowDeferredBuffersShader("ShowDeferredBuffersShader")
 	, mSSAOShader("SSAOShader")
 	, mSSAOBlurShader("SSAOBlurShader")
+	, mPreCompMatrixShader("PreComputeMatrixShader")
 	, mPointLightPositionRenderer(nullptr)
 	, mSpotLightPositionRenderer(nullptr)
 	, mDrawGBufferNormalGridSpan(20, 20)
@@ -146,6 +147,7 @@ void Engine::CreateDynamicResources()
 	InternalInitializeCopyShader();
 	InternalInitializeViewTex2DArrayShader();
 	InternalInitializeShowDeferredBuffersShader();
+	InternalInitializePreComputeMatrixShader();
 }
 
 void Engine::SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
@@ -197,7 +199,7 @@ void Engine::UpdateObjects()
 
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
-		mLights[i]->ForEach([this](Lights::Light * light)
+		mLights[i]->ParallelForEach([this](Lights::Light * light)
 		{
 			light->TransformInViewCoords(mCamera->GetViewMatrix());
 			light->SetIsModified(false);
@@ -293,6 +295,15 @@ void Engine::InternalComputePass()
 
 void Engine::InternalRenderObjects()
 {
+	glFinish();
+
+	mRenderers->ForEach([](Renderer * renderer)
+	{
+		renderer->Update();
+	});
+
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// -----------------------------------------------------------------------
@@ -1007,7 +1018,24 @@ void Engine::DeleteObjectLocation(Frame *& frame)
 
 
 
+void Engine::ComputeViewTransform(GLuint shaderStorageSourceId, GLuint shaderStorageTargetId, GLuint itemCount, GLuint sourceStride, GLuint targetStride)
+{
+	mPreCompMatrixShader.Use();
 
+	glUniform1ui(mPreCompMatrixShader.GetUniform((int)EPreComputeMatrixShaderUniformIndex::u_SourceStride), sourceStride);
+	glUniform1ui(mPreCompMatrixShader.GetUniform((int)EPreComputeMatrixShaderUniformIndex::u_TargetStride), targetStride);
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)EPreComputeMatrixShaderBindingIndex::u_SourceBuffer, shaderStorageSourceId);
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)EPreComputeMatrixShaderBindingIndex::u_TargetBuffer, shaderStorageTargetId);
+	//glBindImageTexture((GLuint)EPreComputeMatrixShaderBindingIndex::u_TargetBuffer, shaderStorageTargetId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+	glDispatchCompute(itemCount, 1, 1);
+
+	//glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+	mPreCompMatrixShader.UnUse();
+}
 
 
 // =======================================================================

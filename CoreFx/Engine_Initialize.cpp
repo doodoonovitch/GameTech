@@ -750,6 +750,44 @@ void Engine::InternalInitializeSSAOBlurShader()
 	PRINT_END_SECTION;
 }
 
+void Engine::InternalInitializePreComputeMatrixShader()
+{
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize Precompute Transformation Matrix shader .....");
+
+	{
+		std::vector<std::string> shaderFilenames(2);
+		shaderFilenames[0] = "shaders/FrameDataUniform.incl.glsl";
+		shaderFilenames[1] = "shaders/precompute.matrix.cs.glsl";
+		mPreCompMatrixShader.LoadFromFile(GL_COMPUTE_SHADER, shaderFilenames, Shader::EInclude::ComputeShadersCommon);
+	}
+	//mPreCompMatrixShader.LoadFromFile(GL_COMPUTE_SHADER, "shaders/precompute.matrix.cs.glsl", Shader::EInclude::ComputeShadersCommon);
+
+	mPreCompMatrixShader.CreateAndLinkProgram();
+
+	const char * uniformNames[(int)EPreComputeMatrixShaderUniformIndex::__uniforms_count__] =
+	{
+		"u_SourceStride",
+		"u_TargetStride",
+	};
+
+	mPreCompMatrixShader.Use();
+
+	mPreCompMatrixShader.AddUniforms(uniformNames, (int)EPreComputeMatrixShaderUniformIndex::__uniforms_count__);
+
+	//glUniform1i(mPreCompMatrixShader.GetUniform((int)EPreComputeMatrixShaderUniformIndex::u_SourceStride), 0);
+	//glUniform1i(mPreCompMatrixShader.GetUniform((int)EPreComputeMatrixShaderUniformIndex::u_TargetStride), 0);
+
+	mPreCompMatrixShader.SetupFrameDataBlockBinding();
+
+	mPreCompMatrixShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	PRINT_MESSAGE(".....done.");
+	PRINT_END_SECTION;
+}
+
 void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
 {
 	renderers->ForEach([&offset, &baseIndex](Renderer * renderer)

@@ -49,14 +49,19 @@ public:
 		RendererShadersHeader = 1,
 		ComputeShadersHeader = 2,
 		Quaternions = 4,
-		FrameCommon = 8,
+		FrameDataUniform = 8,
+		RendererCommon = 16,
 	};
 
 	enum class EInclude
 	{
 		None = 0,
-		RendererShadersCommon = (GLuint)EIncludeCommon::RendererShadersHeader | (GLuint)EIncludeCommon::Quaternions | (GLuint)EIncludeCommon::FrameCommon,
-		ComputeShadersCommon = (GLuint)EIncludeCommon::ComputeShadersHeader | (GLuint)EIncludeCommon::Quaternions,
+		RendererShadersCommon = (GLuint)EIncludeCommon::RendererShadersHeader 
+			| (GLuint)EIncludeCommon::Quaternions 
+			| (GLuint)EIncludeCommon::RendererCommon 
+			| (GLuint)EIncludeCommon::FrameDataUniform,
+		ComputeShadersCommon = (GLuint)EIncludeCommon::ComputeShadersHeader 
+			| (GLuint)EIncludeCommon::Quaternions,
 	};
 
 	enum class EComputeWorkgroupId

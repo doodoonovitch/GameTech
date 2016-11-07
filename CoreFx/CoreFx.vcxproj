@@ -186,6 +186,7 @@
     <ClInclude Include="Renderers\Text2D\TextRenderer.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderStorageBuffer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture2D.h" />
@@ -236,6 +237,7 @@
     <ClCompile Include="Renderers\Text2D\TextRenderer.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShaderStorageBuffer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -252,8 +254,10 @@
     <None Include="..\Data\Shaders\axis.vs.glsl" />
     <None Include="..\Data\Shaders\ComputeShaders.header.glsl" />
     <None Include="..\Data\Shaders\DeepOcean.hmap.cs.glsl" />
+    <None Include="..\Data\Shaders\FrameDataUniform.incl.glsl" />
     <None Include="..\Data\Shaders\light.pbr-tri-ace-2010.fs.glsl" />
     <None Include="..\Data\Shaders\light.pbr.fs.glsl" />
+    <None Include="..\Data\Shaders\Precompute.Matrix.cs.glsl" />
     <None Include="..\Data\Shaders\ssao.GaussianBlur.cs.glsl" />
     <None Include="..\Data\Shaders\GerstnerWaves.hmap.cs.glsl" />
     <None Include="..\Data\Shaders\GerstnerWaves.tes.glsl" />
