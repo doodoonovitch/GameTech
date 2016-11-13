@@ -50,7 +50,8 @@
 #define PRINT_GEN_RENDERBUFFER(prefix, buffer) PRINT_MESSAGE(prefix " RenderBuffer " #buffer " : %i.", buffer)
 #define PRINT_GEN_TEXTURE(prefix, buffer) PRINT_MESSAGE(prefix " Texbuffer " #buffer " : %i.", buffer)
 #define PRINT_GEN_BUFFER(prefix, buffer) PRINT_MESSAGE(prefix " Buffer " #buffer " : %i.", buffer)
-#define PRINT_GEN_TEXTUREBUFFER(prefix, buffer) PRINT_MESSAGE(prefix " Texture / Buffer " #buffer " : (%i, %i).", buffer.GetTextureId(), buffer.GetBufferId());
+#define PRINT_GEN_SHADERSTORAGEBUFFER(prefix, buffer) PRINT_MESSAGE(prefix " Buffer " #buffer " : %i.", buffer.GetBufferId())
+#define PRINT_GEN_TEXTUREBUFFER(prefix, buffer) PRINT_MESSAGE(prefix " Texture / Buffer " #buffer " : (%i, %i).", buffer.GetTextureId(), buffer.GetBufferId())
 #define PRINT_GEN_VERTEXARRAY(prefix, buffer) PRINT_MESSAGE(prefix " Vertex " #buffer " : %i.", buffer)
 
 #define PRINT_BEGIN_SECTION PRINT_MESSAGE("= = = = = = = = = = = = = = = = = = = =")

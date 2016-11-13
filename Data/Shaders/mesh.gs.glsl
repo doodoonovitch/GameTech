@@ -11,7 +11,7 @@ layout (std430, binding = 1) buffer PerInstanceDataIndexBuffer
 	int data[];
 } u_PerInstanceDataIndexBuffer;
 
-uniform int u_MaterialBaseIndex;
+//uniform int u_MaterialBaseIndex;
 
 #define PROPERTY_PER_MATERIAL_COUNT 3
 
@@ -44,7 +44,8 @@ void main()
 	viewModelDQ.Qd = u_PerInstanceDataBuffer.data[index + 1];
 	vec3 scale = u_PerInstanceDataBuffer.data[index + 2].xyz;
 
-	int matIndex = gs_in[0].MeshId * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
+	//int matIndex = gs_in[0].MeshId * PROPERTY_PER_MATERIAL_COUNT + u_MaterialBaseIndex;
+	int matIndex = gs_in[0].MeshId;
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{

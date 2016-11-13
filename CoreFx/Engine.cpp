@@ -136,7 +136,7 @@ void Engine::CreateDynamicResources()
 	// material and texture creation
 	// -----------------------------------------------------------------------
 	//InternalCreateTextures();
-	InternalCreateMaterialBuffer();
+	//InternalCreateMaterialBuffer();
 	// -----------------------------------------------------------------------
 	
 	InternalInitializeQuadVAO();
@@ -199,7 +199,7 @@ void Engine::UpdateObjects()
 
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	{
-		mLights[i]->ParallelForEach([this](Lights::Light * light)
+		mLights[i]->ForEach([this](Lights::Light * light)
 		{
 			light->TransformInViewCoords(mCamera->GetViewMatrix());
 			light->SetIsModified(false);

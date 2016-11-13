@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 IcosahedronRendererBase::IcosahedronRendererBase(const char * shaderTitle, const char * wireFramShaderTitle)
-	: RendererHelper<2>(0, shaderTitle, wireFramShaderTitle, Renderer::Forward_Pass)
+	: RendererHelper<2>(shaderTitle, wireFramShaderTitle, Renderer::Forward_Pass)
 {
 }
 

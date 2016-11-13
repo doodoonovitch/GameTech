@@ -403,8 +403,8 @@ private:
 	void InternalCreateSSAOBuffers();
 	void InternalReleaseSSAOBuffers();
 
-	void InternalCreateMaterialBuffer();
-	static void InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex);
+	//void InternalCreateMaterialBuffer();
+	//static void InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex);
 	//void InternalCreateTextures();
 
 	void InternalInitializeQuadVAO();
@@ -657,7 +657,7 @@ private:
 	Renderers::SpotLightPositionRenderer * mSpotLightPositionRenderer;
 
 	TextureBuffer mMaterialBuffer;
-	std::vector<GLfloat> mMaterials;
+	//std::vector<GLfloat> mMaterials;
 
 	//TextureMapping mLightPassTextureMapping;
 

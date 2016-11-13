@@ -76,7 +76,20 @@
 // ===========================================================================
 
 
+struct ModelMaterial 
+{
+	float mDiffuseR, mDiffuseG, mDiffuseB;
+	float mSpecularR, mSpecularG, mSpecularB;
+	float mEmissiveR, mEmissiveG, mEmissiveB;
 
+	float mRoughness;
+	
+	int mDiffuseSamplerIndex, mDiffuseTextureIndex;
+	int mSpecularSamplerIndex, mSpecularTextureIndex;
+	int mRoughnessSamplerIndex, mRoughnessTextureIndex;
+	int mNormalSamplerIndex, mNormalTextureIndex;
+	int mEmissiveSamplerIndex, mEmissiveTextureIndex;
+};
 
 
 

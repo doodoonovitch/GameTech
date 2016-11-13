@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 AxisRenderer::AxisRenderer()
-	: RendererHelper<1>(0, "AxisRenderer", "AxisWireFrameRenderer", Renderer::Forward_Pass)
+	: RendererHelper<1>("AxisRenderer", "AxisWireFrameRenderer", Renderer::Forward_Pass)
 {
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize AxisRenderer.....");

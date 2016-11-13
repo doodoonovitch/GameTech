@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 TextRenderer::TextRenderer()
-	: RendererHelper<1>(0, "TextRenderer", "TextWireFrameRenderer", Renderer::Forward_Pass)
+	: RendererHelper<1>("TextRenderer", "TextWireFrameRenderer", Renderer::Forward_Pass)
 	, mIsTextBuilt(false)
 {
 	mDataBuffer.reserve(mCharCountBufferCapacity);

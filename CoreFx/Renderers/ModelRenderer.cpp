@@ -11,7 +11,7 @@ namespace CoreFx
 
 
 ModelRenderer::ModelRenderer(size_t capacity, size_t pageSize)
-	: SceneObjectRenderer<Renderables::Model, 3>(true, 3, (GLuint)(0 * Property_Per_Material), capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
+	: SceneObjectRenderer<Renderables::Model, 3>(capacity, pageSize, "ModelRenderer", "ModelWireFrameRenderer")
 	, mMaterialCount(0)
 	, mDrawCmdCount(0)
 	, mMaterialTextureIndexesList(0)
@@ -45,7 +45,7 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	mMaterialTextureIndexesList.resize((GLuint)materialDescList.size());
 	mDrawCommandList = meshDrawInstanceList;
 
-	mMaterials.Resize(mMaterialCount * Property_Per_Material);
+	mShaderMaterialList.resize(mMaterialCount);
 
 	AddTextures(textureDescList);
 	SetMaterials(materialDescList);
@@ -104,17 +104,20 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 
 	GL_CHECK_ERRORS;
 
-
-	mPerInstanceDataStuff->CreateResource((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer, GL_DYNAMIC_COPY, GetCapacity(), sizeof(PerInstanceData));
-	mPerInstanceDataStuff->CreateResource((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer, GL_STATIC_DRAW, GetCapacity(), sizeof(PerInstanceData));
-	mPerInstanceDataStuff->CreateResource((GLuint)EPerInstanceDataBuffer::IndexBuffer, GL_STATIC_DRAW, mMaterialCount, sizeof(GLuint));
-
 	LoadTextures();
 	UpdateMaterialTextureIndex();
+	InitializeShaders();
 
-	PRINT_GEN_TEXTURE("[ModelRenderer]", mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer));
-	PRINT_GEN_TEXTURE("[ModelRenderer]", mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer));
-	PRINT_GEN_TEXTURE("[ModelRenderer]", mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
+	mPrecomputeDataBuffer.CreateResource(GL_DYNAMIC_COPY, GetCapacity() * cPerInstanceDataSize, nullptr);
+	mLocationRawDataBuffer.CreateResource(GL_STATIC_DRAW, GetCapacity() * cPerInstanceDataSize, nullptr);
+	mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, mMaterialCount * sizeof(GLuint), nullptr);
+	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, mMaterialCount * cShaderMaterialSize, nullptr/*mShaderMaterialList.data()*/);
+
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mMaterialBuffer);
+
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mPrecomputeDataBuffer);
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mLocationRawDataBuffer);
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mMaterialIndexBuffer);
 
 	mIsInitialized = true;
 
@@ -133,7 +136,7 @@ void ModelRenderer::Update()
 	UpdateShaderData();
 	Engine * engine = Engine::GetInstance();
 	const GLuint itemSize = sizeof(PerInstanceData) / sizeof(glm::vec4);
-	engine->ComputeViewTransform(mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer), mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer), (GLuint)mObjs.GetCount(), itemSize, itemSize);
+	engine->ComputeViewTransform(mLocationRawDataBuffer.GetBufferId(), mPrecomputeDataBuffer.GetBufferId(), (GLuint)mObjs.GetCount(), itemSize, itemSize);
 }
 
 void ModelRenderer::Render()
@@ -143,20 +146,17 @@ void ModelRenderer::Render()
 	mShader.Use();
 	glBindVertexArray(mVaoID);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer));
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPrecomputeDataBuffer.GetBufferId());
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mMaterialIndexBuffer.GetBufferId());
 
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_BUFFER, Engine::GetInstance()->GetMaterialDataBuffer().GetTextureId());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_Materials, mMaterialBuffer.GetBufferId());
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
 		glBindTexture(mTextureMapping.mMapping[i].mTexture->GetTarget(), mTextureMapping.mMapping[i].mTexture->GetResourceId());
 	}
-
-	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialBaseIndex), GetMaterialBaseIndex());
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
@@ -173,9 +173,9 @@ void ModelRenderer::RenderWireFrame()
 	mWireFrameShader.Use();
 	glBindVertexArray(mVaoID);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::PrecomputeDataBuffer));
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPrecomputeDataBuffer.GetBufferId());
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mMaterialIndexBuffer.GetBufferId());
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
@@ -193,19 +193,13 @@ void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& di
 
 	if (materialIndex < mMaterialCount)
 	{
-		GLuint propertyIndex = Property_Per_Material * materialIndex;
+		ShaderMaterial & mat = mShaderMaterialList[materialIndex];
 
-		GLfloat * prop1 = mMaterials.GetProperty(propertyIndex);
-		memcpy(prop1, glm::value_ptr(diffuse), sizeof(GLfloat) * 3);
+		mat.mDiffuse = diffuse;
+		mat.mSpecular = specular;
+		mat.mEmissive = emissive;
 
-		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
-		memcpy(prop2, glm::value_ptr(specular), sizeof(GLfloat) * 3);
-
-		GLbitfield roughnessBitfield = (uint32_t)(roughness * 32767);
-		memcpy(&prop2[3], &roughnessBitfield, sizeof(GLfloat));
-
-		GLfloat * prop3 = mMaterials.GetProperty(propertyIndex + 2);
-		memcpy(prop3, glm::value_ptr(emissive), sizeof(GLfloat) * 3);
+		mat.mRoughness = roughness;
 
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
 		texIndexes.mDiffuse = diffuseTextureIndex;
@@ -245,40 +239,25 @@ void ModelRenderer::UpdateMaterialTextureIndex()
 	for (GLuint materialIndex = 0; materialIndex < (GLuint)mMaterialTextureIndexesList.size(); ++materialIndex)
 	{
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
+		ShaderMaterial & mat = mShaderMaterialList[materialIndex];
 
-		std::uint8_t diffuseTextureIndex = texIndexes.mDiffuse != NoTexture ? (std::uint8_t)texInfo[texIndexes.mDiffuse].GetLayerIndex() : 0xFF;
-		std::uint8_t specularTextureIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetLayerIndex() : 0xFF;
-		std::uint8_t emissiveTextureIndex = texIndexes.mEmissive != NoTexture ? (std::uint8_t)texInfo[texIndexes.mEmissive].GetLayerIndex() : 0xFF;
-		std::uint8_t normalTextureIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetLayerIndex() : 0xFF;
-		std::uint8_t roughnessTextureIndex = texIndexes.mRoughness != NoTexture ? (std::uint8_t)texInfo[texIndexes.mRoughness].GetLayerIndex() : 0xFF;
+		mat.mDiffuseTextureIndex	= texIndexes.mDiffuse != NoTexture ? (GLint)texInfo[texIndexes.mDiffuse].GetLayerIndex() : -1;
+		mat.mDiffuseSamplerIndex	= texIndexes.mDiffuse != NoTexture ? (GLint)texInfo[texIndexes.mDiffuse].GetSamplerIndex() : -1;
 
-		std::uint8_t diffuseSamplerIndex = texIndexes.mDiffuse != NoTexture ? (std::uint8_t)texInfo[texIndexes.mDiffuse].GetSamplerIndex() : 0xFF;
-		std::uint8_t specularSamplerIndex = texIndexes.mSpecular != NoTexture ? (std::uint8_t)texInfo[texIndexes.mSpecular].GetSamplerIndex() : 0xFF;
-		std::uint8_t emissiveSamplerIndex = texIndexes.mEmissive != NoTexture ? (std::uint8_t)texInfo[texIndexes.mEmissive].GetSamplerIndex() : 0xFF;
-		std::uint8_t normalSamplerIndex = texIndexes.mNormal != NoTexture ? (std::uint8_t)texInfo[texIndexes.mNormal].GetSamplerIndex() : 0xFF;
-		std::uint8_t roughnessSamplerIndex = texIndexes.mRoughness != NoTexture ? (std::uint8_t)texInfo[texIndexes.mRoughness].GetSamplerIndex() : 0xFF;
+		mat.mSpecularTextureIndex	= texIndexes.mSpecular != NoTexture ? (GLint)texInfo[texIndexes.mSpecular].GetLayerIndex() : -1;
+		mat.mSpecularSamplerIndex	= texIndexes.mSpecular != NoTexture ? (GLint)texInfo[texIndexes.mSpecular].GetSamplerIndex() : -1;
 
-		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) Diffuse=(%i, %i), Specular=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i)", materialIndex, (int8_t)diffuseSamplerIndex, (int8_t)diffuseTextureIndex, (int8_t)specularSamplerIndex, (int8_t)specularTextureIndex, (int8_t)roughnessSamplerIndex, (int8_t)roughnessTextureIndex, (int8_t)normalSamplerIndex, (int8_t)normalTextureIndex, (int8_t)emissiveSamplerIndex, (int8_t)emissiveTextureIndex);
+		mat.mEmissiveTextureIndex	= texIndexes.mEmissive != NoTexture ? (GLint)texInfo[texIndexes.mEmissive].GetLayerIndex() : -1;
+		mat.mEmissiveSamplerIndex	= texIndexes.mEmissive != NoTexture ? (GLint)texInfo[texIndexes.mEmissive].GetSamplerIndex() : -1;
 
-		GLuint propertyIndex = Property_Per_Material * materialIndex;
+		mat.mNormalTextureIndex		= texIndexes.mNormal != NoTexture ? (GLint)texInfo[texIndexes.mNormal].GetLayerIndex() : -1;
+		mat.mNormalSamplerIndex		= texIndexes.mNormal != NoTexture ? (GLint)texInfo[texIndexes.mNormal].GetSamplerIndex() : -1;
 
-		GLfloat * prop1 = mMaterials.GetProperty(propertyIndex);
-		GLbitfield diffuseSpecularIndexes = ((diffuseSamplerIndex & 0xFF) << 24) | ((diffuseTextureIndex & 0xFF) << 16) | ((specularSamplerIndex & 0xFF) << 8) | (specularTextureIndex & 0xFF);
-		memcpy(&prop1[3], &diffuseSpecularIndexes, sizeof(GLfloat));
+		mat.mRoughnessTextureIndex	= texIndexes.mRoughness != NoTexture ? (GLint)texInfo[texIndexes.mRoughness].GetLayerIndex() : -1;
+		mat.mRoughnessSamplerIndex	= texIndexes.mRoughness != NoTexture ? (GLint)texInfo[texIndexes.mRoughness].GetSamplerIndex() : -1;
 
-		GLfloat * prop2 = mMaterials.GetProperty(propertyIndex + 1);
-		GLbitfield roughnessBitfields;
-		memcpy(&roughnessBitfields, &prop2[3], sizeof(GLfloat));
-		roughnessBitfields = ((roughnessSamplerIndex & 0xFF) << 24) | ((roughnessTextureIndex & 0xFF) << 16) | (roughnessBitfields & 0xFFFF);
-		memcpy(&prop2[3], &roughnessBitfields, sizeof(GLfloat));
-
-		GLfloat * prop3 = mMaterials.GetProperty(propertyIndex + 2);
-		GLbitfield emissiveNormalIndexes;
-		emissiveNormalIndexes = ((emissiveSamplerIndex & 0xFF) << 24) | ((emissiveTextureIndex & 0xFF) << 16) | ((normalSamplerIndex & 0xFF) << 8) | (normalTextureIndex & 0xFF);
-		memcpy(&prop3[3], &emissiveNormalIndexes, sizeof(GLfloat));
+		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) Diffuse=(%i, %i), Specular=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i)", materialIndex, mat.mDiffuseSamplerIndex, mat.mDiffuseTextureIndex, mat.mSpecularSamplerIndex, mat.mSpecularTextureIndex, mat.mRoughnessSamplerIndex, mat.mRoughnessTextureIndex, mat.mNormalSamplerIndex, mat.mNormalTextureIndex, mat.mEmissiveSamplerIndex, mat.mEmissiveTextureIndex);
 	}
-
-	InitializeShaders();
 }
 
 void ModelRenderer::InitializeShaders()
@@ -304,20 +283,15 @@ void ModelRenderer::InitializeMainShader()
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
-	const char * uniformNames[(int)EMainShaderUniformIndex::__uniforms_count__] =
-	{
-		"u_MaterialBaseIndex",
-		"u_MaterialDataSampler",
-	};
-
 	mShader.CreateAndLinkProgram();
 
 	mShader.Use();
-	mShader.AddUniforms(uniformNames, (int)EMainShaderUniformIndex::__uniforms_count__);
 
-	//pass values of constant uniforms at initialization
-	glUniform1i(mShader.GetUniform((int)EMainShaderUniformIndex::u_MaterialDataSampler), 2);
 
+	//const char * uniformNames[(int)EMainShaderUniformIndex::__uniforms_count__] =
+	//{
+	//};
+	//mShader.AddUniforms(uniformNames, (int)EMainShaderUniformIndex::__uniforms_count__);
 
 	PRINT_MESSAGE("Texture mapping : sampler count = %li", mTextureMapping.mMapping.size());
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
@@ -339,8 +313,6 @@ void ModelRenderer::InitializeMainShader()
 	GL_CHECK_ERRORS;
 
 	PRINT_MESSAGE("... ModelRenderer shader initialized!");
-
-	//Engine::GetInstance()->DisplayTexture2DArray(mTextureMapping.mMapping[0].mTexture, 0);
 }
 
 void ModelRenderer::InitializeWireFrameShader()
@@ -374,7 +346,16 @@ void ModelRenderer::UpdateShaderData()
 
 		// --------------------------------------------
 
-		glBindBuffer(target, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::IndexBuffer));
+		glBindBuffer(target, mMaterialBuffer.GetBufferId());
+		GLuint * matBuffer = (GLuint *)glMapBuffer(target, GL_WRITE_ONLY);
+		const std::uint8_t * data = (const std::uint8_t *)mShaderMaterialList.data();
+		memcpy(matBuffer, data, mMaterialCount * cShaderMaterialSize);
+		glUnmapBuffer(target);
+		glBindBuffer(target, 0);
+
+		// --------------------------------------------
+
+		glBindBuffer(target, mMaterialIndexBuffer.GetBufferId());
 
 		GLuint index = 0;
 		GLuint * matIndexBuffer = (GLuint *)glMapBuffer(target, GL_WRITE_ONLY);
@@ -411,7 +392,7 @@ void ModelRenderer::UpdateShaderData()
 
 		// --------------------------------------------
 
-		glBindBuffer(target, mPerInstanceDataStuff->GetBufferId((GLuint)EPerInstanceDataBuffer::LocationRawDataBuffer));
+		glBindBuffer(target, mLocationRawDataBuffer.GetBufferId());
 		std::uint8_t * bufferBase = (std::uint8_t *)glMapBuffer(target, GL_WRITE_ONLY);
 		mObjs.ForEach([this, bufferBase](Renderables::Model* obj)
 		{

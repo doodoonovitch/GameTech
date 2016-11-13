@@ -51,13 +51,10 @@ public:
 
 private:
 	
-	enum class EMainShaderUniformIndex
-	{
-		u_MaterialBaseIndex,
-		u_MaterialDataSampler,
-
-		__uniforms_count__
-	};
+	//enum class EMainShaderUniformIndex
+	//{
+	//	__uniforms_count__
+	//};
 
 	enum VBOIndex
 	{
@@ -70,6 +67,7 @@ private:
 	{
 		u_PerInstanceDataBuffer,
 		u_PerInstanceDataIndexBuffer,
+		u_Materials,
 	};
 
 #pragma pack(push, 1)
@@ -95,12 +93,12 @@ private:
 
 	struct MaterialTextureIndexes
 	{
-		//TextureIndex mAmbient = CubeRenderer::NoTexture;
-		TextureIndex mDiffuse = CubeRenderer::NoTexture;
-		TextureIndex mSpecular = CubeRenderer::NoTexture;
-		TextureIndex mRoughness = CubeRenderer::NoTexture;
-		TextureIndex mEmissive = CubeRenderer::NoTexture;
-		TextureIndex mNormal = CubeRenderer::NoTexture;
+		//TextureIndex mAmbient = Renderer::NoTexture;
+		TextureIndex mDiffuse = Renderer::NoTexture;
+		TextureIndex mSpecular = Renderer::NoTexture;
+		TextureIndex mRoughness = Renderer::NoTexture;
+		TextureIndex mEmissive = Renderer::NoTexture;
+		TextureIndex mNormal = Renderer::NoTexture;
 
 	};
 
@@ -130,7 +128,29 @@ private:
 
 	typedef std::vector<ModelInstanceMapping> ModelInstanceMappingList;
 
-	const int FIRST_TEXTURE_SAMPLER_INDEX = 3;
+	const int FIRST_TEXTURE_SAMPLER_INDEX = 0;
+
+	struct ShaderMaterial
+	{
+		glm::vec3 mDiffuse;
+		glm::vec3 mSpecular;
+		glm::vec3 mEmissive;
+		GLfloat mRoughness;
+
+		GLint mDiffuseSamplerIndex, mDiffuseTextureIndex;
+		GLint mSpecularSamplerIndex, mSpecularTextureIndex;
+		GLint mRoughnessSamplerIndex, mRoughnessTextureIndex;
+		GLint mNormalSamplerIndex, mNormalTextureIndex;
+		GLint mEmissiveSamplerIndex, mEmissiveTextureIndex;
+
+		//GLfloat __padding__[12];
+	};
+
+	const size_t cShaderMaterialSize = sizeof(ShaderMaterial);
+	const size_t cPerInstanceDataSize = sizeof(PerInstanceData);
+
+
+	typedef std::vector<ShaderMaterial> ShaderMaterialList;
 
 private:
 
@@ -153,6 +173,13 @@ private:
 
 	Renderer::DrawElementsIndirectCommandList mDrawCommandList;
 	ModelInstanceMappingList mModelInstanceMappingList;
+
+	ShaderMaterialList mShaderMaterialList;
+
+	ShaderStorageBuffer mMaterialBuffer;
+	ShaderStorageBuffer mPrecomputeDataBuffer;
+	ShaderStorageBuffer mLocationRawDataBuffer;
+	ShaderStorageBuffer mMaterialIndexBuffer;
 
 	bool mIsModelSet;
 	bool mIsShaderBufferSet;

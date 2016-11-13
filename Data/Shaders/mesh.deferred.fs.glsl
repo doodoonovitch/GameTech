@@ -3,7 +3,11 @@ layout(location = 1) out uvec4 outAlbedoAndStatus;
 layout(location = 2) out vec4 outSpecularAndRoughness;
 layout(location = 3) out vec3 outEmissive;
 
-uniform samplerBuffer u_MaterialDataSampler;
+layout (std430, binding = 2) buffer Materials
+{
+	ModelMaterial u_Materials[];
+};
+
 uniform sampler2DArray u_textureSampler[MAX_TEXTURE_SAMPLER];
 
 vec4 TexGet(uint samplerIndex, vec2 texUV, uint layerIndex);
@@ -20,54 +24,45 @@ in GS_OUT
 
 void main(void)
 {
-	vec4 matData;
-
-	matData = texelFetch(u_MaterialDataSampler, fs_in.MaterialIndex);
-	vec3 materialDiffuse = matData.rgb;
-	uint bitfieldValue = floatBitsToUint(matData.w);
-	uint diffuseTextureIndex = ((bitfieldValue >> 16) & uint(255));
-	uint diffuseSamplerIndex = ((bitfieldValue >> 24) & uint(255));
-	uint specularTextureIndex = (bitfieldValue & uint(255));
-	uint specularSamplerIndex = ((bitfieldValue >> 8) & uint(255));
-
-	matData = texelFetch(u_MaterialDataSampler, fs_in.MaterialIndex + 1);
-	vec3 materialSpecular = matData.rgb;
-	bitfieldValue = floatBitsToUint(matData.w);
-	float roughness = float((bitfieldValue & uint(32767)) / 32767.f);
-	uint roughnessTextureIndex = ((bitfieldValue >> 16) & uint(255));
-	uint roughnessSamplerIndex = ((bitfieldValue >> 24) & uint(255));
 	
-	matData = texelFetch(u_MaterialDataSampler, fs_in.MaterialIndex + 2);
-	vec3 materialEmissive = matData.rgb;
-	bitfieldValue = floatBitsToUint(matData.w);
-	uint emissiveTextureIndex = ((bitfieldValue >> 16) & uint(255));
-	uint emissiveSamplerIndex = ((bitfieldValue >> 24) & uint(255));
-	uint normalTextureIndex = (bitfieldValue & uint(255));
-	uint normalSamplerIndex = ((bitfieldValue >> 8) & uint(255));
-	
-	if ((diffuseTextureIndex != 255) && (diffuseSamplerIndex != 255))
+	vec3 materialDiffuse = vec3(u_Materials[fs_in.MaterialIndex].mDiffuseR, u_Materials[fs_in.MaterialIndex].mDiffuseG, u_Materials[fs_in.MaterialIndex].mDiffuseB);
+	vec3 materialSpecular = vec3(u_Materials[fs_in.MaterialIndex].mSpecularR, u_Materials[fs_in.MaterialIndex].mSpecularG, u_Materials[fs_in.MaterialIndex].mSpecularB);
+	vec3 materialEmissive = vec3(u_Materials[fs_in.MaterialIndex].mEmissiveR, u_Materials[fs_in.MaterialIndex].mEmissiveG, u_Materials[fs_in.MaterialIndex].mEmissiveB);
+	float roughness = u_Materials[fs_in.MaterialIndex].mRoughness;
+
+	int diffuseTextureIndex = u_Materials[fs_in.MaterialIndex].mDiffuseTextureIndex;
+	if (diffuseTextureIndex != -1)
 	{
+		int diffuseSamplerIndex = u_Materials[fs_in.MaterialIndex].mDiffuseSamplerIndex;
 		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec2(fs_in.TexUV), diffuseTextureIndex).xyz;
 	}
 
-	if ((specularTextureIndex != 255) && (specularSamplerIndex != 255))
+	int specularTextureIndex = u_Materials[fs_in.MaterialIndex].mSpecularTextureIndex;
+	if(specularTextureIndex != -1)
 	{
+		int specularSamplerIndex = u_Materials[fs_in.MaterialIndex].mSpecularSamplerIndex;
 		materialSpecular = materialSpecular * TexGet(specularSamplerIndex, vec2(fs_in.TexUV), specularTextureIndex).xyz;
 	}
 
-	if ((emissiveTextureIndex != 255) && (emissiveSamplerIndex != 255))
+	int emissiveTextureIndex = u_Materials[fs_in.MaterialIndex].mEmissiveTextureIndex;
+	if (emissiveTextureIndex != -1)
 	{
+		int emissiveSamplerIndex = u_Materials[fs_in.MaterialIndex].mEmissiveSamplerIndex;
 		materialEmissive = materialEmissive * TexGet(emissiveSamplerIndex, vec2(fs_in.TexUV), emissiveTextureIndex).xyz;
 	}
 
-	if ((roughnessTextureIndex != 255) && (roughnessSamplerIndex != 255))
+	int roughnessTextureIndex = u_Materials[fs_in.MaterialIndex].mRoughnessTextureIndex;
+	if (roughnessTextureIndex != -1)
 	{
+		int roughnessSamplerIndex = u_Materials[fs_in.MaterialIndex].mRoughnessSamplerIndex;
 		roughness = roughness * TexGet(roughnessSamplerIndex, vec2(fs_in.TexUV), roughnessTextureIndex).x;
 	}
-	
+
 	vec3 normal;
-	if ((normalTextureIndex != 255) && (normalSamplerIndex != 255))
+	int normalTextureIndex = u_Materials[fs_in.MaterialIndex].mNormalTextureIndex;
+	if ((normalTextureIndex != -1))
 	{
+		int normalSamplerIndex = u_Materials[fs_in.MaterialIndex].mNormalSamplerIndex;
 		vec3 bumpMapNormal = TexGet(normalSamplerIndex, fs_in.TexUV, normalTextureIndex).xyz;
 		bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
 
@@ -78,7 +73,7 @@ void main(void)
 	{
 		normal = dqTransformNormal(normalize(fs_in.Normal), fs_in.ViewModelDQ);
 	}
-	
+
 	outNormal = vec3(normal.xyz);
 
 	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);

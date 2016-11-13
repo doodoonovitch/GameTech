@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 SkydomeRenderer::SkydomeRenderer(const int rings, const int segments)
-	: RendererHelper<2>(0, "SkydomeRenderer", "SkydomeWireFrameRenderer", Renderer::Forward_Pass)
+	: RendererHelper<2>("SkydomeRenderer", "SkydomeWireFrameRenderer", Renderer::Forward_Pass)
 {
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize SkydomeRenderer.....");

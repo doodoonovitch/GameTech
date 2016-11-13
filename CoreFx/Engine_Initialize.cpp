@@ -319,37 +319,37 @@ void Engine::InternalCreateSSAOBuffers()
 	PRINT_END_SECTION;
 }
 
-void Engine::InternalCreateMaterialBuffer()
-{
-	PRINT_BEGIN_SECTION;
-	PRINT_MESSAGE("Create material buffers.....");
-
-	int bufferSize = 0;
-	mRenderers->ForEach([&bufferSize](Renderer * renderer)
-	{
-		bufferSize += renderer->mMaterials.GetDataSize();
-	});
-
-	mForwardRenderers->ForEach([&bufferSize](Renderer * renderer)
-	{
-		bufferSize += renderer->mMaterials.GetDataSize();
-	});
-
-	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
-	PRINT_GEN_TEXTUREBUFFER("[Engine]", mMaterialBuffer);
-
-	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId()); GL_CHECK_ERRORS;
-	GLsizeiptr offset = 0;
-	GLint baseIndex = 0;
-
-	InternalCreateMaterialBuffer(mRenderers, offset, baseIndex);
-	InternalCreateMaterialBuffer(mForwardRenderers, offset, baseIndex);
-
-	glBindBuffer(GL_TEXTURE_BUFFER, 0);
-
-	PRINT_MESSAGE(".....done.");
-	PRINT_END_SECTION;
-}
+//void Engine::InternalCreateMaterialBuffer()
+//{
+//	PRINT_BEGIN_SECTION;
+//	PRINT_MESSAGE("Create material buffers.....");
+//
+//	int bufferSize = 0;
+//	mRenderers->ForEach([&bufferSize](Renderer * renderer)
+//	{
+//		bufferSize += renderer->mMaterials.GetDataSize();
+//	});
+//
+//	mForwardRenderers->ForEach([&bufferSize](Renderer * renderer)
+//	{
+//		bufferSize += renderer->mMaterials.GetDataSize();
+//	});
+//
+//	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, bufferSize, nullptr);
+//	PRINT_GEN_TEXTUREBUFFER("[Engine]", mMaterialBuffer);
+//
+//	glBindBuffer(GL_TEXTURE_BUFFER, mMaterialBuffer.GetBufferId()); GL_CHECK_ERRORS;
+//	GLsizeiptr offset = 0;
+//	GLint baseIndex = 0;
+//
+//	InternalCreateMaterialBuffer(mRenderers, offset, baseIndex);
+//	InternalCreateMaterialBuffer(mForwardRenderers, offset, baseIndex);
+//
+//	glBindBuffer(GL_TEXTURE_BUFFER, 0);
+//
+//	PRINT_MESSAGE(".....done.");
+//	PRINT_END_SECTION;
+//}
 
 void Engine::InternalCreateFrameDataBuffer(GLuint program)
 {
@@ -788,23 +788,23 @@ void Engine::InternalInitializePreComputeMatrixShader()
 	PRINT_END_SECTION;
 }
 
-void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
-{
-	renderers->ForEach([&offset, &baseIndex](Renderer * renderer)
-	{
-		GLsizei dataSize = renderer->mMaterials.GetDataSize();
-		if (dataSize > 0)
-		{
-			renderer->mMaterialBaseIndex = baseIndex;
-			std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
-			memcpy(buffer, renderer->mMaterials.GetData(), dataSize);
-			glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
-			offset += dataSize;
-			baseIndex += renderer->mMaterials.GetPropertyCount();
-		}
-	});
-}
-
+//void Engine::InternalCreateMaterialBuffer(RendererContainer * renderers, GLsizeiptr & offset, GLint & baseIndex)
+//{
+//	renderers->ForEach([&offset, &baseIndex](Renderer * renderer)
+//	{
+//		GLsizei dataSize = renderer->mMaterials.GetDataSize();
+//		if (dataSize > 0)
+//		{
+//			renderer->mMaterialBaseIndex = baseIndex;
+//			std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_TEXTURE_BUFFER, offset, dataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT); GL_CHECK_ERRORS;
+//			memcpy(buffer, renderer->mMaterials.GetData(), dataSize);
+//			glUnmapBuffer(GL_TEXTURE_BUFFER); GL_CHECK_ERRORS;
+//			offset += dataSize;
+//			baseIndex += renderer->mMaterials.GetPropertyCount();
+//		}
+//	});
+//}
+//
 
 
 	// =======================================================================

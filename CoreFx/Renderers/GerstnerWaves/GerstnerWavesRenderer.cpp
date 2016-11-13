@@ -13,7 +13,7 @@ namespace CoreFx
 
 
 Renderer::Renderer(const Desc & desc)
-	: RendererHelper<1>(0, "GerstnerWaveRenderer", "GerstnerWaveWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
+	: RendererHelper<1>("GerstnerWaveRenderer", "GerstnerWaveWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
 	, mHeightMapCS(nullptr)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mTextureSize(512)

@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 GridRenderer::GridRenderer(int width, int depth)
-	: RendererHelper<1>(0, "GridRenderer", "GridWireFrameRenderer", Forward_Pass)
+	: RendererHelper<1>("GridRenderer", "GridWireFrameRenderer", Forward_Pass)
 {
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize GridRenderer.....");

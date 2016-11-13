@@ -54,7 +54,6 @@ void SimpleCamera::SetupViewportAndProjection()
 	Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
 }
 
-//#define CUBE_SAMPLES
 #define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
@@ -93,90 +92,6 @@ void SimpleCamera::OnInit()
 		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
 		
-#ifdef CUBE_SAMPLES
-		{
-			//const float XStart = 1.f;
-			//const float YStart = 0.f;
-			//const float ZStart = 1.f;
-			//const float XMul = 5.f;
-			//const float YMul = 5.f;
-			//const float ZMul = -200.f;
-
-			const float XStart = 1.52f;
-			const float YStart = 1.02f;
-			const float ZStart = -1.52f;
-			const float XMul = 5.f;
-			const float YMul = 5.f;
-			const float ZMul = -5.f;
-
-			int xCount = 30;
-			int yCount = 30;
-			int zCount = 30;
-
-			Renderers::CubeRenderer::Desc desc;
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 0
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube2.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 1
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/cube_N.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 2
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 3
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/fallforestrocks01_n.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 4
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 5
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks_n.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 6
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024.tif", TextureCategory::Diffuse, TextureWrap::Clamp, TextureWrap::Clamp)); // 7
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_s.tif", TextureCategory::Specular, TextureWrap::Clamp, TextureWrap::Clamp)); // 8
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/bricks1024_n.tif", TextureCategory::NormalMap, TextureWrap::Clamp, TextureWrap::Clamp)); // 9
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.7f, .7f, .7f), 5, glm::vec3(0.664f, 0.824f, 0.850f), Renderers::CubeRenderer::NoTexture, 0.1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6)); // zinc
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 0, glm::vec3(0.664f, 0.824f, 0.850f), Renderers::CubeRenderer::NoTexture, 0.1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2)); // zinc
-
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.7f, .7f, .7f), 3, glm::vec3(0.045f, 0.045f, 0.045f), Renderers::CubeRenderer::NoTexture, 0.8f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 4));
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .3f, .1f), 5, glm::vec3(0.955f, 0.638f, 0.538f), Renderers::CubeRenderer::NoTexture, 0.1f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 6));
-
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.1f, .1f, .1f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0.f, 8600.f, 5000.f), 8, 9));
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(.5f, .5f, .5f), 7, glm::vec3(.2f, .2f, .2f), 8, .9f, 
-				Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 9));
-
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.8f, 0.8f, 0.8f), 1, glm::vec3(.1f, .1f, .1f), Renderers::CubeRenderer::NoTexture, 0.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), 0, glm::vec3(.02f, .02f, .02f), Renderers::CubeRenderer::NoTexture, 0.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
-
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(0.f, 0.f, 1.f), 1, glm::vec3(.05f, .05f, .05f), Renderers::CubeRenderer::NoTexture, .3f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
-			desc.mMaterials.push_back(Renderer::MaterialDesc(glm::vec3(1.f, 1.f, 0.f), 0, glm::vec3(.08f, .08f, .08f), Renderers::CubeRenderer::NoTexture, .2f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, 2));
-
-			const int materialCount = (int)desc.mMaterials.size();
-
-			Renderers::CubeRenderer * cubeRenderer = new Renderers::CubeRenderer(desc, xCount * yCount * zCount, 1);
-			engine->AttachRenderer(cubeRenderer);
-
-			for (auto i = 0; i < xCount; ++i)
-			{
-				float xAngle = (glm::two_pi<float>() * (float)i) / (float)xCount;
-				glm::quat qX = glm::angleAxis(xAngle, XAxis);
-
-				for (auto j = 0; j < yCount; ++j)
-				{
-					float yAngle = (glm::two_pi<float>() * (float)j) / (float)yCount;
-					glm::quat qY = glm::angleAxis(yAngle, YAxis);
-
-					for (auto k = 0; k < zCount; ++k)
-					{
-						float zAngle = (glm::two_pi<float>() * (float)k) / (float)zCount;
-						glm::quat qZ = glm::angleAxis(zAngle, ZAxis);
-
-						Cube * cube = cubeRenderer->CreateCube(i % materialCount);
-						cube->GetFrame()->SetPosition(glm::vec3(XStart + XMul * i, YStart + YMul * j, ZStart + ZMul * k));
-
-						glm::quat qRot = qX * qY * qZ;
-						cube->GetFrame()->SetRotation(qRot);
-					}
-				}
-			}
-		}
-#endif // CUBE_SAMPLE
 
 #ifdef TERRAIN_SAMPLE
 		{
@@ -308,7 +223,7 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
-			//#define ARTORIAS_SWORD_MODEL
+//#define ARTORIAS_SWORD_MODEL
 #define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
@@ -336,13 +251,13 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 4;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::ivec2(5, 5, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::ivec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 1);
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 2);
@@ -370,11 +285,11 @@ void SimpleCamera::OnInit()
 					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.784314f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.9f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.784314f, 0.f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f, 0.784314f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(0.4f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.784314f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.9f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.784314f, 0.f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f, 0.784314f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(0.4f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 1);
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 2);
@@ -436,11 +351,11 @@ void SimpleCamera::OnInit()
 					instancePerModel.push_back(glm::uvec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.91f, 0.92f, 0.92f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.93f, 0.88f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.91f, 0.92f, 0.92f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.93f, 0.88f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 1);
 				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 2);
@@ -475,25 +390,25 @@ void SimpleCamera::OnInit()
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount * 4);
 
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.56f, 0.57f, 0.58f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
+				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderer::NoTexture, glm::vec3(0.56f, 0.57f, 0.58f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
 
 				if (modelCount >= 2)
 				{
-					matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-					matList[dataCtxBase.mMaterialIndexBase + 5] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-					matList[dataCtxBase.mMaterialIndexBase + 6] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-					matList[dataCtxBase.mMaterialIndexBase + 7] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 5] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+					matList[dataCtxBase.mMaterialIndexBase + 6] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
+					matList[dataCtxBase.mMaterialIndexBase + 7] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
 				}
 
 				if (modelCount >= 3)
 				{
-					matList[dataCtxBase.mMaterialIndexBase + 8] = Renderer::MaterialDesc(glm::vec3(0.f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
-					matList[dataCtxBase.mMaterialIndexBase + 9] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-					matList[dataCtxBase.mMaterialIndexBase + 10] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-					matList[dataCtxBase.mMaterialIndexBase + 11] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderers::CubeRenderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderers::CubeRenderer::NoTexture, 1.f, Renderers::CubeRenderer::NoTexture, glm::vec3(0), Renderers::CubeRenderer::NoTexture, Renderers::CubeRenderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 8] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 9] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+					matList[dataCtxBase.mMaterialIndexBase + 10] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
+					matList[dataCtxBase.mMaterialIndexBase + 11] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
 				}
 				
 				for (GLuint i = 0; i < modelCount; ++i)
@@ -529,7 +444,7 @@ void SimpleCamera::OnInit()
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.5f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.5f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
 			}
 #endif
@@ -556,7 +471,7 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_R.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_N.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.588235f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderers::CubeRenderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.588235f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)

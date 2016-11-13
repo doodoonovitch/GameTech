@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 ConeRendererBase::ConeRendererBase(const char * shaderTitle, const char * wireFramShaderTitle)
-	: RendererHelper<1>(0, shaderTitle, wireFramShaderTitle, Renderer::Forward_Pass)
+	: RendererHelper<1>(shaderTitle, wireFramShaderTitle, Renderer::Forward_Pass)
 {
 }
 

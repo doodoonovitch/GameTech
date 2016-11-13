@@ -101,10 +101,8 @@ namespace CoreFx
 #include "Camera.h"
 #include "Renderables\Axis.h"
 #include "Renderables\Grid.h"
-#include "Renderables\Cube.h"
 #include "Renderables\Model.h"
 
-#include "Renderers\CubeRenderer.h"
 #include "Renderers\GridRenderer.h"
 #include "Renderers\AxisRenderer.h"
 #include "Renderers\TerrainRenderer.h"

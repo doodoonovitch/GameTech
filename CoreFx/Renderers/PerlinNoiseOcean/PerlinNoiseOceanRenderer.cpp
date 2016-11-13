@@ -14,7 +14,7 @@ namespace CoreFx
 
 
 Renderer::Renderer(const Desc & desc)
-	: RendererHelper<1>(0, "PerlinNoiseOceanRenderer", "PerlinNoiseOceanWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
+	: RendererHelper<1>("PerlinNoiseOceanRenderer", "PerlinNoiseOceanWireFrameRenderer", Renderer::ERenderPass::Deferred_Pass)
 	, mHeightMapCS(nullptr)
 	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(desc.mSkyboxCubeMapTextureFilename))
 	, mOceanColorTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/textures/OceanColor256.tif", GL_REPEAT, GL_REPEAT))

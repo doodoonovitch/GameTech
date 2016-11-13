@@ -88,9 +88,6 @@
     <ClInclude Include="Frame.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Renderables\Cube.h">
-      <Filter>Renderables</Filter>
-    </ClInclude>
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="Engine.h" />
@@ -98,9 +95,6 @@
       <Filter>Renderables</Filter>
     </ClInclude>
     <ClInclude Include="Macros.h" />
-    <ClInclude Include="Renderers\CubeRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
     <ClInclude Include="InstanceContainer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Renderers\RendererHelper.h">
@@ -220,17 +214,11 @@
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Renderables\Cube.cpp">
-      <Filter>Renderables</Filter>
-    </ClCompile>
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Renderables\Axis.cpp">
       <Filter>Renderables</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\CubeRenderer.cpp">
-      <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Renderers\GridRenderer.cpp">

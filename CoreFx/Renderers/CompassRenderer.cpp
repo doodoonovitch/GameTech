@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 CompassRenderer::CompassRenderer()
-	: RendererHelper<1>(0, "CompassRenderer", "CompassWireframeRenderer", Renderer::Forward_Pass)
+	: RendererHelper<1>("CompassRenderer", "CompassWireframeRenderer", Renderer::Forward_Pass)
 	, mCompassTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/compass.tif"))
 {
 	PRINT_BEGIN_SECTION;
