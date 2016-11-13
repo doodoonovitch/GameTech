@@ -413,7 +413,7 @@ void SimpleCamera::OnInit()
 				
 				for (GLuint i = 0; i < modelCount; ++i)
 				{
-					instancePerModel.push_back(glm::uvec3(3, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(3, 4, dataCtxBase.mModelMappingIndexBase + i));
 					if (i >= 1)
 						modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, (i + 1) * 4);
 				}

@@ -35,6 +35,11 @@ public:
 
 	void Resize(GLenum usage, GLsizeiptr size, const void * data = nullptr);
 
+	void BindBufferBase(GLuint bindingPointIndex)
+	{
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindingPointIndex, GetBufferId());
+	}
+
 protected:
 
 	GLuint mBufferId;

@@ -61,9 +61,12 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	{
 		modelMatrixBuffer[i].mModelDQ = desc.mTerrains[i].mModelDQ;
 	}
-	mModelMatrixBuffer.CreateResource(GL_STATIC_DRAW, GL_RGBA32F, (mMapCount * sizeof(PerMapData)), modelMatrixBuffer);
+	mLocationRawDataBuffer.CreateResource(GL_STATIC_DRAW, mMapCount * sizeof(PerMapData), modelMatrixBuffer);
+	mPrecomputeDataBuffer.CreateResource(GL_DYNAMIC_COPY, mMapCount * sizeof(PerMapData), nullptr);
 
-
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mPrecomputeDataBuffer);
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mLocationRawDataBuffer);
+	
 	//UpdateMaterialTextureIndex(desc);
 	LoadShaders(desc);
 
@@ -76,7 +79,6 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 
 TerrainRenderer::~TerrainRenderer()
 {
-	mModelMatrixBuffer.ReleaseResource();
 	glDeleteTextures(1, &mHeightMapTextureId);
 	mHeightMapTextureId = 0;
 }
@@ -403,7 +405,14 @@ void TerrainRenderer::BuildMaterialShader(std::string & generatedSource, const D
 
 	generatedSource.append("}\r\n");
 }
- 
+
+void TerrainRenderer::Update()
+{
+	Engine * engine = Engine::GetInstance();
+	const GLuint itemSize = sizeof(PerMapData) / sizeof(glm::vec4);
+	engine->ComputeViewTransform(mLocationRawDataBuffer.GetBufferId(), mPrecomputeDataBuffer.GetBufferId(), (GLuint)mMapCount, itemSize, itemSize);
+}
+
 void TerrainRenderer::Render()
 {
 	//if (!mShader.IsLoaded())
@@ -417,8 +426,8 @@ void TerrainRenderer::Render()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+	mLocationRawDataBuffer.BindBufferBase(u_PerInstanceWorlMatrix);
+	mPrecomputeDataBuffer.BindBufferBase(u_PerInstanceViewMatrix);
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
 	{
@@ -441,8 +450,8 @@ void TerrainRenderer::RenderWireFrame()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, mHeightMapTextureId);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, mModelMatrixBuffer.GetTextureId());
+	mLocationRawDataBuffer.BindBufferBase(u_PerInstanceWorlMatrix);
+	mPrecomputeDataBuffer.BindBufferBase(u_PerInstanceViewMatrix);
 
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);

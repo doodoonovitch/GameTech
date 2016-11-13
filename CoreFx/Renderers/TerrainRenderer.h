@@ -87,6 +87,7 @@ public:
 	TerrainRenderer(const Desc & desc);
 	virtual ~TerrainRenderer();
 
+	virtual void Update() override;
 	virtual void Render() override;
 	virtual void RenderWireFrame() override;
 
@@ -116,6 +117,11 @@ private:
 		__uniforms_count__
 	};
 
+	enum EBinding
+	{
+		u_PerInstanceWorlMatrix,
+		u_PerInstanceViewMatrix,
+	};
 
 	struct PerMapData
 	{
@@ -123,7 +129,7 @@ private:
 	};
 
 
-	const int FIRST_TEXTURE_SAMPLER_INDEX = 2;
+	const int FIRST_TEXTURE_SAMPLER_INDEX = 1;
 
 
 	glm::ivec2 mMapSize;
@@ -135,7 +141,8 @@ private:
 	GLuint mHeightMapTextureId;
 	GLint mMapCount;
 
-	TextureBuffer mModelMatrixBuffer;
+	ShaderStorageBuffer mPrecomputeDataBuffer;
+	ShaderStorageBuffer mLocationRawDataBuffer;
 };
 
 

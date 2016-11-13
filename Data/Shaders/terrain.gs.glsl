@@ -1,7 +1,11 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-uniform samplerBuffer u_PerMapDataSampler;
+//uniform samplerBuffer u_PerMapDataSampler;
+layout (std430, binding = 0) buffer PerInstanceWorlMatrix
+{
+	vec4 data[];
+} u_PerInstanceWorlMatrix;
 
 
 in TES_OUT
@@ -25,10 +29,13 @@ void main()
 {  
 	DualQuat modelDQ;
 	int index = gs_in[0].MapIndex * 2;
-	modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
-	modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
+	//modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
+	//modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
+	////gs_out.ViewModelDQ = dqMul(u_ViewDQ, modelDQ);
 
-	//gs_out.ViewModelDQ = dqMul(u_ViewDQ, modelDQ);
+	modelDQ.Qr = u_PerInstanceWorlMatrix.data[index];
+	modelDQ.Qd = u_PerInstanceWorlMatrix.data[index + 1];
+
 	
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	

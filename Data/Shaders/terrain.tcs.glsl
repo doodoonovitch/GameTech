@@ -6,7 +6,11 @@ uniform float u_MinTess = 1;
 uniform float u_MaxTess = 6;
 //uniform float u_LODfactor = 40;
 
-uniform samplerBuffer u_PerMapDataSampler;
+//uniform samplerBuffer u_PerMapDataSampler;
+layout (std430, binding = 1) buffer PerInstanceViewMatrix
+{
+	vec4 data[];
+} u_PerInstanceViewMatrix;
 
 
 in VS_OUT
@@ -83,12 +87,16 @@ void main()
 {
 	if (gl_InvocationID == 0)
 	{
-		DualQuat modelDQ;
 		int index = tcs_in[gl_InvocationID].MapIndex * 2;
-		modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
-		modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
+		//DualQuat modelDQ;
+		//modelDQ.Qr = texelFetch(u_PerMapDataSampler, index);
+		//modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
+		//DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
 
-		DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
+		DualQuat viewModelDQ;
+		viewModelDQ.Qr = u_PerInstanceViewMatrix.data[index];
+		viewModelDQ.Qd = u_PerInstanceViewMatrix.data[index + 1];
+
 
 		vec4 p[4];
 		p[0] = u_ProjMatrix * vec4(dqTransformPoint(viewModelDQ, gl_in[0].gl_Position.xyz), 1.0);

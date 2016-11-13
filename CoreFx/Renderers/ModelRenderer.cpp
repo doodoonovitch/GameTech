@@ -114,7 +114,6 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, mMaterialCount * cShaderMaterialSize, nullptr/*mShaderMaterialList.data()*/);
 
 	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mMaterialBuffer);
-
 	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mPrecomputeDataBuffer);
 	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mLocationRawDataBuffer);
 	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mMaterialIndexBuffer);
