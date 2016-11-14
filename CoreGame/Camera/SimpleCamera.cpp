@@ -54,7 +54,7 @@ void SimpleCamera::SetupViewportAndProjection()
 	Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
 }
 
-#define TERRAIN_SAMPLE
+//#define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
 #define PERLIN_NOISE_OCEAN_SAMPLE
@@ -223,14 +223,73 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
+//#define SPHERE_MODEL
+#define SPHERE2_MODEL
 //#define ARTORIAS_SWORD_MODEL
-#define BOX_MODEL
+//#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
 //#define CERBERUS_MODEL
 //#define SHIELD_MODEL
-#define BBUNIT_MODEL
-#define BARREL_MODEL
+//#define BBUNIT_MODEL
+//#define BARREL_MODEL
+
+
+#ifdef SPHERE_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Sphere/sphere.obj", "Medias/Objects/Sphere", opt, &dataCtxBase);
+				modelData.SetMeshMaterial(dataCtxBase.mMeshInstanceIndexBase, dataCtxBase.mMaterialIndexBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				//texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				//texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				//texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				//texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				//texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+			}
+#endif
+
+#ifdef SPHERE2_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(0.2f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Sphere2/sphere2.obj", "Medias/Objects/Sphere2", opt, &dataCtxBase);
+				modelData.SetMeshMaterial(dataCtxBase.mMeshInstanceIndexBase, dataCtxBase.mMaterialIndexBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				//texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				//texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				//texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				//texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				//texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+
+				//matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(.0f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(.0f), Renderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(.0f), Renderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+			}
+#endif
 
 
 #ifdef ARTORIAS_SWORD_MODEL

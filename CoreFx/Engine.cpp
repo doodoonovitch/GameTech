@@ -295,7 +295,7 @@ void Engine::InternalComputePass()
 
 void Engine::InternalRenderObjects()
 {
-	glFinish();
+	//glFinish();
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
