@@ -57,7 +57,7 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
-#define PERLIN_NOISE_OCEAN_SAMPLE
+//#define PERLIN_NOISE_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
@@ -208,7 +208,35 @@ void SimpleCamera::OnInit()
 
 
 
+//#define ARTORIAS_SWORD_MODEL
+//#define BOX_MODEL
+//#define NANOSUIT_MODEL
+//#define LARACROFT_MODEL
+//#define CERBERUS_MODEL
+//#define SHIELD_MODEL
+//#define BBUNIT_MODEL
+//#define BARREL_MODEL
 
+//#define CUBESPHERE_MODEL
+//#define LOW_CUBESPHERE_MODEL
+//#define SPHERE_MODEL
+//#define SPHERE_300_POLY_MODEL
+//#define SPHERE_1250_POLY_MODEL
+//#define SPHERE_5000_POLY_MODEL
+#define SPHERE_20000_POLY_MODEL
+//#define SPHERE_79600_POLY_MODEL
+//#define SPHERE_318400_POLY_MODEL
+#if defined(CUBESPHERE_MODEL) \
+			|| defined(LOW_CUBESPHERE_MODEL) \
+			|| defined(SPHERE_MODEL) \
+			|| defined(SPHERE_300_POLY_MODEL) \
+			|| defined(SPHERE_1250_POLY_MODEL) \
+			|| defined(SPHERE_5000_POLY_MODEL) \
+			|| defined(SPHERE_20000_POLY_MODEL) \
+			|| defined(SPHERE_79600_POLY_MODEL) \
+			|| defined(SPHERE_318400_POLY_MODEL) 
+#define NO_PREDEFINED_MATERIALS_MODELS
+#endif // defined(...)
 
 
 
@@ -223,24 +251,63 @@ void SimpleCamera::OnInit()
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
 
-//#define SPHERE_MODEL
-#define SPHERE2_MODEL
-//#define ARTORIAS_SWORD_MODEL
-//#define BOX_MODEL
-//#define NANOSUIT_MODEL
-//#define LARACROFT_MODEL
-//#define CERBERUS_MODEL
-//#define SHIELD_MODEL
-//#define BBUNIT_MODEL
-//#define BARREL_MODEL
 
+
+#ifdef NO_PREDEFINED_MATERIALS_MODELS
+			{
+#ifdef LOW_CUBESPHERE_MODEL
+				{
+					glm::mat4 m = glm::scale(glm::vec3(1.f));
+					opt.SetPreTransformVertices(m);
+					modelData.LoadModel("Medias/Objects/Sphere/cube_sphere.stl", "Medias/Objects/Sphere", opt, &dataCtxBase);
+				}
+#endif // LOW_CUBESPHERE_MODEL
+
+#ifdef CUBESPHERE_MODEL
+				{
+					glm::mat4 m = glm::scale(glm::vec3(1.f));
+					opt.SetPreTransformVertices(m);
+					modelData.LoadModel("Medias/Objects/Sphere/cube-sphere.dae", "Medias/Objects/Sphere", opt, &dataCtxBase);
+				}
+#endif //CUBESPHERE_MODEL
 
 #ifdef SPHERE_MODEL
-			{
-				glm::mat4 m = glm::scale(glm::vec3(1.f));
-				opt.SetPreTransformVertices(m);
+				{
+					glm::mat4 m = glm::scale(glm::vec3(1.f));
+					opt.SetPreTransformVertices(m);
+					modelData.LoadModel("Medias/Objects/Sphere/sphere.obj", "Medias/Objects/Sphere", opt, &dataCtxBase);
+				}
+#endif // SPHERE_MODEL
 
-				modelData.LoadModel("Medias/Objects/Sphere/sphere.obj", "Medias/Objects/Sphere", opt, &dataCtxBase);
+#if defined(SPHERE_300_POLY_MODEL) \
+				|| defined(SPHERE_1250_POLY_MODEL) \
+				|| defined(SPHERE_5000_POLY_MODEL) \
+				|| defined(SPHERE_20000_POLY_MODEL) \
+				|| defined(SPHERE_79600_POLY_MODEL) \
+				|| defined(SPHERE_318400_POLY_MODEL)
+				{
+					glm::mat4 m = glm::scale(glm::vec3(.05f));
+					opt.SetPreTransformVertices(m);
+#ifdef SPHERE_300_POLY_MODEL
+					modelData.LoadModel("Medias/Objects/Sphere/300_polygon_sphere_100mm.STL", "Medias/Objects/Sphere", opt, &dataCtxBase);
+#endif // SPHERE_300_POLY_MODEL
+#ifdef SPHERE_1250_POLY_MODEL
+					modelData.LoadModel("Medias/Objects/Sphere/1250_polygon_sphere_100mm.STL", "Medias/Objects/Sphere", opt, &dataCtxBase);
+#endif // SPHERE_1250_POLY_MODEL
+#ifdef SPHERE_5000_POLY_MODEL
+					modelData.LoadModel("Medias/Objects/Sphere/5000_polygon_sphere_100mm.STL", "Medias/Objects/Sphere", opt, &dataCtxBase);
+#endif // SPHERE_5000_POLY_MODEL
+#ifdef SPHERE_20000_POLY_MODEL
+					modelData.LoadModel("Medias/Objects/Sphere/20000_polygon_sphere_100mm.STL", "Medias/Objects/Sphere", opt, &dataCtxBase);
+#endif // SPHERE_20000_POLY_MODEL
+#ifdef SPHERE_79600_POLY_MODEL
+					modelData.LoadModel("Medias/Objects/Sphere/79600_polygon_sphere_100mm.STL", "Medias/Objects/Sphere", opt, &dataCtxBase);
+#endif // SPHERE_79600_POLY_MODEL
+#ifdef SPHERE_318400_POLY_MODEL
+					modelData.LoadModel("Medias/Objects/Sphere/318400_polygon_sphere_100mm.STL", "Medias/Objects/Sphere", opt, &dataCtxBase);
+#endif // SPHERE_318400_POLY_MODEL
+				}
+#endif // ...
 				modelData.SetMeshMaterial(dataCtxBase.mMeshInstanceIndexBase, dataCtxBase.mMaterialIndexBase);
 
 				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
@@ -252,44 +319,33 @@ void SimpleCamera::OnInit()
 				//texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				//texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				const GLuint modelCount = 1;
+				const GLuint modelCount = 4;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(4, 3, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
-			}
-#endif
-
-#ifdef SPHERE2_MODEL
-			{
-				glm::mat4 m = glm::scale(glm::vec3(0.2f));
-				opt.SetPreTransformVertices(m);
-
-				modelData.LoadModel("Medias/Objects/Sphere2/sphere2.obj", "Medias/Objects/Sphere2", opt, &dataCtxBase);
-				modelData.SetMeshMaterial(dataCtxBase.mMeshInstanceIndexBase, dataCtxBase.mMaterialIndexBase);
-
-				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
-				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
-
-				//texList.resize(dataCtxBase.mTextureIndexBase + 4);
-				//texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				//texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				//texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				//texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
-
-				const GLuint modelCount = 1;
-				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
-
-				//matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-
+				
+				// Gold
 				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(.0f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+
+				// Copper
 				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(.0f), Renderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+
+				// Silver
 				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(.0f), Renderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+
+				// Iron
+				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(.0f), Renderer::NoTexture, glm::vec3(0.56f, 0.57f, 0.58f), Renderer::NoTexture, 0.2f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+
+				for(GLuint i = 1; i < modelCount; ++i)
+					modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + i);
 			}
 #endif
+			// Iron : 0.56f, 0.57f, 0.58f
+			// Copper : 0.95f, 0.64f, 0.54f
+			// Gold : 1.00f, 0.71f, 0.29f
+			// Aluminum : 0.91f, 0.92f, 0.92f
+			// Silver : 0.95f, 0.93f, 0.88f
 
 
 #ifdef ARTORIAS_SWORD_MODEL
