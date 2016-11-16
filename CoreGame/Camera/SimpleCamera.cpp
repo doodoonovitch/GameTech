@@ -220,15 +220,17 @@ void SimpleCamera::OnInit()
 //#define CUBESPHERE_MODEL
 //#define LOW_CUBESPHERE_MODEL
 //#define SPHERE_MODEL
+#define SPHERE001_MODEL
 //#define SPHERE_300_POLY_MODEL
 //#define SPHERE_1250_POLY_MODEL
 //#define SPHERE_5000_POLY_MODEL
-#define SPHERE_20000_POLY_MODEL
+//#define SPHERE_20000_POLY_MODEL
 //#define SPHERE_79600_POLY_MODEL
 //#define SPHERE_318400_POLY_MODEL
 #if defined(CUBESPHERE_MODEL) \
 			|| defined(LOW_CUBESPHERE_MODEL) \
 			|| defined(SPHERE_MODEL) \
+			|| defined(SPHERE001_MODEL) \
 			|| defined(SPHERE_300_POLY_MODEL) \
 			|| defined(SPHERE_1250_POLY_MODEL) \
 			|| defined(SPHERE_5000_POLY_MODEL) \
@@ -276,6 +278,14 @@ void SimpleCamera::OnInit()
 					glm::mat4 m = glm::scale(glm::vec3(1.f));
 					opt.SetPreTransformVertices(m);
 					modelData.LoadModel("Medias/Objects/Sphere/sphere.obj", "Medias/Objects/Sphere", opt, &dataCtxBase);
+				}
+#endif // SPHERE_MODEL
+
+#ifdef SPHERE001_MODEL
+				{
+					glm::mat4 m = glm::scale(glm::vec3(.3f));
+					opt.SetPreTransformVertices(m);
+					modelData.LoadModel("Medias/Objects/Sphere/sphere001.obj", "Medias/Objects/Sphere", opt, &dataCtxBase);
 				}
 #endif // SPHERE_MODEL
 
