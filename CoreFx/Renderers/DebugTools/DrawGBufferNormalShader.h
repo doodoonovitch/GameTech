@@ -17,8 +17,8 @@ public:
 	enum EUniformIndex
 	{
 		u_PatchCount,
-		u_gDepthMap,
-		u_gBufferNormal,
+		u_DepthSampler,
+		u_NBufferSampler,
 
 		__uniforms_count__
 	};

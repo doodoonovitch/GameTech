@@ -186,7 +186,8 @@ void ModelRenderer::RenderWireFrame()
 
 
 
-void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, TextureIndex specularTextureIndex, GLfloat roughness, TextureIndex roughnessTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex)
+
+void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const Renderer::MaterialDesc & materialDesc)
 {
 	assert(materialIndex < mMaterialCount);
 
@@ -194,30 +195,28 @@ void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const glm::vec3& di
 	{
 		ShaderMaterial & mat = mShaderMaterialList[materialIndex];
 
-		mat.mDiffuse = diffuse;
-		mat.mSpecular = specular;
-		mat.mEmissive = emissive;
-
-		mat.mRoughness = roughness;
+		mat.mBaseColorR = materialDesc.mBaseColor.r;
+		mat.mBaseColorG = materialDesc.mBaseColor.g;
+		mat.mBaseColorB = materialDesc.mBaseColor.b;
+		mat.mMetallic = materialDesc.mMetallic;
+		mat.mPorosity = materialDesc.mPorosity;
+		mat.mRoughness = materialDesc.mRoughness;
+		mat.mEmissive = materialDesc.mEmissive;
 
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
-		texIndexes.mDiffuse = diffuseTextureIndex;
-		texIndexes.mSpecular = specularTextureIndex;
-		texIndexes.mRoughness = roughnessTextureIndex;
-		texIndexes.mEmissive = emissiveTextureIndex;
-		texIndexes.mNormal = normalTextureIndex;
+		texIndexes.mBaseColor = materialDesc.mBaseColorTextureIndex;
+		texIndexes.mMetallic = materialDesc.mMetallicTextureIndex;
+		texIndexes.mRoughness = materialDesc.mRoughnessTextureIndex;
+		texIndexes.mEmissive = materialDesc.mEmissiveTextureIndex;
+		texIndexes.mNormal = materialDesc.mNormalTextureIndex;
 
 		{
-			PRINT_MESSAGE("\t\t- Material %i : Texture index (DSRNE) = (%i, %i, %i, %i, %i)", materialIndex, (int8_t)diffuseTextureIndex, (int8_t)specularTextureIndex, (int8_t)roughnessTextureIndex, (int8_t)normalTextureIndex, (int8_t)emissiveTextureIndex);
-			PRINT_MESSAGE("\t\t\tDiffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", diffuse.x, diffuse.y, diffuse.z, specular.x, specular.y, specular.z, roughness, emissive.x, emissive.y, emissive.z);
+			PRINT_MESSAGE("\t\t- Material %i : Texture index (AMRNE) = (%i, %i, %i, %i, %i)", materialIndex, texIndexes.mBaseColor, texIndexes.mMetallic, texIndexes.mRoughness, texIndexes.mEmissive, texIndexes.mNormal);
+			PRINT_MESSAGE("\t\t\tBaseColor=(%f, %f, %f), Metallic=%f, Porosity=%f, Roughness=%f, Emissive=%f", mat.mBaseColorR, mat.mBaseColorG, mat.mBaseColorB,
+				mat.mMetallic, mat.mPorosity, mat.mRoughness, mat.mEmissive);
 		}
 
 	}
-}
-
-void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const Renderer::MaterialDesc & mat)
-{
-	SetMaterial(materialIndex, mat.mDiffuse, mat.mDiffuseTextureIndex, mat.mSpecular, mat.mSpecularTextureIndex, mat.mRoughness, mat.mRoughnessTextureIndex, mat.mEmissive, mat.mEmissiveTextureIndex, mat.mNormalTextureIndex);
 }
 
 void ModelRenderer::SetMaterials(const Renderer::MaterialDescList & materials)
@@ -240,11 +239,11 @@ void ModelRenderer::UpdateMaterialTextureIndex()
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
 		ShaderMaterial & mat = mShaderMaterialList[materialIndex];
 
-		mat.mDiffuseTextureIndex	= texIndexes.mDiffuse != NoTexture ? (GLint)texInfo[texIndexes.mDiffuse].GetLayerIndex() : -1;
-		mat.mDiffuseSamplerIndex	= texIndexes.mDiffuse != NoTexture ? (GLint)texInfo[texIndexes.mDiffuse].GetSamplerIndex() : -1;
+		mat.mBaseColorTextureIndex	= texIndexes.mBaseColor != NoTexture ? (GLint)texInfo[texIndexes.mBaseColor].GetLayerIndex() : -1;
+		mat.mBaseColorSamplerIndex	= texIndexes.mBaseColor != NoTexture ? (GLint)texInfo[texIndexes.mBaseColor].GetSamplerIndex() : -1;
 
-		mat.mSpecularTextureIndex	= texIndexes.mSpecular != NoTexture ? (GLint)texInfo[texIndexes.mSpecular].GetLayerIndex() : -1;
-		mat.mSpecularSamplerIndex	= texIndexes.mSpecular != NoTexture ? (GLint)texInfo[texIndexes.mSpecular].GetSamplerIndex() : -1;
+		mat.mMetallicTextureIndex	= texIndexes.mMetallic != NoTexture ? (GLint)texInfo[texIndexes.mMetallic].GetLayerIndex() : -1;
+		mat.mMetallicSamplerIndex	= texIndexes.mMetallic != NoTexture ? (GLint)texInfo[texIndexes.mMetallic].GetSamplerIndex() : -1;
 
 		mat.mEmissiveTextureIndex	= texIndexes.mEmissive != NoTexture ? (GLint)texInfo[texIndexes.mEmissive].GetLayerIndex() : -1;
 		mat.mEmissiveSamplerIndex	= texIndexes.mEmissive != NoTexture ? (GLint)texInfo[texIndexes.mEmissive].GetSamplerIndex() : -1;
@@ -255,7 +254,7 @@ void ModelRenderer::UpdateMaterialTextureIndex()
 		mat.mRoughnessTextureIndex	= texIndexes.mRoughness != NoTexture ? (GLint)texInfo[texIndexes.mRoughness].GetLayerIndex() : -1;
 		mat.mRoughnessSamplerIndex	= texIndexes.mRoughness != NoTexture ? (GLint)texInfo[texIndexes.mRoughness].GetSamplerIndex() : -1;
 
-		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) Diffuse=(%i, %i), Specular=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i)", materialIndex, mat.mDiffuseSamplerIndex, mat.mDiffuseTextureIndex, mat.mSpecularSamplerIndex, mat.mSpecularTextureIndex, mat.mRoughnessSamplerIndex, mat.mRoughnessTextureIndex, mat.mNormalSamplerIndex, mat.mNormalTextureIndex, mat.mEmissiveSamplerIndex, mat.mEmissiveTextureIndex);
+		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) BaseColor=(%i, %i), Metallic=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i)", materialIndex, mat.mBaseColorSamplerIndex, mat.mBaseColorTextureIndex, mat.mMetallicSamplerIndex, mat.mMetallicTextureIndex, mat.mRoughnessSamplerIndex, mat.mRoughnessTextureIndex, mat.mNormalSamplerIndex, mat.mNormalTextureIndex, mat.mEmissiveSamplerIndex, mat.mEmissiveTextureIndex);
 	}
 }
 
@@ -274,12 +273,17 @@ void ModelRenderer::InitializeMainShader()
 	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/mesh.gs.glsl");
 	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/mesh.deferred.fs.glsl");
 
-	PRINT_MESSAGE("Loading shader file : shaders/mesh.deferred.fs.glsl");
 	// fragment shader
-	std::vector<std::string> lightFsGlsl(2);
-	Shader::MergeFile(lightFsGlsl[0], "shaders/mesh.deferred.fs.glsl");
-	std::string & textureFuncSource = lightFsGlsl[1];
+	std::vector<std::string> lightFsGlsl(3);
+	PRINT_MESSAGE("Loading shader file : shaders/DeferredShadingCommon.incl.glsl");
+	Shader::MergeFile(lightFsGlsl[0], "shaders/DeferredShadingCommon.incl.glsl");
+
+	PRINT_MESSAGE("Loading shader file : shaders/mesh.deferred.fs.glsl");
+	Shader::MergeFile(lightFsGlsl[1], "shaders/mesh.deferred.fs.glsl");
+
+	std::string & textureFuncSource = lightFsGlsl[2];
 	Shader::GenerateTexGetFunction(textureFuncSource, (int)mTextureMapping.mMapping.size());
+
 	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	mShader.CreateAndLinkProgram();

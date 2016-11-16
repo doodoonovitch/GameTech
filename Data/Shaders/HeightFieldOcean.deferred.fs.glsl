@@ -1,7 +1,6 @@
 layout(location = 0) out vec3 outNormal;
 layout(location = 1) out uvec4 outAlbedoAndStatus;
-layout(location = 2) out vec4 outSpecularAndRoughness;
-layout(location = 3) out vec3 outEmissive;
+layout(location = 2) out vec4 outRoughnessAndOthers;
 
 uniform samplerCube u_SkyboxCubeMapSampler;
 uniform sampler2D u_textureSampler;
@@ -68,6 +67,6 @@ void main()
 
 	normal = dqTransformNormal(normal, u_ViewDQ);
 
-	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.Roughness, vec3(0));
+	WriteOutData(outAlbedoAndStatus, outRoughnessAndOthers, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, 1.0f, mat.SpecularPower, 0.f);
 	outNormal = vec3(normal.xyz);
 }

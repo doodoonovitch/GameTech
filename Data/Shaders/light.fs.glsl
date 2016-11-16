@@ -6,45 +6,21 @@ in VS_OUT
 	vec2 ViewRay;
 } fs_in;
 
-
-//uniform sampler2D u_gBufferPosition;
-uniform sampler2D u_gBufferNormal;
-uniform usampler2D u_gBufferAlbedoAndStatus;
-uniform sampler2D u_gBufferSpecularRoughness;
-uniform sampler2D u_gBufferEmissive;
-uniform sampler2D u_gDepthMap;
-uniform sampler2D u_gBufferSSAO;
-
 uniform isamplerBuffer u_lightDescSampler;
 uniform samplerBuffer u_lightDataSampler;
 
+uniform sampler2D u_DepthSampler;
+uniform sampler2D u_NBufferSampler;
+uniform usampler2D u_GBuffer1Sampler;
+uniform sampler2D u_SSAOSampler;
 
-struct FragmentInfo
-{
-    vec3 Position;
-    vec3 Normal;
-	vec3 DiffuseMaterial;
-	vec3 SpecularMaterial;
-	vec3 EmissiveMaterial;
-	float Roughness;
-	//float GlossPower;
-	int RendererId;
-};
-
-
-
-// ---------------------------------------------------------------------------
-// GBuffer data extraction helpers
-//
-// ---------------------------------------------------------------------------
-void UnpackFromGBuffer(out FragmentInfo fi);
 
 
 // ---------------------------------------------------------------------------
 // BRDF
 //
 // ---------------------------------------------------------------------------
-vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughness, in vec3 l, in vec3 v, in vec3 n, in vec3 lightColorIntensity, in float attenuation);
+vec3 BRDF(in vec3 baseColor, in float metallic, in float roughness, in vec3 l, in vec3 v, in vec3 n, in vec3 lightColorIntensity, in float attenuation);
 
 //
 // ---------------------------------------------------------------------------
@@ -75,12 +51,12 @@ vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float amb
 
 	vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
 
-	vec3 unnormalizedLightVector = lightPosition.xyz - fi.Position.xyz;
+	vec3 unnormalizedLightVector = lightPosition.xyz - fi.mPosition.xyz;
 	vec3 l = normalize(unnormalizedLightVector);
 	
 	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
 
-	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, l, v, fi.Normal, lightColorIntensity, attenuation * ambientOcclusion);
+	return BRDF(fi.mBaseColor, fi.mMetallic, fi.mRoughness, l, v, fi.mNormal, lightColorIntensity, attenuation * ambientOcclusion);
 }
 
 vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambientOcclusion)
@@ -94,7 +70,7 @@ vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambi
 	float outerConeCos = lightPosition.w;
 	lightPosition.w = 1.0f;
 
-	vec3 unnormalizedLightVector = lightPosition.xyz - fi.Position.xyz;
+	vec3 unnormalizedLightVector = lightPosition.xyz - fi.mPosition.xyz;
 	vec3 l = normalize(unnormalizedLightVector);
 
 	vec4 spotData = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_DIRECTION_PROPERTY);
@@ -104,7 +80,7 @@ vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambi
 	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
 	attenuation *= AngleAttenuation(l, spotDirection, innerConeCos, outerConeCos);
 
-	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, l, v, fi.Normal, lightColorIntensity, attenuation * ambientOcclusion);
+	return BRDF(fi.mBaseColor, fi.mMetallic, fi.mRoughness, l, v, fi.mNormal, lightColorIntensity, attenuation * ambientOcclusion);
 }
 
 vec3 BRDF_DirectionalLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambientOcclusion)
@@ -116,13 +92,13 @@ vec3 BRDF_DirectionalLight(in vec3 v, in FragmentInfo fi, in int lightIndex, flo
 
 	vec3 l = texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
 
-	return GGX_BRDF(fi.DiffuseMaterial, fi.SpecularMaterial, fi.Roughness, l, v, fi.Normal, lightColorIntensity, ambientOcclusion);
+	return BRDF(fi.mBaseColor, fi.mMetallic, fi.mRoughness, l, v, fi.mNormal, lightColorIntensity, ambientOcclusion);
 }
 
 
 vec4 BRDFLight(FragmentInfo fi, float ambientOcclusion)
 {
-	vec3 v = normalize(-fi.Position);
+	vec3 v = normalize(-fi.mPosition);
 	int lightIndex = 1;
 
 	vec3 color = vec3(0.f);
@@ -155,171 +131,24 @@ void main(void)
 {
 	FragmentInfo fi;
 
-	UnpackFromGBuffer(fi);
+	UnpackFromGBuffer(fi, fs_in.TexUV, fs_in.ViewRay, u_GBuffer1Sampler, u_DepthSampler);
+
+	fi.mNormal = normalize(texture(u_NBufferSampler, fs_in.TexUV, 0).xyz);
 	
-	if (fi.RendererId == SKYBOX_RENDERER_ID)
+	if (fi.mRendererId == SKYBOX_RENDERER_ID)
 	{
-		vFragColor = vec4(fi.SpecularMaterial, 1);
+		vFragColor = vec4(fi.mEmissive, 1);
 	}
-	else if(fi.RendererId > 0)
+	else if(fi.mRendererId > 0)
 	{
-		float ambientOcclusion = texture(u_gBufferSSAO, fs_in.TexUV, 0).r;
-		//vFragColor = ADSLight(fi);
+		float ambientOcclusion = texture(u_SSAOSampler, fs_in.TexUV, 0).r;
 		vFragColor = BRDFLight(fi, ambientOcclusion);
 	}
-	else 
-	{
-		vFragColor = vec4(0.f, 0.f, 0.f, 1.f);
-	}
+	//else 
+	//{
+	//	vFragColor = vec4(0.f, 0.f, 0.f, 1.f);
+	//}
 }
-
-
-
-/*
-vec4 ADSLight(FragmentInfo fi)
-{
-	vec3 ambientColor = u_AmbientLight.xyz;
-	vec3 diffuseColor = vec3(0, 0, 0);
-	vec3 specularColor = vec3(0, 0, 0);
-
-	vec3 viewDirection = normalize(-fi.Position);
-
-	int lightIndex = 1;
-
-	// point light evaluation
-	for(int pointLight = 0; pointLight < u_PointLightCount; ++pointLight)
-	{
-		int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
-		++lightIndex;
-
-		int lightType = GetLightType(lightDesc);
-		int dataIndex = GetLightDataIndex(lightDesc);
-
-		vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
-		vec3 lightColor = lightColorIntensity.xyz;
-		float lightIntensity = lightColorIntensity.w;
-
-		vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_POSITION_PROPERTY);
-		vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + POINT_LIGHT_ATTENUATION_PROPERTY);
-
-		vec3 lightDirection = lightPosition.xyz - fi.Position.xyz;
-		float lightDistance = length(lightDirection);
-		lightDirection = lightDirection / lightDistance;
-		//lightDirection = normalize(lightDirection);
-
-		float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
-
-		vec3 reflectionDirection = reflect(-lightDirection, fi.Normal);
-
-		float ambientFactor = attenuation * lightIntensity;
-		ambientColor += lightColor.xyz * ambientFactor;
-
-		float diffuseFactor = max(0, dot(fi.Normal, lightDirection)) * attenuation * lightIntensity;
-		diffuseColor += lightColor * diffuseFactor; 
-
-		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.GlossPower) * attenuation * lightIntensity;	
-		specularColor += lightColor * specularFactor;
-	}
-	
-	// spot light evaluation
-	for(int spotLight = 0; spotLight < u_SpotLightCount; ++spotLight)
-	{
-		int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
-		++lightIndex;
-
-		int lightType = GetLightType(lightDesc);
-		int dataIndex = GetLightDataIndex(lightDesc);
-
-		vec4 lightPosition = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_POSITION_PROPERTY);
-
-		vec3 lightDirection = lightPosition.xyz - fi.Position.xyz;
-		float lightDistance = length(lightDirection);
-		lightDirection = lightDirection / lightDistance;
-
-		float LdotN = dot(fi.Normal, lightDirection);
-
-		//if ((LdotN - 0.000001f) > 0)
-		{
-			vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
-			vec3 lightColor = lightColorIntensity.xyz;
-			float lightIntensity = lightColorIntensity.w;
-
-			vec4 spotData = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_DIRECTION_PROPERTY);
-			vec4 attenuationCoef = texelFetch(u_lightDataSampler, dataIndex + SPOT_LIGHT_ATTENUATION_PROPERTY);
-			vec3 spotDirection = normalize(-spotData.xyz);
-			float innerConeCos = spotData.w;
-			float outerConeCos = attenuationCoef.w;
-
-			float attenuation = 1.0 / (attenuationCoef.x + attenuationCoef.y * lightDistance + attenuationCoef.z * lightDistance * lightDistance);
-
-			vec3 reflectionDirection = reflect(-lightDirection, fi.Normal);
-
-			float theta = dot(lightDirection, spotDirection); 
-			float epsilon = (innerConeCos - outerConeCos);
-			float spotIntensity = clamp((theta - outerConeCos) / epsilon, 0.0, 1.0);
-
-			attenuation = attenuation * spotIntensity;
-
-			float ambientFactor = attenuation * lightIntensity;
-			ambientColor += lightColor * ambientFactor;
-
-			float diffuseFactor = max(0, LdotN) * attenuation * lightIntensity;
-			diffuseColor += lightColor * diffuseFactor; 
-
-			float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.GlossPower) * attenuation * lightIntensity;
-			specularColor += lightColor * specularFactor;
-		}
-	}
-	
-	// Directional light evaluation
-	for(int dirLight = 0; dirLight < u_DirectionalLightCount; ++dirLight)
-	{
-		int lightDesc = texelFetch(u_lightDescSampler, lightIndex).x;
-		++lightIndex;
-
-		int lightType = GetLightType(lightDesc);
-		int dataIndex = GetLightDataIndex(lightDesc);
-
-		vec4 lightColorIntensity = texelFetch(u_lightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
-		vec3 lightColor = lightColorIntensity.xyz;
-		float lightIntensity = lightColorIntensity.w;
-
-		vec3 lightDirection;
-		vec3 reflectionDirection;
-
-		lightDirection = texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
-		reflectionDirection = reflect(lightDirection, fi.Normal);
-
-		lightDirection = -lightDirection;
-		float ambientFactor = lightIntensity;
-		ambientColor += lightColor * ambientFactor;
-
-		float diffuseFactor = max(0, dot(fi.Normal, lightDirection)) * lightIntensity;
-		diffuseColor += lightColor * diffuseFactor; 
-
-		float specularFactor = pow(max(dot(viewDirection, reflectionDirection), 0.0), fi.GlossPower) * lightIntensity;	
-		specularColor += lightColor * specularFactor;
-	}
-	
-	return vec4(fi.DiffuseMaterial * (ambientColor *.5 + diffuseColor) + fi.SpecularMaterial * specularColor + fi.EmissiveMaterial, 1);
-}
-*/
-
-//vec4 GridRenderer(vec3 Position, int MaterialIndex)
-//{
-//    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
-//    vec2 texUV = unpackHalf2x16(data.x);
-
-//	return vec4(texUV.xy, 1, 1);
-//}
-
-//vec4 ColorRenderer(vec3 Position, int MaterialIndex)
-//{
-//    uvec2 data = texture(u_gBufferData, fs_in.TexUV, 0).xy;
-//    vec4 color = vec4(unpackHalf2x16(data.x), unpackHalf2x16(data.y));
-
-//	return color;
-//}
 
 
 //

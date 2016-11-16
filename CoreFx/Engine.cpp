@@ -329,7 +329,7 @@ void Engine::InternalRenderObjects()
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT /*| GL_STENCIL_BUFFER_BIT*/);
 	glStencilMask(0x00);
 
 	mRenderers->ForEach([](Renderer * renderer)
@@ -384,13 +384,13 @@ void Engine::InternalRenderObjects()
 	glBindTexture(GL_TEXTURE_1D, mSSAOBuffers[SSAOBuffer_Kernel]);
 
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
 
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
@@ -441,7 +441,7 @@ void Engine::InternalRenderObjects()
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[HDR_FBO]);
 
-		//glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		glDepthMask(GL_FALSE);
 		glDisable(GL_DEPTH_TEST);
@@ -455,35 +455,17 @@ void Engine::InternalRenderObjects()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
 
-		//glActiveTexture(GL_TEXTURE2);
-		//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
-
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
 
 		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
 
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
 
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
-
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
-
-		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
-
-		//glActiveTexture(GL_TEXTURE2);
-		//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
-
-		//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
-		//{
-		//	glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
-		//	glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
-		//}
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
@@ -598,10 +580,10 @@ void Engine::InternalRenderObjects()
 			//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
 
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+			glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
 
 			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mDrawGBufferNormalPatchCount.x * mDrawGBufferNormalPatchCount.y);
 
@@ -642,13 +624,16 @@ void Engine::InternalRenderDeferredBuffers()
 	{
 	case (int)EDeferredDebug::ShowNormalBuffer:
 	case (int)EDeferredDebug::ShowAlbedoBuffer:
-	case (int)EDeferredDebug::ShowSpecularBuffer:
+	case (int)EDeferredDebug::ShowMetallicBuffer:
 	case (int)EDeferredDebug::ShowRoughnessBuffer:
+	case (int)EDeferredDebug::ShowDepthBuffer:
+	case (int)EDeferredDebug::ShowSSAOBuffer:
 	default:
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		break;
 
 	case (int)EDeferredDebug::ShowPositionBuffer:
+	case (int)EDeferredDebug::ShowEmissiveBuffer:
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[HDR_FBO]);
 		break;
 	}
@@ -665,40 +650,16 @@ void Engine::InternalRenderDeferredBuffers()
 	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_BufferToShow), mDeferredDebugState);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
-
-	//glActiveTexture(GL_TEXTURE2);
-	//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
 
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
 
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
-
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
-
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
-
-	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
-
-	//glActiveTexture(GL_TEXTURE2);
-	//glBindTexture(GL_TEXTURE_BUFFER, mMaterialBuffer.GetTextureId());
-
-	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
-	//{
-	//	glActiveTexture(GL_TEXTURE0 + FIRST_TEXTURE_SAMPLER_INDEX + i);
-	//	glBindTexture(GL_TEXTURE_2D_ARRAY, mLightPassTextureMapping.mMapping[i].mTexture->GetResourceId());
-	//}
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
@@ -709,12 +670,15 @@ void Engine::InternalRenderDeferredBuffers()
 	{
 	case (int)EDeferredDebug::ShowNormalBuffer:
 	case (int)EDeferredDebug::ShowAlbedoBuffer:
-	case (int)EDeferredDebug::ShowSpecularBuffer:
+	case (int)EDeferredDebug::ShowMetallicBuffer:
 	case (int)EDeferredDebug::ShowRoughnessBuffer:
+	case (int)EDeferredDebug::ShowDepthBuffer:
+	case (int)EDeferredDebug::ShowSSAOBuffer:
 	default:
 		break;
 
 	case (int)EDeferredDebug::ShowPositionBuffer:
+	case (int)EDeferredDebug::ShowEmissiveBuffer:
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		glDepthMask(GL_FALSE);

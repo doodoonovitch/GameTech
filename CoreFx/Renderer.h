@@ -107,54 +107,110 @@ public:
 
 	struct MaterialDesc
 	{
-		MaterialDesc()
-			: mDiffuse(0.f)
-			, mSpecular(0.f)
-			, mEmissive(0.f)
-			, mRoughness(0.f)
-			, mDiffuseTextureIndex(NoTexture)
-			, mSpecularTextureIndex(NoTexture)
-			, mRoughnessTextureIndex(NoTexture)
-			, mEmissiveTextureIndex(NoTexture)
-			, mNormalTextureIndex(NoTexture)
-		{}
+	protected:
 
-		MaterialDesc(const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
-			const glm::vec3& specular, TextureIndex specularTextureIndex,
-			GLfloat roughness, TextureIndex roughnessTextureIndex,
-			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
-			TextureIndex normalTextureIndex)
-			: mDiffuse(diffuse)
-			, mSpecular(specular)
-			, mEmissive(emissive)
-			, mRoughness(roughness)
-			, mDiffuseTextureIndex(diffuseTextureIndex)
-			, mSpecularTextureIndex(specularTextureIndex)
-			, mRoughnessTextureIndex(roughnessTextureIndex)
-			, mEmissiveTextureIndex(emissiveTextureIndex)
-			, mNormalTextureIndex(normalTextureIndex)
+		static void SetValue(GLfloat & memberVar, GLfloat value, GLfloat minValue, GLfloat maxValue)
+		{			
+			memberVar = glm::clamp(value, minValue, maxValue);
+		}
+		
+	public:
+
+		MaterialDesc()
+			: mBaseColor(0.f)
+			, mMetallic(1.f)
+			, mPorosity(0.0f)
+			, mRoughness(0.5f)
+			, mEmissive(0.f)
+			, mBaseColorTextureIndex(NoTexture)
+			, mMetallicTextureIndex(NoTexture)
+			, mRoughnessTextureIndex(NoTexture)
+			, mNormalTextureIndex(NoTexture)
+			, mEmissiveTextureIndex(NoTexture)
 		{}
 
 		MaterialDesc(const MaterialDesc & src)
-			: mDiffuse(src.mDiffuse)
-			, mSpecular(src.mSpecular)
-			, mEmissive(src.mEmissive)
+			: mBaseColor(src.mBaseColor)
+			, mMetallic(src.mMetallic)
+			, mPorosity(src.mPorosity)
 			, mRoughness(src.mRoughness)
-			, mDiffuseTextureIndex(src.mDiffuseTextureIndex)
-			, mSpecularTextureIndex(src.mSpecularTextureIndex)
+			, mEmissive(src.mEmissive)
+			, mBaseColorTextureIndex(src.mBaseColorTextureIndex)
+			, mMetallicTextureIndex(src.mMetallicTextureIndex)
 			, mRoughnessTextureIndex(src.mRoughnessTextureIndex)
-			, mEmissiveTextureIndex(src.mEmissiveTextureIndex)
 			, mNormalTextureIndex(src.mNormalTextureIndex)
+			, mEmissiveTextureIndex(src.mEmissiveTextureIndex)
 		{
 		}
 
-		glm::vec3 mAmbient;
-		glm::vec3 mDiffuse;
-		glm::vec3 mSpecular;
-		glm::vec3 mEmissive;
+		MaterialDesc & SetBaseColor(const glm::vec3 & value)
+		{
+			mBaseColor = value;
+			return *this;
+		}
+
+		MaterialDesc & SetMetallic(GLfloat value)
+		{
+			SetValue(mMetallic, value, 0.f, 1.f);
+			return *this;
+		}
+
+		MaterialDesc & SetPorosity(GLfloat value)
+		{
+			SetValue(mPorosity, value, 0.f, 1.f);
+			return *this;
+		}
+
+		MaterialDesc & SetRoughness(GLfloat value)
+		{
+			SetValue(mRoughness, value, 0.f, 1.f);
+			return *this;
+		}
+
+		MaterialDesc & SetEmissive(GLfloat value)
+		{
+			SetValue(mEmissive, value, 0.f, 1.f);
+			return *this;
+		}
+
+		MaterialDesc & SetBaseColorTextureIndex(TextureIndex value)
+		{
+			mBaseColorTextureIndex = value;
+			return *this;
+		}
+
+		MaterialDesc & SetMetallicTextureIndex(TextureIndex value)
+		{
+			mMetallicTextureIndex = value;
+			return *this;
+		}
+
+		MaterialDesc & SetRoughnessTextureIndex(TextureIndex value)
+		{
+			mRoughnessTextureIndex = value;
+			return *this;
+		}
+
+		MaterialDesc & SetNormalTextureIndex(TextureIndex value)
+		{
+			mNormalTextureIndex = value;
+			return *this;
+		}
+
+		MaterialDesc & SetEmissiveTextureIndex(TextureIndex value)
+		{
+			mEmissiveTextureIndex = value;
+			return *this;
+		}
+
+
+		glm::vec3 mBaseColor;
+		GLfloat mMetallic;
+		GLfloat mPorosity;
 		GLfloat mRoughness;
-		TextureIndex mDiffuseTextureIndex;
-		TextureIndex mSpecularTextureIndex;
+		GLfloat mEmissive;
+		TextureIndex mBaseColorTextureIndex;
+		TextureIndex mMetallicTextureIndex;
 		TextureIndex mRoughnessTextureIndex;
 		TextureIndex mNormalTextureIndex;
 		TextureIndex mEmissiveTextureIndex;

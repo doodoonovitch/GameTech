@@ -168,8 +168,8 @@ bool ModelData::AddModel(const std::string & filepath, const std::string & textu
 			for (int i = 0; i < mMaterialList.size(); ++i)
 			{
 				const Renderer::MaterialDesc & v = mMaterialList[i];
-				PRINT_MESSAGE("\t\t- Material %i : Texture index (DSNE) = (%i, %i, %i, %i)", i, (int8_t)v.mDiffuseTextureIndex, (int8_t)v.mSpecularTextureIndex, (int8_t)v.mNormalTextureIndex, (int8_t)v.mEmissiveTextureIndex);
-				PRINT_MESSAGE("\t\t\tDiffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", v.mDiffuse.x, v.mDiffuse.y, v.mDiffuse.z, v.mSpecular.x, v.mSpecular.y, v.mSpecular.z, v.mRoughness, v.mEmissive.x, v.mEmissive.y, v.mEmissive.z);
+				PRINT_MESSAGE("\t\t- Material %i : Texture index (AMNE) = (%i, %i, %i, %i)", i, (int8_t)v.mBaseColorTextureIndex, (int8_t)v.mMetallicTextureIndex, (int8_t)v.mNormalTextureIndex, (int8_t)v.mEmissiveTextureIndex);
+				PRINT_MESSAGE("\t\t\tBaseColor=(%f, %f, %f), Metallic=%f, Roughness=%f, Emissive=%f", v.mBaseColor.x, v.mBaseColor.y, v.mBaseColor.z, v.mMetallic, v.mRoughness, v.mEmissive);
 			}
 		}
 
@@ -321,7 +321,12 @@ void ModelData::ProcessMaterials(const aiScene* scene, const std::string & textu
 		Renderer::TextureIndex normalTextureIndex = ProcessTextures(mNormalTextureList, mat, aiTextureType_NORMALS, textureBasePath);
 		Renderer::TextureIndex roughnessTextureIndex = Renderer::NoTexture;
 
-		mMaterialList.push_back(Renderer::MaterialDesc(diffuseColor, diffuseTextureIndex, specularColor, specularTextureIndex, roughness, roughnessTextureIndex, emissiveColor, emissiveTextureIndex, normalTextureIndex));
+		Renderer::MaterialDesc matDesc;
+		matDesc.SetBaseColor(diffuseColor).SetBaseColorTextureIndex(diffuseTextureIndex);
+		matDesc.SetMetallic(specularColor.r).SetMetallicTextureIndex(specularTextureIndex);
+		matDesc.SetRoughness(roughness).SetRoughnessTextureIndex(roughnessTextureIndex);
+		matDesc.SetNormalTextureIndex(normalTextureIndex).SetEmissive(emissiveColor.x).SetEmissiveTextureIndex(emissiveTextureIndex);
+		mMaterialList.push_back(matDesc);
 
 		//PRINT_MESSAGE("\t-Parse material %i: Name='%s', Diffuse=(%f, %f, %f), Specular=(%f, %f, %f), Roughness=%f, Emissive=(%f, %f, %f)", i, name.C_Str(), diffuseColor.x, diffuseColor.y, diffuseColor.z, specularColor.x, specularColor.y, specularColor.z, roughness, emissiveColor.x, emissiveColor.y, emissiveColor.z);
 	}
@@ -471,7 +476,7 @@ Renderer::TextureIndex ModelData::ProcessTextures(TextureIndexMap & textureIndex
 		break;
 
 	case aiTextureType_SPECULAR:
-		texCat = TextureCategory::Specular;
+		texCat = TextureCategory::Metallic;
 		break;
 
 	case aiTextureType_NORMALS:

@@ -83,16 +83,14 @@ void Engine::InternalCreateGBuffers()
 	PRINT_MESSAGE("Size = %li x %li", mGBufferWidth, mGBufferHeight);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBOs[Deferred_FBO]);
-	glGenTextures(__gBuffer_count__, mGBuffers);
+	glGenTextures((int)EGBuffer::__gBuffer_count__, mGBuffers);
 	GL_CHECK_ERRORS;
 
 	PRINT_GEN_FRAMEBUFFER("[Engine]", mFBOs[Deferred_FBO]);
 	//PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_PositionBuffer]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_NormalBuffer]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_AlbedoAndStatus]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_SpecularRoughness]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_Emissive]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_DepthBuffer]);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::NormalBuffer]);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::UI32Buffer1]);
+	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::DepthBuffer]);
 
 
 	//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
@@ -102,42 +100,28 @@ void Engine::InternalCreateGBuffers()
 	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBuffers[gBuffer_PositionBuffer], 0);
 	//GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_NormalBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBuffers[gBuffer_NormalBuffer], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_AlbedoAndStatus]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, nullptr);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, mGBuffers[gBuffer_AlbedoAndStatus], 0);
-	GL_CHECK_ERRORS;
-
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_SpecularRoughness]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, mGBufferWidth, mGBufferHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, mGBuffers[gBuffer_SpecularRoughness], 0);
-	GL_CHECK_ERRORS;
-
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_Emissive]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, mGBuffers[gBuffer_Emissive], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1], 0);
 	GL_CHECK_ERRORS;
 
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer], 0);
 	GL_CHECK_ERRORS;
 	//glGenRenderbuffers(1, &mDepthRBO);
 	//glBindRenderbuffer(GL_RENDERBUFFER, mDepthRBO);
@@ -146,7 +130,8 @@ void Engine::InternalCreateGBuffers()
 	//GL_CHECK_ERRORS;
 	//PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
 
-	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3/*, GL_COLOR_ATTACHMENT4*/ };
+
+	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	glDrawBuffers(ARRAY_SIZE_IN_ELEMENTS(drawBuffers), drawBuffers); GL_CHECK_ERRORS;
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -209,8 +194,8 @@ void Engine::InternalCreateHdrBuffers()
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mForwardBuffer, 0);
 	GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer]);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[gBuffer_DepthBuffer], 0);
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer], 0);
 	GL_CHECK_ERRORS;
 
 	//glBindRenderbuffer(GL_RENDERBUFFER, mDepthRBO);
@@ -452,31 +437,20 @@ void Engine::InternalInitializeDeferredPassShader()
 
 	{
 		std::vector<std::string> shaderFilenames(3);
-		shaderFilenames[0] = "shaders/light.fs.glsl";
-		shaderFilenames[1] = "shaders/UnpackFromGBuffer.incl.glsl";
+		shaderFilenames[0] = "shaders/DeferredShadingCommon.incl.glsl";
+		shaderFilenames[1] = "shaders/light.fs.glsl";
 		//shaderFilenames[2] = "shaders/light.pbr.fs.glsl";
-		shaderFilenames[2] = "shaders/light.pbr-tri-ace-2010.fs.glsl";
+		//shaderFilenames[2] = "shaders/light.pbr-tri-ace-2010.fs.glsl";
+		shaderFilenames[2] = "shaders/light.pbr-disney.fs.glsl";
 		mDeferredShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
 	}
 
-	//// fragment shader
-	//std::cout << "Loading shader file : shaders/light.fs.glsl" << std::endl;
-	//std::vector<std::string> lightFsGlsl(2);
-	//Shader::MergeFile(lightFsGlsl[0], "shaders/light.fs.glsl");
-	//std::string & textureFuncSource = lightFsGlsl[1];
-	//Shader::GenerateTexGetFunction(textureFuncSource, (int)mLightPassTextureMapping.mMapping.size());
-	//mDeferredShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
-
 	const char * uniformNames[__deferred_uniforms_count__] =
 	{
-		//"u_gBufferPosition",
-		"u_gDepthMap",
-		"u_gBufferNormal",
-		"u_gBufferAlbedoAndStatus",
-		"u_gBufferSpecularRoughness",
-		"u_gBufferEmissive",
-		"u_gBufferSSAO",
-		//"u_materialDataSampler",
+		"u_DepthSampler",
+		"u_NBufferSampler",
+		"u_GBuffer1Sampler",
+		"u_SSAOSampler",
 		"u_lightDescSampler",
 		"u_lightDataSampler",
 	};
@@ -490,13 +464,10 @@ void Engine::InternalInitializeDeferredPassShader()
 	//pass values of constant uniforms at initialization
 	glUniform1i(mDeferredShader.GetUniform(u_lightDescSampler), 0);
 	glUniform1i(mDeferredShader.GetUniform(u_lightDataSampler), 1);
-	//glUniform1i(mDeferredShader.GetUniform(u_gBufferPosition), 2);
-	glUniform1i(mDeferredShader.GetUniform(u_gDepthMap), 2);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferNormal), 3);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferAlbedoAndStatus), 4);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferSpecularRoughness), 5);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferEmissive), 6);
-	glUniform1i(mDeferredShader.GetUniform(u_gBufferSSAO), 7);
+	glUniform1i(mDeferredShader.GetUniform(u_DepthSampler), 2);
+	glUniform1i(mDeferredShader.GetUniform(u_NBufferSampler), 3);
+	glUniform1i(mDeferredShader.GetUniform(u_GBuffer1Sampler), 4);
+	glUniform1i(mDeferredShader.GetUniform(u_SSAOSampler), 5);
 	
 	//glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
 	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
@@ -629,8 +600,8 @@ void Engine::InternalInitializeShowDeferredBuffersShader()
 
 	{
 		std::vector<std::string> shaderFilenames(2);
-		shaderFilenames[0] = "shaders/ShowDeferredBuffers.fs.glsl";
-		shaderFilenames[1] = "shaders/UnpackFromGBuffer.incl.glsl";
+		shaderFilenames[0] = "shaders/DeferredShadingCommon.incl.glsl";
+		shaderFilenames[1] = "shaders/ShowDeferredBuffers.fs.glsl";
 		mShowDeferredBuffersShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
 	}
 
@@ -638,31 +609,21 @@ void Engine::InternalInitializeShowDeferredBuffersShader()
 
 	const char * uniformNames[(int)EShowDeferredShaderUniformIndex::__uniforms_count__] =
 	{
-		//"u_gBufferPosition",
-		"u_gDepthMap",
-		"u_gBufferNormal",
-		"u_gBufferAlbedoAndStatus",
-		"u_gBufferSpecularRoughness",
-		"u_gBufferEmissive",
-		"u_lightDescSampler",
-		"u_lightDataSampler",
+		"u_DepthSampler",
+		"u_NBufferSampler",
+		"u_GBuffer1Sampler",
 		"u_BufferToShow",
-		"u_gBufferSSAO"
+		"u_SSAOSampler"
 	};
 
 	mShowDeferredBuffersShader.Use();
 
 	mShowDeferredBuffersShader.AddUniforms(uniformNames, (int)EShowDeferredShaderUniformIndex::__uniforms_count__);
 
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_lightDescSampler), 0);
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_lightDataSampler), 1);
-	//glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferPosition), 2);
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gDepthMap), 2);
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferNormal), 3);
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferAlbedoAndStatus), 4);
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferSpecularRoughness), 5);
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferEmissive), 6);
-	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_gBufferSSAO), 7);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_DepthSampler), 0);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_NBufferSampler), 1);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_GBuffer1Sampler), 2);
+	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_SSAOSampler), 3);
 	
 	glUniform1i(mShowDeferredBuffersShader.GetUniform((int)EShowDeferredShaderUniformIndex::u_BufferToShow), mDeferredDebugState);
 
@@ -683,18 +644,21 @@ void Engine::InternalInitializeSSAOShader()
 	//setup shader
 
 	mSSAOShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/light.vs.glsl");
-	mSSAOShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/ssao.fs.glsl");
+
+	std::vector<std::string> shaderFilenames(2);
+	shaderFilenames[0] = "shaders/DeferredShadingCommon.incl.glsl";
+	shaderFilenames[1] = "shaders/ssao.fs.glsl";
+	mSSAOShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
 
 	mSSAOShader.CreateAndLinkProgram();
 
 	const char * uniformNames[(int)ESSAOShaderUniformIndex::__uniforms_count__] =
 	{
-		//"u_gBufferPosition",
-		"u_gDepthMap",
-		"u_gBufferNormal",
-		"u_gBufferAlbedoAndStatus",
-		"u_gNoiseMap",
-		"u_gKernel",
+		"u_DepthSampler",
+		"u_NBufferSampler",
+		"u_GBuffer1Sampler",
+		"u_NoiseSampler",
+		"u_KernelSampler",
 		"u_KernelSize",
 		"u_Radius",
 		"u_NoiseScale",
@@ -704,12 +668,11 @@ void Engine::InternalInitializeSSAOShader()
 
 	mSSAOShader.AddUniforms(uniformNames, (int)ESSAOShaderUniformIndex::__uniforms_count__);
 
-	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gNoiseMap), 0);
-	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gKernel), 1);
-	//glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gBufferPosition), 2);
-	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gDepthMap), 2);
-	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gBufferNormal), 3);
-	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_gBufferAlbedoAndStatus), 4);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_NoiseSampler), 0);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_KernelSampler), 1);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_DepthSampler), 2);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_NBufferSampler), 3);
+	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_GBuffer1Sampler), 4);
 
 	mSSAOShader.UnUse();
 

@@ -441,15 +441,6 @@
     <None Include="..\Data\Shaders\ComputeShaders.header.glsl">
       <Filter>Shaders\Incl</Filter>
     </None>
-    <None Include="..\Data\Shaders\cube.gs.glsl">
-      <Filter>Shaders\Debug</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.vs.glsl">
-      <Filter>Shaders\Debug</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.wireframe.fs.glsl">
-      <Filter>Shaders\Debug</Filter>
-    </None>
     <None Include="..\Data\Shaders\drawGBufferNormals.forward.fs.glsl">
       <Filter>Shaders\Debug</Filter>
     </None>
@@ -469,9 +460,6 @@
       <Filter>Shaders\Debug</Filter>
     </None>
     <None Include="..\Data\Shaders\wireframe.fs.glsl">
-      <Filter>Shaders\Debug</Filter>
-    </None>
-    <None Include="..\Data\Shaders\cube.deferred.fs.glsl">
       <Filter>Shaders\Debug</Filter>
     </None>
     <None Include="..\Data\Shaders\IcosahedronShader.forward.fs.glsl">
@@ -558,9 +546,6 @@
     <None Include="..\Data\Shaders\HeightFieldOcean.normal.cs.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>
-    <None Include="..\Data\Shaders\UnpackFromGBuffer.incl.glsl">
-      <Filter>Shaders\Deferred</Filter>
-    </None>
     <None Include="..\Data\Shaders\ShowDeferredBuffers.fs.glsl">
       <Filter>Shaders\Debug</Filter>
     </None>
@@ -584,6 +569,12 @@
     </None>
     <None Include="..\Data\Shaders\FrameDataUniform.incl.glsl">
       <Filter>Shaders\Incl</Filter>
+    </None>
+    <None Include="..\Data\Shaders\DeferredShadingCommon.incl.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="..\Data\Shaders\light.pbr-disney.fs.glsl">
+      <Filter>Shaders\Deferred</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

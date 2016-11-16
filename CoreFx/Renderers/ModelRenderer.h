@@ -40,8 +40,7 @@ public:
 
 	// ---------------------------------------------
 
-	void SetMaterial(std::uint16_t materialIndex, const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, const glm::vec3& specular, TextureIndex specularTextureIndex, GLfloat roughness, TextureIndex roughnessTextureIndex, const glm::vec3& emissive, TextureIndex emissiveTextureIndex, TextureIndex normalTextureIndex);
-	void SetMaterial(std::uint16_t materialIndex, const Renderer::MaterialDesc & mat);
+	void SetMaterial(std::uint16_t materialIndex, const Renderer::MaterialDesc & materialDesc);
 	void SetMaterials(const Renderer::MaterialDescList & materials);
 
 	// ---------------------------------------------
@@ -81,21 +80,11 @@ private:
 	};
 #pragma pack(pop)
 
-	struct MaterialData
-	{
-		__declspec(align(4)) GLfloat mDiffuse[3];
-		__declspec(align(4)) GLbitfield mDiffuseSpecularIndexes;	// diffuse, specular sampler and texture index
-		__declspec(align(4)) GLfloat mSpecular[3];
-		__declspec(align(4)) GLfloat mRoughness;
-		__declspec(align(4)) GLfloat mEmissive[3];
-		__declspec(align(4)) GLfloat mEmissiveNormalIndex;
-	};
-
 	struct MaterialTextureIndexes
 	{
 		//TextureIndex mAmbient = Renderer::NoTexture;
-		TextureIndex mDiffuse = Renderer::NoTexture;
-		TextureIndex mSpecular = Renderer::NoTexture;
+		TextureIndex mBaseColor = Renderer::NoTexture;
+		TextureIndex mMetallic = Renderer::NoTexture;
 		TextureIndex mRoughness = Renderer::NoTexture;
 		TextureIndex mEmissive = Renderer::NoTexture;
 		TextureIndex mNormal = Renderer::NoTexture;
@@ -132,18 +121,22 @@ private:
 
 	struct ShaderMaterial
 	{
-		glm::vec3 mDiffuse;
-		glm::vec3 mSpecular;
-		glm::vec3 mEmissive;
-		GLfloat mRoughness;
+		GLfloat mBaseColorR;
+		GLfloat mBaseColorG;
+		GLfloat mBaseColorB;
 
-		GLint mDiffuseSamplerIndex, mDiffuseTextureIndex;
-		GLint mSpecularSamplerIndex, mSpecularTextureIndex;
+		GLfloat mMetallic;
+		GLfloat mRoughness;
+		GLfloat mPorosity;
+		GLfloat mEmissive;
+
+		GLint mBaseColorSamplerIndex, mBaseColorTextureIndex;
+		GLint mMetallicSamplerIndex, mMetallicTextureIndex;
 		GLint mRoughnessSamplerIndex, mRoughnessTextureIndex;
 		GLint mNormalSamplerIndex, mNormalTextureIndex;
 		GLint mEmissiveSamplerIndex, mEmissiveTextureIndex;
 
-		//GLfloat __padding__[12];
+		//GLfloat __padding__[15];
 	};
 
 	const size_t cShaderMaterialSize = sizeof(ShaderMaterial);

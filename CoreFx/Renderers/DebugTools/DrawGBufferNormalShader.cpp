@@ -32,8 +32,8 @@ void DrawGBufferNormalShader::LoadShaders()
 	const char * uniformNames[__uniforms_count__] =
 	{
 		"u_PatchCount",
-		"u_gDepthMap",
-		"u_gBufferNormal",
+		"u_DepthSampler",
+		"u_NBufferSampler",
 	};
 
 	CreateAndLinkProgram();
@@ -42,8 +42,8 @@ void DrawGBufferNormalShader::LoadShaders()
 		AddUniforms(uniformNames, __uniforms_count__);
 
 		//pass values of constant uniforms at initialization
-		glUniform1i(GetUniform(u_gDepthMap), 0);
-		glUniform1i(GetUniform(u_gBufferNormal), 1);
+		glUniform1i(GetUniform(u_DepthSampler), 0);
+		glUniform1i(GetUniform(u_NBufferSampler), 1);
 
 		SetupFrameDataBlockBinding();
 	UnUse();

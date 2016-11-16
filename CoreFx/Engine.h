@@ -38,14 +38,12 @@ private:
 		__BufferId_Count__
 	};
 
-	enum GBufferType
+	enum class EGBuffer
 	{
 		//gBuffer_PositionBuffer,
-		gBuffer_NormalBuffer,
-		gBuffer_AlbedoAndStatus,
-		gBuffer_SpecularRoughness,
-		gBuffer_Emissive,
-		gBuffer_DepthBuffer,
+		NormalBuffer,
+		UI32Buffer1,
+		DepthBuffer,
 
 		__gBuffer_count__
 	};
@@ -100,10 +98,12 @@ public:
 	{
 		ShowNormalBuffer		= 1,
 		ShowAlbedoBuffer		= 2,
-		ShowSpecularBuffer		= 3,
+		ShowMetallicBuffer		= 3,
 		ShowRoughnessBuffer		= 4,
 		ShowPositionBuffer		= 5,
 		ShowSSAOBuffer			= 6,
+		ShowEmissiveBuffer		= 7,
+		ShowDepthBuffer			= 8,
 
 		__count__
 	};
@@ -439,17 +439,12 @@ private:
 
 	enum EDeferredShaderUniformIndex
 	{
-		//u_gBufferPosition,
-		u_gDepthMap,
-		u_gBufferNormal,
-		u_gBufferAlbedoAndStatus,
-		u_gBufferSpecularRoughness,
-		u_gBufferEmissive,
-		u_gBufferSSAO,
-		//u_materialDataSampler,
+		u_DepthSampler,
+		u_NBufferSampler,
+		u_GBuffer1Sampler,
+		u_SSAOSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,
-
 
 		__deferred_uniforms_count__
 	};
@@ -478,28 +473,22 @@ private:
 
 	enum class EShowDeferredShaderUniformIndex 
 	{
-		//u_gBufferPosition,
-		u_gDepthMap,
-		u_gBufferNormal,
-		u_gBufferAlbedoAndStatus,
-		u_gBufferSpecularRoughness,
-		u_gBufferEmissive,
-		u_lightDescSampler,
-		u_lightDataSampler,
+		u_DepthSampler,
+		u_NBufferSampler,
+		u_GBuffer1Sampler,
 		u_BufferToShow,
-		u_gBufferSSAO,
+		u_SSAOSampler,
 
 		__uniforms_count__
 	};
 
 	enum class ESSAOShaderUniformIndex
 	{
-		//u_gBufferPosition,
-		u_gDepthMap,
-		u_gBufferNormal,
-		u_gBufferAlbedoAndStatus,
-		u_gNoiseMap,
-		u_gKernel,
+		u_DepthSampler,
+		u_NBufferSampler,
+		u_GBuffer1Sampler,
+		u_NoiseSampler,
+		u_KernelSampler,
 		u_KernelSize,
 		u_Radius,
 		u_NoiseScale,
@@ -569,7 +558,7 @@ private:
 	GLuint mFBOs[__fbo_count__];
 	//GLuint mDepthRBO;
 
-	GLuint mGBuffers[__gBuffer_count__];
+	GLuint mGBuffers[(int)EGBuffer::__gBuffer_count__];
 
 	GLuint mForwardBuffer;
 

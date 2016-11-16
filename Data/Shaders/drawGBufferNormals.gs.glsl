@@ -1,8 +1,8 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-uniform sampler2D u_gDepthMap;
-uniform sampler2D u_gBufferNormal;
+uniform sampler2D u_DepthSampler;
+uniform sampler2D u_NBufferSampler;
 
 out GS_OUT
 {
@@ -17,8 +17,8 @@ struct FragmentInfo
 
 void UnpackFromGBuffer(out FragmentInfo fi, vec2 texUV, vec2 viewRay)
 {
-    fi.Position = PositionFromDepth(texture(u_gDepthMap, texUV, 0).x, viewRay);
-	fi.Normal = texture(u_gBufferNormal, texUV, 0).xyz;
+    fi.Position = PositionFromDepth(texture(u_DepthSampler, texUV, 0).x, viewRay);
+	fi.Normal = texture(u_NBufferSampler, texUV, 0).xyz;
 }
 
 void main()

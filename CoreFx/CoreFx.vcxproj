@@ -250,7 +250,9 @@
     <None Include="..\Data\Shaders\axis.vs.glsl" />
     <None Include="..\Data\Shaders\ComputeShaders.header.glsl" />
     <None Include="..\Data\Shaders\DeepOcean.hmap.cs.glsl" />
+    <None Include="..\Data\Shaders\DeferredShadingCommon.incl.glsl" />
     <None Include="..\Data\Shaders\FrameDataUniform.incl.glsl" />
+    <None Include="..\Data\Shaders\light.pbr-disney.fs.glsl" />
     <None Include="..\Data\Shaders\light.pbr-tri-ace-2010.fs.glsl" />
     <None Include="..\Data\Shaders\light.pbr.fs.glsl" />
     <None Include="..\Data\Shaders\Precompute.Matrix.cs.glsl" />
@@ -271,10 +273,6 @@
     <None Include="..\Data\Shaders\ConeShader.vs.glsl" />
     <None Include="..\Data\Shaders\copy.fs.glsl" />
     <None Include="..\Data\Shaders\copyTex2DArray.fs.glsl" />
-    <None Include="..\Data\Shaders\cube.deferred.fs.glsl" />
-    <None Include="..\Data\Shaders\cube.gs.glsl" />
-    <None Include="..\Data\Shaders\cube.vs.glsl" />
-    <None Include="..\Data\Shaders\cube.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.gs.glsl" />
     <None Include="..\Data\Shaders\deepOcean.tes.glsl" />
@@ -321,7 +319,6 @@
     <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\tonemapping.fs.glsl" />
     <None Include="..\Data\Shaders\screenquad.vs.glsl" />
-    <None Include="..\Data\Shaders\UnpackFromGBuffer.incl.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.fs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.gs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.vs.glsl" />

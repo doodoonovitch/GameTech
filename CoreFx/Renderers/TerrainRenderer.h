@@ -35,15 +35,11 @@ public:
 
 	struct MaterialDesc : Renderer::MaterialDesc
 	{
-		MaterialDesc(GLfloat heightMin, GLfloat heightMax, 
-			const glm::vec3& diffuse, TextureIndex diffuseTextureIndex, 
-			const glm::vec3& specular, GLfloat roughness, TextureIndex specularTextureIndex, 
-			const glm::vec3& emissive, TextureIndex emissiveTextureIndex, 
-			TextureIndex normalTextureIndex, GLfloat texScale = 1.f)
-			: Renderer::MaterialDesc(diffuse, diffuseTextureIndex, specular, specularTextureIndex, roughness, Renderer::NoTexture, emissive, emissiveTextureIndex, normalTextureIndex)
-			, mHeightMin(heightMin)
-			, mHeightMax(heightMax)
-			, mTexScale(texScale)
+		MaterialDesc()
+			: Renderer::MaterialDesc()
+			, mHeightMin(0.f)
+			, mHeightMax(1.f)
+			, mTexScale(1.f)
 		{}
 
 		MaterialDesc(const MaterialDesc & src)
@@ -53,6 +49,25 @@ public:
 			, mTexScale(src.mTexScale)
 		{
 		}
+
+		MaterialDesc & SetHeightMin(GLfloat value)
+		{
+			mHeightMin = value;
+			return *this;
+		}
+
+		MaterialDesc & SetHeightMax(GLfloat value)
+		{
+			mHeightMax = value;
+			return *this;
+		}
+
+		MaterialDesc & SetTexScale(GLfloat value)
+		{
+			mTexScale = value;
+			return *this;
+		}
+
 
 		GLfloat mHeightMin;
 		GLfloat mHeightMax;

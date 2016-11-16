@@ -1,7 +1,6 @@
-layout(location = 0) out vec3 outNormal;
+layout(location = 0) out vec4 outNormalAndEmissive;
 layout(location = 1) out uvec4 outAlbedoAndStatus;
-layout(location = 2) out vec4 outSpecularAndRoughness;
-layout(location = 3) out vec3 outEmissive;
+layout(location = 2) out uint outRoughnessAndOthers;
 
 const int c_MaxWavesToSum = 4;
 
@@ -88,6 +87,6 @@ void main()
 
 	normal = dqTransformNormal(normal, u_ViewDQ);
 
-	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.SpecularPower, vec3(0));
-	outNormal = vec3(normal.xyz);
+	WriteOutData(outAlbedoAndStatus, outRoughnessAndOthers, DEEPOCEAN_RENDERER_ID , mat.DiffuseColor, 1.0f, mat.SpecularPower, 0.f);
+	outNormalAndEmissive = vec4(normal.xyz, 0.f);
 }

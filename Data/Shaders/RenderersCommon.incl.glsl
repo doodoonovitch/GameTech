@@ -44,7 +44,6 @@
 // ---------------------------------------------------------------------------
 // Material sampler first index and max sampler count
 //
-#define FIRST_TEXTURE_SAMPLER_INDEX					10
 #define MAX_TEXTURE_SAMPLER							32
 //
 // ---------------------------------------------------------------------------
@@ -52,7 +51,7 @@
 // ---------------------------------------------------------------------------
 // Render ids
 //
-#define CUBE_RENDERER_ID							1
+#define MODEL_RENDERER_ID							1
 #define AXIS_RENDERER_ID							2
 #define GRID_RENDERER_ID							3
 #define VERTEX_NORMAL_RENDERER_ID					4
@@ -63,11 +62,11 @@
 // ---------------------------------------------------------------------------
 
 #define Mask_0x00FFFFFF								uint(16777215)
+#define Mask_0xFFFFFF00								uint(4294967040)
 #define Mask_0xFF000000								uint(uint(255) << 24)
 #define Mask_0x00FF0000								uint(uint(255) << 16)
 #define Mask_0x0000FF00								uint(uint(255) << 8)
 #define Mask_0x000000FF								uint(255)
-#define CombineRenderIdAndMaterialIndex(rendererId, materialIndex) uint((rendererId << 24) | (materialIndex & Mask_0x00FFFFFF))
 
 
 
@@ -78,18 +77,23 @@
 
 struct ModelMaterial 
 {
-	float mDiffuseR, mDiffuseG, mDiffuseB;
-	float mSpecularR, mSpecularG, mSpecularB;
-	float mEmissiveR, mEmissiveG, mEmissiveB;
+	float mBaseColorR;
+	float mBaseColorG;
+	float mBaseColorB;
 
+	float mMetallic;
 	float mRoughness;
-	
-	int mDiffuseSamplerIndex, mDiffuseTextureIndex;
-	int mSpecularSamplerIndex, mSpecularTextureIndex;
+	float mPorosity;
+	float mEmissive;
+
+	int mBaseColorSamplerIndex, mBaseColorTextureIndex;
+	int mMetallicSamplerIndex, mMetallicTextureIndex;
 	int mRoughnessSamplerIndex, mRoughnessTextureIndex;
 	int mNormalSamplerIndex, mNormalTextureIndex;
 	int mEmissiveSamplerIndex, mEmissiveTextureIndex;
 };
+
+
 
 
 
@@ -164,19 +168,6 @@ vec3 ComputeBumpedNormal(vec3 normal, vec3 tangent, sampler2DArray gNormalMap, v
 
 
 
-// ===========================================================================
-// ===========================================================================
-// ===========================================================================
-
-
-void WriteOutData(out uvec4 outAlbedoAndStatus, out vec4 outSpecularAndRoughness, out vec3 outEmissive,
-	int rendererId, vec3 matDiffuseColor, vec3 matSpecularColor, float roughness, vec3 matEmissive)
-{
-	outAlbedoAndStatus = uvec4(clamp(matDiffuseColor, 0.f, 1.f) * 255, rendererId);
-	outSpecularAndRoughness = vec4(matSpecularColor, roughness);
-	outEmissive = matEmissive;
-}
-
 
 
 
@@ -221,15 +212,31 @@ float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
 
 
 
-
 // ===============================================================================
 // Calculates the Fresnel factor using Schlick's approximation
 //
-//		float LdotH = saturate(dot(l, h));
+//		float LoH = saturate(dot(l, h));
 // ===============================================================================
-vec3 BRDF_Fresnel(in vec3 f0, in float LdotH)
+float SchlickFresnel(in float LoH)
 {
-	return f0 + (vec3(1.0f) - f0) * pow((1.0f - LdotH), 5.0f);
+    float m = clamp(1 - LoH, 0, 1);
+	return Pow5(m);
+}
+
+vec3 BRDF_Fresnel2(in vec3 f0, in float LoH)
+{
+    float m = clamp(1 - LoH, 0, 1);
+	float fh = Pow5(m);
+
+	return mix(f0, vec3(1), fh);
+}
+
+vec3 BRDF_Fresnel(in vec3 f0, in float LoH)
+{
+    float m = clamp(1 - LoH, 0, 1);
+	float fh = Pow5(m);
+
+	return f0 + (vec3(1.0f) - f0) * fh;
 }
 
 // ---------------------------------------------------------------------------

@@ -101,7 +101,7 @@ enum class TextureWrap
 enum class TextureCategory
 {
 	Diffuse,
-	Specular,
+	Metallic,
 	NormalMap,
 	HeightMap,
 	Emissive,

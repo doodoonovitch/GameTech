@@ -1,7 +1,6 @@
-layout(location = 0) out vec3 outNormal;
+layout(location = 0) out vec4 outNormalAndEmissive;
 layout(location = 1) out uvec4 outAlbedoAndStatus;
-layout(location = 2) out vec4 outSpecularAndRoughness;
-layout(location = 3) out vec3 outEmissive;
+layout(location = 2) out uint outRoughnessAndOthers;
 
 uniform vec3 u_Scale;
 uniform float u_TexScale = 0.1;
@@ -123,11 +122,12 @@ void main()
 
 	//normal = fs_in.ViewNormal;
 
-	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, TERRAIN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.Roughness, vec3(0));
+	//WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, TERRAIN_RENDERER_ID , mat.DiffuseColor, mat.SpecularColor, mat.Roughness, vec3(0));
+	WriteOutData(outAlbedoAndStatus, outRoughnessAndOthers, TERRAIN_RENDERER_ID , mat.DiffuseColor, .0f, 0.f, 0.f);
 
 	//outData = uvec3(packUnorm4x8(vec4(mat.DiffuseColor, TERRAIN_RENDERER_ID / 255)), packUnorm4x8(vec4(mat.SpecularColor, mat.Roughness / 255)), 0);
 	//outPosition = fs_in.ViewPosition;
-	outNormal = vec3(normal.xyz);
+	outNormalAndEmissive = vec4(normal.xyz, 0.f);
 }
 /*
 void GetMaterial(out Material blendedMat, vec3 uvs, vec3 blendWeights, vec3 normal, vec3 position)

@@ -1,7 +1,5 @@
 layout(location = 0) out vec3 outNormal;
-layout(location = 1) out uvec4 outAlbedoAndStatus;
-layout(location = 2) out vec4 outSpecularAndRoughness;
-layout(location = 3) out vec3 outEmissive;
+layout(location = 1) out uvec4 outUI32Buffer1;
 
 layout (std430, binding = 2) buffer Materials
 {
@@ -24,38 +22,42 @@ in GS_OUT
 
 void main(void)
 {
-	
-	vec3 materialDiffuse = vec3(u_Materials[fs_in.MaterialIndex].mDiffuseR, u_Materials[fs_in.MaterialIndex].mDiffuseG, u_Materials[fs_in.MaterialIndex].mDiffuseB);
-	vec3 materialSpecular = vec3(u_Materials[fs_in.MaterialIndex].mSpecularR, u_Materials[fs_in.MaterialIndex].mSpecularG, u_Materials[fs_in.MaterialIndex].mSpecularB);
-	vec3 materialEmissive = vec3(u_Materials[fs_in.MaterialIndex].mEmissiveR, u_Materials[fs_in.MaterialIndex].mEmissiveG, u_Materials[fs_in.MaterialIndex].mEmissiveB);
-	float roughness = u_Materials[fs_in.MaterialIndex].mRoughness;
+	MaterialData mat;
 
-	int diffuseTextureIndex = u_Materials[fs_in.MaterialIndex].mDiffuseTextureIndex;
-	if (diffuseTextureIndex != -1)
+	mat.mRendererId = MODEL_RENDERER_ID;
+
+	mat.mBaseColor = vec3(u_Materials[fs_in.MaterialIndex].mBaseColorR, u_Materials[fs_in.MaterialIndex].mBaseColorG, u_Materials[fs_in.MaterialIndex].mBaseColorB);
+	mat.mRoughness = u_Materials[fs_in.MaterialIndex].mRoughness;
+	mat.mMetallic =  u_Materials[fs_in.MaterialIndex].mMetallic;
+	mat.mPorosity =  u_Materials[fs_in.MaterialIndex].mPorosity;
+	mat.mEmissive =  mat.mBaseColor * u_Materials[fs_in.MaterialIndex].mEmissive;
+
+	int baseColorTextureIndex = u_Materials[fs_in.MaterialIndex].mBaseColorTextureIndex;
+	if (baseColorTextureIndex != -1)
 	{
-		int diffuseSamplerIndex = u_Materials[fs_in.MaterialIndex].mDiffuseSamplerIndex;
-		materialDiffuse = materialDiffuse * TexGet(diffuseSamplerIndex, vec2(fs_in.TexUV), diffuseTextureIndex).xyz;
+		int baseColorSamplerIndex = u_Materials[fs_in.MaterialIndex].mBaseColorSamplerIndex;
+		mat.mBaseColor = mat.mBaseColor * TexGet(baseColorSamplerIndex, vec2(fs_in.TexUV), baseColorTextureIndex).xyz;
 	}
 
-	int specularTextureIndex = u_Materials[fs_in.MaterialIndex].mSpecularTextureIndex;
-	if(specularTextureIndex != -1)
+	int metallicTextureIndex = u_Materials[fs_in.MaterialIndex].mMetallicTextureIndex;
+	if(metallicTextureIndex != -1)
 	{
-		int specularSamplerIndex = u_Materials[fs_in.MaterialIndex].mSpecularSamplerIndex;
-		materialSpecular = materialSpecular * TexGet(specularSamplerIndex, vec2(fs_in.TexUV), specularTextureIndex).xyz;
-	}
-
-	int emissiveTextureIndex = u_Materials[fs_in.MaterialIndex].mEmissiveTextureIndex;
-	if (emissiveTextureIndex != -1)
-	{
-		int emissiveSamplerIndex = u_Materials[fs_in.MaterialIndex].mEmissiveSamplerIndex;
-		materialEmissive = materialEmissive * TexGet(emissiveSamplerIndex, vec2(fs_in.TexUV), emissiveTextureIndex).xyz;
+		int metallicSamplerIndex = u_Materials[fs_in.MaterialIndex].mMetallicSamplerIndex;
+		mat.mMetallic = mat.mMetallic * TexGet(metallicSamplerIndex, vec2(fs_in.TexUV), metallicTextureIndex).x;
 	}
 
 	int roughnessTextureIndex = u_Materials[fs_in.MaterialIndex].mRoughnessTextureIndex;
 	if (roughnessTextureIndex != -1)
 	{
 		int roughnessSamplerIndex = u_Materials[fs_in.MaterialIndex].mRoughnessSamplerIndex;
-		roughness = roughness * TexGet(roughnessSamplerIndex, vec2(fs_in.TexUV), roughnessTextureIndex).x;
+		mat.mRoughness = mat.mRoughness * TexGet(roughnessSamplerIndex, vec2(fs_in.TexUV), roughnessTextureIndex).x;
+	}
+
+	int emissiveTextureIndex = u_Materials[fs_in.MaterialIndex].mEmissiveTextureIndex;
+	if(emissiveTextureIndex != -1)
+	{
+		int emissiveSamplerIndex = u_Materials[fs_in.MaterialIndex].mEmissiveSamplerIndex;
+		mat.mEmissive = mat.mEmissive * TexGet(emissiveSamplerIndex, vec2(fs_in.TexUV), emissiveTextureIndex).xyz;
 	}
 
 	vec3 normal;
@@ -64,7 +66,7 @@ void main(void)
 	{
 		int normalSamplerIndex = u_Materials[fs_in.MaterialIndex].mNormalSamplerIndex;
 		vec3 bumpMapNormal = TexGet(normalSamplerIndex, fs_in.TexUV, normalTextureIndex).xyz;
-		bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
+		bumpMapNormal = bumpMapNormal * 2.0 - vec3(1.0, 1.0, 1.0);
 
 		normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
 		normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
@@ -74,8 +76,7 @@ void main(void)
 		normal = dqTransformNormal(normalize(fs_in.Normal), fs_in.ViewModelDQ);
 	}
 
-	outNormal = vec3(normal.xyz);
-
-	WriteOutData(outAlbedoAndStatus, outSpecularAndRoughness, outEmissive, CUBE_RENDERER_ID , materialDiffuse, materialSpecular, roughness, materialEmissive);
+	outNormal = normal;
+	EncodeMaterialData(outUI32Buffer1, mat);
 
 }

@@ -1,10 +1,10 @@
 layout(location = 0) out float outFragColor;
 
-uniform sampler2D	u_gBufferNormal;
-uniform sampler2D	u_gDepthMap;
-uniform usampler2D	u_gBufferAlbedoAndStatus;
-uniform sampler2D	u_gNoiseMap;
-uniform sampler1D	u_gKernel;
+uniform sampler2D	u_NBufferSampler;
+uniform usampler2D	u_GBuffer1Sampler;
+uniform sampler2D	u_DepthSampler;
+uniform sampler2D	u_NoiseSampler;
+uniform sampler1D	u_KernelSampler;
 
 uniform int			u_KernelSize;
 uniform float		u_Radius;
@@ -16,22 +16,20 @@ in VS_OUT
 	vec2 ViewRay;
 } fs_in;
 
-
 void main(void)
 {	
-	int rendererId = int(texture(u_gBufferAlbedoAndStatus, fs_in.TexUV, 0).w & 15);
-	if (rendererId == SKYBOX_RENDERER_ID || !(rendererId > 0))
+	FragmentInfo fi;
+	UnpackFromGBuffer(fi, fs_in.TexUV, fs_in.ViewRay, u_GBuffer1Sampler, u_DepthSampler);
+
+	if (fi.mRendererId == SKYBOX_RENDERER_ID || fi.mRendererId == uint(0))
 	{
 		outFragColor = 1.0;
 		return;
 	}
 
-	vec3 normal = normalize(texture(u_gBufferNormal, fs_in.TexUV, 0).xyz);
+	vec3 normal = normalize(texture(u_NBufferSampler, fs_in.TexUV, 0).xyz);
 
-	float depth = texture(u_gDepthMap, fs_in.TexUV).r;
-	vec3 position = PositionFromDepth(depth, fs_in.ViewRay);
-
-	vec3 randomVec = texture(u_gNoiseMap, fs_in.TexUV * u_NoiseScale).xyz;
+	vec3 randomVec = texture(u_NoiseSampler, fs_in.TexUV * u_NoiseScale).xyz;
 
 	vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
 	vec3 bitangent = cross(normal, tangent);
@@ -41,8 +39,8 @@ void main(void)
 	for(int i = 0; i < u_KernelSize; ++i)
 	{
 		// get sample position
-		vec3 smp = TBN * texelFetch(u_gKernel, i, 0).xyz; 
-		smp = position + smp * u_Radius; 
+		vec3 smp = TBN * texelFetch(u_KernelSampler, i, 0).xyz; 
+		smp = fi.mPosition + smp * u_Radius; 
         
 		// project sample position (to sample texture) (to get position on screen/texture)
 		vec4 offset = vec4(smp, 1.0);
@@ -50,11 +48,11 @@ void main(void)
 		offset.xyz /= offset.w;      
 		offset.xyz = offset.xyz * 0.5 + 0.5; 
 
-		float sampleDepth = texture(u_gDepthMap, offset.xy).r; 
+		float sampleDepth = texture(u_DepthSampler, offset.xy).r; 
 		sampleDepth = LinearizeDepth(sampleDepth);
         
 		// range check & accumulate
-		float rangeCheck = smoothstep(0.0, 1.0, u_Radius / abs(position.z - sampleDepth));
+		float rangeCheck = smoothstep(0.0, 1.0, u_Radius / abs(fi.mPosition.z - sampleDepth));
 		occlusion += (sampleDepth >= smp.z ? 1.0 : 0.0) * rangeCheck;
 
 	}

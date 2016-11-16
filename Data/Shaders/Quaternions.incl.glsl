@@ -15,6 +15,149 @@
 
 
 
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
+
+
+
+float Square( float x )
+{
+	return x*x;
+}
+
+vec2 Square( vec2 x )
+{
+	return x*x;
+}
+
+vec3 Square( vec3 x )
+{
+	return x*x;
+}
+
+vec4 Square( vec4 x )
+{
+	return x*x;
+}
+
+float Pow2( float x )
+{
+	return x*x;
+}
+
+vec2 Pow2( vec2 x )
+{
+	return x*x;
+}
+
+vec3 Pow2( vec3 x )
+{
+	return x*x;
+}
+
+vec4 Pow2( vec4 x )
+{
+	return x*x;
+}
+
+float Pow3( float x )
+{
+	return x*x*x;
+}
+
+vec2 Pow3( vec2 x )
+{
+	return x*x*x;
+}
+
+vec3 Pow3( vec3 x )
+{
+	return x*x*x;
+}
+
+vec4 Pow3( vec4 x )
+{
+	return x*x*x;
+}
+
+float Pow4( float x )
+{
+	float xx = x*x;
+	return xx * xx;
+}
+
+vec2 Pow4( vec2 x )
+{
+	vec2 xx = x*x;
+	return xx * xx;
+}
+
+vec3 Pow4( vec3 x )
+{
+	vec3 xx = x*x;
+	return xx * xx;
+}
+
+vec4 Pow4( vec4 x )
+{
+	vec4 xx = x*x;
+	return xx * xx;
+}
+
+float Pow5( float x )
+{
+	float xx = x*x;
+	return xx * xx * x;
+}
+
+vec2 Pow5( vec2 x )
+{
+	vec2 xx = x*x;
+	return xx * xx * x;
+}
+
+vec3 Pow5( vec3 x )
+{
+	vec3 xx = x*x;
+	return xx * xx * x;
+}
+
+vec4 Pow5( vec4 x )
+{
+	vec4 xx = x*x;
+	return xx * xx * x;
+}
+
+float Pow6( float x )
+{
+	float xx = x*x;
+	return xx * xx * xx;
+}
+
+vec2 Pow6( vec2 x )
+{
+	vec2 xx = x*x;
+	return xx * xx * xx;
+}
+
+vec3 Pow6( vec3 x )
+{
+	vec3 xx = x*x;
+	return xx * xx * xx;
+}
+
+vec4 Pow6( vec4 x )
+{
+	vec4 xx = x*x;
+	return xx * xx * xx;
+}
+
+
+
+
 // ===========================================================================
 // ===========================================================================
 // ===========================================================================

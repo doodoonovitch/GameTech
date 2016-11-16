@@ -77,7 +77,7 @@ void Engine::InternalReleaseGBuffers()
 {
 	//glDeleteRenderbuffers(1, &mDepthRBO);
 	//mDepthRBO = 0;
-	glDeleteTextures(__gBuffer_count__, mGBuffers);
+	glDeleteTextures((int)EGBuffer::__gBuffer_count__, mGBuffers);
 	memset(mGBuffers, 0, sizeof(mGBuffers));
 }
 
