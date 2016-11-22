@@ -13,7 +13,7 @@ namespace CoreFx
 class SkydomeRenderer : public RendererHelper<2>
 {
 public:
-	SkydomeRenderer(const int rings = 128, const int segments = 128);
+	SkydomeRenderer(const int rings = 128, const int segments = 128, CubeMapTexture const * textureCache = nullptr);
 	virtual ~SkydomeRenderer();
 
 	virtual void Render() override;
@@ -21,6 +21,9 @@ public:
 
 	void SetSunDirection(const glm::vec3 sunDirection);
 	const glm::vec3 & GetSunDirection() const { return mSunDirection; }
+
+	bool IsCacheBuilt() const { return mIsCacheBuilt; }
+	bool UseCache() const { return mTextureCache != nullptr; }
 
 public:
 
@@ -97,6 +100,8 @@ protected:
 	void CreateGeometry(std::vector<glm::vec3> & vertices, std::vector<GLushort> & indices, GLfloat radius, const GLfloat height, const int rings, const int segments);
 
 	void UpdatePreethamScatterParams();
+
+	void RenderInCache();
 
 private:
 
@@ -206,6 +211,8 @@ private:
 	glm::vec3 mBetaPAng;        //!< Mie angular scattering coefficient
 	glm::vec4 mConstants;       //!< Shader constants
 
+	CubeMapTexture const * mTextureCache = nullptr;
+	bool mIsCacheBuilt = false;
 };
 
 

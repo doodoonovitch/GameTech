@@ -23,6 +23,10 @@ public:
 		return mTarget;
 	}
 
+	const GLsizei GetWidth() const { return mSize.x; }
+	const GLsizei GetHeight() const { return mSize.y; }
+	const GLsizei GetDepth() const { return mSize.z; }
+
 protected:
 
 	enum TextureClass
@@ -34,7 +38,7 @@ protected:
 		Texture2DArray,
 	};
 
-	Texture(GLuint id, GLenum target, TextureClass texClass);
+	Texture(GLsizei width, GLsizei height, GLsizei depth, GLuint id, GLenum target, TextureClass texClass);
 	~Texture();
 
 	TextureClass GetTextureClass() const
@@ -55,6 +59,7 @@ protected:
 private:
 
 	GLuint mId;
+	glm::ivec3 mSize;
 	TextureClass mTextureClass;
 	GLenum mTarget;
 
@@ -65,7 +70,7 @@ class Texture1D : public Texture
 {
 protected:
 
-	Texture1D(GLuint id, GLenum target);
+	Texture1D(GLsizei width, GLuint id, GLenum target);
 	~Texture1D();
 
 private:
@@ -77,7 +82,7 @@ class Texture2D : public Texture
 {
 protected:
 
-	Texture2D(GLuint id, GLenum target);
+	Texture2D(GLsizei width, GLsizei height, GLuint id, GLenum target);
 	~Texture2D();
 
 private:
@@ -274,7 +279,7 @@ class CubeMapTexture : public Texture
 {
 protected:
 
-	CubeMapTexture(GLuint textureId, GLenum target);
+	CubeMapTexture(GLsizei width, GLsizei height, GLuint textureId, GLenum target);
 	~CubeMapTexture();
 
 
@@ -288,7 +293,7 @@ class Texture2DArray : public Texture
 {
 protected:
 
-	Texture2DArray(GLuint textureId, GLenum target);
+	Texture2DArray(GLsizei width, GLsizei height, GLsizei layerCount, GLuint textureId, GLenum target);
 	~Texture2DArray();
 
 

@@ -9,8 +9,9 @@ namespace CoreFx
 
 
 
-SkydomeRenderer::SkydomeRenderer(const int rings, const int segments)
+SkydomeRenderer::SkydomeRenderer(const int rings, const int segments, CubeMapTexture const * textureCache)
 	: RendererHelper<2>("SkydomeRenderer", "SkydomeWireFrameRenderer", Renderer::Forward_Pass)
+	, mTextureCache(textureCache)
 {
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize SkydomeRenderer.....");
@@ -679,6 +680,15 @@ void SkydomeRenderer::CalculateS0(const float a_thetav, const float a_phiv, glm:
 
 	a_S0_Mie = sunAmb_1 + skyAmb_1;
 	a_S0_Ray = sunAmb_2 + skyAmb_2;
+}
+
+void SkydomeRenderer::RenderInCache()
+{
+	if (mTextureCache != nullptr && !mIsCacheBuilt)
+	{
+
+		mIsCacheBuilt = true;
+	}
 }
 
 

@@ -16,6 +16,7 @@ public:
 
 	Texture2D const * LoadTexture2D(std::string const &tiffFilename, GLenum wrapS = GL_REPEAT, GLenum wrapT = GL_REPEAT, bool generateMipMap = true);
 	CubeMapTexture const * LoadTextureCubeMap(std::string const & prefixFilename, bool generateMipMap = true);
+	CubeMapTexture const * CreateTextureCubeMap(std::string const & textureBaseName, GLsizei textureSize, GLint internalFormat = GL_RGBA, bool generateMipMap = true);
 
 	struct LoadTextureGroupDesc
 	{
@@ -42,7 +43,7 @@ public:
 
 public:
 	
-	static bool LoadTiffImage(std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth = nullptr, uint32_t * desiredHeight = nullptr, bool invertY = true);
+	static bool LoadTiffImage(GLsizei & width, GLsizei & height, std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth = nullptr, uint32_t * desiredHeight = nullptr, bool invertY = true);
 
 	static bool GetTiffImageSize(std::string const &tiffFilename, uint32_t & imgWidth, uint32_t & imgHeight);
 
@@ -103,8 +104,8 @@ private:
 		glDeleteTextures((GLsizei)count, ids.data());
 	}
 
-	bool LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, GLenum wrapS = GL_REPEAT, GLenum wrapT = GL_REPEAT, bool generateMipMap = true);
-	bool LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::string tiffFilenames[6], bool generateMipMap = true);
+	bool LoadTiffTex2D(GLuint & id, GLenum & target, GLsizei & width, GLsizei & height, std::string const &tiffFilename, GLenum wrapS = GL_REPEAT, GLenum wrapT = GL_REPEAT, bool generateMipMap = true);
+	bool LoadTiffTexCubeMap(GLuint & id, GLenum & target, GLsizei & width, GLsizei & height, std::string tiffFilenames[6], bool generateMipMap = true);
 
 	void InitializePerlinNoise();
 

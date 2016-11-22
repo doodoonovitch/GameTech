@@ -108,19 +108,20 @@ void TextureManager::Initialize()
 
 	GLuint id = 0;
 	GLenum target;
+	GLsizei width, height;
 
-	if (!LoadTiffTex2D(id, target, filename, GL_REPEAT, GL_REPEAT, true))
+	if (!LoadTiffTex2D(id, target, width, height, filename, GL_REPEAT, GL_REPEAT, true))
 	{
-		GLsizei w = 128, h = 128;
-		GLubyte* pData = (GLubyte*)malloc(w * h * 4);
+		width = 128; height = 128;
+		GLubyte* pData = (GLubyte*)malloc(width * height * 4);
 
 		RGBA* ptr = (RGBA*)pData;
-		for (auto i = 0; i < h; ++i)
+		for (auto i = 0; i < height; ++i)
 		{
-			float k = (float)i / (float)h;
+			float k = (float)i / (float)height;
 			GLubyte c = (GLubyte)(k * 255);
 			GLubyte a = c < 4 ? 4 : c;
-			for (auto j = 0; j < w; ++j)
+			for (auto j = 0; j < width; ++j)
 			{
 				*ptr++ = RGBA(c, c, 255, a);
 			}
@@ -130,12 +131,12 @@ void TextureManager::Initialize()
 
 		glGenTextures(1, &id);
 		glBindTexture(target, id);
-		CreateTexStorage2D(target, w, h, pData, true, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+		CreateTexStorage2D(target, width, height, pData, true, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 		glBindTexture(target, 0);
 		free(pData);
 	}
 
-	mDefault2D = new Texture2D(id, target);
+	mDefault2D = new Texture2D(width, height, id, target);
 
 	PRINT_MESSAGE("[TextureManager] Texture mDefault2D : %i.", id);
 
@@ -150,8 +151,9 @@ void TextureManager::Initialize()
 	filenames[4] = prefixFilename + "_+Z.tif";
 	filenames[5] = prefixFilename + "_-Z.tif";
 
-	if (!LoadTiffTexCubeMap(id, target, filenames, true))
+	if (!LoadTiffTexCubeMap(id, target, width, height, filenames, true))
 	{
+		width = 2; height = 2;
 		target = GL_TEXTURE_CUBE_MAP;
 		glGenTextures(1, &id);
 		glBindTexture(target, id);
@@ -179,13 +181,12 @@ void TextureManager::Initialize()
 		for (int i = 0; i < 6; ++i)
 		{
 			memset(buffer, colors[i], sizeof(buffer));
-			CreateTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 2, 2, buffer, false);
-			//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+			CreateTexStorage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, width, height, buffer, false);
 		}
 
 		glBindTexture(target, 0);
 	}
-	mDefaultCubeMap = new CubeMapTexture(id, target);
+	mDefaultCubeMap = new CubeMapTexture(width, height, id, target);
 
 }
 
@@ -223,11 +224,11 @@ void TextureManager::CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, c
 	GL_CHECK_ERRORS;
 }
 
-bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, std::string const &tiffFilename, GLenum wrapS, GLenum wrapT, bool generateMipMap)
+bool TextureManager::LoadTiffTex2D(GLuint & id, GLenum & target, GLsizei & width, GLsizei & height, std::string const &tiffFilename, GLenum wrapS, GLenum wrapT, bool generateMipMap)
 {
 	id = 0;
 	target = GL_TEXTURE_2D;
-	bool loaded = LoadTiffImage(tiffFilename, [&id, target, wrapS, wrapT, generateMipMap](uint32_t w, uint32_t h, const uint32_t * raster)
+	bool loaded = LoadTiffImage(width, height, tiffFilename, [&id, target, wrapS, wrapT, generateMipMap](uint32_t w, uint32_t h, const uint32_t * raster)
 	{
 		glGenTextures(1, &id);
 		glBindTexture(target, id);
@@ -256,14 +257,14 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &tiffFilename,
 	{
 		GLuint id = 0;
 		GLenum target = GL_TEXTURE_2D;
-
-		if (LoadTiffTex2D(id, target, tiffFilename, wrapS, wrapT, generateMipMap))
+		GLsizei width, height;
+		if (LoadTiffTex2D(id, target, width, height, tiffFilename, wrapS, wrapT, generateMipMap))
 		{
-			returnTexture = new Texture2D(id, target);
+			returnTexture = new Texture2D(width, height, id, target);
 		}
 		else
 		{
-			returnTexture = new Texture2D(mDefault2D->GetResourceId(), mDefault2D->GetTarget());
+			returnTexture = new Texture2D(mDefault2D->GetWidth(), mDefault2D->GetHeight(), mDefault2D->GetResourceId(), mDefault2D->GetTarget());
 		}
 		m2DTexMap[s] = returnTexture;
 	}
@@ -271,32 +272,31 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &tiffFilename,
 	return returnTexture;
 }
 
-bool TextureManager::LoadTiffImage(std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth, uint32_t * desiredHeight, bool invertY)
+bool TextureManager::LoadTiffImage(GLsizei & width, GLsizei & height, std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth, uint32_t * desiredHeight, bool invertY)
 {
 	bool loaded = false;
 
 	TIFF* tif = TIFFOpen(tiffFilename.c_str(), "r");
 	if (tif)
 	{
-		uint32_t w, h;
 		size_t npixels;
 		uint32_t * raster;
 		if (desiredWidth != nullptr)
-			w = *desiredWidth;
+			width = *desiredWidth;
 		else
-			TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+			TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
 		if (desiredHeight != nullptr)
-			h = *desiredHeight;
+			height = *desiredHeight;
 		else
-			TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
-		npixels = w * h;
+			TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
+		npixels = width * height;
 		raster = (uint32*)_TIFFmalloc(npixels * sizeof(uint32));
 		if (raster != NULL)
 		{
-			if (TIFFReadRGBAImageOriented(tif, w, h, raster, invertY ? ORIENTATION_TOPLEFT : ORIENTATION_BOTLEFT, 0))
+			if (TIFFReadRGBAImageOriented(tif, width, height, raster, invertY ? ORIENTATION_TOPLEFT : ORIENTATION_BOTLEFT, 0))
 			{
 				if(func != nullptr)
-					func(w, h, raster);
+					func(width, height, raster);
 				loaded = true;
 			}
 			else
@@ -319,7 +319,7 @@ bool TextureManager::LoadTiffImage(std::string const &tiffFilename, std::functio
 	return loaded;
 }
 
-bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::string tiffFilenames[6], bool generateMipMap)
+bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, GLsizei & width, GLsizei & height, std::string tiffFilenames[6], bool generateMipMap)
 {
 	target = GL_TEXTURE_CUBE_MAP;
 	glGenTextures(1, &id);
@@ -329,7 +329,7 @@ bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::strin
 	{
 		uint32_t desiredW = 0, desiredH = 0;
 		GLenum trg = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
-		bool loaded = LoadTiffImage(tiffFilenames[i], [trg, &desiredW, &desiredH](uint32_t w, uint32_t h, const uint32_t * raster)
+		bool loaded = LoadTiffImage(width, height, tiffFilenames[i], [trg, &desiredW, &desiredH](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
 			//CreateTexStorage2D(trg, w, h, raster, true);
 			glTexImage2D(trg, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, raster);
@@ -357,9 +357,6 @@ bool TextureManager::LoadTiffTexCubeMap(GLuint & id, GLenum & target, std::strin
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-	//if (generateMipMap)
-	//	glGenerateMipmap(target);
 
 	glBindTexture(target, 0);
 
@@ -392,19 +389,75 @@ CubeMapTexture const * TextureManager::LoadTextureCubeMap(std::string const & pr
 		filenames[4] = prefixFilename + "_+Z.tif";
 		filenames[5] = prefixFilename + "_-Z.tif";
 
-		if (LoadTiffTexCubeMap(id, target, filenames, generateMipMap))
+		GLsizei width, height;
+
+		if (LoadTiffTexCubeMap(id, target, width, height, filenames, generateMipMap))
 		{
-			returnTexture = new CubeMapTexture(id, target);
+			returnTexture = new CubeMapTexture(width, height, id, target);
 		}
 		else
 		{
-			returnTexture = new CubeMapTexture(mDefaultCubeMap->GetResourceId(), mDefaultCubeMap->GetTarget());
+			returnTexture = new CubeMapTexture(mDefaultCubeMap->GetWidth(), mDefaultCubeMap->GetHeight(), mDefaultCubeMap->GetResourceId(), mDefaultCubeMap->GetTarget());
 		}
 		mCubeMapTexMap[s] = returnTexture;
 	}
 	
 	return returnTexture;
 }
+
+CubeMapTexture const * TextureManager::CreateTextureCubeMap(std::string const & textureBaseName, GLsizei textureSize, GLint internalFormat, bool generateMipMap)
+{
+	CubeMapTexture * returnTexture = nullptr;
+
+	GLuint id = 0;
+	GLenum target = GL_TEXTURE_CUBE_MAP;
+
+	GLsizei numLevels = generateMipMap ? (GLsizei)(1 + floor(log2(textureSize))) : 1;
+
+	glGenTextures(1, &id);
+	glBindTexture(target, id);
+
+	for (int i = 0; i < 6; ++i)
+	{
+		GLenum trg = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+		glTexStorage2D(trg, numLevels, internalFormat, textureSize, textureSize);
+		//glTexImage2D(trg, 0, internalFormat, textureSize, textureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	}
+
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	if (generateMipMap)
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	else
+		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	glBindTexture(target, 0);
+	
+	returnTexture = new CubeMapTexture(textureSize, textureSize, id, target);
+	const size_t bufferSize = 60;
+	char tmp[bufferSize + 1];
+	int ret = sprintf_s(tmp, bufferSize, "_%p", returnTexture);
+	std::string name;
+	if (ret != -1)
+	{
+		tmp[ret] = 0;
+		name = textureBaseName + tmp;
+	}
+	else
+	{
+		name = textureBaseName + "_some_errors_has_occured";
+	}
+
+	mCubeMapTexMap[name] = returnTexture;
+
+	return returnTexture;
+}
+
 
 void TextureManager::ReleaseTexture2D(Texture2D const *& texture)
 {
@@ -432,7 +485,7 @@ Texture2DArray const * TextureManager::CreateTexture2DArray(GLsizei mipMapCount,
 
 	glBindTexture(target, 0); GL_CHECK_ERRORS;
 
-	Texture2DArray * texture = new Texture2DArray(id, target);
+	Texture2DArray * texture = new Texture2DArray(width, height, depth, id, target);
 	mTex2DArrayMap[texture] = texture;
 
 	return texture;
@@ -470,7 +523,8 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, co
 	for (int index = 0; index < layerCount; ++index)
 	{
 		const LoadTextureGroupDesc & texDesc = list[index];
-		bool loaded = LoadTiffImage(texDesc.mFilename, [target, index, &texDesc, groupId](uint32_t w, uint32_t h, const uint32_t * raster)
+		GLsizei w, h;
+		bool loaded = LoadTiffImage(w, h, texDesc.mFilename, [target, index, &texDesc, groupId](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
 			glTexSubImage3D(target, 0, 0, 0, index, w, h, 1, GL_RGBA, GL_UNSIGNED_BYTE, raster); GL_CHECK_ERRORS;
 			PRINT_MESSAGE("[LoadTextureGroup] Texture group '%I64x' (Cat=%i) : image '%s' loaded.", groupId, (int)TextureInfo::GetCategoryFromGroupId(groupId), texDesc.mFilename.c_str());
@@ -592,7 +646,7 @@ void TextureManager::InitializePerlinNoise()
 
 		glBindTexture(target, 0);
 
-		mPerlinNoisePermutation = new Texture1D(id, target);
+		mPerlinNoisePermutation = new Texture1D(256, id, target);
 	}
 
 	{
@@ -630,7 +684,7 @@ void TextureManager::InitializePerlinNoise()
 
 		delete[] permutation2D;
 
-		mPerlinNoisePermutation2D = new Texture2D(id, target);
+		mPerlinNoisePermutation2D = new Texture2D(256, 256, id, target);
 	}
 
 	static float gradients[] =
@@ -671,7 +725,7 @@ void TextureManager::InitializePerlinNoise()
 
 		glBindTexture(target, 0);
 
-		mPerlinNoiseGradient = new Texture1D(id, target);
+		mPerlinNoiseGradient = new Texture1D(16, id, target);
 	}
 
 	{
@@ -699,7 +753,7 @@ void TextureManager::InitializePerlinNoise()
 
 		glBindTexture(target, 0);
 
-		mPerlinNoisePermutationGradient = new Texture1D(id, target);
+		mPerlinNoisePermutationGradient = new Texture1D(256, id, target);
 	}
 
 	// gradients for 4D noise
@@ -758,7 +812,7 @@ void TextureManager::InitializePerlinNoise()
 
 		glBindTexture(target, 0);
 
-		mPerlinNoiseGradient4D = new Texture1D(id, target);
+		mPerlinNoiseGradient4D = new Texture1D(32, id, target);
 	}
 
 	{
@@ -786,7 +840,7 @@ void TextureManager::InitializePerlinNoise()
 
 		glBindTexture(target, 0);
 
-		mPerlinNoisePermutationGradient4D = new Texture1D(id, target);
+		mPerlinNoisePermutationGradient4D = new Texture1D(256, id, target);
 	}
 
 }
