@@ -541,9 +541,7 @@ void Engine::InternalRenderObjects()
 		{
 			if (!mSkybox->IsHDR() && mSkybox->GetIsInitialized())
 			{
-				glDisable(GL_CULL_FACE);
 				mSkybox->Render();
-				glEnable(GL_CULL_FACE);
 			}
 		}
 

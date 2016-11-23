@@ -58,7 +58,8 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
 //#define PERLIN_NOISE_OCEAN_SAMPLE
-#define SKYDOME_SAMPLE
+//#define SKYDOME_SAMPLE
+#define SKYBOX_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
 
@@ -187,10 +188,15 @@ void SimpleCamera::OnInit()
 		}
 #endif // GERSTNER_WAVE_OCEAN_SAMPLE
 
+#ifdef SKYBOX_SAMPLE
+		{
+			Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/Skybox1");
+			engine->AttachSkyboxRenderer(skybox);
+		}
+#endif
+
 #ifdef SKYDOME_SAMPLE
 		{
-			//Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/Skybox1");
-			//engine->AttachSkyboxRenderer(skybox);
 			mSkydome = new Renderers::SkydomeRenderer();
 			engine->AttachSkydomeRenderer(mSkydome);
 		}
@@ -332,7 +338,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 4;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(4, 3, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				

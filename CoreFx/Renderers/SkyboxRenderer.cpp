@@ -37,7 +37,13 @@ void SkyboxRenderer::Initialize()
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/skybox.vs.glsl");
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.forward.fs.glsl");
-	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.deferred.fs.glsl");
+
+	//std::vector<std::string> shaderFilenames(2);
+	//shaderFilenames[0] = "shaders/DeferredShadingCommon.incl.glsl";
+	//shaderFilenames[1] = "shaders/skybox.deferred.fs.glsl";
+	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
+
+
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddUniforms(uniformNames, __uniforms_count__);

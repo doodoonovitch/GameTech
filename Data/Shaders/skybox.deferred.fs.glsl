@@ -1,6 +1,5 @@
-layout(location = 0) out vec4 outNormalAndEmissive;
-layout(location = 1) out uvec4 outAlbedoAndStatus;
-layout(location = 2) out uint outRoughnessAndOthers;
+layout(location = 0) out vec3 outNormal;
+layout(location = 1) out uvec4 outUI32Buffer1;
 
 uniform samplerCube u_SkyboxCubeMapSampler;
 
@@ -11,7 +10,14 @@ in VS_OUT
 
 void main(void)
 {
-	vec3 color = texture(u_SkyboxCubeMapSampler, fs_in.TexCoords).rgb;
-	WriteOutData(outAlbedoAndStatus, outRoughnessAndOthers, SKYBOX_RENDERER_ID , mat.DiffuseColor, .0f, 0.f, 0.f);
-	outNormalAndEmissive = vec4(0);
+	MaterialData mat;
+
+	mat.mBaseColor = vec3(0);
+	mat.mMetallic = 0;
+	mat.mRoughness = 0;
+	mat.mPorosity = 0;
+	mat.mEmissive = texture(u_SkyboxCubeMapSampler, fs_in.TexCoords).rgb;
+	mat.mRendererId = SKYBOX_RENDERER_ID;
+
+	EncodeMaterialData(outUI32Buffer1, mat);
 }
