@@ -9,9 +9,9 @@ namespace CoreFx
 
 
 
-SkydomeRenderer::SkydomeRenderer(const int rings, const int segments, CubeMapTexture const * textureCache)
+SkydomeRenderer::SkydomeRenderer(const int rings, const int segments, bool useTextureCache)
 	: RendererHelper<2>("SkydomeRenderer", "SkydomeWireFrameRenderer", Renderer::Forward_Pass)
-	, mTextureCache(textureCache)
+	, mTextureCache(nullptr)
 {
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize SkydomeRenderer.....");
@@ -52,12 +52,12 @@ SkydomeRenderer::SkydomeRenderer(const int rings, const int segments, CubeMapTex
 	const glm::vec3 zenith(0.f, 1.f, 0.f);
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/skydome.vs.glsl");
-	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skydome.forward.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skydome.forward.fs.glsl");
 
-	std::vector<std::string> shaderFilenames(2);
-	shaderFilenames[0] = "shaders/DeferredShadingCommon.incl.glsl";
-	shaderFilenames[1] = "shaders/skydome.deferred.fs.glsl";
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
+	//std::vector<std::string> shaderFilenames(2);
+	//shaderFilenames[0] = "shaders/DeferredShadingCommon.incl.glsl";
+	//shaderFilenames[1] = "shaders/skydome.deferred.fs.glsl";
+	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, shaderFilenames);
 
 	mShader.CreateAndLinkProgram();
 
@@ -109,7 +109,9 @@ SkydomeRenderer::SkydomeRenderer(const int rings, const int segments, CubeMapTex
 
 	GL_CHECK_ERRORS;
 
-	mIsInitialized = true;
+
+
+	mIsInitialized = useTextureCache ? InitializeSkydomeTextureCache() : true;
 
 	PRINT_MESSAGE(".....SkydomeRenderer initialized!\n");
 	PRINT_END_SECTION;
@@ -117,6 +119,7 @@ SkydomeRenderer::SkydomeRenderer(const int rings, const int segments, CubeMapTex
 
 SkydomeRenderer::~SkydomeRenderer()
 {
+	SAFE_DELETE_ARRAY(mCubeMapProjMatrix);
 }
 
 void SkydomeRenderer::CreateGeometry(std::vector<glm::vec3> & vertices, std::vector<GLushort> & indices, GLfloat radius_, const GLfloat height_, const int rings_, const int segments_)
@@ -206,14 +209,16 @@ void SkydomeRenderer::UpdatePreethamScatterParams()
 
 void SkydomeRenderer::Render()
 {
-	mShader.Use();
-	UpdatePreethamScatterParams();
-		glBindVertexArray(mVaoID);
-			glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
-		glBindVertexArray(0);
-	mShader.UnUse();
+	if (UseCache())
+	{
+
+	}
+	else
+	{
+		RenderDome();
+	}
 }
- 
+
 void SkydomeRenderer::RenderWireFrame()
 {
 	mWireFrameShader.Use();
@@ -682,15 +687,90 @@ void SkydomeRenderer::CalculateS0(const float a_thetav, const float a_phiv, glm:
 	a_S0_Ray = sunAmb_2 + skyAmb_2;
 }
 
-void SkydomeRenderer::RenderInCache()
+
+void SkydomeRenderer::RenderDome()
+{
+	mShader.Use();
+	UpdatePreethamScatterParams();
+	glBindVertexArray(mVaoID);
+	glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
+	glBindVertexArray(0);
+	mShader.UnUse();
+}
+
+
+void SkydomeRenderer::RenderCache()
 {
 	if (mTextureCache != nullptr && !mIsCacheBuilt)
 	{
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+
+		mShader.Use();
+		UpdatePreethamScatterParams();
+		glBindVertexArray(mVaoID);
+		glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, mTextureCacheRenderFBOs);
+		for (int face = 0; face < 6; ++face)
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mTextureCache->GetResourceId(), 0);
+			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mTextureCacheRenderDepthBuffer);
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindVertexArray(0);
+		mShader.UnUse();
 
 		mIsCacheBuilt = true;
 	}
 }
 
+bool SkydomeRenderer::InitializeSkydomeTextureCache()
+{
+	Engine * engine = Engine::GetInstance();
+	mTextureCache = engine->GetTextureManager()->CreateTextureCubeMap("SkyMap", 512, GL_RGB16F, false);
+
+	mCubeMapProjMatrix = new glm::mat4[6];
+	
+	const glm::vec3 X(1.f, 0.f, 0.f);
+	const glm::vec3 Y(0.f, 1.f, 0.f);
+	const glm::vec3 Z(0.f, 0.f, 1.f);
+	const glm::vec3 O(0.f, 0.f, 0.f);
+
+	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_POSITIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, X, Y);
+	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_NEGATIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, -X, Y);
+	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_POSITIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, Y, X);
+	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_NEGATIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, -Y, X);
+	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_POSITIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, Z, Y);
+	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, -Z, Y);
+
+	glm::mat4 projMatrix = glm::perspective(glm::half_pi<GLfloat>(), 1.f, 1.f, 1000.f);
+	for (int i = 0; i < 6; ++i)
+	{
+		mCubeMapProjMatrix[i] = projMatrix * mCubeMapProjMatrix[i];
+	}
+
+	glGenFramebuffers(1, &mTextureCacheRenderFBOs);
+	glBindFramebuffer(GL_FRAMEBUFFER, mTextureCacheRenderFBOs);
+	
+	glGenRenderbuffers(1, &mTextureCacheRenderDepthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, mTextureCacheRenderDepthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH, mTextureCache->GetWidth(), mTextureCache->GetHeight());
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mTextureCacheRenderDepthBuffer);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		PRINT_ERROR("Skydome cache texture frame buffer initialization has failed!");
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return true;
+}
 
 	} // namespace Renderers
 } // namespace CoreFx

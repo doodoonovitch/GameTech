@@ -340,26 +340,26 @@ void Engine::InternalRenderObjects()
 		}			
 	});
 
-	// -----------------------------------------------------------------------
-	// Render sky box / sky dome
-	// -----------------------------------------------------------------------
+	//// -----------------------------------------------------------------------
+	//// Render sky box / sky dome
+	//// -----------------------------------------------------------------------
 
-	glDepthMask(GL_FALSE);
-	glDepthFunc(GL_LEQUAL);
-	if (mSkybox != nullptr)
-	{
-		if (mSkybox->GetIsInitialized())
-		{
-			mSkybox->Render();
-		}
-	}
-	else if (mSkydome != nullptr)
-	{
-		if (mSkydome->GetIsInitialized())
-		{
-			mSkydome->Render();
-		}
-	}
+	//glDepthMask(GL_FALSE);
+	//glDepthFunc(GL_LEQUAL);
+	//if (mSkybox != nullptr)
+	//{
+	//	if (mSkybox->GetIsInitialized())
+	//	{
+	//		mSkybox->Render();
+	//	}
+	//}
+	//else if (mSkydome != nullptr)
+	//{
+	//	if (mSkydome->GetIsInitialized())
+	//	{
+	//		mSkydome->Render();
+	//	}
+	//}
 
 	// -----------------------------------------------------------------------
 	// SSAO pass
@@ -472,6 +472,27 @@ void Engine::InternalRenderObjects()
 		mDeferredShader.UnUse();
 
 		// -----------------------------------------------------------------------
+		// HDR skydome / skybox render
+		// -----------------------------------------------------------------------
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+
+		if (mSkybox != nullptr)
+		{
+			if (mSkybox->IsHDR() && mSkybox->GetIsInitialized())
+			{
+				mSkybox->Render();
+			}
+		}
+		else if (mSkydome != nullptr)
+		{
+			if (mSkydome->GetIsInitialized())
+			{
+				mSkydome->Render();
+			}
+		}
+
+		// -----------------------------------------------------------------------
 		// tone mapping pass
 		// -----------------------------------------------------------------------
 
@@ -515,6 +536,17 @@ void Engine::InternalRenderObjects()
 			if (mSpotLightPositionRenderer->GetIsInitialized())
 				mSpotLightPositionRenderer->Render();
 		}
+
+		if (mSkybox != nullptr)
+		{
+			if (!mSkybox->IsHDR() && mSkybox->GetIsInitialized())
+			{
+				glDisable(GL_CULL_FACE);
+				mSkybox->Render();
+				glEnable(GL_CULL_FACE);
+			}
+		}
+
 
 		// -----------------------------------------------------------------------
 		// wire frame pass

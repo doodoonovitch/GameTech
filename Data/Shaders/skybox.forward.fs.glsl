@@ -9,5 +9,5 @@ in VS_OUT
 
 void main(void)
 {
-	outColor = texture(u_SkyboxCubeMapSampler, fs_in.TexCoords);
+	outColor = texture(u_SkyboxCubeMapSampler, normalize(fs_in.TexCoords));
 }

@@ -13,7 +13,8 @@ namespace CoreFx
 class SkydomeRenderer : public RendererHelper<2>
 {
 public:
-	SkydomeRenderer(const int rings = 128, const int segments = 128, CubeMapTexture const * textureCache = nullptr);
+	SkydomeRenderer(const int rings = 128, const int segments = 128, bool useTextureCache = false);
+
 	virtual ~SkydomeRenderer();
 
 	virtual void Render() override;
@@ -24,6 +25,10 @@ public:
 
 	bool IsCacheBuilt() const { return mIsCacheBuilt; }
 	bool UseCache() const { return mTextureCache != nullptr; }
+
+	CubeMapTexture const * GetCache() const { return mTextureCache; }
+
+	void RenderCache();
 
 public:
 
@@ -101,7 +106,9 @@ protected:
 
 	void UpdatePreethamScatterParams();
 
-	void RenderInCache();
+	void RenderDome();
+
+	bool InitializeSkydomeTextureCache();
 
 private:
 
@@ -212,6 +219,9 @@ private:
 	glm::vec4 mConstants;       //!< Shader constants
 
 	CubeMapTexture const * mTextureCache = nullptr;
+	glm::mat4 * mCubeMapProjMatrix = nullptr;
+	GLuint mTextureCacheRenderFBOs = 0;
+	GLuint mTextureCacheRenderDepthBuffer = 0;
 	bool mIsCacheBuilt = false;
 };
 

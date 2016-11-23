@@ -160,6 +160,10 @@ void Engine::InternalCreateHdrBuffers()
 	PRINT_GEN_FRAMEBUFFER("[Engine]", mFBOs[HDR_FBO]);
 	PRINT_GEN_TEXTURE("[Engine]", mHdrBuffer);
 
+	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer], 0);
+	GL_CHECK_ERRORS;
+
 	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

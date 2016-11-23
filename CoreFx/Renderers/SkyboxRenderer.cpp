@@ -8,10 +8,23 @@ namespace CoreFx
 	{
 
 
+SkyboxRenderer::SkyboxRenderer(CubeMapTexture const * skyboxCubeMapTexture, bool isHDR)
+	: RendererHelper<1>("SkyboxRenderer", "SkyboxWireFrameRenderer", Renderer::Forward_Pass)
+	, mCubeMapTexture(skyboxCubeMapTexture)
+	, mIsHDR(isHDR)
+{
+	Initialize();
+}
 
-	SkyboxRenderer::SkyboxRenderer(const std::string & skyboxCubeMapTextureFilename)
-		: RendererHelper<1>("SkyboxRenderer", "SkyboxWireFrameRenderer", Renderer::Forward_Pass)
-		, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(skyboxCubeMapTextureFilename))
+SkyboxRenderer::SkyboxRenderer(const std::string & skyboxCubeMapTextureFilename, bool isHDR)
+	: RendererHelper<1>("SkyboxRenderer", "SkyboxWireFrameRenderer", Renderer::Forward_Pass)
+	, mCubeMapTexture(Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap(skyboxCubeMapTextureFilename))
+	, mIsHDR(isHDR)
+{
+	Initialize();
+}
+
+void SkyboxRenderer::Initialize()
 {
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize SkyboxRenderer.....");
@@ -23,8 +36,8 @@ namespace CoreFx
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/skybox.vs.glsl");
-	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.forward.fs.glsl");
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.deferred.fs.glsl");
+	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.forward.fs.glsl");
+	//mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/skybox.deferred.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddUniforms(uniformNames, __uniforms_count__);
