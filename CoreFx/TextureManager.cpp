@@ -420,12 +420,8 @@ CubeMapTexture const * TextureManager::CreateTextureCubeMap(std::string const & 
 	glGenTextures(1, &id);
 	glBindTexture(target, id);
 
-	for (int i = 0; i < 6; ++i)
-	{
-		GLenum trg = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
-		glTexStorage2D(trg, numLevels, internalFormat, textureSize, textureSize);
-		//glTexImage2D(trg, 0, internalFormat, textureSize, textureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-	}
+	glTexStorage2D(target, numLevels, internalFormat, textureSize, textureSize);
+	GL_CHECK_ERRORS;
 
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -437,10 +433,10 @@ CubeMapTexture const * TextureManager::CreateTextureCubeMap(std::string const & 
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
 	glBindTexture(target, 0);
-	
+
+	//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		
 	returnTexture = new CubeMapTexture(textureSize, textureSize, id, target);
 	const size_t bufferSize = 60;
 	char tmp[bufferSize + 1];
