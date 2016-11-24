@@ -13,7 +13,7 @@ namespace CoreFx
 class SkydomeRenderer : public RendererHelper<2>
 {
 public:
-	SkydomeRenderer(const int rings = 128, const int segments = 128, bool useTextureCache = false);
+	SkydomeRenderer(bool useTextureCache = false, GLsizei cacheTextureSize = 512, const int rings = 128, const int segments = 128);
 
 	virtual ~SkydomeRenderer();
 
@@ -23,12 +23,12 @@ public:
 	void SetSunDirection(const glm::vec3 sunDirection);
 	const glm::vec3 & GetSunDirection() const { return mSunDirection; }
 
-	bool IsCacheBuilt() const { return mIsCacheBuilt; }
-	bool UseCache() const { return mTextureCache != nullptr; }
+	bool IsCacheRebuildRequired() const { return (mCache != nullptr) ? (!mCache->mIsBuilt) : false; }
+	bool UseCache() const { return mCache != nullptr; }
 
-	CubeMapTexture const * GetCache() const { return mTextureCache; }
+	CubeMapTexture const * GetCacheTexture() const { return mCache != nullptr ? mCache->mCubeMapTexture : nullptr; }
 
-	void RenderCache();
+	bool RenderCache();
 
 public:
 
@@ -107,8 +107,6 @@ protected:
 	void UpdatePreethamScatterParams();
 
 	void RenderDome();
-
-	bool InitializeSkydomeTextureCache();
 
 private:
 
@@ -218,11 +216,27 @@ private:
 	glm::vec3 mBetaPAng;        //!< Mie angular scattering coefficient
 	glm::vec4 mConstants;       //!< Shader constants
 
-	CubeMapTexture const * mTextureCache = nullptr;
-	glm::mat4 * mCubeMapProjMatrix = nullptr;
-	GLuint mTextureCacheRenderFBOs = 0;
-	GLuint mTextureCacheRenderDepthBuffer = 0;
-	bool mIsCacheBuilt = false;
+	struct Cache
+	{
+		SkyboxRenderer * mSkyboxRenderer = nullptr;
+		CubeMapTexture const * mCubeMapTexture = nullptr;
+		glm::mat4 * mCubeMapProjMatrix = nullptr;
+		GLuint mFBOs = 0;
+		GLuint mDepthBuffer = 0;
+		bool mIsBuilt = false;
+
+		Cache();
+		~Cache();
+		bool Initialize(GLsizei cacheTextureSize);
+	};
+
+	Cache * mCache = nullptr;
+
+	//CubeMapTexture const * mTextureCache = nullptr;
+	//glm::mat4 * mCubeMapProjMatrix = nullptr;
+	//GLuint mTextureCacheRenderFBOs = 0;
+	//GLuint mTextureCacheRenderDepthBuffer = 0;
+	//bool mIsCacheBuilt = false;
 };
 
 

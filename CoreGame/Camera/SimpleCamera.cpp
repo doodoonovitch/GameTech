@@ -58,8 +58,8 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
 //#define PERLIN_NOISE_OCEAN_SAMPLE
-//#define SKYDOME_SAMPLE
-#define SKYBOX_SAMPLE
+#define SKYDOME_SAMPLE
+//#define SKYBOX_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
 
@@ -197,7 +197,7 @@ void SimpleCamera::OnInit()
 
 #ifdef SKYDOME_SAMPLE
 		{
-			mSkydome = new Renderers::SkydomeRenderer();
+			mSkydome = new Renderers::SkydomeRenderer(true);
 			engine->AttachSkydomeRenderer(mSkydome);
 		}
 #endif // SKYDOME_SAMPLE

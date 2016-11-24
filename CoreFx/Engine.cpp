@@ -295,6 +295,17 @@ void Engine::InternalComputePass()
 
 void Engine::InternalRenderObjects()
 {
+	if (mSkydome != nullptr)
+	{
+		if (mSkydome->GetIsInitialized() && mSkydome->IsCacheRebuildRequired())
+		{
+			if (mSkydome->RenderCache())
+			{
+				glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+			}
+		}
+	}
+
 	//glFinish();
 
 	mRenderers->ForEach([](Renderer * renderer)
