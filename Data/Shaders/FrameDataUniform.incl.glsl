@@ -7,6 +7,8 @@ layout (std140, shared) uniform FrameData
 		
 	mat4 u_ViewMatrix;
 
+	mat4 u_ViewProjMatrix;
+
 	DualQuat u_ViewDQ;
 
 	vec4 u_ViewPosition;

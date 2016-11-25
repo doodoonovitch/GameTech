@@ -13,7 +13,7 @@ namespace CoreFx
 class SkydomeRenderer : public RendererHelper<2>
 {
 public:
-	SkydomeRenderer(bool useTextureCache = false, GLsizei cacheTextureSize = 512, const int rings = 128, const int segments = 128);
+	SkydomeRenderer(bool useTextureCache = false, GLsizei cacheTextureSize = 256, const int rings = 128, const int segments = 128);
 
 	virtual ~SkydomeRenderer();
 
@@ -23,8 +23,9 @@ public:
 	void SetSunDirection(const glm::vec3 sunDirection);
 	const glm::vec3 & GetSunDirection() const { return mSunDirection; }
 
-	bool IsCacheRebuildRequired() const { return (mCache != nullptr) ? (!mCache->mIsBuilt) : false; }
+	bool IsCacheInvalidated() const { return (mCache != nullptr) ? (!mCache->mIsBuilt) : false; }
 	bool UseCache() const { return mCache != nullptr; }
+	void InvalidateCache() { if(mCache != nullptr) mCache->mIsBuilt = false; }
 
 	CubeMapTexture const * GetCacheTexture() const { return mCache != nullptr ? mCache->mCubeMapTexture : nullptr; }
 
@@ -122,6 +123,7 @@ private:
 		u_D,
 		u_E,
 		u_colorConvMat,
+		u_VPMatrix,
 
 		__uniforms_count__
 	};
@@ -231,12 +233,6 @@ private:
 	};
 
 	Cache * mCache = nullptr;
-
-	//CubeMapTexture const * mTextureCache = nullptr;
-	//glm::mat4 * mCubeMapProjMatrix = nullptr;
-	//GLuint mTextureCacheRenderFBOs = 0;
-	//GLuint mTextureCacheRenderDepthBuffer = 0;
-	//bool mIsCacheBuilt = false;
 };
 
 

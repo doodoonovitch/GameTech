@@ -12,6 +12,7 @@ uniform vec3    u_E;
 uniform mat3	u_colorConvMat;
 //uniform float   u_exposure;
 
+uniform mat4	u_VPMatrix;
 
 out VS_OUT
 {
@@ -60,6 +61,6 @@ void main()
 	//                                               
 	// Transform vertex                              
 	//                                               
-	vec4 pos = u_ProjMatrix * u_ViewMatrix * vec4(in_Position, 0);
+	vec4 pos = u_VPMatrix * vec4(in_Position, 0);
 	gl_Position = pos.xyww;
 }

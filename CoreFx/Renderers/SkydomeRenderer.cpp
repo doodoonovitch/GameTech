@@ -18,7 +18,6 @@ SkydomeRenderer::Cache::~Cache()
 	Engine::GetInstance()->GetTextureManager()->ReleaseCubeMapTexture(mCubeMapTexture);
 	glDeleteFramebuffers(1, &mFBOs); mFBOs = 0;
 	glDeleteRenderbuffers(1, &mDepthBuffer); mDepthBuffer = 0;
-	//glDeleteTextures(1, &mDepthBuffer); mDepthBuffer = 0;
 	mIsBuilt = false;
 }
 
@@ -34,9 +33,7 @@ bool SkydomeRenderer::Cache::Initialize(GLsizei cacheTextureSize)
 	const glm::vec3 Z(0.f, 0.f, 1.f);
 	const glm::vec3 O(0.f, 0.f, 0.f);
 	const glm::vec3 s(1.f, -1.f, 1.f);
-	const glm::mat4 scaleMatrix(glm::vec4(1.f, 0.f, 0.f, 0.f), glm::vec4(0.f, -1.f, 0.f, 0.f), glm::vec4(0.f, 0.f, 1.f, 0.f), glm::vec4(0.f, 0.f, 0.f, 1.f));
-
-
+	
 	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_POSITIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, X, -Y);
 	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_NEGATIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, -X, -Y);
 	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_POSITIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, Y, Z);
@@ -44,10 +41,10 @@ bool SkydomeRenderer::Cache::Initialize(GLsizei cacheTextureSize)
 	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_POSITIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, Z, -Y);
 	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, -Z, -Y);
 
-	glm::mat4 projMatrix = glm::perspective(glm::half_pi<GLfloat>(), 1.f, 1.f, 1000.f);
+	glm::mat4 projMatrix = glm::perspective(glm::half_pi<GLfloat>(), 1.f, 1.f, 100.f);
 	for (int i = 0; i < 6; ++i)
 	{
-		mCubeMapProjMatrix[i] = scaleMatrix * projMatrix * mCubeMapProjMatrix[i];
+		mCubeMapProjMatrix[i] = projMatrix * mCubeMapProjMatrix[i];
 	}
 
 	glGenFramebuffers(1, &mFBOs);
@@ -63,6 +60,16 @@ bool SkydomeRenderer::Cache::Initialize(GLsizei cacheTextureSize)
 	{
 		PRINT_ERROR("Skydome cache texture frame buffer initialization has failed!");
 	}
+
+	// clear texture
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	for (int face = 0; face < 6; ++face)
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mCubeMapTexture->GetResourceId(), 0);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	mSkyboxRenderer = new SkyboxRenderer(mCubeMapTexture, true);
@@ -109,6 +116,7 @@ SkydomeRenderer::SkydomeRenderer(bool useTextureCache, GLsizei cacheTextureSize,
 		"u_D",
 		"u_E",
 		"u_colorConvMat",
+		"u_VPMatrix"
 	};
 
 	const glm::vec3 zenith(0.f, 1.f, 0.f);
@@ -260,6 +268,7 @@ void SkydomeRenderer::SetSunDirection(const glm::vec3 sunDirection)
 { 
 	mSunDirection = sunDirection; 
 	SetSun(acos(mSunDirection.y), atan2(mSunDirection.z, mSunDirection.x));
+	InvalidateCache();
 }
 
 
@@ -291,6 +300,7 @@ void SkydomeRenderer::RenderWireFrame()
 {
 	mWireFrameShader.Use();
 		glBindVertexArray(mVaoID);
+		glUniformMatrix4fv(mShader.GetUniform(u_VPMatrix), 1, false, glm::value_ptr(Engine::GetInstance()->GetCamera()->GetViewProjectionMatrix()));
 			glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
 		glBindVertexArray(0);
 	mWireFrameShader.UnUse();
@@ -509,6 +519,8 @@ void SkydomeRenderer::SetTurbidity(const float turbidity)
 	}
 
 	ComputeAttenuatedSunlight();
+
+	InvalidateCache();
 }
 
 //-----------------------------------------------------------------------------
@@ -517,6 +529,7 @@ void SkydomeRenderer::SetTurbidity(const float turbidity)
 void SkydomeRenderer::SetScaleFactors(const float exposure, const float scaleInscatter)
 {
 	mConstants = glm::vec4(static_cast< float >(c_thetaBins), static_cast< float >(c_phiBins), exposure, scaleInscatter);
+	InvalidateCache();
 }
 
 
@@ -761,6 +774,7 @@ void SkydomeRenderer::RenderDome()
 	mShader.Use();
 	UpdatePreethamScatterParams();
 	glBindVertexArray(mVaoID);
+	glUniformMatrix4fv(mShader.GetUniform(u_VPMatrix), 1, false, glm::value_ptr(Engine::GetInstance()->GetCamera()->GetViewProjectionMatrix()));
 	glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
 	glBindVertexArray(0);
 	mShader.UnUse();
@@ -774,9 +788,9 @@ bool SkydomeRenderer::RenderCache()
 
 	glViewport(0, 0, mCache->mCubeMapTexture->GetWidth(), mCache->mCubeMapTexture->GetHeight());
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1);
 
+	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -787,13 +801,15 @@ bool SkydomeRenderer::RenderCache()
 	glBindFramebuffer(GL_FRAMEBUFFER, mCache->mFBOs);
 	for (int face = 0; face < 6; ++face)
 	{
+		if ((face + GL_TEXTURE_CUBE_MAP_POSITIVE_X) == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y)
+			continue;
+
+		glUniformMatrix4fv(mShader.GetUniform(u_VPMatrix), 1, false, glm::value_ptr(mCache->mCubeMapProjMatrix[face]));
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mCache->mCubeMapTexture->GetResourceId(), 0);
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mTextureCacheRenderDepthBuffer);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		if((GL_TEXTURE_CUBE_MAP_POSITIVE_X + face) == GL_TEXTURE_CUBE_MAP_POSITIVE_X)
-			glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

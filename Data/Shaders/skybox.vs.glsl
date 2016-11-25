@@ -10,7 +10,7 @@ out VS_OUT
 void main()
 {  
 	//vec4 pos = u_ProjMatrix * vec4(dqTransformNormal(in_Position, u_ViewDQ), 1);
-	vec4 pos = u_ProjMatrix * u_ViewMatrix * vec4(in_Position, 0);
+	vec4 pos = u_ViewProjMatrix * vec4(in_Position, 0);
 	gl_Position = pos.xyww;
 	vs_out.TexCoords = in_Position;
 }

@@ -26,6 +26,9 @@ void Camera::Update()
 	if (GetFrame()->IsModified())
 	{
 		mViewDQ =  GetFrame()->GetDualQuaternion().GetConjugate();
+		mView = mViewDQ.GetMatrix();
+		mViewProj = mProj * mView;
+
 		glm::mat4 m = GetFrame()->GetDualQuaternion().GetMatrix();
 		mRight = glm::normalize(glm::vec3(m[0]));
 		mUp = glm::normalize(glm::vec3(m[1]));
@@ -47,11 +50,6 @@ void Camera::SetupProjection(const float fovy, const float aspRatio, float zNear
 	mProj = glm::perspective(mFovY, mAspect, mNearZ, mFarZ);
 	mInvProj = glm::inverse(mProj);
 } 
-
-const glm::mat4 Camera::GetViewMatrix() const
-{
-	return mViewDQ.GetMatrix();
-}
 
 glm::mat4 Camera::GetMatrixUsingYawPitchRoll(const float yaw, const float pitch, const float roll)
 {	 

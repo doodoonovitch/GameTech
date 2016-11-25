@@ -240,7 +240,6 @@ void Engine::RenderObjects()
 	assert(buffer != nullptr);
 
 	glm::vec4 eyePos(mCamera->GetFrame()->GetPosition(), 1.f);
-	glm::mat4 viewMatrix(mCamera->GetViewMatrix());
 	glm::vec4 depthRangeFovAspect(mCamera->GetNearZ(), mCamera->GetFarZ(), mCamera->GetFovY(), mCamera->GetAspect());
 	glm::vec4 bufferViewportSize(mGBufferWidth, mGBufferHeight, mViewportWidth, mViewportHeight);
 	glm::vec4 leftRightTopBottom(0, mViewportWidth, 0, mViewportHeight);
@@ -248,7 +247,8 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(mCamera->GetInverseProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_OrthoProjMatrix], glm::value_ptr(mOrthoProjMatrix), sizeof(glm::mat4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(viewMatrix), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(mCamera->GetViewMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ViewProjMatrix], glm::value_ptr(mCamera->GetViewProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
@@ -295,9 +295,11 @@ void Engine::InternalComputePass()
 
 void Engine::InternalRenderObjects()
 {
+	glDisable(GL_BLEND);
+
 	if (mSkydome != nullptr)
 	{
-		if (mSkydome->GetIsInitialized() && mSkydome->IsCacheRebuildRequired())
+		if (mSkydome->GetIsInitialized() && mSkydome->IsCacheInvalidated())
 		{
 			if (mSkydome->RenderCache())
 			{

@@ -197,7 +197,7 @@ void SimpleCamera::OnInit()
 
 #ifdef SKYDOME_SAMPLE
 		{
-			mSkydome = new Renderers::SkydomeRenderer(true);
+			mSkydome = new Renderers::SkydomeRenderer(true, 256);
 			engine->AttachSkydomeRenderer(mSkydome);
 		}
 #endif // SKYDOME_SAMPLE

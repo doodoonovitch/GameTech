@@ -54,8 +54,8 @@ public:
 
 	inline const Maths::DualQuaternion & GetViewDQ() const;
 
-	const glm::mat4 GetViewMatrix() const;
-
+	const glm::mat4 & GetViewMatrix() const;
+	const glm::mat4 & GetViewProjectionMatrix() const;
 
 public:
 
@@ -89,6 +89,8 @@ protected:
 
 	glm::mat4 mProj; //projection matrix
 	glm::mat4 mInvProj;
+	glm::mat4 mView;
+	glm::mat4 mViewProj;
 	Maths::DualQuaternion mViewDQ;
 	glm::vec3 mRight;
 	glm::vec3 mUp;
@@ -196,6 +198,17 @@ inline const glm::mat4 & Camera::GetInverseProjectionMatrix() const
 {
 	return mInvProj;
 }
+
+inline const glm::mat4 & Camera::GetViewMatrix() const
+{
+	return mView;
+}
+
+inline const glm::mat4 & Camera::GetViewProjectionMatrix() const
+{
+	return mViewProj;
+}
+
 
 
 } // namespace Core
