@@ -343,10 +343,10 @@ void SimpleCamera::OnInit()
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				
 				// Gold
-				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(0.1f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.1f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.0f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
 				// Copper
-				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.1f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.1f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
 				// Silver
 				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(0.95f, 0.93f, 0.88f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.8f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
