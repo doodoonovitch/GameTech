@@ -15,7 +15,6 @@ struct MaterialData
 	uint mRendererId;
 };
 
-
 struct FragmentInfo
 {
 	vec3 mPosition;
@@ -30,6 +29,9 @@ struct FragmentInfo
 	float mDepth;
 
 	uint mRendererId;
+
+	vec3 mDiffuseColor;
+	vec3 mSpecularColor;
 };
 
 uint Pack4x8(vec4 fValue)

@@ -39,7 +39,8 @@ public:
 
 	void ReleaseTextureGroup(TextureGroup const *& texture);
 
-	Texture2D const * GetDefaultTexture2D()	{ return mDefault2D; }
+	Texture2D const * GetDefaultTexture2D()	const { return mDefault2D; }
+	CubeMapTexture const * GetDefaultCubeMapTexture() const { return mDefaultCubeMap; }
 
 public:
 	

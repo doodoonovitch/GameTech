@@ -14,13 +14,17 @@ uniform sampler2D u_NBufferSampler;
 uniform usampler2D u_GBuffer1Sampler;
 uniform sampler2D u_SSAOSampler;
 
+uniform samplerCube u_EnvMapSampler;
+
+uniform bool u_IsEnvMapHDR;
+
 
 
 // ---------------------------------------------------------------------------
 // BRDF
 //
 // ---------------------------------------------------------------------------
-vec3 BRDF(in vec3 baseColor, in float metallic, in float roughness, in vec3 l, in vec3 v, in vec3 n, in vec3 lightColorIntensity, in float attenuation);
+vec3 BRDF(in vec3 diffuseColor, in vec3 specularColor, in float roughness, in vec3 l, in vec3 v, in vec3 n, in float NoV, in vec3 lightColorIntensity, in float attenuation);
 
 //
 // ---------------------------------------------------------------------------
@@ -42,7 +46,7 @@ void GetCommonLightProperties(in int lightIndex, out int dataIndex, out vec3 lig
 	lightRadius = data.w;
 }
 
-vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambientOcclusion)
+vec3 BRDF_PointLight(in vec3 v, in float NoV, in FragmentInfo fi, in int lightIndex)
 {
 	int dataIndex;
 	vec3 lightColorIntensity;
@@ -56,10 +60,10 @@ vec3 BRDF_PointLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float amb
 	
 	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
 
-	return BRDF(fi.mBaseColor, fi.mMetallic, fi.mRoughness, l, v, fi.mNormal, lightColorIntensity, attenuation * ambientOcclusion);
+	return BRDF(fi.mDiffuseColor, fi.mSpecularColor, fi.mRoughness, l, v, fi.mNormal, NoV, lightColorIntensity, attenuation);
 }
 
-vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambientOcclusion)
+vec3 BRDF_SpotLight(in vec3 v, in float NoV, in FragmentInfo fi, in int lightIndex)
 {
 	int dataIndex;
 	vec3 lightColorIntensity;
@@ -80,10 +84,10 @@ vec3 BRDF_SpotLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambi
 	float attenuation = DistAttenuation(unnormalizedLightVector, lightRadius);
 	attenuation *= AngleAttenuation(l, spotDirection, innerConeCos, outerConeCos);
 
-	return BRDF(fi.mBaseColor, fi.mMetallic, fi.mRoughness, l, v, fi.mNormal, lightColorIntensity, attenuation * ambientOcclusion);
+	return BRDF(fi.mDiffuseColor, fi.mSpecularColor, fi.mRoughness, l, v, fi.mNormal, NoV, lightColorIntensity, attenuation);
 }
 
-vec3 BRDF_DirectionalLight(in vec3 v, in FragmentInfo fi, in int lightIndex, float ambientOcclusion)
+vec3 BRDF_DirectionalLight(in vec3 v, in float NoV, in FragmentInfo fi, in int lightIndex)
 {
 	int dataIndex;
 	vec3 lightColorIntensity;
@@ -92,13 +96,20 @@ vec3 BRDF_DirectionalLight(in vec3 v, in FragmentInfo fi, in int lightIndex, flo
 
 	vec3 l = texelFetch(u_lightDataSampler, dataIndex + DIRECTIONAL_LIGHT_DIRECTION_PROPERTY).xyz;
 
-	return BRDF(fi.mBaseColor, fi.mMetallic, fi.mRoughness, l, v, fi.mNormal, lightColorIntensity, ambientOcclusion);
+	return BRDF(fi.mDiffuseColor, fi.mSpecularColor, fi.mRoughness, l, v, fi.mNormal, NoV, lightColorIntensity, 1);
 }
 
 
-vec4 BRDFLight(FragmentInfo fi, float ambientOcclusion)
+vec4 BRDFLight(FragmentInfo fi)
 {
 	vec3 v = normalize(-fi.mPosition);
+	float NoV = max(dot(fi.mNormal, v), 0.0001f);
+
+    fi.mDiffuseColor = fi.mBaseColor - fi.mBaseColor * fi.mMetallic;
+    // 0.03 default specular value for dielectric.
+    fi.mSpecularColor = mix(vec3(0.03f), fi.mBaseColor, fi.mMetallic);
+
+
 	int lightIndex = 1;
 
 	vec3 color = vec3(0.f);
@@ -106,25 +117,37 @@ vec4 BRDFLight(FragmentInfo fi, float ambientOcclusion)
 	// point light evaluation
 	for(int pointLight = 0; pointLight < u_PointLightCount; ++pointLight)
 	{
-		color += BRDF_PointLight(v, fi, lightIndex, ambientOcclusion);
+		color += BRDF_PointLight(v, NoV, fi, lightIndex);
 		++lightIndex;
 	}
 
 	// spot light evaluation
 	for(int spotLight = 0; spotLight < u_SpotLightCount; ++spotLight)
 	{
-		color += BRDF_SpotLight(v, fi, lightIndex, ambientOcclusion);
+		color += BRDF_SpotLight(v, NoV, fi, lightIndex);
 		++lightIndex;
 	}
 
 	// directional light evaluation
 	for(int directionalLight = 0; directionalLight < u_DirectionalLightCount; ++directionalLight)
 	{
-		color += BRDF_DirectionalLight(v, fi, lightIndex, ambientOcclusion);
+		color += BRDF_DirectionalLight(v, NoV, fi, lightIndex);
 		++lightIndex;
 	}
 	
-	return vec4(color, 1.0f);
+	float ambientOcclusion = texture(u_SSAOSampler, fs_in.TexUV, 0).r;
+
+    vec3 r = reflect( -v, fi.mNormal);
+	vec3 envColor = texture(u_EnvMapSampler, r).rgb;
+
+	if(!u_IsEnvMapHDR)
+	{
+		envColor = pow(envColor, vec3(2.2));
+	}
+
+	vec3 envFresnel = BRDF_Specular_F_Roughness(fi.mSpecularColor, fi.mRoughness * fi.mRoughness, NoV);
+
+	return vec4(color * ambientOcclusion + envColor * envFresnel, 1.0f);
 }
 
 void main(void)
@@ -141,8 +164,7 @@ void main(void)
 	}
 	else if(fi.mRendererId > 0)
 	{
-		float ambientOcclusion = texture(u_SSAOSampler, fs_in.TexUV, 0).r;
-		vFragColor = BRDFLight(fi, ambientOcclusion);
+		vFragColor = BRDFLight(fi);
 	}
 	//else 
 	//{

@@ -214,6 +214,29 @@ void Engine::RenderObjects()
 		InternalGenerateBuffersAndFBOs();
 	}
 
+	if (mEnvMapTexture == nullptr)
+	{
+		if (mSkydome != nullptr && mSkydome->UseCache())
+		{
+			mEnvMapTexture = mSkydome->GetCacheTexture();
+			mIsEnvMapHDR = GL_TRUE;
+		}
+		else if (mSkybox != nullptr)
+		{
+			mEnvMapTexture = mSkybox->GetTexture();
+			mIsEnvMapHDR = (GLboolean) mSkybox->IsHDR();
+		}
+		else
+		{
+			mEnvMapTexture = mTextureManager->GetDefaultCubeMapTexture();
+			mIsEnvMapHDR = GL_FALSE;
+		}
+
+		mDeferredShader.Use();
+		glUniform1i(mDeferredShader.GetUniform(u_IsEnvMapHDR), mIsEnvMapHDR);
+		mDeferredShader.UnUse();
+	}
+
 	// Fill light data buffer 
 	// -----------------------------------------------------------------------
 	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId());
@@ -479,6 +502,10 @@ void Engine::InternalRenderObjects()
 
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(mEnvMapTexture->GetTarget(), mEnvMapTexture->GetResourceId());
+		
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);

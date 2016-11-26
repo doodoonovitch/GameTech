@@ -98,7 +98,7 @@ vec3 GGX_Specular(in vec3 specAlbedo, in float m, in float NdotL, in float NdotH
 	float vis = v1i * v1o;
 
 	// Calculate the fresnel term
-	vec3 f = BRDF_Fresnel(specAlbedo, LdotH);
+	vec3 f = BRDF_SchlickFresnel(specAlbedo, LdotH);
 	// Put it all together
 	return d * f * vis;
 }
@@ -126,12 +126,12 @@ vec3 GGX_BRDF(in vec3 diffuseMaterial, in vec3 specularMaterial, in float roughn
 	float vis = v1i * v1o;
 
 	// Calculate the distribution term
-	vec3 f = BRDF_Fresnel(specularMaterial, LdotH);
+	vec3 f = BRDF_SchlickFresnel(specularMaterial, LdotH);
 	float d = m2 / (PI * pow(NdotH2 * (m2 - 1) + 1, 2.0f));
 	vec3 Fspec = d * f * vis;
 
 	// Calculate the fresnel term
-	vec3 f2 = BRDF_Fresnel(diffuseMaterial, NdotL);
+	vec3 f2 = BRDF_SchlickFresnel(diffuseMaterial, NdotL);
 	vec3 Fdiff = BRDF_BlinnPhongDiffuse(diffuseMaterial, f2);
 		
 	vec3 brdf = (Fdiff + Fspec) * lightColorIntensity * NdotL * attenuation;

@@ -446,6 +446,8 @@ private:
 		u_SSAOSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,
+		u_EnvMapSampler,
+		u_IsEnvMapHDR,
 
 		__deferred_uniforms_count__
 	};
@@ -666,6 +668,9 @@ private:
 	GLint mDisplayTextureLayerIndex;
 
 	GLint mDeferredDebugState = 0;
+
+	const CubeMapTexture * mEnvMapTexture = nullptr;
+	GLboolean mIsEnvMapHDR = false;
 
 };
 

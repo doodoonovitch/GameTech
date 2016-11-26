@@ -22,6 +22,8 @@ public:
 
 	bool IsHDR() const { return mIsHDR; }
 
+	CubeMapTexture const * GetTexture() const { return mCubeMapTexture; }
+
 private:
 
 	void Initialize();

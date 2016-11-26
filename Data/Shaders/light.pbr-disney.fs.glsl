@@ -28,15 +28,15 @@ vec3 BRDF(in vec3 baseColor, in float metallic, in float roughness, in vec3 l, i
 
     // Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
     // and mix in diffuse retro-reflection based on roughness
-    float FL = SchlickFresnel(NoL);
-	float FV = SchlickFresnel(NoV);
+    float FL = BRDF_SchlickFresnel(NoL);
+	float FV = BRDF_SchlickFresnel(NoV);
     float Fd90 = 0.5 + 2 * LoH2 * roughness;
     float Fd = mix(1, Fd90, FL) * mix(1, Fd90, FV);
 
 	// specular
 	float a = roughness * roughness;
 	float Ds = NormalDistribution_BlinnPhong(a, NoH);
-    float FH = SchlickFresnel(LoH);
+    float FH = BRDF_SchlickFresnel(LoH);
     vec3 Fs = mix(specularColor, vec3(1), FH);
     float roughg = sqrt(roughness * .5 + .5);
 	float Gs = smithG_GGX(NoL, roughg) * smithG_GGX(NoV, roughg);

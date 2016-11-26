@@ -570,11 +570,11 @@
     <None Include="..\Data\Shaders\FrameDataUniform.incl.glsl">
       <Filter>Shaders\Incl</Filter>
     </None>
-    <None Include="..\Data\Shaders\DeferredShadingCommon.incl.glsl">
-      <Filter>Shaders\Deferred</Filter>
-    </None>
     <None Include="..\Data\Shaders\light.pbr-disney.fs.glsl">
       <Filter>Shaders\Deferred</Filter>
+    </None>
+    <None Include="..\Data\Shaders\DeferredShadingCommon.incl.glsl">
+      <Filter>Shaders\Incl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

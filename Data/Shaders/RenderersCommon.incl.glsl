@@ -217,26 +217,18 @@ float DistAttenuation(in vec3 unnormalizedLightVector, in float lightRadius)
 //
 //		float LoH = saturate(dot(l, h));
 // ===============================================================================
-float SchlickFresnel(in float LoH)
+float BRDF_SchlickFresnel(in float LoH)
 {
     float m = clamp(1 - LoH, 0, 1);
 	return Pow5(m);
 }
 
-vec3 BRDF_Fresnel2(in vec3 f0, in float LoH)
+vec3 BRDF_SchlickFresnel(in vec3 specularColor, in float LoH)
 {
     float m = clamp(1 - LoH, 0, 1);
 	float fh = Pow5(m);
 
-	return mix(f0, vec3(1), fh);
-}
-
-vec3 BRDF_Fresnel(in vec3 f0, in float LoH)
-{
-    float m = clamp(1 - LoH, 0, 1);
-	float fh = Pow5(m);
-
-	return f0 + (vec3(1.0f) - f0) * fh;
+	return specularColor + (vec3(1.0f) - specularColor) * fh;
 }
 
 // ---------------------------------------------------------------------------
@@ -255,4 +247,12 @@ vec3 BRDF_LambertDiffuse(in vec3 Kd)
 vec3 BRDF_BlinnPhongDiffuse(in vec3 Kd, in vec3 fresnel)
 {
 	return (vec3(1.0f) -  fresnel) * Kd / PI;
+}
+
+vec3 BRDF_Specular_F_Roughness(vec3 specularColor, float a, float NoV)
+{
+    float m = 1 - clamp(NoV, 0, 1);
+	float fh = Pow5(m);
+
+    return (specularColor + (max(vec3(1.0f - a), specularColor) - specularColor) * fh);
 }
