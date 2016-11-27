@@ -127,7 +127,7 @@ vec3 PositionFromDepth(float depth, vec2 viewRay)
 	float zView = LinearizeDepth(depth);
 	vec2 xyView = viewRay * -zView;
 
-	return vec3(xyView, zView);
+	return (u_InvViewMatrix * vec4(xyView, zView, 1.0)).xyz;
 }
 
 

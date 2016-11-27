@@ -28,14 +28,14 @@ void main()
 	{
 		UnpackFromGBuffer(fi, gl_in[i].gl_Position.xy, gl_in[i].gl_Position.zw);
 
-		vec4 projPos = u_ProjMatrix * vec4(fi.Position, 1);
+		vec4 projPos = u_ViewProjMatrix * vec4(fi.Position, 1);
 		gl_Position = projPos;
 		gs_out.Color = vec4(u_VertexNormalColor.xyz, 1);
 		//gs_out.Color = vec4(fi.Normal, 1);
 		EmitVertex();
 
 		vec4 position = vec4(fi.Position + (fi.Normal * u_NormalMagnitude), 1);
-		gl_Position = u_ProjMatrix * position;
+		gl_Position = u_ViewProjMatrix * position;
 		gs_out.Color = vec4(u_VertexNormalColor.xzy, 1);
 		//gs_out.Color = vec4(fi.Normal, 1);
 		EmitVertex();

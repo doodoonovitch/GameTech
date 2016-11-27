@@ -20,13 +20,13 @@ PointLight::~PointLight()
 
 }
 
-void PointLight::TransformInViewCoords(const glm::mat4 & viewMatrix) 
-{
-	const GLfloat * p = GetProperty(World_Position_Property);
-	glm::vec4 worldPosition(p[0], p[1], p[2], 1.0f);
-	glm::vec4 pos = viewMatrix * worldPosition;
-	SetProperty(pos, Position_Property);
-}
+//void PointLight::TransformInViewCoords(const glm::mat4 & viewMatrix) 
+//{
+//	const GLfloat * p = GetProperty(World_Position_Property);
+//	glm::vec4 worldPosition(p[0], p[1], p[2], 1.0f);
+//	glm::vec4 pos = viewMatrix * worldPosition;
+//	SetProperty(pos, Position_Property);
+//}
 
 
 	} // namespace Light

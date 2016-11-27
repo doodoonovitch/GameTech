@@ -9,7 +9,5 @@ out VS_OUT
 void main()
 {  
 	vs_out.Color = vColor;
-	vec4 pos = vec4(dqTransformPoint(u_ViewDQ, vVertex.xyz), 1);
-
-	gl_Position = u_ProjMatrix * pos;
+	gl_Position = u_ViewProjMatrix * vec4(vVertex.xyz, 1);
 }

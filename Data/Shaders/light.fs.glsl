@@ -102,7 +102,7 @@ vec3 BRDF_DirectionalLight(in vec3 v, in float NoV, in FragmentInfo fi, in int l
 
 vec4 BRDFLight(FragmentInfo fi)
 {
-	vec3 v = normalize(-fi.mPosition);
+	vec3 v = normalize(u_ViewPosition.xyz - fi.mPosition);
 	float NoV = max(dot(fi.mNormal, v), 0.0001f);
 
     fi.mDiffuseColor = fi.mBaseColor - fi.mBaseColor * fi.mMetallic;
@@ -137,8 +137,7 @@ vec4 BRDFLight(FragmentInfo fi)
 	
 	float ambientOcclusion = texture(u_SSAOSampler, fs_in.TexUV, 0).r;
 
-	vec3 worldView = (u_InvViewMatrix * vec4(-v, 0)).xyz;
-    vec3 r = reflect( worldView, fi.mWorldNormal);
+    vec3 r = reflect(-v, fi.mNormal);
 	vec3 envColor = texture(u_EnvMapSampler, r).rgb;
 
 	if(!u_IsEnvMapHDR)
@@ -158,7 +157,6 @@ void main(void)
 	UnpackFromGBuffer(fi, fs_in.TexUV, fs_in.ViewRay, u_GBuffer1Sampler, u_DepthSampler);
 
 	fi.mNormal = normalize(texture(u_NBufferSampler, fs_in.TexUV, 0).xyz);
-	fi.mWorldNormal = (u_InvViewMatrix * vec4(fi.mNormal, 0)).xyz;
 
 	if (fi.mRendererId == SKYBOX_RENDERER_ID)
 	{

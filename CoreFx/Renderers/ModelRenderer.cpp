@@ -133,9 +133,9 @@ ModelRenderer::~ModelRenderer()
 void ModelRenderer::Update()
 {
 	UpdateShaderData();
-	Engine * engine = Engine::GetInstance();
-	const GLuint itemSize = sizeof(PerInstanceData) / sizeof(glm::vec4);
-	engine->ComputeViewTransform(mLocationRawDataBuffer.GetBufferId(), mPrecomputeDataBuffer.GetBufferId(), (GLuint)mObjs.GetCount(), itemSize, itemSize);
+	//Engine * engine = Engine::GetInstance();
+	//const GLuint itemSize = sizeof(PerInstanceData) / sizeof(glm::vec4);
+	//engine->ComputeViewTransform(mLocationRawDataBuffer.GetBufferId(), mPrecomputeDataBuffer.GetBufferId(), (GLuint)mObjs.GetCount(), itemSize, itemSize);
 }
 
 void ModelRenderer::Render()
@@ -145,7 +145,7 @@ void ModelRenderer::Render()
 	mShader.Use();
 	glBindVertexArray(mVaoID);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPrecomputeDataBuffer.GetBufferId());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mLocationRawDataBuffer.GetBufferId());
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mMaterialIndexBuffer.GetBufferId());
 
@@ -172,7 +172,7 @@ void ModelRenderer::RenderWireFrame()
 	mWireFrameShader.Use();
 	glBindVertexArray(mVaoID);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mPrecomputeDataBuffer.GetBufferId());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mLocationRawDataBuffer.GetBufferId());
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mMaterialIndexBuffer.GetBufferId());
 

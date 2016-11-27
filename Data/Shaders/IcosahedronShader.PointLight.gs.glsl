@@ -30,8 +30,8 @@ void main()
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
-		vec4 viewPos = gl_in[i].gl_Position + lightPosition;
-		gl_Position = u_ProjMatrix * viewPos;
+		vec4 pos = gl_in[i].gl_Position + lightPosition;
+		gl_Position = u_ViewProjMatrix * pos;
 		gs_out.Color = lightColor;
 
 		EmitVertex();

@@ -29,21 +29,21 @@ SpotLight::~SpotLight()
 
 }
 
-void SpotLight::TransformInViewCoords(const glm::mat4 & viewMatrix)
-{
-	const GLfloat * p = GetProperty(World_Position_Property);
-	glm::vec4 worldPosition(p[0], p[1], p[2], 1.0f);
-	glm::vec4 pos = viewMatrix * worldPosition;
-	GLfloat * posProp = GetProperty(Position_Property);
-	memcpy(posProp, glm::value_ptr(pos), 3 * sizeof(GLfloat));
-
-	p = GetProperty(World_Direction_Property);
-	glm::vec4 worldDirection(p[0], p[1], p[2], 0.0f);
-	glm::vec4 dir = viewMatrix * worldDirection;
-	GLfloat * dirProp = GetProperty(Direction_Property);
-	memcpy(dirProp, glm::value_ptr(dir), 3 * sizeof(GLfloat));
-	SetIsModified(true);
-}
+//void SpotLight::TransformInViewCoords(const glm::mat4 & viewMatrix)
+//{
+//	const GLfloat * p = GetProperty(World_Position_Property);
+//	glm::vec4 worldPosition(p[0], p[1], p[2], 1.0f);
+//	glm::vec4 pos = viewMatrix * worldPosition;
+//	GLfloat * posProp = GetProperty(Position_Property);
+//	memcpy(posProp, glm::value_ptr(pos), 3 * sizeof(GLfloat));
+//
+//	p = GetProperty(World_Direction_Property);
+//	glm::vec4 worldDirection(p[0], p[1], p[2], 0.0f);
+//	glm::vec4 dir = viewMatrix * worldDirection;
+//	GLfloat * dirProp = GetProperty(Direction_Property);
+//	memcpy(dirProp, glm::value_ptr(dir), 3 * sizeof(GLfloat));
+//	SetIsModified(true);
+//}
 
 void SpotLight::SetInnerConeAngle(float value)
 {

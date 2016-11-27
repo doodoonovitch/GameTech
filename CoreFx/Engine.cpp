@@ -197,14 +197,14 @@ void Engine::UpdateObjects()
 	assert(mCamera->GetFrame() != nullptr);
 	mCamera->Update();
 
-	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
-	{
-		mLights[i]->ForEach([this](Lights::Light * light)
-		{
-			light->TransformInViewCoords(mCamera->GetViewMatrix());
-			light->SetIsModified(false);
-		});
-	}
+	//for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
+	//{
+	//	mLights[i]->ForEach([this](Lights::Light * light)
+	//	{
+	//		light->TransformInViewCoords(mCamera->GetViewMatrix());
+	//		light->SetIsModified(false);
+	//	});
+	//}
 }
 
 void Engine::RenderObjects()

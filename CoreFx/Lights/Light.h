@@ -45,7 +45,7 @@ public:
 		__light_type_count__
 	};
 	
-	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) = 0;
+	//virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) = 0;
 
 	LightType GetLightType() const
 	{

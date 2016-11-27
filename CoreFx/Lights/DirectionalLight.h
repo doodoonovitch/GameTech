@@ -25,19 +25,22 @@ public:
 		__property_count__
 	};
 
-	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
+	//virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
 
-	const glm::vec4 & GetDirection() const
+	const glm::vec3 & GetDirection() const
 	{
-		return mWorldDirection;
+		const GLfloat * p = GetProperty(Direction_Property);
+		return glm::vec3(p[0], p[1], p[2]);
+		//return mWorldDirection;
 	}
 
-	void SetDirection(const glm::vec3& position)
+	void SetDirection(const glm::vec3& value)
 	{
-		mWorldDirection.x = position.x;
-		mWorldDirection.y = position.y;
-		mWorldDirection.z = position.z;
-		SetIsModified(true);
+		//mWorldDirection.x = position.x;
+		//mWorldDirection.y = position.y;
+		//mWorldDirection.z = position.z;
+		//SetIsModified(true);
+		SetProperty(glm::vec4(value, 1.0f), Direction_Property);
 	}
 
 
@@ -48,7 +51,7 @@ protected:
 
 private:
 
-	glm::vec4 mWorldDirection;
+	//glm::vec4 mWorldDirection;
 };
 
 

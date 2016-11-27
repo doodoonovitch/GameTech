@@ -23,23 +23,23 @@ public:
 	enum PropertyIndex
 	{
 		Position_Property = Light::__Common_Property_Count__,
-		World_Position_Property,
+		//World_Position_Property,
 
 		__property_count__
 	};
 
 
-	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
+	//virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
 
 	glm::vec3 GetPosition() const
 	{
-		const GLfloat * p = GetProperty(World_Position_Property);
+		const GLfloat * p = GetProperty(Position_Property);
 		return glm::vec3(p[0], p[1], p[2]);
 	}
 
 	void SetPosition(const glm::vec3& position)
 	{
-		SetProperty(glm::vec4(position, 1.0f), World_Position_Property);
+		SetProperty(glm::vec4(position, 1.0f), Position_Property);
 	}
 
 protected:

@@ -40,10 +40,10 @@ private:
 
 	enum class EGBuffer
 	{
-		//gBuffer_PositionBuffer,
 		NormalBuffer,
 		UI32Buffer1,
 		DepthBuffer,
+		//PositionBuffer,
 
 		__gBuffer_count__
 	};

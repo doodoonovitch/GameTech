@@ -30,7 +30,7 @@ out GS_OUT
 	vec3 Tangent;
 	vec2 TexUV;
 	flat int MaterialIndex;
-	flat DualQuat ViewModelDQ;
+	flat DualQuat ModelDQ;
 } gs_out;
 
 void main()
@@ -38,9 +38,9 @@ void main()
 	int offset = u_PerInstanceDataIndexBuffer.data[gs_in[0].MeshId];
 	int index = (offset + gs_in[0].InstanceId) * PROPERTY_PER_MATERIAL_COUNT;
 	
-	DualQuat viewModelDQ;
-	viewModelDQ.Qr = u_PerInstanceDataBuffer.data[index];
-	viewModelDQ.Qd = u_PerInstanceDataBuffer.data[index + 1];
+	DualQuat modelDQ;
+	modelDQ.Qr = u_PerInstanceDataBuffer.data[index];
+	modelDQ.Qd = u_PerInstanceDataBuffer.data[index + 1];
 	vec3 scale = u_PerInstanceDataBuffer.data[index + 2].xyz;
 
 	int matIndex = gs_in[0].MeshId;
@@ -48,11 +48,11 @@ void main()
 	for(int i = 0; i < gl_in.length(); ++i )
 	{
 		gs_out.MaterialIndex = matIndex;
-		gs_out.ViewModelDQ = viewModelDQ;
+		gs_out.ModelDQ = modelDQ;
 		
 		vec3 position = scale * gl_in[i].gl_Position.xyz;
-		vec4 pos = vec4(dqTransformPoint(viewModelDQ, position), 1);
-		gl_Position = u_ProjMatrix * pos;
+		vec4 pos = vec4(dqTransformPoint(modelDQ, position), 1);
+		gl_Position = u_ViewProjMatrix * pos;
 
 		gs_out.Normal = scale * gs_in[i].Normal; 
 		gs_out.Tangent = scale * gs_in[i].Tangent; 

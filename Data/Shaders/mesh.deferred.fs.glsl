@@ -17,7 +17,7 @@ in GS_OUT
 	vec3 Tangent;
 	vec2 TexUV;
 	flat int MaterialIndex;
-	flat DualQuat ViewModelDQ;
+	flat DualQuat ModelDQ;
 } fs_in;
 
 void main(void)
@@ -69,11 +69,11 @@ void main(void)
 		bumpMapNormal = bumpMapNormal * 2.0 - vec3(1.0, 1.0, 1.0);
 
 		normal = ComputeBumpedNormal(fs_in.Normal, fs_in.Tangent, bumpMapNormal);
-		normal = dqTransformNormal(normal, fs_in.ViewModelDQ);
+		normal = dqTransformNormal(normal, fs_in.ModelDQ);
 	}
 	else
 	{
-		normal = dqTransformNormal(normalize(fs_in.Normal), fs_in.ViewModelDQ);
+		normal = dqTransformNormal(normalize(fs_in.Normal), fs_in.ModelDQ);
 	}
 
 	outNormal = normal;

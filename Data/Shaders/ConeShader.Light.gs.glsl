@@ -25,21 +25,18 @@ void main()
 	vec4 lightColorIntensity = texelFetch(u_LightDataSampler, dataIndex + LIGHT_COLOR_PROPERTY);
 	vec4 lightColor = vec4(lightColorIntensity.xyz * lightColorIntensity.w, 1.f);
 
-	vec4 lightPosition = texelFetch(u_LightDataSampler, dataIndex + SPOT_LIGHT_WORLD_POSITION_PROPERTY);
-	vec3 lightDirection = normalize(texelFetch(u_LightDataSampler, dataIndex + SPOT_LIGHT_WORLD_DIRECTION_PROPERTY).xyz);
+	vec4 lightPosition = texelFetch(u_LightDataSampler, dataIndex + SPOT_LIGHT_POSITION_PROPERTY);
+	vec3 lightDirection = normalize(texelFetch(u_LightDataSampler, dataIndex + SPOT_LIGHT_DIRECTION_PROPERTY).xyz);
 	
 	vec4 qRot = qRotationBetweenVectors(vec3(0, -1, 0), lightDirection);
 	DualQuat rotDQ = dqFromRotation(qRot);
 	DualQuat traDQ = dqFromTranslation(lightPosition.xyz);
 	DualQuat modelDQ = dqMul(traDQ, rotDQ);
-	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
-
-	mat4 m = u_ProjMatrix * u_ViewMatrix;
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
-		vec4 viewPos = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
-		gl_Position = u_ProjMatrix * viewPos;
+		vec4 pos = vec4(dqTransformPoint(modelDQ, gl_in[i].gl_Position.xyz), 1);
+		gl_Position = u_ViewProjMatrix * pos;
 		gs_out.Color = lightColor;
 
 		EmitVertex();

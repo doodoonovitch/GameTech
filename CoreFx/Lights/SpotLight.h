@@ -24,35 +24,35 @@ public:
 	{
 		Position_Property = Light::__Common_Property_Count__,
 		Direction_Property,
-		World_Position_Property,
-		World_Direction_Property,
+		//World_Position_Property,
+		//World_Direction_Property,
 
 		__property_count__
 	};
 
 
-	virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
+	//virtual void TransformInViewCoords(const glm::mat4 & viewMatrix) override;
 
 	glm::vec3 GetPosition() const
 	{
-		const GLfloat * p = GetProperty(World_Position_Property);
+		const GLfloat * p = GetProperty(Position_Property);
 		return glm::vec3(p[0], p[1], p[2]);
 	}
 
 	void SetPosition(const glm::vec3& position)
 	{
-		SetProperty(glm::vec4(position, 1.0f), World_Position_Property);
+		SetProperty(position, Position_Property);
 	}
 
 	glm::vec3 GetDirection() const
 	{
-		const GLfloat * p = GetProperty(World_Direction_Property);
+		const GLfloat * p = GetProperty(Direction_Property);
 		return glm::vec3(p[0], p[1], p[2]);
 	}
 
 	void SetDirection(const glm::vec3& direction)
 	{
-		SetProperty(glm::vec4(direction, 0.0f), World_Direction_Property);
+		SetProperty(direction, Direction_Property);
 	}
 
 	float GetInnerConeAngle() const

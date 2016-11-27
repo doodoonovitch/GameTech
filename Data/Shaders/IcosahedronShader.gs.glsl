@@ -21,13 +21,10 @@ void main()
 	modelDQ.Qr = texelFetch(u_perInstanceDataSampler, index);
 	modelDQ.Qd = texelFetch(u_perInstanceDataSampler, index + 1);
 
-	DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
-
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
-		vec4 viewPos = vec4(dqTransformPoint(viewModelDQ, gl_in[i].gl_Position.xyz), 1);
-		//gs_out.ViewPosition = viewPos.xyz;
-		gl_Position = u_ProjMatrix * viewPos;
+		vec4 pos = vec4(dqTransformPoint(modelDQ, gl_in[i].gl_Position.xyz), 1);
+		gl_Position = u_ViewProjMatrix * pos;
 
 		EmitVertex();
 	}
