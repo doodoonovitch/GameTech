@@ -6,6 +6,7 @@ layout (std140, shared) uniform FrameData
 	mat4 u_OrthoProjMatrix;
 		
 	mat4 u_ViewMatrix;
+	mat4 u_InvViewMatrix;
 
 	mat4 u_ViewProjMatrix;
 

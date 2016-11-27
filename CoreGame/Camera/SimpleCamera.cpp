@@ -58,8 +58,8 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
 //#define PERLIN_NOISE_OCEAN_SAMPLE
-#define SKYDOME_SAMPLE
-//#define SKYBOX_SAMPLE
+//#define SKYDOME_SAMPLE
+#define SKYBOX_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
 

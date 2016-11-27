@@ -19,6 +19,7 @@ struct FragmentInfo
 {
 	vec3 mPosition;
 	vec3 mNormal;
+	vec3 mWorldNormal;
 	vec3 mBaseColor;
 	vec3 mEmissive;
 

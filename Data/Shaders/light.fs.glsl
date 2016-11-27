@@ -137,7 +137,8 @@ vec4 BRDFLight(FragmentInfo fi)
 	
 	float ambientOcclusion = texture(u_SSAOSampler, fs_in.TexUV, 0).r;
 
-    vec3 r = reflect( -v, fi.mNormal);
+	vec3 worldView = (u_InvViewMatrix * vec4(-v, 0)).xyz;
+    vec3 r = reflect( worldView, fi.mWorldNormal);
 	vec3 envColor = texture(u_EnvMapSampler, r).rgb;
 
 	if(!u_IsEnvMapHDR)
@@ -157,7 +158,8 @@ void main(void)
 	UnpackFromGBuffer(fi, fs_in.TexUV, fs_in.ViewRay, u_GBuffer1Sampler, u_DepthSampler);
 
 	fi.mNormal = normalize(texture(u_NBufferSampler, fs_in.TexUV, 0).xyz);
-	
+	fi.mWorldNormal = (u_InvViewMatrix * vec4(fi.mNormal, 0)).xyz;
+
 	if (fi.mRendererId == SKYBOX_RENDERER_ID)
 	{
 		vFragColor = vec4(fi.mEmissive, 1);

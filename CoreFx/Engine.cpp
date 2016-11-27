@@ -271,6 +271,7 @@ void Engine::RenderObjects()
 	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(mCamera->GetInverseProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_OrthoProjMatrix], glm::value_ptr(mOrthoProjMatrix), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(mCamera->GetViewMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_InvViewMatrix], glm::value_ptr(mCamera->GetInverseViewMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewProjMatrix], glm::value_ptr(mCamera->GetViewProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
