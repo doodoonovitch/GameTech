@@ -30,61 +30,11 @@ public:
 		glm::uvec2 mTextureSize = glm::uvec2(512);
 		glm::uvec2 mScreenResolution = glm::uvec2(72);
 
-		GLuint mCharacterCountBufferCapacity = 1000;
+		GLsizei mCharacterCountBufferCapacity = 1000;
 
 
 		PoliceDescList mPoliceList;
 	};
-
-public:
-	TextRenderer();
-	virtual ~TextRenderer();
-
-	virtual void Render() override;
-	virtual void RenderWireFrame() override;
-
-	void Initialize(Desc desc);
-	void ResizeBuffer(GLuint characterCount);
-
-
-protected:
-
-	enum EAttributeIndex
-	{
-		u_Color,
-		__attributes_count__
-	};
-
-	struct GlyphInfo
-	{
-		enum class Status
-		{
-			None,
-			WhiteSpace = 1,
-			Undefined = 2,
-		};
-
-		union
-		{
-			struct S
-			{
-				std::uint64_t mLayerIndex : 12, mLeft : 12, mTop : 12, mRight : 12, mBottom : 12, mStatus:4;
-			} mBitfields;
-			GLuint mPacked[2];
-		};
-
-		void Set(GLushort left, GLushort top, GLushort right, GLushort bottom, GLushort layerIndex, Status status)
-		{
-			mPacked[0] = (layerIndex & 0xFFF) | ((left & 0xFFF) << 12) | ((top & 0xFFF) << 24);
-			mPacked[1] = (((top & 0xFFF) >> 8) & 0xF) | ((right & 0xFFF) << 4) | ((bottom & 0xFFF) << 16) | ((((GLubyte)status) & 0xF) << 28);
-		}
-	};
-
-	typedef std::vector<GlyphInfo> GlyphInfoBuffer;
-
-	typedef std::vector<TextPage *> TextPageList;
-
-public:
 
 	struct GlyphMetrics
 	{
@@ -112,10 +62,12 @@ public:
 		const std::string & GetFamilyName() const { return mFamilyName; }
 		const std::string & GetStyleName() const { return mStyleName; }
 
-		GLint GetLineHeight() const { return mLineHeight; }
+		GLushort GetLineHeight() const { return mLineHeight; }
 
 		GLushort GetCharacterWidth() const { return mDesiredCharWidth; }
 		GLushort GetCharacterHeight() const { return mDesiredCharHeight; }
+
+		GLushort GetDefaultWidth() const { return mDefaultWidth; }
 
 		const CharGlyphIndexMapping & GetMapping() const { return mMapping; }
 
@@ -132,6 +84,9 @@ public:
 			}
 		}
 
+		GLuint GetUndefinedCharacterIndex() const { return mUndefinedCharIndex; }
+
+
 	private:
 
 		friend class TextRenderer;
@@ -139,8 +94,8 @@ public:
 		GLuint mBufferEntryIndex;
 		GLuint mUndefinedCharIndex;
 
-		GLint mLineHeight;
-		GLint mDefaultWidth;
+		GLushort mLineHeight;
+		GLushort mDefaultWidth;
 
 		GLushort mDesiredCharWidth;
 		GLushort mDesiredCharHeight;
@@ -157,44 +112,188 @@ public:
 
 	typedef std::vector<FontInfo> FontInfoList;
 
-private:
 
-	enum DataIndex
+#pragma pack(push, 1)
+	struct ShaderGlyphInfo
 	{
-		DataIndex_X,
-		DataIndex_Y,
-		DataIndex_CharIndex,
-
-		__dataindex_count__
+		GLuint mLayerIndexAndStatus = 0;
+		GLuint mXTexUV;
+		GLuint mYTexUV;
+		GLuint mCharacterSize;
 	};
 
-	typedef std::vector<GLuint> DataBuffer;
+	struct GlyphInfo : public ShaderGlyphInfo
+	{
+		enum ELayerIndexAndStatusMaskShift
+		{
+			LayerIndexMask = 0x0000FFFF,
+			StatusMask = 0xFFFF0000,
+		};
 
+		enum class Status
+		{
+			Character,
+			WhiteSpace = 1,
+			Undefined = 2,
+		};
+
+		glm::uvec2 mLTCorner;
+		glm::uvec2 mRBCorner;
+
+		void Set(const glm::uvec2 leftTopCornerInPixel, const glm::uvec2 rightBottomCornerInPixel, const glm::ivec2 & textureSize, GLushort layerIndex, Status status)
+		{
+			mLayerIndexAndStatus = ((GLuint)layerIndex) | (((GLuint)status) << 16);
+			SetCorners(leftTopCornerInPixel, rightBottomCornerInPixel, textureSize);
+		}
+
+		GLushort GetLayerIndex() const
+		{
+			return mLayerIndexAndStatus & LayerIndexMask;
+		}
+
+		void SetLayerIndex(GLushort layerIndex)
+		{
+			mLayerIndexAndStatus = ((GLuint)layerIndex) | (mLayerIndexAndStatus & StatusMask);
+		}
+
+		Status GetStatus() const
+		{
+			return (Status)(mLayerIndexAndStatus & StatusMask);
+		}
+
+		void SetStatus(Status status)
+		{
+			mLayerIndexAndStatus = (mLayerIndexAndStatus & LayerIndexMask) | (GLuint)status;
+		}
+
+		void SetCorners(const glm::uvec2 leftTopCornerInPixel, const glm::uvec2 rightBottomCornerInPixel, const glm::ivec2 & textureSize)
+		{
+			mLTCorner = leftTopCornerInPixel;
+			mRBCorner = rightBottomCornerInPixel;
+			glm::vec2 xTexUV(leftTopCornerInPixel.x - .5f, rightBottomCornerInPixel.x + .5f);
+			glm::vec2 yTexUV(leftTopCornerInPixel.y - .5f, rightBottomCornerInPixel.y + .5f);
+			xTexUV /= (textureSize.x - 1);
+			yTexUV = glm::vec2(1.f) - (yTexUV / (textureSize.y - 1));
+			mXTexUV = glm::packHalf2x16(xTexUV);
+			mYTexUV = glm::packHalf2x16(yTexUV);
+			glm::ivec2 size(mRBCorner.x - mLTCorner.x + 1, mRBCorner.y - mLTCorner.y + 1);
+			mCharacterSize = (GLuint)(size.x & 0xFFFF) | (GLuint)((size.y & 0xFFFF) << 16);
+		}
+
+		GLushort GetCharacterWidth() const
+		{
+			return mCharacterSize & 0xFFFF;
+		}
+		
+		GLushort GetCharacterHeight() const
+		{
+			return (mCharacterSize >> 16) & 0xFFFF;
+		}
+
+	};
+#pragma pack(pop)
+
+	typedef std::vector<GlyphInfo> GlyphInfoBuffer;
+
+
+
+public:
+	
+	TextRenderer();
+	virtual ~TextRenderer();
+
+	virtual void Render() override;
+	virtual void RenderWireFrame() override;
+
+	void Initialize(const Desc & desc);
+	void ResizeBuffer(GLsizei characterCount);
+
+	TextPage * NewPage(bool isVisible);
+	void DeletePage(TextPage *& page);
+	
+	bool IsValidFontIndex(GLuint fontIndex) const { return fontIndex < (GLuint)mFontInfoList.size(); }
+	const FontInfoList & GetFontInfoList() const { return mFontInfoList; }
+	const FontInfo & GetFontInfo(GLuint fontIndex) const
+	{ 
+		if (!IsValidFontIndex(fontIndex))
+		{
+			PRINT_ERROR("Undefined font index '%l'", fontIndex);
+			fontIndex = fontIndex % (GLuint)mFontInfoList.size();
+		}
+		return mFontInfoList[fontIndex];
+	}
+
+	const GlyphInfo & GetGlyphInfo(GLuint glyphIndex) const
+	{
+		if (!(glyphIndex < (GLuint)mGlyphInfoBuffer.size()))
+		{
+			PRINT_ERROR("Undefined glyph index '%l'", glyphIndex);
+			glyphIndex = glyphIndex % (GLuint)mGlyphInfoBuffer.size();
+		}
+		return mGlyphInfoBuffer[glyphIndex];
+	}
+
+	void InvalidateShaderBuffer();
 
 protected:
+
+	typedef std::vector<TextPage *> TextPageList;
+
+protected:
+
+	void InitializeShader();
 
 	//typedef std::vector<FT_Face> FtFaceList;
 
 	bool AddFont(FT_Library ftLibrary, const char * fontName, GLushort charWidth, GLushort charHeight, glm::uvec2 & topLeft, GLushort &layerIndex, const std::vector<GLuint> & characterSet);
-	bool AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeight, GLuint & bitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex);
+	bool AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLushort & lineHeight, GLuint & bitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex);
 	bool LoadTexture(FT_Library ftLibrary);
 
-	void BuildPage(TextPage & page, bool forceRebuild = false);
+	void UpdateShaderStorageBuffer();
+
+	friend class TextPage;
+
+	void BuildPageList();
 
 protected:
+
+#pragma pack(push, 1)
+	struct VAOBufferData
+	{
+		GLfloat mPosition[2];
+		GLint mTexCoordIndex[2];
+	};
+#pragma pack(pop)
+
+	enum EStorageBufferBinding
+	{
+		u_GlyphInfoBuffer,
+		u_PerInstanceDataBuffer,
+	};
+
+	enum EAttributeIndex
+	{
+		u_FontTextureSampler,
+		__attributes_count__
+	};
+
 
 	const Texture2DArray * mTexture = nullptr;
 	glm::uvec2 mTextureSize = glm::uvec2(512);
 	glm::uvec2 mScreenResolution = glm::uvec2(72);
 	GLushort mLayerCount = 0;
-	GLuint mCharCountBufferCapacity = 1000;
+	GLsizei mCharCountBufferCapacity = 1000;
+	GLsizei mCharCount = 0;
+	ShaderStorageBuffer mShaderBuffer;
+	ShaderStorageBuffer mShaderGlyphInfoBuffer;
 
 	GlyphInfoBuffer mGlyphInfoBuffer;
 	FontInfoList mFontInfoList;
 	
-	DataBuffer mDataBuffer;
+	TextPageList mTextPageList;
 
-	bool mIsTextBuilt;
+
+	bool mIsShaderBufferUpdated;
 };
 
 

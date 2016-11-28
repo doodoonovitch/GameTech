@@ -37,6 +37,7 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 
 		mRenderers = new RendererContainer(64, 16);
 		mForwardRenderers = new RendererContainer(64, 16);
+		mHUDRenderers = new RendererContainer(16, 8);
 		mComputes = new ComputeShaderContainer(64, 16);
 
 		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
@@ -53,10 +54,10 @@ void Engine::InternalInitialize(GLint viewportX, GLint viewportY, GLsizei viewpo
 
 void Engine::InternalInitializeViewportParams(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight)
 {
-	mViewportX = viewportX;
-	mViewportY = viewportY;
-	mViewportWidth = viewportWidth;
-	mViewportHeight = viewportHeight;
+	mViewportOrigin.x = viewportX;
+	mViewportOrigin.y = viewportY;
+	mViewportSize.x = viewportWidth;
+	mViewportSize.y = viewportHeight;
 	mGBufferWidth = gBufferWidth;
 	mGBufferHeight = gBufferHeight;
 	mNoiseScale.x = (GLfloat)mGBufferWidth / 4.0f;
@@ -64,8 +65,8 @@ void Engine::InternalInitializeViewportParams(GLint viewportX, GLint viewportY, 
 
 	InternalUpdateDrawGBufferNormalsPatchCount();
 
-	glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
-	mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(mViewportX), static_cast<GLfloat>(mViewportX + mViewportWidth), static_cast<GLfloat>(mViewportY), static_cast<GLfloat>(mViewportY + mViewportHeight));
+	glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+	mOrthoProjMatrix = glm::ortho(static_cast<GLfloat>(viewportX), static_cast<GLfloat>(viewportX + viewportWidth), static_cast<GLfloat>(viewportY), static_cast<GLfloat>(viewportY + viewportHeight));
 }
 
 void Engine::InternalGenerateBuffersAndFBOs()

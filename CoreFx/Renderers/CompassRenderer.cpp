@@ -10,7 +10,7 @@ namespace CoreFx
 
 
 CompassRenderer::CompassRenderer()
-	: RendererHelper<1>("CompassRenderer", "CompassWireframeRenderer", Renderer::Forward_Pass)
+	: RendererHelper<1>("CompassRenderer", "CompassWireframeRenderer", Renderer::HUD_Pass)
 	, mCompassTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("medias/compass.tif"))
 {
 	PRINT_BEGIN_SECTION;
@@ -43,6 +43,7 @@ CompassRenderer::CompassRenderer()
 	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/compass.wireframe.fs.glsl");
 	mWireFrameShader.CreateAndLinkProgram();
 	mWireFrameShader.Use();
+	mWireFrameShader.AddUniforms(uniformNames, __uniforms_count__ - 1);
 	mWireFrameShader.SetupFrameDataBlockBinding();
 	mWireFrameShader.UnUse();
 
@@ -94,7 +95,6 @@ void CompassRenderer::UpdateUniforms(Shader const & shader)
 
 void CompassRenderer::Render()
 {
-	glDisable(GL_DEPTH_TEST);
 	mShader.Use();
 		UpdateUniforms(mShader);
 		glBindVertexArray(mVaoID);
@@ -103,19 +103,16 @@ void CompassRenderer::Render()
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	mShader.UnUse();
-	glEnable(GL_DEPTH_TEST);
 }
  
 void CompassRenderer::RenderWireFrame()
 {
-	glDisable(GL_DEPTH_TEST);
 	mWireFrameShader.Use();
 		UpdateUniforms(mWireFrameShader);
 		glBindVertexArray(mVaoID);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	mWireFrameShader.UnUse();
-	glEnable(GL_DEPTH_TEST);
 }
 
 

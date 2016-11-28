@@ -100,6 +100,7 @@ public:
 	{
 		Deferred_Pass,
 		Forward_Pass,
+		HUD_Pass,
 	};
 
 	typedef std::uint8_t TextureIndex;

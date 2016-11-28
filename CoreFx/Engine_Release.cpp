@@ -37,6 +37,7 @@ void Engine::InternalRelease()
 		SAFE_DELETE(mComputes);
 		SAFE_DELETE(mRenderers);
 		SAFE_DELETE(mForwardRenderers);
+		SAFE_DELETE(mHUDRenderers);
 
 		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 		{

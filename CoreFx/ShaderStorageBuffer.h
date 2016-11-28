@@ -30,6 +30,7 @@ public:
 	}
 
 	void CreateResource(GLenum usage, GLsizeiptr size, const void * data = nullptr);
+	void CreateResource(GLenum usage, GLsizeiptr itemCount, GLsizei itemSize, const void * data = nullptr, GLsizei stride = 0);
 
 	void ReleaseResource();
 

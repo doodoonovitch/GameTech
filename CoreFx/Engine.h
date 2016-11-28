@@ -151,10 +151,13 @@ public:
 
 	void SetViewport(GLint viewportX, GLint viewportY, GLsizei viewportWidth, GLsizei viewportHeight, GLsizei gBufferWidth, GLsizei gBufferHeight);
 
-	GLint GetViewPortX() const { return mViewportX; }
-	GLint GetViewPortY() const { return mViewportY; }
-	GLsizei GetViewPortWidth() const { return mViewportWidth; }
-	GLsizei GetViewPortHeight() const { return mViewportHeight; }
+	GLint GetViewPortX() const { return mViewportOrigin.x; }
+	GLint GetViewPortY() const { return mViewportOrigin.y; }
+	GLsizei GetViewPortWidth() const { return (GLsizei)mViewportSize.x; }
+	GLsizei GetViewPortHeight() const { return (GLsizei)mViewportSize.y; }
+	const glm::ivec2 & GetViewPortOrigin() const { return mViewportOrigin; }
+	const glm::ivec2 & GetViewPortSize() const { return mViewportSize; }
+
 	
 	Camera* GetCamera() const
 	{
@@ -376,6 +379,8 @@ public:
 
 	void ComputeViewTransform(GLuint shaderStorageSourceId, GLuint shaderStorageTargetId, GLuint itemCount, GLuint sourceStride, GLuint targetStride);
 
+	const glm::mat4 & GetOrthoProjMatrix() const { return mOrthoProjMatrix; }
+
 private:
 
 	typedef InstanceContainer<Frame> FrameContainer;
@@ -529,6 +534,7 @@ private:
 	TextureManager * mTextureManager;
 	RendererContainer * mRenderers;
 	RendererContainer * mForwardRenderers;
+	RendererContainer * mHUDRenderers;
 	ComputeShaderContainer * mComputes;
 	LightContainer * mLights[Lights::Light::__light_type_count__];
 	GLint mLightDescIndexOffsets[Lights::Light::__light_type_count__];
@@ -585,8 +591,8 @@ private:
 
 	GLsizei mGBufferWidth;
 	GLsizei mGBufferHeight;
-	GLint mViewportX, mViewportY;
-	GLsizei mViewportWidth, mViewportHeight;
+	glm::ivec2 mViewportOrigin;
+	glm::ivec2 mViewportSize;
 	glm::mat4 mOrthoProjMatrix;
 
 	float mExposure;

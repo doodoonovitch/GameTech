@@ -63,10 +63,12 @@
 
 #define Mask_0x00FFFFFF								uint(16777215)
 #define Mask_0xFFFFFF00								uint(4294967040)
+#define Mask_0xFFFF0000								uint(4294901760)
 #define Mask_0xFF000000								uint(uint(255) << 24)
 #define Mask_0x00FF0000								uint(uint(255) << 16)
 #define Mask_0x0000FF00								uint(uint(255) << 8)
 #define Mask_0x000000FF								uint(255)
+#define Mask_0x0000FFFF								uint(65535)
 
 
 

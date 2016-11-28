@@ -72,6 +72,9 @@
     <Filter Include="Shaders\SSAO">
       <UniqueIdentifier>{1db766f4-21cb-40d0-bbad-0ceb0bd87ac6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Text2D">
+      <UniqueIdentifier>{f4956014-1d59-4e3c-84cb-f2cc3576df0e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoreFx.h" />
@@ -570,11 +573,20 @@
     <None Include="..\Data\Shaders\FrameDataUniform.incl.glsl">
       <Filter>Shaders\Incl</Filter>
     </None>
+    <None Include="..\Data\Shaders\DeferredShadingCommon.incl.glsl">
+      <Filter>Shaders\Deferred</Filter>
+    </None>
     <None Include="..\Data\Shaders\light.pbr-disney.fs.glsl">
       <Filter>Shaders\Deferred</Filter>
     </None>
-    <None Include="..\Data\Shaders\DeferredShadingCommon.incl.glsl">
-      <Filter>Shaders\Incl</Filter>
+    <None Include="..\Data\Shaders\Text.vs.glsl">
+      <Filter>Shaders\Text2D</Filter>
+    </None>
+    <None Include="..\Data\Shaders\Text.forward.fs.glsl">
+      <Filter>Shaders\Text2D</Filter>
+    </None>
+    <None Include="..\Data\Shaders\Text.wireframe.fs.glsl">
+      <Filter>Shaders\Text2D</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

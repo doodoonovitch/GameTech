@@ -15,6 +15,7 @@ Engine::Engine()
 	: mTextureManager(nullptr)
 	, mRenderers(nullptr)
 	, mForwardRenderers(nullptr)
+	, mHUDRenderers(nullptr)
 	, mComputes(nullptr)
 	, mFrameContainers(nullptr)
 	, mCamera(nullptr)
@@ -23,10 +24,8 @@ Engine::Engine()
 	, mSkydome(nullptr)
 	, mGBufferWidth(1920)
 	, mGBufferHeight(1080)
-	, mViewportX(0)
-	, mViewportY(0)
-	, mViewportWidth(1920)
-	, mViewportHeight(1080)
+	, mViewportOrigin(0)
+	, mViewportSize(1920, 1080)
 	, mExposure(0.1f)
 	, mGamma(1.0f)
 	, mInvGamma(1.0f/mGamma)
@@ -264,8 +263,8 @@ void Engine::RenderObjects()
 
 	glm::vec4 eyePos(mCamera->GetFrame()->GetPosition(), 1.f);
 	glm::vec4 depthRangeFovAspect(mCamera->GetNearZ(), mCamera->GetFarZ(), mCamera->GetFovY(), mCamera->GetAspect());
-	glm::vec4 bufferViewportSize(mGBufferWidth, mGBufferHeight, mViewportWidth, mViewportHeight);
-	glm::vec4 leftRightTopBottom(0, mViewportWidth, 0, mViewportHeight);
+	glm::vec4 bufferViewportSize(mGBufferWidth, mGBufferHeight, mViewportSize.x, mViewportSize.y);
+	glm::vec4 leftRightTopBottom(0, mViewportSize.x, 0, mViewportSize.y);
 
 	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(mCamera->GetInverseProjectionMatrix()), sizeof(glm::mat4));
@@ -327,7 +326,7 @@ void Engine::InternalRenderObjects()
 		{
 			if (mSkydome->RenderCache())
 			{
-				glViewport(mViewportX, mViewportY, mViewportWidth, mViewportHeight);
+				glViewport(mViewportOrigin.x, mViewportOrigin.y, mViewportSize.x, mViewportSize.y);
 			}
 		}
 	}
@@ -682,6 +681,40 @@ void Engine::InternalRenderObjects()
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 		mCopyShader.UnUse();
+
+		// -----------------------------------------------------------------------
+		// draw HUD 
+		// -----------------------------------------------------------------------
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glDisable(GL_CULL_FACE);
+		mHUDRenderers->ForEach([](Renderer * renderer)
+		{
+			if (renderer->GetIsInitialized())
+				renderer->Render();
+		});
+
+		if (GetWireFrame())
+		{
+			glEnable(GL_LINE_SMOOTH);
+			glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			mHUDRenderers->ForEach([](Renderer * renderer)
+			{
+				if (renderer->GetIsInitialized())
+					renderer->RenderWireFrame();
+			});
+
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glDisable(GL_LINE_SMOOTH);
+		}
+
+		glEnable(GL_CULL_FACE);
 	}
 	else
 	{
@@ -891,6 +924,9 @@ bool Engine::AttachRenderer(Renderer* renderer)
 
 	case Renderer::Forward_Pass:
 		return mForwardRenderers->Attach(renderer);
+
+	case Renderer::HUD_Pass:
+		return mHUDRenderers->Attach(renderer);
 	}
 
 	return false;
@@ -912,6 +948,9 @@ bool Engine::DetachRenderer(Renderer* renderer)
 
 	case Renderer::Forward_Pass:
 		return mForwardRenderers->Detach(renderer);
+
+	case Renderer::HUD_Pass:
+		return mHUDRenderers->Detach(renderer);
 	}
 
 	return false;

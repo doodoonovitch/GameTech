@@ -317,6 +317,9 @@
     <None Include="..\Data\Shaders\terrain.vs.glsl" />
     <None Include="..\Data\Shaders\terrain.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\terrain_vertex_normal.gs.glsl" />
+    <None Include="..\Data\Shaders\Text.forward.fs.glsl" />
+    <None Include="..\Data\Shaders\Text.vs.glsl" />
+    <None Include="..\Data\Shaders\Text.wireframe.fs.glsl" />
     <None Include="..\Data\Shaders\tonemapping.fs.glsl" />
     <None Include="..\Data\Shaders\screenquad.vs.glsl" />
     <None Include="..\Data\Shaders\vertex_normal.fs.glsl" />

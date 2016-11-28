@@ -349,10 +349,10 @@ void SimpleCamera::OnInit()
 				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.1f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
 				// Silver
-				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(0.95f, 0.93f, 0.88f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.3f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(0.95f, 0.93f, 0.88f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.15f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
 				// Iron
-				matList[dataCtxBase.mMaterialIndexBase + 3].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.4f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 3].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(0.2f).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
 				for(GLuint i = 1; i < modelCount; ++i)
 					modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + i);
@@ -702,6 +702,13 @@ void SimpleCamera::OnInit()
 				p2.mCharacterSet.push_back(i);
 
 			textRenderer->Initialize(desc);
+
+			Renderers::TextPage * page1 = textRenderer->NewPage(true);
+			page1->PushBackText(glm::ivec2(300, 200), L"1234567890@ABCDEFGH@ ", 1, glm::u8vec4(255, 106, 0, 255));
+			page1->PushBackText(glm::ivec2(300, 10), L"[page1] Test text rendering...", 0, glm::u8vec4(255, 106, 0, 255));
+			page1->PushBackText(glm::ivec2(300, 100), L"[page1] Test 2 - Font 2...", 1, glm::u8vec4(0, 127, 70, 255));
+
+			engine->AttachRenderer(textRenderer);
 		}
 
 	// Setup Lights

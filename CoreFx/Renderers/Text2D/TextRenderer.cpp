@@ -10,35 +10,205 @@ namespace CoreFx
 
 
 TextRenderer::TextRenderer()
-	: RendererHelper<1>("TextRenderer", "TextWireFrameRenderer", Renderer::Forward_Pass)
-	, mIsTextBuilt(false)
+	: RendererHelper<1>("TextRenderer", "TextWireFrameRenderer", Renderer::HUD_Pass)
+	, mIsShaderBufferUpdated(false)
 {
-	mDataBuffer.reserve(mCharCountBufferCapacity);
+}
 
-	/*
+
+TextRenderer::~TextRenderer()
+{
+	for (TextPageList::iterator it = mTextPageList.begin(); it != mTextPageList.end(); ++it)
+	{
+		TextPage * page = *it;
+		SAFE_DELETE(page);
+	}
+	mTextPageList.clear();
+}
+
+void TextRenderer::Render()
+{
+	UpdateShaderStorageBuffer();
+
+	mShader.Use();
+		glBindVertexArray(mVaoID);
+
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_GlyphInfoBuffer, mShaderGlyphInfoBuffer.GetBufferId());
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mShaderBuffer.GetBufferId());
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(mTexture->GetTarget(), mTexture->GetResourceId());
+
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mCharCount);
+
+		glBindVertexArray(0);
+	mShader.UnUse();
+}
+
+void TextRenderer::RenderWireFrame()
+{
+	UpdateShaderStorageBuffer();
+
+	mWireFrameShader.Use();
+	glBindVertexArray(mVaoID);
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_GlyphInfoBuffer, mShaderGlyphInfoBuffer.GetBufferId());
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mShaderBuffer.GetBufferId());
+
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, mCharCount);
+
+	glBindVertexArray(0);
+	mWireFrameShader.UnUse();
+}
+
+void TextRenderer::ResizeBuffer(GLsizei characterCount)
+{
+	mCharCountBufferCapacity = characterCount;
+	mShaderBuffer.Resize(GL_STATIC_DRAW, mCharCountBufferCapacity * sizeof(TextPage::TextLine::CharacterShaderData), nullptr);
+	InvalidateShaderBuffer();
+}
+
+void TextRenderer::InvalidateShaderBuffer()
+{
+	mIsShaderBufferUpdated = false;
+}
+
+void TextRenderer::UpdateShaderStorageBuffer()
+{
+	if (mIsShaderBufferUpdated)
+		return;
+	
+	mIsShaderBufferUpdated = true;
+
+	GLenum target = GL_SHADER_STORAGE_BUFFER;
+
+	glBindBuffer(target, mShaderBuffer.GetBufferId());
+	TextPage::TextLine::CharacterShaderData * bufferBase = (TextPage::TextLine::CharacterShaderData *)glMapBuffer(target, GL_WRITE_ONLY);
+
+	GLsizei index = 0;
+
+	for (TextPageList::iterator pageIt = mTextPageList.begin(); pageIt != mTextPageList.end() && index < mCharCountBufferCapacity; ++pageIt)
+	{
+		TextPage * page = *pageIt;
+		if (!page->GetIsVisible())
+		{
+			continue;
+		}
+
+		for (TextPage::TextLineList::iterator lineIt = page->mTextLineList.begin(); lineIt != page->mTextLineList.end() && index < mCharCountBufferCapacity; ++lineIt)
+		{
+			TextPage::TextLine & textLine = *lineIt;
+
+			textLine.mShaderBufferIndex = index;
+			GLsizei index2 = index + (GLsizei)textLine.mText.size();
+			GLsizei charToWrite = index2 <= mCharCountBufferCapacity ? (index2 - index) : (mCharCountBufferCapacity - index);
+
+			memcpy(&bufferBase[index], textLine.mDataBuffer.data(), charToWrite * sizeof(TextPage::TextLine::CharacterShaderData));
+
+			//{
+			//	const glm::mat4 & m = Engine::GetInstance()->GetOrthoProjMatrix();
+			//	glm::vec4 pts[] = {
+			//		glm::vec4(0.f, 140.f, 0.f, 1.f),
+			//		glm::vec4(0.f, 0.f, 0.f, 1.f),
+			//		glm::vec4(140.f, 140.f, 0.f, 1.f),
+			//		glm::vec4(140.f, 0.f,	0.f, 1.f)
+			//	};
+			//	for (int i = 0; i < 4; ++i)
+			//	{
+			//		glm::vec4 p = m * pts[i];
+			//		PRINT_MESSAGE("[TextRenderer-Test] p[%i] : {%f, %f, %f, %f)", i, p.x, p.y, p.z, p.w);
+			//	}
+
+			//	VAOBufferData quadVertices[] =
+			//	{
+			//		// Positions        
+			//		{{ 0.0f, 1.0f },{ 0, 1 }},
+			//		{{ 0.0f, 0.0f },{ 0, 0 }},
+			//		{{ 1.0f, 1.0f },{ 1, 1 }},
+			//		{{ 1.0f, 0.0f },{ 1, 0 }}
+			//	};
+
+			//	PRINT_MESSAGE("Text Line : ....");
+			//	for (TextPage::TextLine::DataBuffer::const_iterator it = textLine.mDataBuffer.begin(); it != textLine.mDataBuffer.end(); ++it)
+			//	{
+			//		const TextPage::TextLine::CharacterShaderData & ci = *it;
+
+			//		const GlyphInfo & gi = mGlyphInfoBuffer[ci.mGlyphInfoIndex];
+
+			//		glm::vec2 charSize = glm::vec2(gi.mCharacterSize & 0x0000FFFF, (gi.mCharacterSize >> 16) & 0x0000FFFF);
+			//		glm::vec2 orig = glm::unpackHalf2x16(ci.mLocation);
+			//		glm::vec2 xTexUV = glm::unpackHalf2x16(gi.mXTexUV);
+			//		glm::vec2 yTexUV = glm::unpackHalf2x16(gi.mYTexUV);
+
+			//		PRINT_MESSAGE("\t - glyph index = %li, \t orig=(%f, %f), \t charSize=(%f, %f)", ci.mGlyphInfoIndex, orig.x, orig.y, charSize.x, charSize.y)
+
+			//		for (int i = 0; i < 4; ++i)
+			//		{
+			//			const VAOBufferData & in = quadVertices[i];
+			//			glm::vec2 in_Position(in.mPosition[0], in.mPosition[1]);
+			//			glm::vec4 pos = glm::vec4(orig + in_Position * charSize, 0.f, 1.0f);
+			//			glm::vec2 texUV(xTexUV[in.mTexCoordIndex[0]], yTexUV[in.mTexCoordIndex[1]]);
+			//			glm::vec4 pojPos = m * pos;
+
+			//			PRINT_MESSAGE("\t\t[%i] in = (%f, %f), pos = (%f, %f, %f, %f), \t proj. pos = (%f, %f, %f, %f), \ttexUV=(%f, %f)", i, in_Position.x, in_Position.y, pos.x, pos.y, pos.z, pos.w, pojPos.x, pojPos.y, pojPos.z, pojPos.w, texUV.x, texUV.y);
+			//		}
+
+			//		PRINT_MESSAGE("");
+
+			//	}
+			//}
+
+			index = index2;
+		}
+	}
+
+	mCharCount = index;
+
+	glUnmapBuffer(target);
+	glBindBuffer(target, 0);
+}
+
+void TextRenderer::InitializeShader()
+{
 	const char * attributeNames[__attributes_count__] =
 	{
-			"u_Color"
+		"u_FontTextureSampler"
 	};
 
 	//setup shader
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/text.vs.glsl");
+	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/text.gs.glsl");
 	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/text.forward.fs.glsl");
 	mShader.CreateAndLinkProgram();
 	mShader.Use();
 		mShader.AddAttributes(attributeNames, __attributes_count__);
+
+		glUniform1i(mShader.GetUniform(u_FontTextureSampler), 0); GL_CHECK_ERRORS;
+
 		mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
 
-	GLfloat quadVertices[] =
+	//setup shader
+	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/text.vs.glsl");
+	//mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/text.gs.glsl");
+	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/text.wireframe.fs.glsl");
+	mWireFrameShader.CreateAndLinkProgram();
+	mWireFrameShader.Use();
+	//mWireFrameShader.AddAttributes(attributeNames, __attributes_count__);
+	mWireFrameShader.SetupFrameDataBlockBinding();
+	mWireFrameShader.UnUse();
+
+	GL_CHECK_ERRORS;
+
+	const VAOBufferData quadVertices[] =
 	{
 		// Positions        
-		-1.0f, 1.0f, 
-		-1.0f, -1.0f, 
-		1.0f, 1.0f, 
-		1.0f, -1.0f,
+		{{0.0f, 1.0f},		{0, 0}},
+		{{0.0f, 0.0f},		{0, 1}},
+		{{1.0f, 1.0f},		{1, 0}},
+		{{1.0f, 0.0f},		{1, 1}}
 	};
 
 
@@ -47,60 +217,38 @@ TextRenderer::TextRenderer()
 
 	glBindVertexArray(mVaoID);
 
-		glBindBuffer (GL_ARRAY_BUFFER, mVboIDs[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-		GL_CHECK_ERRORS;	 
+	glBindBuffer(GL_ARRAY_BUFFER, mVboIDs[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	GL_CHECK_ERRORS;
 
-		glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
-		glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-		GL_CHECK_ERRORS;
+	glEnableVertexAttribArray(Shader::POSITION_ATTRIBUTE);
+	glVertexAttribPointer(Shader::POSITION_ATTRIBUTE, 2, GL_FLOAT, GL_FALSE, sizeof(VAOBufferData), (GLvoid*)0);
+	GL_CHECK_ERRORS;
+
+	glEnableVertexAttribArray(Shader::UV_ATTRIBUTE);
+	glVertexAttribPointer(Shader::UV_ATTRIBUTE, 2, GL_INT, GL_FALSE, sizeof(VAOBufferData), (GLvoid*)offsetof(VAOBufferData, mTexCoordIndex));
+	GL_CHECK_ERRORS;
 
 	glBindVertexArray(0);
 
 	GL_CHECK_ERRORS;
 
+	mShaderGlyphInfoBuffer.CreateResource(GL_STATIC_DRAW, mGlyphInfoBuffer.size(), sizeof(ShaderGlyphInfo), mGlyphInfoBuffer.data(), sizeof(GlyphInfo));
+
+	mShaderBuffer.CreateResource(GL_STATIC_DRAW, mCharCountBufferCapacity * sizeof(TextPage::TextLine::CharacterShaderData), nullptr);
+
 	mIsInitialized = true;
-	*/
-
 }
 
-
-TextRenderer::~TextRenderer()
+void TextRenderer::Initialize(const Desc & desc)
 {
-	mDataBuffer.clear();
-}
-
-void TextRenderer::Render()
-{
-	mShader.Use();
-		glBindVertexArray(mVaoID);
-			glDrawArrays(GL_LINES, 0, 6);
-		glBindVertexArray(0);
-	mShader.UnUse();
-}
-
-void TextRenderer::RenderWireFrame()
-{
-	Render();
-}
-
-void TextRenderer::ResizeBuffer(GLuint characterCount)
-{
-	mCharCountBufferCapacity = characterCount;
-	mDataBuffer.reserve(mCharCountBufferCapacity * __dataindex_count__);
-	mIsTextBuilt = false;
-}
-
-void TextRenderer::Initialize(Desc desc)
-{
-	//FtFaceList ftFaceList;
-	mLayerCount = 0;
-	glm::uvec2 topLeft(0);
-
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize TextRenderer.....");
 
-	ResizeBuffer(desc.mCharacterCountBufferCapacity);
+	mCharCountBufferCapacity = desc.mCharacterCountBufferCapacity;
+
+	mLayerCount = 0;
+	glm::uvec2 topLeft(0);
 
 	mTextureSize = desc.mTextureSize;
 	mScreenResolution = desc.mScreenResolution;
@@ -126,17 +274,11 @@ void TextRenderer::Initialize(Desc desc)
 	LoadTexture(ftLibrary);
 	PRINT_MESSAGE(" \t Texture Id = %i", mTexture->GetResourceId());
 
-	//for (FT_Face ftFace : ftFaceList)
-	//{
-	//	if (ftFace != nullptr)
-	//	{
-	//		FT_Done_Face(ftFace);
-	//	}
-	//}
-
-	//Engine::GetInstance()->DisplayTexture2DArray(mTexture, 1);
+	//Engine::GetInstance()->DisplayTexture2DArray(mTexture, 0);
 
 	PRINT_MESSAGE(" \t Layer count = %i", mLayerCount);
+
+	InitializeShader();
 
 EndTextRendererInit:
 
@@ -155,7 +297,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 	FT_Error error;
 	FT_Face ftFace = nullptr;
 
-	GLint * lineHeight = nullptr;
+	GLushort * lineHeight = nullptr;
 	GLuint currLineBitmapHeight = 0;
 
 	if (ftLibrary == nullptr)
@@ -198,7 +340,8 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 
 	{
 		GlyphInfo undefinedCharGlyphInfo;
-		undefinedCharGlyphInfo.Set(0, 0, 0, 0, 0, GlyphInfo::Status::Undefined);
+		const glm::uvec2 zero(0);
+		undefinedCharGlyphInfo.Set(zero, zero, mTextureSize, 0, GlyphInfo::Status::Undefined);
 		mGlyphInfoBuffer.push_back(undefinedCharGlyphInfo);
 	}
 
@@ -235,16 +378,18 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 		}
 
 		GlyphInfo & undefinedCharGlyphInfo = mGlyphInfoBuffer[fi.mUndefinedCharIndex];
+		glm::uvec2 c2;
 		if (defaultChar != nullptr)
 		{
-			undefinedCharGlyphInfo.mBitfields.mRight = GlyphMetrics::toPixel(defaultChar->mSize.x);
-			undefinedCharGlyphInfo.mBitfields.mBottom = GlyphMetrics::toPixel(defaultChar->mSize.y);
+			c2.x = GlyphMetrics::toPixel(defaultChar->mSize.x);
+			c2.y = GlyphMetrics::toPixel(defaultChar->mSize.y);
 		}
 		else
 		{
-			undefinedCharGlyphInfo.mBitfields.mRight = GlyphMetrics::toPixel(fi.mDefaultWidth);
-			undefinedCharGlyphInfo.mBitfields.mBottom = GlyphMetrics::toPixel(fi.mLineHeight);
+			c2.x = GlyphMetrics::toPixel(fi.mDefaultWidth);
+			c2.y = GlyphMetrics::toPixel(fi.mLineHeight);
 		}
+		undefinedCharGlyphInfo.SetCorners(undefinedCharGlyphInfo.mLTCorner, c2, mTextureSize);
 	}
 	
 
@@ -261,7 +406,7 @@ ExitAddFont:
 	return result;
 }
 
-bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLint & lineHeightMax, GLuint & currLineBitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex)
+bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_UInt ftGlyphIndex, FontInfo & fi, GLushort & lineHeightMax, GLuint & currLineBitmapHeight, glm::uvec2 & topLeft, GLushort & layerIndex)
 {
 	FT_Error error;
 
@@ -281,12 +426,12 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 		if (ftCharCode == L' ')
 		{
 			if (ftFace->glyph->metrics.vertAdvance > lineHeightMax)
-				lineHeightMax = ftFace->glyph->metrics.vertAdvance;
+				lineHeightMax = (GLushort)ftFace->glyph->metrics.vertAdvance;
 
 			GlyphMetrics gm;
 			gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);
 			gm.mSize = gm.mAdvance;
-			gm.mBearing = glm::ivec2(0);
+			gm.mBearing = glm::ivec2(0, gm.mSize.y);
 			gm.mGlyphInfoBufferIndex = (GLuint)mGlyphInfoBuffer.size();
 #ifdef _DEBUG
 			gm.mChar = (wchar_t)ftCharCode;
@@ -294,7 +439,8 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 			fi.mMapping[ftCharCode] = gm;
 
 			GlyphInfo gi;
-			gi.Set(0, 0, (GLushort)GlyphMetrics::toPixel(GlyphMetrics::floor(gm.mAdvance.x)), (GLushort)GlyphMetrics::toPixel(GlyphMetrics::floor(gm.mAdvance.y)), 0, GlyphInfo::Status::WhiteSpace);
+			const glm::uvec2 zero(0);
+			gi.Set(zero, glm::uvec2(GlyphMetrics::toPixel(GlyphMetrics::floor(gm.mAdvance.x)), GlyphMetrics::toPixel(GlyphMetrics::floor(gm.mAdvance.y))), mTextureSize, 0, GlyphInfo::Status::WhiteSpace);
 			mGlyphInfoBuffer.push_back(gi);
 		}
 		return true;
@@ -302,7 +448,7 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 
 	{
 		if (ftFace->glyph->metrics.vertAdvance > lineHeightMax)
-			lineHeightMax = ftFace->glyph->metrics.vertAdvance;
+			lineHeightMax = (GLushort)ftFace->glyph->metrics.vertAdvance;
 
 		GlyphMetrics gm;
 		gm.mAdvance = glm::u16vec2(ftFace->glyph->metrics.horiAdvance, ftFace->glyph->metrics.vertAdvance);
@@ -316,38 +462,51 @@ bool TextRenderer::AddCharacterMetrics(FT_Face ftFace, FT_ULong ftCharCode, FT_U
 
 		GlyphInfo gi;
 
-		if (bitmapSize.y > currLineBitmapHeight)
-			currLineBitmapHeight = bitmapSize.y;
-
-		if ((topLeft.y + currLineBitmapHeight + 2) >= mTextureSize.y)
+		bool ok = false;
+		while (!ok)
 		{
-			topLeft.x = 0;
-			topLeft.y = 0;
-			++layerIndex;
-			currLineBitmapHeight = bitmapSize.y;
-		}
+			if (topLeft.x >= mTextureSize.x || (topLeft.x + bitmapSize.x) > mTextureSize.x)
+			{
+				topLeft.x = 0;
+				topLeft.y += (currLineBitmapHeight + 1);
+			}
 
-		glm::uvec2 bottomRight = topLeft + bitmapSize - glm::uvec2(1);
-		if (bottomRight.x >= mTextureSize.x)
-		{
-			topLeft.x = 0;
-			topLeft.y += (currLineBitmapHeight + 2);
+			if (bitmapSize.y > currLineBitmapHeight)
+				currLineBitmapHeight = bitmapSize.y;
 
-			currLineBitmapHeight = bitmapSize.y;
+			if (topLeft.y >= mTextureSize.y || (topLeft.y + currLineBitmapHeight) > mTextureSize.y)
+			{
+				topLeft.x = 0;
+				topLeft.y = 0;
+				++layerIndex;
+				currLineBitmapHeight = bitmapSize.y;
+			}
 
-			bottomRight.y = topLeft.y + bitmapSize.y - 1;
+			glm::uvec2 bottomRight = topLeft + bitmapSize - glm::uvec2(1);
+			if (bottomRight.x >= mTextureSize.x)
+			{
+				topLeft.x = 0;
+				topLeft.y += (currLineBitmapHeight + 1);
+				currLineBitmapHeight = bitmapSize.y;
+				continue;
+			}
+
 			if (bottomRight.y >= mTextureSize.y)
 			{
-				++layerIndex;
-
+				topLeft.x = 0;
 				topLeft.y = 0;
-				bottomRight.y = topLeft.y + bitmapSize.y - 1;
+				++layerIndex;
+				currLineBitmapHeight = bitmapSize.y;
+				continue;
 			}
-			bottomRight.x = topLeft.x + bitmapSize.x - 1;
+
+			ok = true;
+
+			gi.Set(topLeft, bottomRight, mTextureSize, layerIndex, GlyphInfo::Status::Character);
+			mGlyphInfoBuffer.push_back(gi);
+			topLeft.x = bottomRight.x + 2;
 		}
-		gi.Set((GLushort)topLeft.x, (GLushort)topLeft.y, (GLushort)bottomRight.x, (GLushort)bottomRight.y, layerIndex, GlyphInfo::Status::None);
-		mGlyphInfoBuffer.push_back(gi);
-		topLeft.x = bottomRight.x + 2;
+
 	}
 
 	return true;
@@ -394,15 +553,15 @@ bool TextRenderer::LoadTexture(FT_Library ftLibrary)
 			GlyphMetrics & gm = itMapping->second;
 			GlyphInfo & gi = mGlyphInfoBuffer[gm.mGlyphInfoBufferIndex];
 
-			if (gi.mBitfields.mLayerIndex > layerIndex)
+			if (gi.GetLayerIndex() > layerIndex)
 			{
 				glTexSubImage3D(mTexture->GetTarget(), 0, 0, 0, layerIndex, mTextureSize.x, mTextureSize.y, 1, GL_RED, GL_UNSIGNED_BYTE, buffer); GL_CHECK_ERRORS;
 
-				layerIndex = gi.mBitfields.mLayerIndex;
+				layerIndex = gi.GetLayerIndex();
 				memset(buffer, 0, bufferSize);
 			}
 
-			if ((GlyphInfo::Status)gi.mBitfields.mStatus == GlyphInfo::Status::None)
+			if ((GlyphInfo::Status)gi.GetStatus() == GlyphInfo::Status::Character)
 			{
 				error = FT_Load_Char(ftFace, ftCharCode, FT_LOAD_RENDER);
 				if (error != 0)
@@ -411,17 +570,17 @@ bool TextRenderer::LoadTexture(FT_Library ftLibrary)
 				}
 				else
 				{
-					assert(gi.mBitfields.mRight - gi.mBitfields.mLeft + 1 == ftFace->glyph->bitmap.width);
-					assert(gi.mBitfields.mBottom - gi.mBitfields.mTop + 1 == ftFace->glyph->bitmap.rows);
+					assert(gi.mRBCorner.x - gi.mLTCorner.x + 1 == ftFace->glyph->bitmap.width);
+					assert(gi.mRBCorner.y - gi.mLTCorner.y + 1 == ftFace->glyph->bitmap.rows);
 
-					std::uint8_t * dst = buffer + ((mTextureSize.y - gi.mBitfields.mTop - 1) * mTextureSize.x) + gi.mBitfields.mLeft;
+					std::uint8_t * dst = buffer + ((mTextureSize.y - gi.mLTCorner.y - 1) * mTextureSize.x) + gi.mLTCorner.x;
 					std::uint8_t * src = ftFace->glyph->bitmap.buffer;
-					for (auto y = gi.mBitfields.mTop; y <= gi.mBitfields.mBottom; ++y)
+					for (auto y = gi.mLTCorner.y; y <= gi.mRBCorner.y; ++y)
 					{
-						GLuint n = (GLuint)gi.mBitfields.mRight - (GLuint)gi.mBitfields.mLeft + 1;
+						GLuint n = (GLuint)gi.mRBCorner.x - (GLuint)gi.mLTCorner.x + 1;
 							
 						assert(ftFace->glyph->bitmap.width == n);
-						assert(gi.mBitfields.mLeft + ftFace->glyph->bitmap.width <= mTextureSize.x);
+						assert(gi.mLTCorner.x + ftFace->glyph->bitmap.width <= mTextureSize.x);
 
 						memcpy(dst, src, n);
 						src += std::abs(ftFace->glyph->bitmap.pitch);
@@ -450,64 +609,41 @@ bool TextRenderer::LoadTexture(FT_Library ftLibrary)
 	return true;
 }
 
-void TextRenderer::BuildPage(TextPage & page, bool forceRebuild)
+
+void TextRenderer::BuildPageList()
 {
-	if (page.mIsBuilt && !forceRebuild)
-		return;
-
-	//Engine * engine = Engine::GetInstance();
-	//glm::ivec2 viewPort1(engine->GetViewPortX(), engine->GetViewPortY());
-	//glm::ivec2 viewPort2(viewPort1.x + engine->GetViewPortX() - 1, viewPort1.y + engine->GetViewPortY() - 1);
-
-
-	GLuint index = 0;
-	GLuint bufferSize = (GLuint)mDataBuffer.size();
-
-	for (TextPage::TextLineList::iterator it = page.mTextLineList.begin(); it != page.mTextLineList.end() && index < bufferSize; ++it)
+	for (TextPageList::iterator it = mTextPageList.begin(); it != mTextPageList.end(); ++it)
 	{
-		TextPage::TextLine & textLine = *it;
-		GLuint charCount = (GLuint)textLine.mText.size();
-		if (forceRebuild || !textLine.mIsBuilt)
-		{
-			assert(textLine.mFontIndex < (GLuint)mFontInfoList.size());
+		TextPage * page = *it;
+		page->Build();
+	}
+}
 
-			const FontInfo & fi = mFontInfoList[textLine.mFontIndex];
-			glm::ivec2 cursor = textLine.mLocation;
-			for (std::wstring::const_iterator charIt = textLine.mText.begin(); charIt != textLine.mText.end() && index < bufferSize; ++charIt)
-			{
-				const GlyphMetrics * gm = fi.GetGlyph(*charIt);
-
-				glm::ivec2 pos;
-				if (gm == nullptr)
-				{
-					pos = cursor;
-					mDataBuffer[index + DataIndex_CharIndex] = fi.mUndefinedCharIndex;
-					cursor.x += GlyphMetrics::toPixel(fi.mDefaultWidth);
-				}
-				else
-				{
-					pos.x = cursor.x + GlyphMetrics::toPixel(gm->mBearing.x);
-					pos.y = cursor.y - GlyphMetrics::toPixel(gm->mSize.y - gm->mBearing.y);
-					mDataBuffer[index + DataIndex_CharIndex] = gm->mGlyphInfoBufferIndex;
-					cursor.x += GlyphMetrics::toPixel(gm->mAdvance.x);
-				}
-
-				mDataBuffer[index + DataIndex_X] = pos.x;
-				mDataBuffer[index + DataIndex_Y] = pos.y;
-
-				index += __dataindex_count__;
-			}
-			textLine.mIsBuilt = true;
-		}
-		else
-		{
-			index += charCount * __dataindex_count__;
-		}
-
+TextPage * TextRenderer::NewPage(bool isVisible)
+{
+	if (!mIsInitialized)
+	{
+		PRINT_ERROR("[TextRenderer::NewPage] The text renderer is not initialized!");
+		return nullptr;
 	}
 
-	page.mIsBuilt = true;
+	TextPage * page = new TextPage(isVisible, this);
+	mTextPageList.push_back(page);
+	return page;
+}
 
+void TextRenderer::DeletePage(TextPage *& page)
+{
+	TextPageList::iterator it = std::find(mTextPageList.begin(), mTextPageList.end(), page);
+	if (it == mTextPageList.end())
+	{
+		PRINT_ERROR("[DeletePage] The page '0x%p' is not defined!", page);
+	}
+	else
+	{
+		mTextPageList.erase(it);
+		SAFE_DELETE(page);
+	}
 }
 
 	} // namespace Renderers

@@ -16,39 +16,78 @@ class TextPage
 	friend class TextRenderer;
 
 public:
+	
+	enum class ELocationType
+	{
+		AbsolutePixel,
+		RelativeRatio
+	};
+
+protected:
 
 	struct TextLine
 	{
+#pragma pack(push, 1)
+		struct CharacterShaderData
+		{
+			GLuint mGlyphInfoIndex;
+			GLuint mLocation;
+			GLuint mColor;
+		};
+#pragma pack(pop)
+
+		typedef std::vector<CharacterShaderData> DataBuffer;
+
 		GLuint mFontIndex;
-		glm::ivec2 mLocation;
+		GLuint mColor;
+		glm::vec2 mLocation;
+		glm::vec2 mSize;
 		std::wstring mText;
-		bool mIsBuilt;
+		DataBuffer mDataBuffer;
+		GLint mShaderBufferIndex;
+		ELocationType mLocationType;
 
 		TextLine()
 			: mFontIndex(0)
 			, mLocation(0)
-			, mIsBuilt(false)
+			, mShaderBufferIndex(-1)
+			, mLocationType(ELocationType::RelativeRatio)
 		{}
 	};
 
 	typedef std::vector<TextLine> TextLineList;
 
 protected:
-	TextPage();
-	~TextPage();
 
+	TextPage(bool isVisible, TextRenderer * textRenderer);
+	~TextPage();
+	
 
 public:
 
-	GLint AddText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex);
+	bool GetIsVisible() const { return mIsVisible; }
+	void SetVisible(bool visible);
+
+	size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
+	size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
+	size_t PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
+	size_t PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
+
+	void EraseText(size_t index);
+	void PopBackText();
 
 protected:
 
+	void BuildTextLine(TextLine & line);
+	void Build();
+
+	void InvalidateRendererShaderBufferIfVisible();
 
 private:
 
+	TextRenderer * mRenderer;
 	TextLineList mTextLineList;
-	bool mIsBuilt;
+	bool mIsVisible;
 };
 
 
