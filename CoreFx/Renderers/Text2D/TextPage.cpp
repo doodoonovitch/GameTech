@@ -19,7 +19,7 @@ TextPage::~TextPage()
 	mRenderer = nullptr;
 }
 
-void TextPage::SetVisible(bool visible)
+void TextPage::SetIsVisible(bool visible)
 { 
 	if (mIsVisible != visible && !mTextLineList.empty())
 	{

@@ -18,11 +18,11 @@ TextRenderer::TextRenderer()
 
 TextRenderer::~TextRenderer()
 {
-	for (TextPageList::iterator it = mTextPageList.begin(); it != mTextPageList.end(); ++it)
-	{
-		TextPage * page = *it;
-		SAFE_DELETE(page);
-	}
+	//for (TextPageList::iterator it = mTextPageList.begin(); it != mTextPageList.end(); ++it)
+	//{
+	//	TextPage * page = *it;
+	//	SAFE_DELETE(page);
+	//}
 	mTextPageList.clear();
 }
 
@@ -89,7 +89,7 @@ void TextRenderer::UpdateShaderStorageBuffer()
 
 	for (TextPageList::iterator pageIt = mTextPageList.begin(); pageIt != mTextPageList.end() && index < mCharCountBufferCapacity; ++pageIt)
 	{
-		TextPage * page = *pageIt;
+		std::shared_ptr<TextPage> page = *pageIt;
 		if (!page->GetIsVisible())
 		{
 			continue;
@@ -615,36 +615,32 @@ void TextRenderer::BuildPageList()
 {
 	for (TextPageList::iterator it = mTextPageList.begin(); it != mTextPageList.end(); ++it)
 	{
-		TextPage * page = *it;
+		std::shared_ptr<TextPage> page = *it;
 		page->Build();
 	}
 }
 
-TextPage * TextRenderer::NewPage(bool isVisible)
+void TextRenderer::TextPageDelete(TextPage * page)
+{
+	delete page;
+}
+
+std::weak_ptr<TextPage> TextRenderer::NewPage(bool isVisible)
 {
 	if (!mIsInitialized)
 	{
 		PRINT_ERROR("[TextRenderer::NewPage] The text renderer is not initialized!");
-		return nullptr;
+		return std::weak_ptr<TextPage>();
 	}
 
-	TextPage * page = new TextPage(isVisible, this);
+	std::shared_ptr<TextPage> page(new TextPage(isVisible, this), TextRenderer::TextPageDelete);
 	mTextPageList.push_back(page);
 	return page;
 }
 
-void TextRenderer::DeletePage(TextPage *& page)
+void TextRenderer::DeletePage(std::weak_ptr<TextPage> page)
 {
-	TextPageList::iterator it = std::find(mTextPageList.begin(), mTextPageList.end(), page);
-	if (it == mTextPageList.end())
-	{
-		PRINT_ERROR("[DeletePage] The page '0x%p' is not defined!", page);
-	}
-	else
-	{
-		mTextPageList.erase(it);
-		SAFE_DELETE(page);
-	}
+	std::remove(mTextPageList.begin(), mTextPageList.end(), page.lock());
 }
 
 	} // namespace Renderers

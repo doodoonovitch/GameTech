@@ -10,6 +10,9 @@
     <Filter Include="Sys">
       <UniqueIdentifier>{0fffe05f-0da5-4ca0-86af-a17a2c903bc0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{8dddc16f-0817-4b75-a5b9-7f45eba398b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

@@ -210,8 +210,9 @@ public:
 	void Initialize(const Desc & desc);
 	void ResizeBuffer(GLsizei characterCount);
 
-	TextPage * NewPage(bool isVisible);
-	void DeletePage(TextPage *& page);
+	std::weak_ptr<TextPage> NewPage(bool isVisible);
+	void DeletePage(std::weak_ptr<TextPage> page);
+	GLsizei GetTextPageCount() const { return (GLsizei)mTextPageList.size(); }
 	
 	bool IsValidFontIndex(GLuint fontIndex) const { return fontIndex < (GLuint)mFontInfoList.size(); }
 	const FontInfoList & GetFontInfoList() const { return mFontInfoList; }
@@ -239,7 +240,10 @@ public:
 
 protected:
 
-	typedef std::vector<TextPage *> TextPageList;
+	typedef std::vector<std::shared_ptr<TextPage>> TextPageList;
+	typedef std::vector<TextGroup> TextGroupList;
+
+	static void TextPageDelete(TextPage * page);
 
 protected:
 
@@ -293,6 +297,7 @@ protected:
 	FontInfoList mFontInfoList;
 	
 	TextPageList mTextPageList;
+	TextGroupList mTextGroupList;
 
 
 	bool mIsShaderBufferUpdated;

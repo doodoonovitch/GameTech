@@ -66,7 +66,7 @@ protected:
 public:
 
 	bool GetIsVisible() const { return mIsVisible; }
-	void SetVisible(bool visible);
+	void SetIsVisible(bool visible);
 
 	size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
 	size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);

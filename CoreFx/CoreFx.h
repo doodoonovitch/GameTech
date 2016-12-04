@@ -120,6 +120,8 @@ namespace CoreFx
 #include "Renderers\CompassRenderer.h"
 #include "Renderers\ModelRenderer.h"
 #include "Renderers\Text2D\TextPage.h"
+#include "Renderers\Text2D\TextGroup.h"
 #include "Renderers\Text2D\TextRenderer.h"
+
 
 #endif // COREFX_COREFX_H

@@ -180,6 +180,7 @@
     <ClInclude Include="Renderers\SkyboxRenderer.h" />
     <ClInclude Include="Renderers\SkydomeRenderer.h" />
     <ClInclude Include="Renderers\TerrainRenderer.h" />
+    <ClInclude Include="Renderers\Text2D\TextGroup.h" />
     <ClInclude Include="Renderers\Text2D\TextPage.h" />
     <ClInclude Include="Renderers\Text2D\TextRenderer.h" />
     <ClInclude Include="SceneObject.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="Renderers\SkyboxRenderer.cpp" />
     <ClCompile Include="Renderers\SkydomeRenderer.cpp" />
     <ClCompile Include="Renderers\TerrainRenderer.cpp" />
+    <ClCompile Include="Renderers\Text2D\TextGroup.cpp" />
     <ClCompile Include="Renderers\Text2D\TextPage.cpp" />
     <ClCompile Include="Renderers\Text2D\TextRenderer.cpp" />
     <ClCompile Include="SceneObject.cpp" />

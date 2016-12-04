@@ -205,6 +205,9 @@
       <Filter>Renderers\DebugTools</Filter>
     </ClInclude>
     <ClInclude Include="ShaderStorageBuffer.h" />
+    <ClInclude Include="Renderers\Text2D\TextGroup.h">
+      <Filter>Renderers\Text2D</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -313,6 +316,9 @@
     <ClCompile Include="Engine_Release.cpp" />
     <ClCompile Include="Engine_Initialize.cpp" />
     <ClCompile Include="ShaderStorageBuffer.cpp" />
+    <ClCompile Include="Renderers\Text2D\TextGroup.cpp">
+      <Filter>Renderers\Text2D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
