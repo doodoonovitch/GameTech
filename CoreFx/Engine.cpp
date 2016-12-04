@@ -376,27 +376,6 @@ void Engine::InternalRenderObjects()
 		}			
 	});
 
-	//// -----------------------------------------------------------------------
-	//// Render sky box / sky dome
-	//// -----------------------------------------------------------------------
-
-	//glDepthMask(GL_FALSE);
-	//glDepthFunc(GL_LEQUAL);
-	//if (mSkybox != nullptr)
-	//{
-	//	if (mSkybox->GetIsInitialized())
-	//	{
-	//		mSkybox->Render();
-	//	}
-	//}
-	//else if (mSkydome != nullptr)
-	//{
-	//	if (mSkydome->GetIsInitialized())
-	//	{
-	//		mSkydome->Render();
-	//	}
-	//}
-
 	// -----------------------------------------------------------------------
 	// SSAO pass
 	// -----------------------------------------------------------------------
@@ -681,45 +660,45 @@ void Engine::InternalRenderObjects()
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 		mCopyShader.UnUse();
-
-		// -----------------------------------------------------------------------
-		// draw HUD 
-		// -----------------------------------------------------------------------
-
-		glDisable(GL_DEPTH_TEST);
-		glDepthMask(GL_FALSE);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glDisable(GL_CULL_FACE);
-		mHUDRenderers->ForEach([](Renderer * renderer)
-		{
-			if (renderer->GetIsInitialized())
-				renderer->Render();
-		});
-
-		if (GetWireFrame())
-		{
-			glEnable(GL_LINE_SMOOTH);
-			glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-			mHUDRenderers->ForEach([](Renderer * renderer)
-			{
-				if (renderer->GetIsInitialized())
-					renderer->RenderWireFrame();
-			});
-
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			glDisable(GL_LINE_SMOOTH);
-		}
-
-		glEnable(GL_CULL_FACE);
 	}
 	else
 	{
 		InternalRenderDeferredBuffers();
 	}
+
+	// -----------------------------------------------------------------------
+	// draw HUD 
+	// -----------------------------------------------------------------------
+
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDisable(GL_CULL_FACE);
+	mHUDRenderers->ForEach([](Renderer * renderer)
+	{
+		if (renderer->GetIsInitialized())
+			renderer->Render();
+	});
+
+	if (GetWireFrame())
+	{
+		glEnable(GL_LINE_SMOOTH);
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		mHUDRenderers->ForEach([](Renderer * renderer)
+		{
+			if (renderer->GetIsInitialized())
+				renderer->RenderWireFrame();
+		});
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDisable(GL_LINE_SMOOTH);
+	}
+
+	glEnable(GL_CULL_FACE);
 }
 
 void Engine::InternalRenderDeferredBuffers()

@@ -2,9 +2,7 @@
 #include "CoreGame.h"
 #include <iostream>
 
-using namespace std;
 using namespace CoreFx;
-using namespace Renderables;
 
 
 namespace CoreGame
@@ -17,7 +15,7 @@ void SimpleCamera::OnRender()
 {
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Engine* engine = Engine::GetInstance();
+	CoreFx::Engine* engine = CoreFx::Engine::GetInstance();
 
 	if (!mFreezeTimer)
 	{
@@ -31,7 +29,7 @@ void SimpleCamera::OnRender()
 
 void SimpleCamera::OnShutdown()
 {
-	Engine::Release();
+	CoreFx::Engine::Release();
 
 	PRINT_MESSAGE("Shutdown successfull");
 }
@@ -51,7 +49,7 @@ void SimpleCamera::SetupViewportAndProjection()
 		mCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight, mCamera->GetNearZ(), mCamera->GetFarZ());
 	}
 
-	Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
+	CoreFx::Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
 }
 
 //#define TERRAIN_SAMPLE
@@ -74,12 +72,12 @@ void SimpleCamera::OnInit()
 	{
 		GLsizei w = (GLsizei)mGameProgram.GetWindowWidth();
 		GLsizei h = (GLsizei)mGameProgram.GetWindowHeight();
-		Engine::Initialize(0, 0, w, h, w, h);
+		CoreFx::Engine::Initialize(0, 0, w, h, w, h);
 	}
 
-		Engine* engine = Engine::GetInstance();
+		CoreFx::Engine* engine = CoreFx::Engine::GetInstance();
 
-		mCamera = new Camera();
+		mCamera = new CoreFx::Camera();
 		mCamera->LookAt(glm::vec3(10, 10.f, 20.f), glm::vec3(10.f, 10.f, 5.f), glm::vec3(0, 1, 0));
 		engine->SetCamera(mCamera);
 
@@ -87,10 +85,12 @@ void SimpleCamera::OnInit()
 
 		mCamera->Update();
 
-		Renderers::GridRenderer * gridRenderer = new Renderers::GridRenderer(50, 50);
+		InitializeTextRenderer();
+
+		CoreFx::Renderers::GridRenderer * gridRenderer = new CoreFx::Renderers::GridRenderer(50, 50);
 		engine->AttachRenderer(gridRenderer);
 
-		Renderers::AxisRenderer * axisRenderer = new Renderers::AxisRenderer();
+		CoreFx::Renderers::AxisRenderer * axisRenderer = new CoreFx::Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
 		
 		//engine->EnableDeferredDebug((Engine::EDeferredDebug)(mShowDeferredBufferState = (GLint)Engine::EDeferredDebug::ShowNormalBuffer));
@@ -99,7 +99,7 @@ void SimpleCamera::OnInit()
 		{
 			float yScale = 100.f;
 
-			Renderers::TerrainRenderer::Desc desc(512, 512, glm::vec3(1.f, yScale, 1.f), 0.6f, 0.7f);
+			CoreFx::Renderers::TerrainRenderer::Desc desc(512, 512, glm::vec3(1.f, yScale, 1.f), 0.6f, 0.7f);
 			
 			desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/Terrain/Canyon_513x513.r32", 513, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
 			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/Terrain/SweetCanyon_513x513.r32", 513, true, glm::vec3(-512.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
@@ -686,29 +686,6 @@ void SimpleCamera::OnInit()
 
 		// TextRenderer
 		{
-			Renderers::TextRenderer * textRenderer = new Renderers::TextRenderer();
-			Renderers::TextRenderer::Desc desc;
-			desc.mPoliceList.resize(2);
-			desc.mTextureSize = glm::ivec2(512);
-
-			Renderers::TextRenderer::PoliceDesc & p1 = desc.mPoliceList[0];
-			p1.mFont = "Medias\\Fonts\\OCRAEXT.TTF";
-			p1.mCharacterHeight = 24;
-
-			Renderers::TextRenderer::PoliceDesc & p2 = desc.mPoliceList[1];
-			p2.mFont = "Medias\\Fonts\\arial.ttf";
-			p2.mCharacterHeight = 48;
-			for (GLuint i = L' '; i <= L'µ'; ++i)
-				p2.mCharacterSet.push_back(i);
-
-			textRenderer->Initialize(desc);
-
-			Renderers::TextPage * page1 = textRenderer->NewPage(true);
-			page1->PushBackText(glm::ivec2(300, 200), L"1234567890@ABCDEFGH@ ", 1, glm::u8vec4(255, 106, 0, 255));
-			page1->PushBackText(glm::ivec2(300, 10), L"[page1] Test text rendering...", 0, glm::u8vec4(255, 106, 0, 255));
-			page1->PushBackText(glm::ivec2(300, 100), L"[page1] Test 2 - Font 2...", 1, glm::u8vec4(0, 127, 70, 255));
-
-			engine->AttachRenderer(textRenderer);
 		}
 
 	// Setup Lights
@@ -756,11 +733,213 @@ void SimpleCamera::OnInit()
 
 }
 
+void SimpleCamera::InitializeTextRenderer()
+{
+	const char * fonts[] =
+	{
+		"Medias\\Fonts\\Hack-Regular.ttf",
+		"Medias\\Fonts\\Hack-Bold.ttf",
+		"Medias\\Fonts\\Hack-BoldItalic.ttf",
+		"Medias\\Fonts\\INFROMAN.ttf",
+		"Medias\\Fonts\\arial.ttf",
+		"Medias\\Fonts\\OCRAEXT.TTF",
+	};
+	const int FontCount = ARRAY_SIZE_IN_ELEMENTS(fonts);
+
+	const int fontSizes[] =
+	{
+		18, 36, 60
+	};
+	const int FontSizeCount = ARRAY_SIZE_IN_ELEMENTS(fontSizes);
+
+	mTextRenderer = new Renderers::TextRenderer();
+	Renderers::TextRenderer::Desc desc;
+	desc.mPoliceList.resize((size_t)EFont::__fonts_count__);
+	desc.mTextureSize = glm::ivec2(512);
+
+	// Normal
+	{
+		Renderers::TextRenderer::PoliceDesc & p = desc.mPoliceList[(int)EFont::Normal];
+		p.mFont = fonts[0];
+		p.mCharacterHeight = fontSizes[0];
+	}
+	// NormalBold
+	{
+		Renderers::TextRenderer::PoliceDesc & p = desc.mPoliceList[(int)EFont::NormalBold];
+		p.mFont = fonts[1];
+		p.mCharacterHeight = fontSizes[0];
+	}
+	// NormalItalic
+	{
+		Renderers::TextRenderer::PoliceDesc & p = desc.mPoliceList[(int)EFont::NormalItalic];
+		p.mFont = fonts[2];
+		p.mCharacterHeight = fontSizes[0];
+	}
+	// Title
+	{
+		Renderers::TextRenderer::PoliceDesc & p = desc.mPoliceList[(int)EFont::Title];
+		p.mFont = fonts[3];
+		p.mCharacterHeight = fontSizes[2];
+	}
+	// Header
+	{
+		Renderers::TextRenderer::PoliceDesc & p = desc.mPoliceList[(int)EFont::Header];
+		p.mFont = fonts[4];
+		p.mCharacterHeight = fontSizes[1];
+	}
+
+
+	int fontIndex = 0;
+	for (int i = 0; i < (int)EFont::__fonts_count__; ++i)
+	{
+		Renderers::TextRenderer::PoliceDesc & p = desc.mPoliceList[fontIndex++];
+		for (GLuint i = L' '; i <= L'µ'; ++i)
+			p.mCharacterSet.push_back(i);
+	}
+
+	mTextRenderer->Initialize(desc);
+
+	mTestPage = mTextRenderer->NewPage(false);
+	mTestPage->PushBackText(glm::ivec2(300, 10), L"1234567890@ABCDEFGH@ ", (GLuint)EFont::Normal, glm::u8vec4(255, 106, 0, 255));
+	mTestPage->PushBackText(glm::ivec2(300, 100), L"[page1] Test text rendering...", (GLuint)EFont::NormalBold, glm::u8vec4(255, 106, 0, 255));
+	mTestPage->PushBackText(glm::ivec2(300, 200), L"[page1] Test 2 - Font 2...", (GLuint)EFont::NormalItalic, glm::u8vec4(0, 127, 70, 255));
+
+	mHelpInfoPage = mTextRenderer->NewPage(false);
+	mFrameInfoPage = mTextRenderer->NewPage(true);
+
+	CoreFx::Engine::GetInstance()->AttachRenderer(mTextRenderer);
+
+	InitializeHelpInfoPage();
+}
+
+void SimpleCamera::InitializeHelpInfoPage()
+{
+	const int Column1 = 50;
+	const int Column2 = 100;
+	const int Column3 = 180;
+	const int Column4 = 300;
+	const int Interline1 = 6;
+	const int Interline2 = 4;
+
+	const Renderers::TextRenderer::FontInfo & fiNormal = mTextRenderer->GetFontInfo((GLuint)EFont::Normal);
+	const Renderers::TextRenderer::FontInfo & fiNormalBold = mTextRenderer->GetFontInfo((GLuint)EFont::NormalBold);
+	const Renderers::TextRenderer::FontInfo & fiNormalItalic = mTextRenderer->GetFontInfo((GLuint)EFont::NormalItalic);
+	const Renderers::TextRenderer::FontInfo & fiTitle = mTextRenderer->GetFontInfo((GLuint)EFont::Title);
+	const Renderers::TextRenderer::FontInfo & fiHeader = mTextRenderer->GetFontInfo((GLuint)EFont::Header);
+
+	const glm::u8vec4 color1(255, 106, 0, 255);
+	const glm::u8vec4 color2(255, 106, 0, 255);
+	const glm::u8vec4 color3(127, 0, 0, 255);
+	const glm::u8vec4 color4(100, 100, 100, 255);
+
+	int row = 100;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(300, 10), L"Commands...", (GLuint)EFont::Title, color1);
+
+	//
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column1, row), L"Main commands", (GLuint)EFont::Header, color2);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight()) + Interline1;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"Mouse Left Button", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column4, row), L": camera rotation", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"Mouse Right Button", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column4, row), L": camera strafe", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	row += +Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[Z][S]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": move forward/backward", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[Q][D]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": move left/right", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[SHIFT]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": move faster", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[CTRL]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": lock camera pitch rotation", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[E][e]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- exposure", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[G][g]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- gamma", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[G][g]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- gamma", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[+][-]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- move speed", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[*]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": default move speed", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[<][>]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- sun position", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[o][O]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- SSAO radius", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[k][K]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- SSAO kernel size", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[P][p]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": pause", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[ESC]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": quit", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	//
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column1, row), L"Debug-tools commands", (GLuint)EFont::Header, color2);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight()) + Interline1;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[F2]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": view deferred rendering buffers", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[X][x]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": draw wireframes", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[B][b]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": draw normals", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[v][V]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- normals density", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[,][?]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": +/- normal length", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+	mHelpInfoPage->PushBackText(glm::ivec2(Column2, row), L"[L][l]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage->PushBackText(glm::ivec2(Column3, row), L": draw lights position", (GLuint)EFont::Normal, color4);
+	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+
+}
+
 SimpleCamera::SimpleCamera(GameProgram & gameProgram)
 	: GameEngine(gameProgram)
-	, mCamera(nullptr)
-	, mSkydome(nullptr)
-	, mSunLight(nullptr)
 {
 }
 
@@ -829,11 +1008,11 @@ void SimpleCamera::OnMouseMove(int x, int y)
 			mMouseY = mRotY;
 		}
 
-		if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) == 0)
-		{
+		//if ((GetAsyncKeyState(VK_LSHIFT) & 0x8000) == 0)
+		//{
 			mCamera->Yaw(glm::radians(mMouseX));
-		}
-		if ((GetAsyncKeyState(VK_LSHIFT) & 0x8000) == 0)
+		//}
+		if ((GetAsyncKeyState(VK_LCONTROL) & 0x8000) == 0)
 		{
 			mCamera->Pitch(glm::radians(mMouseY));
 		}
@@ -1036,7 +1215,7 @@ void SimpleCamera::filterMouseMoves(float dx, float dy)
 
 void SimpleCamera::OnUpdate()
 {
-	bool bWalk = false, bStrafe = false, bSunPos = false;
+	bool bWalk = false, bStrafe = false;
 	float dx = 0, dy = 0, speed = mMoveSpeed;
 
 	if (GetAsyncKeyState(VK_SHIFT))
@@ -1074,6 +1253,20 @@ void SimpleCamera::OnUpdate()
 		bStrafe = true;
 	}
 
+	static bool wasF1Pressed = false;
+	if (GetAsyncKeyState(VK_F1) & 0x8000)
+	{
+		if (!wasF1Pressed)
+		{
+			mHelpInfoPage->SetVisible(!mHelpInfoPage->GetIsVisible());
+		}
+		wasF1Pressed = true;
+	}
+	else
+	{
+		wasF1Pressed = false;
+	}
+
 	static bool wasF2Pressed = false;
 	if (GetAsyncKeyState(VK_F2) & 0x8000)
 	{
@@ -1089,15 +1282,8 @@ void SimpleCamera::OnUpdate()
 	}
 	else
 		wasF2Pressed = false;
+
 	
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
-	{
-	}
-
-	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
-	{
-	}
-
 	if (bWalk)
 	{
 		mCamera->Walk((float)(dy * mDeltaTime));
@@ -1106,11 +1292,6 @@ void SimpleCamera::OnUpdate()
 	if (bStrafe)
 	{
 		mCamera->Strafe((float)(dx * mDeltaTime));
-	}
-
-	if (bSunPos)
-	{
-		UpdateSunPosition();
 	}
 
 	//if (bWalk || bStrafe)

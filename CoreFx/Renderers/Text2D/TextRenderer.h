@@ -91,6 +91,8 @@ public:
 
 		friend class TextRenderer;
 
+		GLuint mIndex;
+
 		GLuint mBufferEntryIndex;
 		GLuint mUndefinedCharIndex;
 

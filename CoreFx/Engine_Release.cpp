@@ -34,6 +34,11 @@ void Engine::InternalRelease()
 
 		SAFE_DELETE(mCamera);
 
+		mComputes->DeleteAll();
+		mRenderers->DeleteAll();
+		mForwardRenderers->DeleteAll();
+		mHUDRenderers->DeleteAll();
+
 		SAFE_DELETE(mComputes);
 		SAFE_DELETE(mRenderers);
 		SAFE_DELETE(mForwardRenderers);

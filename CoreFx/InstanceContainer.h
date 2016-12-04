@@ -131,9 +131,19 @@ public:
 		}
 	}
 
-	void DirtyDetachAll()
+	void DetachAll()
 	{
 		mObjs.clear();
+	}
+
+	void DeleteAll()
+	{
+		Container temp;
+		std::swap(temp, mObjs);
+		for (auto o : mObjs)
+		{
+			delete o;
+		}
 	}
 
 private:

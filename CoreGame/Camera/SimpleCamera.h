@@ -40,6 +40,22 @@ private:
 
 	void SetupViewportAndProjection();
 
+	void InitializeTextRenderer();
+	void InitializeHelpInfoPage();
+
+private:
+
+	enum class EFont
+	{
+		Normal,
+		NormalBold,
+		NormalItalic,
+		Title,
+		Header,
+
+		__fonts_count__
+	};
+
 	static const int VK_W = 0x57;
 	static const int VK_S = 0x53;
 	static const int VK_A = 0x41;
@@ -61,9 +77,14 @@ private:
 	int mState = 0, mOldX = 0, mOldY = 0;
 	float mRotX = 0.f, mRotY = 135.f, mDist = 0.f;
 
-	CoreFx::Camera* mCamera;
-	CoreFx::Renderers::SkydomeRenderer * mSkydome;
-	CoreFx::Lights::DirectionalLight * mSunLight;
+	CoreFx::Camera* mCamera = nullptr;
+	CoreFx::Renderers::SkydomeRenderer * mSkydome = nullptr;
+	CoreFx::Lights::DirectionalLight * mSunLight = nullptr;
+	CoreFx::Renderers::TextRenderer * mTextRenderer = nullptr;
+
+	CoreFx::Renderers::TextPage * mHelpInfoPage = nullptr;
+	CoreFx::Renderers::TextPage * mFrameInfoPage = nullptr;
+	CoreFx::Renderers::TextPage * mTestPage = nullptr;
 
 	uint32_t mSunPositionDegree = 4;
 	uint32_t mSunPositionInc = 1;

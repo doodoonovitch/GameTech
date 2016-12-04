@@ -325,6 +325,7 @@ bool TextRenderer::AddFont(FT_Library ftLibrary, const char * fontName, GLushort
 	GLuint index = (GLuint)mFontInfoList.size();
 	mFontInfoList.resize(index + 1);
 	FontInfo & fi = mFontInfoList[index];
+	fi.mIndex = index;
 	fi.mFileName = fontName;
 	fi.mFamilyName = ftFace->family_name;
 	fi.mStyleName = ftFace->style_name;

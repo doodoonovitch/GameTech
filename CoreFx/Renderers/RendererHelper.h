@@ -141,7 +141,7 @@ protected:
 		{
 			delete obj;
 		});
-		mObjs.DirtyDetachAll();
+		mObjs.DetachAll();
 	}
 
 	typedef InstanceContainer<T_Object> Container;
