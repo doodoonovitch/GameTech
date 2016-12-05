@@ -21,7 +21,7 @@ TextPage::~TextPage()
 
 void TextPage::SetIsVisible(bool visible)
 { 
-	if (mIsVisible != visible && !mTextLineList.empty())
+	if (mIsVisible != visible && !mTextLineList.empty() && mRenderer->IsAnActivePage(this))
 	{
 		mRenderer->InvalidateShaderBuffer();
 		mIsVisible = visible;
@@ -30,7 +30,7 @@ void TextPage::SetIsVisible(bool visible)
 
 void TextPage::InvalidateRendererShaderBufferIfVisible()
 {
-	if (mIsVisible)
+	if (mIsVisible && mRenderer->IsAnActivePage(this))
 	{
 		mRenderer->InvalidateShaderBuffer();
 	}

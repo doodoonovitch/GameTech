@@ -40,6 +40,7 @@ public:
 	void AttachPage(TextPageWeakPtr page);
 	void DetachPage(TextPageWeakPtr page);
 	bool IsPageAttached(TextPageWeakPtr page) const;
+	bool IsPageAttached(const TextPage * page) const;
 
 	void SetIsVisible(bool visible);
 

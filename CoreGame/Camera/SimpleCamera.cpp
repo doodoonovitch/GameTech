@@ -804,6 +804,9 @@ void SimpleCamera::InitializeTextRenderer()
 
 	mTextRenderer->Initialize(desc);
 
+	mDefaultTextGroup = mTextRenderer->GetTextGroup((GLsizei)ETextGroup::Default);
+	mShowDeferredBuffersTextGroup = mTextRenderer->NewTextGroup();
+
 	mTestPage = mTextRenderer->NewPage(false);
 	mTestPage.lock()->PushBackText(glm::ivec2(300, 10), L"1234567890@ABCDEFGH@ ", (GLuint)EFont::Normal, glm::u8vec4(255, 106, 0, 255));
 	mTestPage.lock()->PushBackText(glm::ivec2(300, 100), L"[page1] Test text rendering...", (GLuint)EFont::NormalBold, glm::u8vec4(255, 106, 0, 255));
@@ -811,18 +814,20 @@ void SimpleCamera::InitializeTextRenderer()
 
 	mHelpInfoPage = mTextRenderer->NewPage(false);
 	mFrameInfoPage = mTextRenderer->NewPage(true);
+	mShowDeferredBuffersPage = mTextRenderer->NewPage(true, mShowDeferredBuffersTextGroup);
 
 	CoreFx::Engine::GetInstance()->AttachRenderer(mTextRenderer);
 
-	InitializeHelpInfoPage();
+	InitializeTextPages();
 }
 
-void SimpleCamera::InitializeHelpInfoPage()
+void SimpleCamera::InitializeTextPages()
 {
 	const int Column1 = 50;
 	const int Column2 = 100;
 	const int Column3 = 180;
 	const int Column4 = 300;
+	const int Interline0 = 14;
 	const int Interline1 = 6;
 	const int Interline2 = 4;
 
@@ -832,115 +837,146 @@ void SimpleCamera::InitializeHelpInfoPage()
 	const Renderers::TextRenderer::FontInfo & fiTitle = mTextRenderer->GetFontInfo((GLuint)EFont::Title);
 	const Renderers::TextRenderer::FontInfo & fiHeader = mTextRenderer->GetFontInfo((GLuint)EFont::Header);
 
+	const GLuint titleLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiTitle.GetLineHeight());
+	const GLuint headerLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight());
+	const GLuint normalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
+
 	const glm::u8vec4 color1(255, 106, 0, 255);
 	const glm::u8vec4 color2(255, 106, 0, 255);
 	const glm::u8vec4 color3(127, 0, 0, 255);
 	const glm::u8vec4 color4(100, 100, 100, 255);
 
-	int row = 100;
+	int row = 0;
 
-	mHelpInfoPage.lock()->PushBackText(glm::ivec2(300, 10), L"Commands...", (GLuint)EFont::Title, color1);
-
+	mHelpInfoPage.lock()->PushBackText(glm::ivec2(300, row), L"Commands...", (GLuint)EFont::Title, color1);
+	row += titleLineHeight + Interline0;
 	//
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column1, row), L"Main commands", (GLuint)EFont::Header, color2);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight()) + Interline1;
+	row += headerLineHeight + Interline1;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"Mouse Left Button", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column4, row), L": camera rotation", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"Mouse Right Button", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column4, row), L": camera strafe", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	row += +Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[Z][S]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": move forward/backward", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[Q][D]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": move left/right", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[SHIFT]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": move faster", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[CTRL]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": lock camera pitch rotation", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[E][e]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- exposure", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[G][g]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- gamma", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[G][g]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- gamma", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[+][-]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- move speed", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[*]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": default move speed", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[<][>]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- sun position", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[o][O]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- SSAO radius", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[k][K]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- SSAO kernel size", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[P][p]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": pause", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[ESC]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": quit", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	//
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column1, row), L"Debug-tools commands", (GLuint)EFont::Header, color2);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight()) + Interline1;
+	row += headerLineHeight + Interline1;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[F2]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": view deferred rendering buffers", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[X][x]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": draw wireframes", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[B][b]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": draw normals", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[v][V]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- normals density", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[,][?]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- normal length", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[L][l]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": draw lights position", (GLuint)EFont::Normal, color4);
-	row += Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight()) + Interline2;
+	row += normalLineHeight + Interline2;
 
+	// --------------------------------------------------------------
+
+	row = 0;
+	mShowDeferredBuffersPage.lock()->PushBackText(glm::vec2(-0.3f, -0.9f), Renderers::TextPage::ELocationType::RelativeRatio, L"Press F2 to continue...", (GLuint)EFont::Header, color1);
+}
+
+void SimpleCamera::UpdateShowDeferredBuffersText()
+{
+	static const wchar_t * sShowDeferredBuffersText[]
+	{
+		L"Normal Buffer",
+		L"Albedo Buffer",
+		L"Metallic Buffer",
+		L"Roughness Buffer",
+		L"Position Buffer",
+		L"SSAO Buffer",
+		L"Emissive Buffer",
+		L"Depth Buffer"
+	};
+
+	auto pagePtr = mShowDeferredBuffersPage.lock();
+	if (pagePtr->GetTextCount() == 2)
+	{
+		pagePtr->EraseText(1);
+	}
+
+	pagePtr->PushBackText(glm::vec2(-0.2f, 0.92f), Renderers::TextPage::ELocationType::RelativeRatio, sShowDeferredBuffersText[mShowDeferredBufferState-1], (GLuint)EFont::Header, glm::u8vec4(255, 106, 0, 255));
 }
 
 SimpleCamera::SimpleCamera(GameProgram & gameProgram)
@@ -1279,9 +1315,16 @@ void SimpleCamera::OnUpdate()
 		{
 			mShowDeferredBufferState = (mShowDeferredBufferState + 1) % (GLint)Engine::EDeferredDebug::__count__;
 			if (mShowDeferredBufferState == 0)
+			{
 				Engine::GetInstance()->DisableDeferredDebug();
+				mTextRenderer->SetActiveTextGroup((GLsizei)ETextGroup::Default);
+			}
 			else
+			{
+				UpdateShowDeferredBuffersText();
+				mTextRenderer->SetActiveTextGroup((GLsizei)ETextGroup::ShowDeferredBuffers);
 				Engine::GetInstance()->EnableDeferredDebug((Engine::EDeferredDebug)mShowDeferredBufferState);
+			}
 		}
 		wasF2Pressed = true;
 	}

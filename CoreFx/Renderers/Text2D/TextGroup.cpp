@@ -25,7 +25,7 @@ void TextGroup::AttachPage(TextPageWeakPtr page)
 
 void TextGroup::DetachPage(TextPageWeakPtr page)
 {
-	DetachPage(page, false);
+	DetachPage(page, true);
 }
 
 void TextGroup::AttachPage(TextPageWeakPtr page, bool updateRendererState)
@@ -48,9 +48,18 @@ void TextGroup::DetachPage(TextPageWeakPtr page, bool updateRendererState)
 	if (ptr == nullptr)
 		return;
 
-	std::remove_if(mTextPageList.begin(), mTextPageList.end(), [ptr](TextPageWeakPtr a)->bool { return a.lock() == ptr; });
+	int removeCount = 0;
+	std::remove_if(mTextPageList.begin(), mTextPageList.end(), [ptr, &removeCount](TextPageWeakPtr a)->bool 
+	{ 
+		if (a.lock() == ptr)
+		{
+			++removeCount;
+			return true;
+		}
+		return false; 
+	});
 
-	if (updateRendererState && ptr->GetIsVisible() && mRenderer->GetActiveTextGroup().lock().get() == this)
+	if (updateRendererState && removeCount > 0 && ptr->GetIsVisible() && mRenderer->GetActiveTextGroup().lock().get() == this)
 	{
 		mRenderer->InvalidateShaderBuffer();
 	}
@@ -66,21 +75,31 @@ void TextGroup::SetIsVisible(bool visible)
 			p->SetIsVisible(visible);
 		}
 	});
+
+	if (mRenderer->GetActiveTextGroup().lock().get() == this)
+	{
+		mRenderer->InvalidateShaderBuffer();
+	}
 }
 
 bool TextGroup::IsPageAttached(TextPageWeakPtr page) const
 {
-	auto pagePtr = page.lock();
-	if (pagePtr == nullptr)
-		return false;
-
-	return IsPageAttached(pagePtr);
+	return IsPageAttached(page.lock().get());
 }
 
 bool TextGroup::IsPageAttached(std::shared_ptr<TextPage> page) const
 {
+	//auto it = std::find_if(mTextPageList.begin(), mTextPageList.end(), [page](TextPageWeakPtr a)->bool { return a.lock() == page; });
+	//return !(it == mTextPageList.end());
+	return IsPageAttached(page.get());
+}
 
-	auto it = std::find_if(mTextPageList.begin(), mTextPageList.end(), [page](TextPageWeakPtr a)->bool { return a.lock() == page; });
+bool TextGroup::IsPageAttached(const TextPage * page) const
+{
+	if (page == nullptr)
+		return false;
+
+	auto it = std::find_if(mTextPageList.begin(), mTextPageList.end(), [page](TextPageWeakPtr a)->bool { return a.lock().get() == page; });
 	return !(it == mTextPageList.end());
 }
 

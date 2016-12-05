@@ -41,7 +41,9 @@ private:
 	void SetupViewportAndProjection();
 
 	void InitializeTextRenderer();
-	void InitializeHelpInfoPage();
+	void InitializeTextPages();
+
+	void UpdateShowDeferredBuffersText();
 
 private:
 
@@ -55,6 +57,13 @@ private:
 
 		__fonts_count__
 	};
+
+	enum class ETextGroup
+	{
+		Default,
+		ShowDeferredBuffers,
+	};
+
 
 	static const int VK_W = 0x57;
 	static const int VK_S = 0x53;
@@ -83,8 +92,12 @@ private:
 	CoreFx::Renderers::TextRenderer * mTextRenderer = nullptr;
 
 	CoreFx::Renderers::TextPageWeakPtr mHelpInfoPage;
+	CoreFx::Renderers::TextPageWeakPtr mShowDeferredBuffersPage;
 	CoreFx::Renderers::TextPageWeakPtr mFrameInfoPage;
 	CoreFx::Renderers::TextPageWeakPtr mTestPage;
+
+	CoreFx::Renderers::TextGroupWeakPtr mDefaultTextGroup;
+	CoreFx::Renderers::TextGroupWeakPtr mShowDeferredBuffersTextGroup;
 
 	uint32_t mSunPositionDegree = 4;
 	uint32_t mSunPositionInc = 1;

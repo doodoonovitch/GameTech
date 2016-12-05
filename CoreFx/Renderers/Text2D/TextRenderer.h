@@ -210,7 +210,7 @@ public:
 	void Initialize(const Desc & desc);
 	void ResizeBuffer(GLsizei characterCount);
 
-	TextPageWeakPtr NewPage(bool isVisible);
+	TextPageWeakPtr NewPage(bool isVisible, GLsizei textGroupIndex = 0);
 	TextPageWeakPtr NewPage(bool isVisible, TextGroupWeakPtr attachToThisTextGroup);
 
 	void DeletePage(TextPageWeakPtr page);
@@ -218,10 +218,16 @@ public:
 	
 	TextGroupWeakPtr NewTextGroup();
 	void DeleteTextGroup(TextGroupWeakPtr textGroup);
+
 	GLsizei GetTextGroupCount() const { return (GLsizei)mTextGroupList.size(); }
 	TextGroupWeakPtr GetTextGroup(GLsizei groupIndex) const;
+
 	void SetActiveTextGroup(TextGroupWeakPtr groupPtr);
+	void SetActiveTextGroup(GLsizei index);
 	TextGroupWeakPtr GetActiveTextGroup() const { return mActiveTextGroup; }
+
+	bool IsAnActivePage(TextPageWeakPtr page) const;
+	bool IsAnActivePage(const TextPage * page) const;
 
 	bool IsValidFontIndex(GLuint fontIndex) const { return fontIndex < (GLuint)mFontInfoList.size(); }
 	const FontInfoList & GetFontInfoList() const { return mFontInfoList; }

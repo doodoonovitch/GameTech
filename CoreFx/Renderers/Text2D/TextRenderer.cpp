@@ -89,10 +89,12 @@ void TextRenderer::UpdateShaderStorageBuffer()
 
 	GLsizei index = 0;
 
-	for (TextPageList::iterator pageIt = mTextPageList.begin(); pageIt != mTextPageList.end() && index < mCharCountBufferCapacity; ++pageIt)
+	TextGroup::TextPageList & pageList = mActiveTextGroup->mTextPageList;
+
+	for (TextGroup::TextPageList::iterator pageIt = pageList.begin(); pageIt != pageList.end() && index < mCharCountBufferCapacity; ++pageIt)
 	{
-		std::shared_ptr<TextPage> page = *pageIt;
-		if (!page->GetIsVisible())
+		std::shared_ptr<TextPage> page = (*pageIt).lock();
+		if (page == nullptr || !page->GetIsVisible())
 		{
 			continue;
 		}
@@ -106,59 +108,6 @@ void TextRenderer::UpdateShaderStorageBuffer()
 			GLsizei charToWrite = index2 <= mCharCountBufferCapacity ? (index2 - index) : (mCharCountBufferCapacity - index);
 
 			memcpy(&bufferBase[index], textLine.mDataBuffer.data(), charToWrite * sizeof(TextPage::TextLine::CharacterShaderData));
-
-			//{
-			//	const glm::mat4 & m = Engine::GetInstance()->GetOrthoProjMatrix();
-			//	glm::vec4 pts[] = {
-			//		glm::vec4(0.f, 140.f, 0.f, 1.f),
-			//		glm::vec4(0.f, 0.f, 0.f, 1.f),
-			//		glm::vec4(140.f, 140.f, 0.f, 1.f),
-			//		glm::vec4(140.f, 0.f,	0.f, 1.f)
-			//	};
-			//	for (int i = 0; i < 4; ++i)
-			//	{
-			//		glm::vec4 p = m * pts[i];
-			//		PRINT_MESSAGE("[TextRenderer-Test] p[%i] : {%f, %f, %f, %f)", i, p.x, p.y, p.z, p.w);
-			//	}
-
-			//	VAOBufferData quadVertices[] =
-			//	{
-			//		// Positions        
-			//		{{ 0.0f, 1.0f },{ 0, 1 }},
-			//		{{ 0.0f, 0.0f },{ 0, 0 }},
-			//		{{ 1.0f, 1.0f },{ 1, 1 }},
-			//		{{ 1.0f, 0.0f },{ 1, 0 }}
-			//	};
-
-			//	PRINT_MESSAGE("Text Line : ....");
-			//	for (TextPage::TextLine::DataBuffer::const_iterator it = textLine.mDataBuffer.begin(); it != textLine.mDataBuffer.end(); ++it)
-			//	{
-			//		const TextPage::TextLine::CharacterShaderData & ci = *it;
-
-			//		const GlyphInfo & gi = mGlyphInfoBuffer[ci.mGlyphInfoIndex];
-
-			//		glm::vec2 charSize = glm::vec2(gi.mCharacterSize & 0x0000FFFF, (gi.mCharacterSize >> 16) & 0x0000FFFF);
-			//		glm::vec2 orig = glm::unpackHalf2x16(ci.mLocation);
-			//		glm::vec2 xTexUV = glm::unpackHalf2x16(gi.mXTexUV);
-			//		glm::vec2 yTexUV = glm::unpackHalf2x16(gi.mYTexUV);
-
-			//		PRINT_MESSAGE("\t - glyph index = %li, \t orig=(%f, %f), \t charSize=(%f, %f)", ci.mGlyphInfoIndex, orig.x, orig.y, charSize.x, charSize.y)
-
-			//		for (int i = 0; i < 4; ++i)
-			//		{
-			//			const VAOBufferData & in = quadVertices[i];
-			//			glm::vec2 in_Position(in.mPosition[0], in.mPosition[1]);
-			//			glm::vec4 pos = glm::vec4(orig + in_Position * charSize, 0.f, 1.0f);
-			//			glm::vec2 texUV(xTexUV[in.mTexCoordIndex[0]], yTexUV[in.mTexCoordIndex[1]]);
-			//			glm::vec4 pojPos = m * pos;
-
-			//			PRINT_MESSAGE("\t\t[%i] in = (%f, %f), pos = (%f, %f, %f, %f), \t proj. pos = (%f, %f, %f, %f), \ttexUV=(%f, %f)", i, in_Position.x, in_Position.y, pos.x, pos.y, pos.z, pos.w, pojPos.x, pojPos.y, pojPos.z, pojPos.w, texUV.x, texUV.y);
-			//		}
-
-			//		PRINT_MESSAGE("");
-
-			//	}
-			//}
 
 			index = index2;
 		}
@@ -627,7 +576,13 @@ void TextRenderer::TextPageDelete(TextPage * page)
 	delete page;
 }
 
-TextPageWeakPtr TextRenderer::NewPage(bool isVisible)
+TextPageWeakPtr TextRenderer::NewPage(bool isVisible, GLsizei textGroupIndex)
+{
+	TextGroupWeakPtr textGroupPtr = (textGroupIndex >= 0 && textGroupIndex < (GLsizei)mTextGroupList.size()) ? mTextGroupList[textGroupIndex] : mDefaultTextGroup;
+	return NewPage(isVisible, textGroupPtr);
+}
+
+TextPageWeakPtr TextRenderer::NewPage(bool isVisible, TextGroupWeakPtr attachToThisTextGroup)
 {
 	if (!mIsInitialized)
 	{
@@ -637,18 +592,19 @@ TextPageWeakPtr TextRenderer::NewPage(bool isVisible)
 
 	std::shared_ptr<TextPage> page(new TextPage(isVisible, this), TextRenderer::TextPageDelete);
 	mTextPageList.push_back(page);
-	return page;
-}
 
-TextPageWeakPtr TextRenderer::NewPage(bool isVisible, TextGroupWeakPtr attachToThisTextGroup)
-{
-	TextPageWeakPtr pagePtr = NewPage(isVisible);
+	TextPageWeakPtr pagePtr = page;
 	auto grpPtr = attachToThisTextGroup.lock();
 	if (grpPtr == nullptr)
 	{
-		grpPtr = mActiveTextGroup;
+		grpPtr = mDefaultTextGroup;
 	}
-	grpPtr->AttachPage(pagePtr);
+	grpPtr->AttachPage(pagePtr, false);
+
+	//if (isVisible && grpPtr == mActiveTextGroup)
+	//{
+	//	InvalidateShaderBuffer();
+	//}
 
 	return pagePtr;
 }
@@ -659,9 +615,11 @@ void TextRenderer::DeletePage(TextPageWeakPtr page)
 	if (ptr == nullptr)
 		return;
 
+	bool isActivePage = ptr->GetIsVisible() && mActiveTextGroup->IsPageAttached(ptr);
+
 	std::remove(mTextPageList.begin(), mTextPageList.end(), ptr);
 
-	if (ptr->GetIsVisible() && mActiveTextGroup->IsPageAttached(ptr))
+	if (isActivePage)
 	{
 		InvalidateShaderBuffer();
 	}
@@ -731,6 +689,27 @@ void TextRenderer::SetActiveTextGroup(std::shared_ptr<TextGroup> groupPtr)
 void TextRenderer::SetActiveTextGroup(TextGroupWeakPtr groupPtr)
 {
 	SetActiveTextGroup(groupPtr.lock());
+}
+
+void TextRenderer::SetActiveTextGroup(GLsizei index)
+{
+	if (index < 0 || index >= (GLsizei)mTextGroupList.size())
+	{
+		PRINT_ERROR("[TextRenderer::SetActiveTextGroup] Text group index=%i is not defined!", index);
+		return;
+	}
+
+	SetActiveTextGroup(mTextGroupList[index]);
+}
+
+bool TextRenderer::IsAnActivePage(TextPageWeakPtr page) const
+{
+	return mActiveTextGroup->IsPageAttached(page);
+}
+
+bool TextRenderer::IsAnActivePage(const TextPage * page) const
+{
+	return mActiveTextGroup->IsPageAttached(page);
 }
 
 	} // namespace Renderers
