@@ -42,19 +42,28 @@ int main(int argc, char **argv)
 		const Sys::DisplayMonitorHelper & helper = simpleCameraSample.GetDisplayMonitorHelper();
 		const Sys::DisplayMonitorInfoList & infoList = helper.GetDisplayMonitorList();
 
+		int monitorCount = (int)infoList.size();
+
+		const wchar_t * modes[] =
+		{
+			L"Window",
+			L"Fullscreen"
+		};
+
 		if (!getChoiceFromArgs(argc, argv, choice))
 		{
 			do
 			{
 				int i = 1;
 
-				wprintf(L"\t%i - Window Mode\n", i++);
-
-				Sys::DisplayMonitorInfoList::const_iterator it;
-				for (it = infoList.begin(); it != infoList.end(); ++it, ++i)
+				for (int mode = 0; mode < ARRAY_SIZE_IN_ELEMENTS(modes); ++mode)
 				{
-					const Sys::DisplayMonitorInfo & info = *it;
-					wprintf(L"\t%i - Fullscreen on monitor '%s' (%i, %i - %i x %i)\n", i, info.mName.c_str(), info.mVirtualScreen.left, info.mVirtualScreen.top, std::abs(info.mVirtualScreen.right - info.mVirtualScreen.left), std::abs(info.mVirtualScreen.bottom - info.mVirtualScreen.top));
+					Sys::DisplayMonitorInfoList::const_iterator it;
+					for (it = infoList.begin(); it != infoList.end(); ++it, ++i)
+					{
+						const Sys::DisplayMonitorInfo & info = *it;
+						wprintf(L"\t%i - %s on monitor '%s' (%i, %i - %i x %i)\n", i, modes[mode], info.mName.c_str(), info.mVirtualScreen.left, info.mVirtualScreen.top, std::abs(info.mVirtualScreen.right - info.mVirtualScreen.left), std::abs(info.mVirtualScreen.bottom - info.mVirtualScreen.top));
+					}
 				}
 
 				wprintf(L"\t0 - Exit\n");
@@ -63,7 +72,7 @@ int main(int argc, char **argv)
 				wscanf_s(L"%i", &choice);
 				wprintf(L"\n\n");
 
-			} while (!(choice >= 0 && (choice - 1) <= (int)infoList.size()));
+			} while (!( (choice >= 0) && (choice <= (monitorCount * 2))));
 		}
 
 		if (choice == 0)
@@ -71,18 +80,23 @@ int main(int argc, char **argv)
 			return 0;
 		}
 
-		if (choice == 1)
+		--choice;
+		int mode = choice / monitorCount;
+		monitorIndex = choice % monitorCount;
+		
+		if (mode == 0)
 		{
-			monitorIndex = helper.GetPrimaryMonitorIndex();
 			const Sys::DisplayMonitorInfo & info = infoList[monitorIndex];
+
+			LONG w = std::abs(info.mVirtualScreen.right - info.mVirtualScreen.left);
+			LONG h = std::abs(info.mVirtualScreen.bottom - info.mVirtualScreen.top);
 			win = info.mVirtualScreen;
-			win.right = 1280;
-			win.bottom = 960;
+			win.right = info.mVirtualScreen.left + std::min((LONG)1280, w);
+			win.bottom = info.mVirtualScreen.top + std::min((LONG)960, h);
 			fullscreen = false;
 		}
 		else
 		{
-			monitorIndex = choice - 2;
 			const Sys::DisplayMonitorInfo & info = infoList[monitorIndex];
 			win = info.mVirtualScreen;
 			fullscreen = true;

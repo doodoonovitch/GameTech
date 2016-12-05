@@ -98,6 +98,7 @@ private:
 	bool mFreezeTimer = false;
 
 	GLint mShowDeferredBufferState = 0;
+	bool mIsInitialized = false;
 
 };
 

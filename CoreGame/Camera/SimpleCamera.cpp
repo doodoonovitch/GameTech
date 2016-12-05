@@ -49,7 +49,10 @@ void SimpleCamera::SetupViewportAndProjection()
 		mCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight, mCamera->GetNearZ(), mCamera->GetFarZ());
 	}
 
-	CoreFx::Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
+	if (mIsInitialized)
+	{
+		CoreFx::Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
+	}
 }
 
 //#define TERRAIN_SAMPLE
@@ -84,6 +87,8 @@ void SimpleCamera::OnInit()
 		SetupViewportAndProjection();
 
 		mCamera->Update();
+
+		mIsInitialized = true;
 
 		InitializeTextRenderer();
 
