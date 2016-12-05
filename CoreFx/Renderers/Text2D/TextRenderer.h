@@ -210,10 +210,19 @@ public:
 	void Initialize(const Desc & desc);
 	void ResizeBuffer(GLsizei characterCount);
 
-	std::weak_ptr<TextPage> NewPage(bool isVisible);
-	void DeletePage(std::weak_ptr<TextPage> page);
+	TextPageWeakPtr NewPage(bool isVisible);
+	TextPageWeakPtr NewPage(bool isVisible, TextGroupWeakPtr attachToThisTextGroup);
+
+	void DeletePage(TextPageWeakPtr page);
 	GLsizei GetTextPageCount() const { return (GLsizei)mTextPageList.size(); }
 	
+	TextGroupWeakPtr NewTextGroup();
+	void DeleteTextGroup(TextGroupWeakPtr textGroup);
+	GLsizei GetTextGroupCount() const { return (GLsizei)mTextGroupList.size(); }
+	TextGroupWeakPtr GetTextGroup(GLsizei groupIndex) const;
+	void SetActiveTextGroup(TextGroupWeakPtr groupPtr);
+	TextGroupWeakPtr GetActiveTextGroup() const { return mActiveTextGroup; }
+
 	bool IsValidFontIndex(GLuint fontIndex) const { return fontIndex < (GLuint)mFontInfoList.size(); }
 	const FontInfoList & GetFontInfoList() const { return mFontInfoList; }
 	const FontInfo & GetFontInfo(GLuint fontIndex) const
@@ -241,9 +250,10 @@ public:
 protected:
 
 	typedef std::vector<std::shared_ptr<TextPage>> TextPageList;
-	typedef std::vector<TextGroup> TextGroupList;
+	typedef std::vector<std::shared_ptr<TextGroup>> TextGroupList;
 
 	static void TextPageDelete(TextPage * page);
+	static void TextGroupDelete(TextGroup * textGroup);
 
 protected:
 
@@ -260,6 +270,9 @@ protected:
 	friend class TextPage;
 
 	void BuildPageList();
+
+	void SetActiveTextGroup(std::shared_ptr<TextGroup> groupPtr);
+
 
 protected:
 
@@ -299,6 +312,8 @@ protected:
 	TextPageList mTextPageList;
 	TextGroupList mTextGroupList;
 
+	std::shared_ptr<TextGroup> mDefaultTextGroup;
+	std::shared_ptr<TextGroup> mActiveTextGroup;
 
 	bool mIsShaderBufferUpdated;
 };

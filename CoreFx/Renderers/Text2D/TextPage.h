@@ -90,7 +90,7 @@ private:
 	bool mIsVisible;
 };
 
-
+typedef std::weak_ptr<TextPage> TextPageWeakPtr;
 
 
 	} // namespace Renderers

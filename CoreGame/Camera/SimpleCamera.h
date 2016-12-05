@@ -82,9 +82,9 @@ private:
 	CoreFx::Lights::DirectionalLight * mSunLight = nullptr;
 	CoreFx::Renderers::TextRenderer * mTextRenderer = nullptr;
 
-	std::weak_ptr<CoreFx::Renderers::TextPage> mHelpInfoPage;
-	std::weak_ptr<CoreFx::Renderers::TextPage> mFrameInfoPage;
-	std::weak_ptr<CoreFx::Renderers::TextPage> mTestPage;
+	CoreFx::Renderers::TextPageWeakPtr mHelpInfoPage;
+	CoreFx::Renderers::TextPageWeakPtr mFrameInfoPage;
+	CoreFx::Renderers::TextPageWeakPtr mTestPage;
 
 	uint32_t mSunPositionDegree = 4;
 	uint32_t mSunPositionInc = 1;

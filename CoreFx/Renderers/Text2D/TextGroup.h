@@ -17,29 +17,50 @@ class TextGroup
 
 public:
 
-	TextGroup();
-	~TextGroup();
-
-	void ForEach(std::function<void(std::weak_ptr<TextPage>)> func)
+	void ForEach(std::function<void(TextPageWeakPtr)> func)
 	{
-		for (auto o : mTextPageList)
+		TextPageList::iterator it = mTextPageList.begin();
+		while (it != mTextPageList.end())
 		{
-			func(o);
+			TextPageWeakPtr pWeakPtr = *it;
+			auto page = pWeakPtr.lock();
+			if (page == nullptr)
+			{
+				it = mTextPageList.erase(it);
+			}
+			else
+			{
+				++it;
+				func(pWeakPtr);
+			}
 		}
 	}
 
 
-	void AttachPage(std::weak_ptr<TextPage> page);
-	void DetachPage(std::weak_ptr<TextPage> page);
+	void AttachPage(TextPageWeakPtr page);
+	void DetachPage(TextPageWeakPtr page);
+	bool IsPageAttached(TextPageWeakPtr page) const;
 
 	void SetIsVisible(bool visible);
 
+protected:
+
+	TextGroup(TextRenderer * renderer);
+	~TextGroup();
+
+	void AttachPage(TextPageWeakPtr page, bool updateRendererState);
+	void DetachPage(TextPageWeakPtr page, bool updateRendererState);
+	bool IsPageAttached(std::shared_ptr<TextPage> page) const;
+
 private:
 
-	typedef std::vector<std::weak_ptr<TextPage>> TextPageList;
+	typedef std::list<TextPageWeakPtr> TextPageList;
 
+	TextRenderer * mRenderer;
 	TextPageList mTextPageList;
 };
+
+typedef std::weak_ptr<TextGroup> TextGroupWeakPtr;
 
 
 } // namespace Renderers

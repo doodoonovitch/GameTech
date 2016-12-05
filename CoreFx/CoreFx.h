@@ -28,6 +28,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <list>
 #include <algorithm>
 #include <iterator>
 #include <functional>

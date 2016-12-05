@@ -13,16 +13,18 @@ TextRenderer::TextRenderer()
 	: RendererHelper<1>("TextRenderer", "TextWireFrameRenderer", Renderer::HUD_Pass)
 	, mIsShaderBufferUpdated(false)
 {
+	auto ptr = NewTextGroup();
+	mDefaultTextGroup = ptr.lock();
+	mActiveTextGroup = mDefaultTextGroup;
 }
 
 
 TextRenderer::~TextRenderer()
 {
-	//for (TextPageList::iterator it = mTextPageList.begin(); it != mTextPageList.end(); ++it)
-	//{
-	//	TextPage * page = *it;
-	//	SAFE_DELETE(page);
-	//}
+	mDefaultTextGroup.reset();
+	mActiveTextGroup.reset();
+
+	mTextGroupList.clear();
 	mTextPageList.clear();
 }
 
@@ -625,12 +627,12 @@ void TextRenderer::TextPageDelete(TextPage * page)
 	delete page;
 }
 
-std::weak_ptr<TextPage> TextRenderer::NewPage(bool isVisible)
+TextPageWeakPtr TextRenderer::NewPage(bool isVisible)
 {
 	if (!mIsInitialized)
 	{
 		PRINT_ERROR("[TextRenderer::NewPage] The text renderer is not initialized!");
-		return std::weak_ptr<TextPage>();
+		return TextPageWeakPtr();
 	}
 
 	std::shared_ptr<TextPage> page(new TextPage(isVisible, this), TextRenderer::TextPageDelete);
@@ -638,9 +640,97 @@ std::weak_ptr<TextPage> TextRenderer::NewPage(bool isVisible)
 	return page;
 }
 
-void TextRenderer::DeletePage(std::weak_ptr<TextPage> page)
+TextPageWeakPtr TextRenderer::NewPage(bool isVisible, TextGroupWeakPtr attachToThisTextGroup)
 {
-	std::remove(mTextPageList.begin(), mTextPageList.end(), page.lock());
+	TextPageWeakPtr pagePtr = NewPage(isVisible);
+	auto grpPtr = attachToThisTextGroup.lock();
+	if (grpPtr == nullptr)
+	{
+		grpPtr = mActiveTextGroup;
+	}
+	grpPtr->AttachPage(pagePtr);
+
+	return pagePtr;
+}
+
+void TextRenderer::DeletePage(TextPageWeakPtr page)
+{
+	auto ptr = page.lock();
+	if (ptr == nullptr)
+		return;
+
+	std::remove(mTextPageList.begin(), mTextPageList.end(), ptr);
+
+	if (ptr->GetIsVisible() && mActiveTextGroup->IsPageAttached(ptr))
+	{
+		InvalidateShaderBuffer();
+	}
+}
+
+void TextRenderer::TextGroupDelete(TextGroup * textGroup)
+{
+	delete textGroup;
+}
+
+TextGroupWeakPtr TextRenderer::NewTextGroup()
+{
+	std::shared_ptr<TextGroup> ptr(new TextGroup(this), TextRenderer::TextGroupDelete);
+
+	mTextGroupList.push_back(ptr);
+
+	return ptr;
+}
+
+void TextRenderer::DeleteTextGroup(TextGroupWeakPtr textGroup)
+{
+	auto ptr = textGroup.lock();
+
+	if (ptr == mDefaultTextGroup)
+	{
+		PRINT_ERROR("[TextRenderer::DeleteTextGroup] The default text group cannot be deleted!");
+		return;
+	}
+
+	if (ptr == mActiveTextGroup)
+	{
+		SetActiveTextGroup(mDefaultTextGroup);
+	}
+
+	std::remove(mTextGroupList.begin(), mTextGroupList.end(), ptr);
+}
+
+TextGroupWeakPtr TextRenderer::GetTextGroup(GLsizei groupIndex) const
+{
+	if (((size_t)groupIndex) < mTextGroupList.size())
+	{
+		return mTextGroupList[groupIndex];
+	}
+	else
+	{
+		return TextGroupWeakPtr();
+	}
+}
+
+void TextRenderer::SetActiveTextGroup(std::shared_ptr<TextGroup> groupPtr)
+{
+	if (groupPtr != nullptr)
+	{
+		if (mActiveTextGroup != groupPtr)
+		{
+			mActiveTextGroup = groupPtr;
+			InvalidateShaderBuffer();
+		}
+	}
+	else
+	{
+		mActiveTextGroup = mDefaultTextGroup;
+		InvalidateShaderBuffer();
+	}
+}
+
+void TextRenderer::SetActiveTextGroup(TextGroupWeakPtr groupPtr)
+{
+	SetActiveTextGroup(groupPtr.lock());
 }
 
 	} // namespace Renderers

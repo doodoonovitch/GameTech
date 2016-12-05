@@ -7,7 +7,8 @@ namespace Renderers
 {
 
 
-TextGroup::TextGroup()
+TextGroup::TextGroup(TextRenderer * renderer)
+	: mRenderer(renderer)
 {
 }
 
@@ -17,25 +18,70 @@ TextGroup::~TextGroup()
 	mTextPageList.clear();
 }
 
-void TextGroup::AttachPage(std::weak_ptr<TextPage> page)
+void TextGroup::AttachPage(TextPageWeakPtr page)
 {
-	mTextPageList.push_back(page);
+	AttachPage(page, true);
 }
 
-void TextGroup::DetachPage(std::weak_ptr<TextPage> page)
+void TextGroup::DetachPage(TextPageWeakPtr page)
 {
-	std::remove_if(mTextPageList.begin(), mTextPageList.end(), [page](std::weak_ptr<TextPage> a)->bool { return a.lock() == page.lock(); } );
+	DetachPage(page, false);
 }
+
+void TextGroup::AttachPage(TextPageWeakPtr page, bool updateRendererState)
+{
+	auto ptr = page.lock();
+	if (ptr == nullptr)
+		return;
+
+	mTextPageList.push_back(page);
+
+	if (updateRendererState && ptr->GetIsVisible() && mRenderer->GetActiveTextGroup().lock().get() == this)
+	{
+		mRenderer->InvalidateShaderBuffer();
+	}
+}
+
+void TextGroup::DetachPage(TextPageWeakPtr page, bool updateRendererState)
+{
+	auto ptr = page.lock();
+	if (ptr == nullptr)
+		return;
+
+	std::remove_if(mTextPageList.begin(), mTextPageList.end(), [ptr](TextPageWeakPtr a)->bool { return a.lock() == ptr; });
+
+	if (updateRendererState && ptr->GetIsVisible() && mRenderer->GetActiveTextGroup().lock().get() == this)
+	{
+		mRenderer->InvalidateShaderBuffer();
+	}
+}
+
 
 void TextGroup::SetIsVisible(bool visible)
 {
-	ForEach([visible](std::weak_ptr<TextPage> page)
+	ForEach([visible](TextPageWeakPtr page)
 	{
 		if (auto p = page.lock())
 		{
 			p->SetIsVisible(visible);
 		}
 	});
+}
+
+bool TextGroup::IsPageAttached(TextPageWeakPtr page) const
+{
+	auto pagePtr = page.lock();
+	if (pagePtr == nullptr)
+		return false;
+
+	return IsPageAttached(pagePtr);
+}
+
+bool TextGroup::IsPageAttached(std::shared_ptr<TextPage> page) const
+{
+
+	auto it = std::find_if(mTextPageList.begin(), mTextPageList.end(), [page](TextPageWeakPtr a)->bool { return a.lock() == page; });
+	return !(it == mTextPageList.end());
 }
 
 
