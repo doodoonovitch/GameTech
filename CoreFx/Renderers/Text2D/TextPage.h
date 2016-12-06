@@ -73,10 +73,13 @@ public:
 	size_t PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
 	size_t PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
 
+	bool UpdateText(size_t textLine, const std::wstring & text);
+
 	size_t GetTextCount() const { return mTextLineList.size(); }
 
 	void EraseText(size_t index);
 	void PopBackText();
+	void ClearText();
 
 protected:
 

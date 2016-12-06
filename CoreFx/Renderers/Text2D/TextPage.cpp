@@ -87,11 +87,30 @@ size_t TextPage::PushBackText(const glm::vec2 & location, ELocationType location
 	return ret;
 }
 
+bool TextPage::UpdateText(size_t textLineIndex, const std::wstring & text)
+{
+	if (textLineIndex >= mTextLineList.size())
+	{
+		PRINT_ERROR("[UpdateText] The page doesnot contains text lines n° %l)!", mTextLineList.size());
+		return false;
+	}
+
+	TextLine & textLine = mTextLineList[textLineIndex];
+
+	textLine.mText = text;
+
+	BuildTextLine(textLine);
+
+	InvalidateRendererShaderBufferIfVisible();
+
+	return true;
+}
+
 void TextPage::EraseText(size_t index)
 {
 	if (index >= mTextLineList.size())
 	{
-		PRINT_ERROR("[PopBackText] The page is full (the page contains %l text lines)!", mTextLineList.size());
+		PRINT_WARNING("[PopBackText] The page is full (the page contains %l text lines)!", mTextLineList.size());
 		return;
 	}
 
@@ -104,10 +123,22 @@ void TextPage::PopBackText()
 {
 	if (mTextLineList.empty())
 	{
-		PRINT_ERROR("[PopBackText] The page is empty!")
+		PRINT_WARNING("[PopBackText] The page is empty!")
 	}
 
 	mTextLineList.pop_back();
+
+	InvalidateRendererShaderBufferIfVisible();
+}
+
+void TextPage::ClearText()
+{
+	if (mTextLineList.empty())
+	{
+		PRINT_WARNING("[ClearText] The page is empty!")
+	}
+
+	mTextLineList.clear();
 
 	InvalidateRendererShaderBufferIfVisible();
 }

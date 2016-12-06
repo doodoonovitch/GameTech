@@ -208,6 +208,9 @@
     <ClInclude Include="Renderers\Text2D\TextGroup.h">
       <Filter>Renderers\Text2D</Filter>
     </ClInclude>
+    <ClInclude Include="Maths\SolarPosition.h">
+      <Filter>Maths</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -318,6 +321,9 @@
     <ClCompile Include="ShaderStorageBuffer.cpp" />
     <ClCompile Include="Renderers\Text2D\TextGroup.cpp">
       <Filter>Renderers\Text2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Maths\SolarPosition.cpp">
+      <Filter>Maths</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

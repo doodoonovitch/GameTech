@@ -12,7 +12,7 @@ out VS_OUT
 
 void main()
 { 
-	vec3 north = vec3(0, 0, 1);
+	vec3 north = vec3(0, 0, -1);
 	float angle = acos(dot(normalize(vec3(u_ViewDir.x, 0, u_ViewDir.z)), north));
 	vec3 axis;
 	if (u_ViewDir.x < north.x)
@@ -21,7 +21,7 @@ void main()
 		axis = vec3(0, 0, -1);
 
 	DualQuat dqT1 = dqFromTranslation(u_Translation);
-	vec4 qRot = qAngleAxis(angle, axis);
+	vec4 qRot = qAngleAxis(-angle, axis);
 	DualQuat dqRot = dqFromRotation(qRot);
 	DualQuat dqT2 = dqFromTranslation(-u_Translation);
 	DualQuat modelDQ = dqMul(dqMul(dqT1, dqRot), dqT2);

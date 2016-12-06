@@ -68,6 +68,7 @@ namespace CoreFx
 
 #include "Maths\DualQuaternion.h"
 #include "Maths\Helpers.h"
+#include "Maths\SolarPosition.h"
 
 #include "InstanceContainer.h"
 #include "PropertyData.h"

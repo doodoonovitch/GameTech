@@ -36,17 +36,6 @@ public:
 
 private:
 
-	void filterMouseMoves(float dx, float dy);
-
-	void SetupViewportAndProjection();
-
-	void InitializeTextRenderer();
-	void InitializeTextPages();
-
-	void UpdateShowDeferredBuffersText();
-
-private:
-
 	enum class EFont
 	{
 		Normal,
@@ -64,6 +53,55 @@ private:
 		ShowDeferredBuffers,
 	};
 
+	struct CityPositionInfo
+	{
+		float mLatitude;
+		float mLongitude;
+		int mYear;
+		int mMonth;
+		int mDay;
+		int mSunrise;
+		int mSunset;
+		int mTimeZone;
+		bool mDaySaving;
+		std::wstring mName;
+	};
+
+	enum class ECity
+	{
+		Athens,
+		BikiniAtoll,
+		Kyoto,
+		Longyearbyen,
+		Nuuk,
+		Oslo,
+		Paris,
+		Rome,
+		Sydney,
+		Singapore,
+		Stanley,
+
+		__count__
+	};
+
+private:
+
+	void filterMouseMoves(float dx, float dy);
+
+	void SetupViewportAndProjection();
+
+	void InitializeTextRenderer();
+	void InitializeTextPages();
+
+	void UpdateShowDeferredBuffersText();
+
+	void SetCity(ECity cityIndex);
+	void UpdateSunPosTextPage();
+	void UpdateSunPosTextPageTime();
+
+private:
+
+	static CityPositionInfo mCityList[(int)ECity::__count__];
 
 	static const int VK_W = 0x57;
 	static const int VK_S = 0x53;
@@ -94,15 +132,18 @@ private:
 	CoreFx::Renderers::TextPageWeakPtr mHelpInfoPage;
 	CoreFx::Renderers::TextPageWeakPtr mShowDeferredBuffersPage;
 	CoreFx::Renderers::TextPageWeakPtr mFrameInfoPage;
+	CoreFx::Renderers::TextPageWeakPtr mSunPosPage;
 	CoreFx::Renderers::TextPageWeakPtr mTestPage;
 
 	CoreFx::Renderers::TextGroupWeakPtr mDefaultTextGroup;
+	CoreFx::Renderers::TextGroupWeakPtr mHelpInfoTextGroup;
 	CoreFx::Renderers::TextGroupWeakPtr mShowDeferredBuffersTextGroup;
 
-	uint32_t mSunPositionDegree = 4;
-	uint32_t mSunPositionInc = 1;
-	const uint32_t SunPositionMin = 0;
-	const uint32_t SunPositionMax = 180;
+	size_t mTimeTextLineIndex;
+
+	ECity mCity = ECity::Paris;
+	int mDayTimeIncMinutes = 10;
+	int mCurrentDayTime = 8 * 60;
 
 	glm::vec2 m_mouseHistory[MOUSE_HISTORY_BUFFER_SIZE];
 
@@ -112,6 +153,8 @@ private:
 
 	GLint mShowDeferredBufferState = 0;
 	bool mIsInitialized = false;
+
+	CoreFx::Maths::SolarPosition mSolarPosition;
 
 };
 

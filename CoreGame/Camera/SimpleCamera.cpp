@@ -8,6 +8,22 @@ using namespace CoreFx;
 namespace CoreGame
 {
 
+int ToMinutes(int hour, int minute) { return hour * 60 + minute; }
+
+SimpleCamera::CityPositionInfo SimpleCamera::mCityList[(int)SimpleCamera::ECity::__count__] =
+{
+	{ 37.97945f, 23.71622f,			2016, 12, 7,	ToMinutes(5, 28),	ToMinutes(17, 5),		2, false,	L"Athens"},
+	{ 11.5836300f, 165.3761700f,	2016, 12, 7,	ToMinutes(7, 6),	ToMinutes(18, 34),		12, true,	L"BikiniAtoll" },
+	{ 35.0210700f, 135.7538500f,	2016, 12, 7,	ToMinutes(6, 52),	ToMinutes(16, 45),		9, true,	L"Kyoto" },
+	{ 78.2166667f, 15.6333333f,		2016, 12, 7,	ToMinutes(11, 44),	ToMinutes(12, 41),		1, false,	L"Longyearbyen" },
+	{ 64.18347f, -51.72157f,		2016, 12, 7,	ToMinutes(10, 2),	ToMinutes(14, 35),		-3, true,	L"Nuuk" },
+	{ 59.9127300f, 10.7460900f,		2016, 12, 7,	ToMinutes(9, 3),	ToMinutes(15, 14),		1, false,	L"Oslo" },
+	{ 48.8441311f, 2.3834446f,		2016, 12, 7,	ToMinutes(8, 30),	ToMinutes(16, 54),		1, true,	L"Paris"},
+	{ 41.8919300f, 12.5113300f,		2016, 12, 7,	ToMinutes(7, 24),	ToMinutes(16, 39),		1, false,	L"Rome" },
+	{ -33.8678500f, 151.2073200f,	2016, 12, 7,	ToMinutes(5, 37),	ToMinutes(19, 56),		11, true,	L"Sydney" },
+	{ 1.2896700f, 103.8500700f,		2016, 12, 7,	ToMinutes(6, 55),	ToMinutes(18, 58),		8, false,	L"Singapore" },
+	{ -51.700981f, -57.84919f,		2016, 12, 7,	ToMinutes(4, 29),	ToMinutes(20, 58),		-3, false,	L"Stanley" },
+};
 
 
 
@@ -59,8 +75,8 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
 //#define PERLIN_NOISE_OCEAN_SAMPLE
-//#define SKYDOME_SAMPLE
-#define SKYBOX_SAMPLE
+#define SKYDOME_SAMPLE
+//#define SKYBOX_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
 
@@ -70,7 +86,9 @@ void SimpleCamera::OnInit()
 	const glm::vec3 YAxis(0.f, 1.f, 0.f);
 	const glm::vec3 ZAxis(0.f, 0.f, 1.f);
 
-	GL_CHECK_ERRORS
+	GL_CHECK_ERRORS;
+
+	SetCity(ECity::Paris);
 
 	{
 		GLsizei w = (GLsizei)mGameProgram.GetWindowWidth();
@@ -694,15 +712,15 @@ void SimpleCamera::OnInit()
 		}
 
 	// Setup Lights
-		Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 8.f, 15.f), glm::vec3(1.f, 1.f, 1.f), 50000.f, 10000.f, glm::normalize(glm::vec3(.3f, -0.7f, 1.f)), glm::radians(15.f), glm::radians(25.f));
-		Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
+		//Lights::SpotLight * spotLight1 = engine->CreateSpotLight(glm::vec3(65.f, 8.f, 15.f), glm::vec3(1.f, 1.f, 1.f), 50000.f, 10000.f, glm::normalize(glm::vec3(.3f, -0.7f, 1.f)), glm::radians(15.f), glm::radians(25.f));
+		//Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
 
 
-		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
-		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
-		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
-		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
-		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
+		//Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
+		//Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
+		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
+		//Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
+		//Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
 
 
 		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);
@@ -711,6 +729,7 @@ void SimpleCamera::OnInit()
 	//setup camera
 
 	UpdateSunPosition();
+	UpdateSunPosTextPage();
 
 	engine->CreateDynamicResources();
 
@@ -806,14 +825,16 @@ void SimpleCamera::InitializeTextRenderer()
 
 	mDefaultTextGroup = mTextRenderer->GetTextGroup((GLsizei)ETextGroup::Default);
 	mShowDeferredBuffersTextGroup = mTextRenderer->NewTextGroup();
+	mHelpInfoTextGroup = mTextRenderer->NewTextGroup();
 
 	mTestPage = mTextRenderer->NewPage(false);
 	mTestPage.lock()->PushBackText(glm::ivec2(300, 10), L"1234567890@ABCDEFGH@ ", (GLuint)EFont::Normal, glm::u8vec4(255, 106, 0, 255));
 	mTestPage.lock()->PushBackText(glm::ivec2(300, 100), L"[page1] Test text rendering...", (GLuint)EFont::NormalBold, glm::u8vec4(255, 106, 0, 255));
 	mTestPage.lock()->PushBackText(glm::ivec2(300, 200), L"[page1] Test 2 - Font 2...", (GLuint)EFont::NormalItalic, glm::u8vec4(0, 127, 70, 255));
 
-	mHelpInfoPage = mTextRenderer->NewPage(false);
+	mHelpInfoPage = mTextRenderer->NewPage(true, mHelpInfoTextGroup);
 	mFrameInfoPage = mTextRenderer->NewPage(true);
+	mSunPosPage = mTextRenderer->NewPage(true);
 	mShowDeferredBuffersPage = mTextRenderer->NewPage(true, mShowDeferredBuffersTextGroup);
 
 	CoreFx::Engine::GetInstance()->AttachRenderer(mTextRenderer);
@@ -954,6 +975,71 @@ void SimpleCamera::InitializeTextPages()
 
 	row = 0;
 	mShowDeferredBuffersPage.lock()->PushBackText(glm::vec2(-0.3f, -0.9f), Renderers::TextPage::ELocationType::RelativeRatio, L"Press F2 to continue...", (GLuint)EFont::Header, color1);
+
+	// --------------------------------------------------------------
+
+	row = 0;
+
+
+}
+
+void SimpleCamera::UpdateSunPosTextPage()
+{
+	const int Column1 = 50;
+	const int Column2 = 100;
+	const int Interline1 = 6;
+	const int Interline2 = 4;
+
+	const Renderers::TextRenderer::FontInfo & fiNormal = mTextRenderer->GetFontInfo((GLuint)EFont::Normal);
+	const Renderers::TextRenderer::FontInfo & fiNormalBold = mTextRenderer->GetFontInfo((GLuint)EFont::NormalBold);
+
+	const GLuint normalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
+
+	const glm::u8vec4 color1(255, 106, 0, 255);
+
+	int row = 100;
+
+	const int textBufferSize = 300;
+	wchar_t textBuffer[textBufferSize];
+
+	const CityPositionInfo & city = mCityList[(int)mCity];
+
+	auto page = mSunPosPage.lock();
+
+	page->ClearText();
+
+	swprintf_s(textBuffer, textBufferSize, L"City : %s", city.mName.c_str());
+	page->PushBackText(glm::ivec2(Column1, row), textBuffer, (GLuint)EFont::NormalBold, color1);
+	row += normalLineHeight + Interline1;
+
+	swprintf_s(textBuffer, textBufferSize, L"Latitude : %f, Longitude : %f", city.mLatitude, city.mLongitude);
+	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
+	row += normalLineHeight + Interline2;
+
+	swprintf_s(textBuffer, textBufferSize, L"Timezone : %i, Day saving : %i", city.mTimeZone, city.mDaySaving);
+	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
+	row += normalLineHeight + Interline2;
+
+	swprintf_s(textBuffer, textBufferSize, L"Sunrise : %i:%i, Sunset : %i:%i", (int)(city.mSunrise / 60), (int)(city.mSunrise % 60), (int)(city.mSunset / 60), (int)(city.mSunset % 60));
+	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
+	row += normalLineHeight + Interline2;
+
+	swprintf_s(textBuffer, textBufferSize, L"Date (year-month-day): %i-%i-%i", city.mYear, city.mMonth, city.mDay);
+	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
+	row += normalLineHeight + Interline2;
+
+	swprintf_s(textBuffer, textBufferSize, L"Time : %i:%i", (int)(mCurrentDayTime / 60), (int)(mCurrentDayTime % 60));
+	mTimeTextLineIndex = page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
+	row += normalLineHeight + Interline2;
+}
+
+void SimpleCamera::UpdateSunPosTextPageTime()
+{
+	const int textBufferSize = 300;
+	wchar_t textBuffer[textBufferSize];
+
+	swprintf_s(textBuffer, textBufferSize, L"Time : %i:%i", (int)(mCurrentDayTime / 60), (int)(mCurrentDayTime % 60));
+	mSunPosPage.lock()->UpdateText(mTimeTextLineIndex, textBuffer);
 }
 
 void SimpleCamera::UpdateShowDeferredBuffersText()
@@ -1196,26 +1282,33 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		break;
 
 	case '<':
-		if (mSunPositionDegree < SunPositionMax)
-		{
-			mSunPositionDegree += mSunPositionInc;
-			if (mSunPositionDegree > SunPositionMax)
-				mSunPositionDegree = SunPositionMax;
-
-			UpdateSunPosition();
-		}
-		break;
-
 	case '>':
-		if (mSunPositionDegree > SunPositionMin)
 		{
-			mSunPositionDegree -= mSunPositionInc;
-			if (mSunPositionDegree < SunPositionMin)
-				mSunPositionDegree = SunPositionMin;
+			const CityPositionInfo & city = mCityList[(int)mCity];
+
+			int inc = key == '<' ? mDayTimeIncMinutes : -mDayTimeIncMinutes;
+			mCurrentDayTime += mDayTimeIncMinutes;
+			if (mCurrentDayTime > city.mSunset)
+				mCurrentDayTime = city.mSunset;
+			else if (mCurrentDayTime < city.mSunrise)
+				mCurrentDayTime = city.mSunrise;
 
 			UpdateSunPosition();
-		}
+			UpdateSunPosTextPageTime();
+	}
 		break;
+
+	case 'c':
+		SetCity((ECity)(((int)mCity + 1) % (int)ECity::__count__));
+		UpdateSunPosition();
+		UpdateSunPosTextPage();
+		break;
+	case 'C':
+		SetCity((ECity)(((int)mCity - 1) % (int)ECity::__count__));
+		UpdateSunPosition();
+		UpdateSunPosTextPage();
+		break;
+
 	}
 	//glutPostRedisplay();
 }
@@ -1346,14 +1439,51 @@ void SimpleCamera::OnUpdate()
 	//	glutPostRedisplay();
 }
 
+
 void SimpleCamera::UpdateSunPosition()
 {
-	float sunPosRadian = glm::radians((float)(mSunPositionDegree));
-	glm::vec3 sunDir = glm::normalize(glm::vec3(cos(sunPosRadian), sin(sunPosRadian), 0.f));
+	const CityPositionInfo & city = mCityList[(int)mCity];
+
+	SYSTEMTIME tm = mSolarPosition.GetTime();
+
+	tm.wHour = mCurrentDayTime / 60;
+	tm.wMinute = mCurrentDayTime % 60;
+
+	mSolarPosition.SetTime(tm);
+
+	mSolarPosition.Update();
+
+	glm::vec3 sunDir(glm::normalize(mSolarPosition.GetPosition()));
 	if (mSunLight != nullptr)
 		mSunLight->SetDirection(sunDir);
 	if (mSkydome != nullptr)
 		mSkydome->SetSunDirection(sunDir);
+
+}
+
+void SimpleCamera::SetCity(ECity cityIndex)
+{
+	mCity = cityIndex;
+
+	SYSTEMTIME tm;
+	const CityPositionInfo & city = mCityList[(int)mCity];
+	mCurrentDayTime = city.mSunrise;
+	tm.wYear = city.mYear; tm.wMonth = city.mMonth; tm.wDay = city.mDay;
+	tm.wHour = city.mSunrise;
+	tm.wMilliseconds = 0; tm.wSecond = 0; tm.wMinute = 0;
+
+	mSolarPosition.SetLocation(city.mLatitude, city.mLongitude);
+	mSolarPosition.SetTimeZone(city.mTimeZone, city.mDaySaving);
+	mSolarPosition.SetTime(tm);
+
+	PRINT_MESSAGE("============================================================");
+	PRINT_MESSAGE("Position : %S", city.mName.c_str());
+	PRINT_MESSAGE("\t-Latitude : %f, Longitude : %f", city.mLatitude, city.mLongitude);
+	PRINT_MESSAGE("\t-Date (year-month-day): %i-%i-%i, Time : %i:%i", city.mYear, city.mMonth, city.mDay, (int)(mCurrentDayTime / 60), (int)(mCurrentDayTime % 60));
+	PRINT_MESSAGE("\t-Timezone : %i, Day saving : %i", city.mTimeZone, city.mDaySaving);
+	PRINT_MESSAGE("\t-Sunrise : %i:%i, Sunset : %i:%i", (int)(city.mSunrise / 60), (int)(city.mSunrise % 60), (int)(city.mSunset / 60), (int)(city.mSunset % 60));
+	PRINT_MESSAGE("============================================================");
+
 }
 
 

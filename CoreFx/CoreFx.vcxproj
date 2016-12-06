@@ -153,6 +153,7 @@
     <ClInclude Include="Macros.h" />
     <ClInclude Include="Maths\DualQuaternion.h" />
     <ClInclude Include="Maths\Helpers.h" />
+    <ClInclude Include="Maths\SolarPosition.h" />
     <ClInclude Include="PropertyData.h" />
     <ClInclude Include="Renderables\Axis.h" />
     <ClInclude Include="Renderables\Grid.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="Lights\SpotLight.cpp" />
     <ClCompile Include="Log\Logger.cpp" />
     <ClCompile Include="Maths\DualQuaternion.cpp" />
+    <ClCompile Include="Maths\SolarPosition.cpp" />
     <ClCompile Include="PropertyData.cpp" />
     <ClCompile Include="Renderables\Axis.cpp" />
     <ClCompile Include="Renderables\Grid.cpp" />
