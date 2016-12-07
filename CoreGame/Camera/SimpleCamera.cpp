@@ -37,6 +37,13 @@ void SimpleCamera::OnRender()
 	{
 		engine->SetDeltaTime((float)mDeltaTime);
 		engine->SetTime((float)mTime);
+
+		const int textBufferSize = 50;
+		static wchar_t textBuffer[textBufferSize];
+
+		auto fps = 1.0 / mDeltaTime;
+		swprintf_s(textBuffer, textBufferSize, L"%3.0f fps", fps);
+		mFrameInfoPage.lock()->UpdateText(mFpsTextLineIndex, textBuffer);
 	}
 
 	engine->UpdateObjects();
@@ -50,24 +57,26 @@ void SimpleCamera::OnShutdown()
 	PRINT_MESSAGE("Shutdown successfull");
 }
 
-void SimpleCamera::OnWindowResize(int w, int h)
+void SimpleCamera::OnWindowResize(int /*w*/, int /*h*/)
 {
-	mWindowWidth = (GLsizei)w;
-	mWindowHeight = (GLsizei)h;
+	//mWindowWidth = (GLsizei)w;
+	//mWindowHeight = (GLsizei)h;
 	SetupViewportAndProjection();
 }
 
 void SimpleCamera::SetupViewportAndProjection()
 {
+	GLsizei w = mGameProgram.GetClientWidth();
+	GLsizei h = mGameProgram.GetClientHeight();
 	if (mCamera != nullptr)
 	{
 		assert(mCamera != nullptr);
-		mCamera->SetupProjection(45, (GLfloat)mWindowWidth / mWindowHeight, mCamera->GetNearZ(), mCamera->GetFarZ());
+		mCamera->SetupProjection(45, (GLfloat)w / h, mCamera->GetNearZ(), mCamera->GetFarZ());
 	}
 
 	if (mIsInitialized)
 	{
-		CoreFx::Engine::GetInstance()->SetViewport(0, 0, mWindowWidth, mWindowHeight, mWindowWidth, mWindowHeight);
+		CoreFx::Engine::GetInstance()->SetViewport(0, 0, w, h, w, h);
 	}
 }
 
@@ -91,8 +100,8 @@ void SimpleCamera::OnInit()
 	SetCity(ECity::Paris);
 
 	{
-		GLsizei w = (GLsizei)mGameProgram.GetWindowWidth();
-		GLsizei h = (GLsizei)mGameProgram.GetWindowHeight();
+		GLsizei w = (GLsizei)mGameProgram.GetClientWidth();
+		GLsizei h = (GLsizei)mGameProgram.GetClientHeight();
 		CoreFx::Engine::Initialize(0, 0, w, h, w, h);
 	}
 
@@ -827,10 +836,10 @@ void SimpleCamera::InitializeTextRenderer()
 	mShowDeferredBuffersTextGroup = mTextRenderer->NewTextGroup();
 	mHelpInfoTextGroup = mTextRenderer->NewTextGroup();
 
-	mTestPage = mTextRenderer->NewPage(false);
-	mTestPage.lock()->PushBackText(glm::ivec2(300, 10), L"1234567890@ABCDEFGH@ ", (GLuint)EFont::Normal, glm::u8vec4(255, 106, 0, 255));
-	mTestPage.lock()->PushBackText(glm::ivec2(300, 100), L"[page1] Test text rendering...", (GLuint)EFont::NormalBold, glm::u8vec4(255, 106, 0, 255));
-	mTestPage.lock()->PushBackText(glm::ivec2(300, 200), L"[page1] Test 2 - Font 2...", (GLuint)EFont::NormalItalic, glm::u8vec4(0, 127, 70, 255));
+	//mTestPage = mTextRenderer->NewPage(false);
+	//mTestPage.lock()->PushBackText(glm::ivec2(300, 10), L"1234567890@ABCDEFGH@ ", (GLuint)EFont::Normal, glm::u8vec4(255, 106, 0, 255));
+	//mTestPage.lock()->PushBackText(glm::ivec2(300, 100), L"[page1] Test text rendering...", (GLuint)EFont::NormalBold, glm::u8vec4(255, 106, 0, 255));
+	//mTestPage.lock()->PushBackText(glm::ivec2(300, 200), L"[page1] Test 2 - Font 2...", (GLuint)EFont::NormalItalic, glm::u8vec4(0, 127, 70, 255));
 
 	mHelpInfoPage = mTextRenderer->NewPage(true, mHelpInfoTextGroup);
 	mFrameInfoPage = mTextRenderer->NewPage(true);
@@ -868,6 +877,12 @@ void SimpleCamera::InitializeTextPages()
 	const glm::u8vec4 color2(255, 106, 0, 255);
 	const glm::u8vec4 color3(127, 0, 0, 255);
 	const glm::u8vec4 color4(100, 100, 100, 255);
+	
+	// ------------------------------------------------------------------------
+
+	mFpsTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(0, 0), L"xx fps", (GLuint)EFont::NormalItalic, color4);
+	
+	// ------------------------------------------------------------------------
 
 	int row = 0;
 	const wchar_t * Title = L"Commands...";
@@ -999,7 +1014,7 @@ void SimpleCamera::UpdateSunPosTextPage()
 
 	const GLuint normalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
 
-	const glm::u8vec4 color1(255, 106, 0, 255);
+	const glm::u8vec4 color1(200, 200, 200, 255);
 
 	int row = 100;
 

@@ -118,8 +118,8 @@ private:
 
 	float mMoveSpeed = DEFAULT_MOVE_SPEED;
 
-	GLsizei mWindowWidth = 1280;
-	GLsizei mWindowHeight = 960;
+	//GLsizei mWindowWidth = 1280;
+	//GLsizei mWindowHeight = 960;
 
 	//camera transformation variables
 	int mState = 0, mOldX = 0, mOldY = 0;
@@ -134,13 +134,15 @@ private:
 	CoreFx::Renderers::TextPageWeakPtr mShowDeferredBuffersPage;
 	CoreFx::Renderers::TextPageWeakPtr mFrameInfoPage;
 	CoreFx::Renderers::TextPageWeakPtr mSunPosPage;
-	CoreFx::Renderers::TextPageWeakPtr mTestPage;
+	//CoreFx::Renderers::TextPageWeakPtr mTestPage;
 
 	CoreFx::Renderers::TextGroupWeakPtr mDefaultTextGroup;
 	CoreFx::Renderers::TextGroupWeakPtr mHelpInfoTextGroup;
 	CoreFx::Renderers::TextGroupWeakPtr mShowDeferredBuffersTextGroup;
 
 	CoreFx::Renderers::TextGroupWeakPtr mLastActiveTextGroup;
+
+	size_t mFpsTextLineIndex;
 
 	size_t mTimeTextLineIndex;
 

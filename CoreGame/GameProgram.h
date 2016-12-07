@@ -39,6 +39,11 @@ public:
 		return mWinRect;
 	}
 
+	const RECT & GetClientRect() const
+	{
+		return mCliRect;
+	}
+
 	int GetWindowWidth() const
 	{
 		return mWinRect.right - mWinRect.left;
@@ -48,6 +53,18 @@ public:
 	{
 		return mWinRect.bottom - mWinRect.top;
 	}
+
+	int GetClientWidth() const
+	{
+		return mCliRect.right - mCliRect.left;
+	}
+
+	int GetClientHeight() const
+	{
+		return mCliRect.bottom - mCliRect.top;
+	}
+
+	bool GetIsFullscreen() const { return mFullscreen; }
 
 protected:
 
@@ -59,6 +76,7 @@ protected:
 	int			mMouseY = 0;
 	MouseState	mMouseState;
 	RECT		mWinRect;
+	RECT		mCliRect;
 
 	Sys::StepTimer mTimer;
 	Sys::DisplayMonitorHelper mMonitorHelper;

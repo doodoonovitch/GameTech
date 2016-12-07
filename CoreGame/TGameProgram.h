@@ -126,6 +126,7 @@ protected:
 
 		mFullscreen = fullscreenflag;			
 		mWinRect = winRect;
+		mCliRect = winRect;
 
 		mHInstance = GetModuleHandle(NULL);					// Grab An Instance For Our Window
 		wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;		// Redraw On Size, And Own DC For Window.
@@ -139,7 +140,7 @@ protected:
 		wc.lpszMenuName = NULL;								// We Don't Want A Menu
 		wc.lpszClassName = sWindowClassName;				// Set The Class Name
 
-		if (!RegisterClass(&wc))									// Attempt To Register The Window Class
+		if (!RegisterClass(&wc))							// Attempt To Register The Window Class
 		{
 			//MessageBox(NULL, L"Failed To Register The Window Class.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			ErrorExit(L"Register the Window Class");
@@ -470,6 +471,19 @@ private:
 
 	static void OnWindowResize(int w, int h)
 	{
+		WINDOWINFO wi;
+		wi.cbSize = sizeof(wi);
+		if (GetWindowInfo(sGameProgram->mHWnd, &wi))
+		{
+			sGameProgram->mWinRect = wi.rcWindow;
+			sGameProgram->mCliRect = wi.rcClient;
+		}
+		else
+		{
+			sGameProgram->mWinRect = { 0, 0, w, h};
+			sGameProgram->mCliRect = sGameProgram->mWinRect;
+		}
+
 		sGameProgram->mGameEngine.OnWindowResize(w, h);
 	}
 

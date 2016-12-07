@@ -28,6 +28,8 @@ public:
 	void SetDeltaTime(double value) { mDeltaTime = value; }
 	void SetTime(double value) { mTime = value; }
 
+	bool GetIsFullscreen() const { return mGameProgram.GetIsFullscreen(); }
+
 protected:
 
 	GameProgram & mGameProgram;
