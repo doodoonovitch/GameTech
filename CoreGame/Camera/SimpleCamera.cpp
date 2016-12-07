@@ -839,6 +839,8 @@ void SimpleCamera::InitializeTextRenderer()
 
 	CoreFx::Engine::GetInstance()->AttachRenderer(mTextRenderer);
 
+	mLastActiveTextGroup = mTextRenderer->GetActiveTextGroup();
+
 	InitializeTextPages();
 }
 
@@ -868,8 +870,10 @@ void SimpleCamera::InitializeTextPages()
 	const glm::u8vec4 color4(100, 100, 100, 255);
 
 	int row = 0;
-
-	mHelpInfoPage.lock()->PushBackText(glm::ivec2(300, row), L"Commands...", (GLuint)EFont::Title, color1);
+	const wchar_t * Title = L"Commands...";
+	int width = Renderers::TextRenderer::GlyphMetrics::toPixel(mHelpInfoPage.lock()->MeasureString(Title, (GLuint)EFont::Title));
+	int titleColumn = (CoreFx::Engine::GetInstance()->GetViewPortWidth() - width) / 2;
+	mHelpInfoPage.lock()->PushBackText(glm::ivec2(titleColumn, row), Title, (GLuint)EFont::Title, color1);
 	row += titleLineHeight + Interline0;
 	//
 
@@ -1390,11 +1394,22 @@ void SimpleCamera::OnUpdate()
 	static bool wasF1Pressed = false;
 	if (GetAsyncKeyState(VK_F1) & 0x8000)
 	{
-		if (!wasF1Pressed)
+		if (mShowDeferredBufferState == 0)
 		{
-			mHelpInfoPage.lock()->SetIsVisible(!mHelpInfoPage.lock()->GetIsVisible());
+			if (!wasF1Pressed)
+			{
+				if (mTextRenderer->IsActiveTextGroup((GLsizei)ETextGroup::HelpInfo))
+				{
+					mTextRenderer->SetActiveTextGroup(mLastActiveTextGroup);
+				}
+				else
+				{
+					mLastActiveTextGroup = mTextRenderer->GetActiveTextGroup();
+					mTextRenderer->SetActiveTextGroup((GLsizei)ETextGroup::HelpInfo);
+				}
+			}
+			wasF1Pressed = true;
 		}
-		wasF1Pressed = true;
 	}
 	else
 	{
@@ -1410,7 +1425,7 @@ void SimpleCamera::OnUpdate()
 			if (mShowDeferredBufferState == 0)
 			{
 				Engine::GetInstance()->DisableDeferredDebug();
-				mTextRenderer->SetActiveTextGroup((GLsizei)ETextGroup::Default);
+				mTextRenderer->SetActiveTextGroup(mLastActiveTextGroup);
 			}
 			else
 			{

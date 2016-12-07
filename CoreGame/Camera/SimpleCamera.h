@@ -51,6 +51,7 @@ private:
 	{
 		Default,
 		ShowDeferredBuffers,
+		HelpInfo,
 	};
 
 	struct CityPositionInfo
@@ -138,6 +139,8 @@ private:
 	CoreFx::Renderers::TextGroupWeakPtr mDefaultTextGroup;
 	CoreFx::Renderers::TextGroupWeakPtr mHelpInfoTextGroup;
 	CoreFx::Renderers::TextGroupWeakPtr mShowDeferredBuffersTextGroup;
+
+	CoreFx::Renderers::TextGroupWeakPtr mLastActiveTextGroup;
 
 	size_t mTimeTextLineIndex;
 

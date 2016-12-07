@@ -681,8 +681,11 @@ void TextRenderer::SetActiveTextGroup(std::shared_ptr<TextGroup> groupPtr)
 	}
 	else
 	{
-		mActiveTextGroup = mDefaultTextGroup;
-		InvalidateShaderBuffer();
+		if(mActiveTextGroup != mDefaultTextGroup)
+		{
+			mActiveTextGroup = mDefaultTextGroup;
+			InvalidateShaderBuffer();
+		}
 	}
 }
 
@@ -700,6 +703,21 @@ void TextRenderer::SetActiveTextGroup(GLsizei index)
 	}
 
 	SetActiveTextGroup(mTextGroupList[index]);
+}
+
+bool TextRenderer::IsActiveTextGroup(TextGroupWeakPtr groupPtr) const
+{
+	return mActiveTextGroup == groupPtr.lock();
+}
+
+bool TextRenderer::IsActiveTextGroup(GLsizei index) const
+{
+	if (index < 0 || index >= (GLsizei)mTextGroupList.size())
+	{
+		return false;
+	}
+
+	return mActiveTextGroup == mTextGroupList[index];
 }
 
 bool TextRenderer::IsAnActivePage(TextPageWeakPtr page) const

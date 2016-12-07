@@ -81,6 +81,8 @@ public:
 	void PopBackText();
 	void ClearText();
 
+	int MeasureString(const std::wstring & text, GLuint fontIndex) const;
+
 protected:
 
 	void BuildTextLine(TextLine & line);

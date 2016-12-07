@@ -226,6 +226,9 @@ public:
 	void SetActiveTextGroup(GLsizei index);
 	TextGroupWeakPtr GetActiveTextGroup() const { return mActiveTextGroup; }
 
+	bool IsActiveTextGroup(TextGroupWeakPtr index) const;
+	bool IsActiveTextGroup(GLsizei index) const;
+
 	bool IsAnActivePage(TextPageWeakPtr page) const;
 	bool IsAnActivePage(const TextPage * page) const;
 

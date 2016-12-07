@@ -143,6 +143,32 @@ void TextPage::ClearText()
 	InvalidateRendererShaderBufferIfVisible();
 }
 
+int TextPage::MeasureString(const std::wstring & text, GLuint fontIndex) const
+{
+	if (!mRenderer->IsValidFontIndex(fontIndex))
+	{
+		PRINT_ERROR("[TextPage::MeasureString] Undefined font index '%l'", fontIndex);
+		return 0;
+	}
+
+	int width = 0;
+	const TextRenderer::FontInfo & fi = mRenderer->GetFontInfo(fontIndex);
+
+	for (std::wstring::const_iterator charIt = text.begin(); charIt != text.end(); ++charIt)
+	{
+		const TextRenderer::GlyphMetrics * gm = fi.GetGlyph(*charIt);
+		if (gm == nullptr)
+		{
+			width += TextRenderer::GlyphMetrics::toPixel(fi.GetDefaultWidth());
+		}
+		else
+		{
+			width += TextRenderer::GlyphMetrics::toPixel(gm->mAdvance.x);
+		}
+	}
+
+	return width;
+}
 
 void TextPage::BuildTextLine(TextPage::TextLine & textLine)
 {
