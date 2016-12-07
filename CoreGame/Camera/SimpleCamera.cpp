@@ -1291,7 +1291,7 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 			const CityPositionInfo & city = mCityList[(int)mCity];
 
 			int inc = key == '<' ? mDayTimeIncMinutes : -mDayTimeIncMinutes;
-			mCurrentDayTime += mDayTimeIncMinutes;
+			mCurrentDayTime += inc;
 			if (mCurrentDayTime > city.mSunset)
 				mCurrentDayTime = city.mSunset;
 			else if (mCurrentDayTime < city.mSunrise)
