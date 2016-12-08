@@ -36,27 +36,6 @@ void TextPage::InvalidateRendererShaderBufferIfVisible()
 	}
 }
 
-
-size_t TextPage::PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color)
-{
-	glm::vec4 c(color);
-	c /= 255;
-	return PushBackText(location, text, fontIndex, c);
-}
-
-size_t TextPage::PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color)
-{
-	glm::vec2 loc((GLfloat)location.x, (GLfloat)location.y);
-	return PushBackText(loc, ELocationType::AbsolutePixel, text, fontIndex, color);
-}
-
-size_t TextPage::PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color)
-{
-	glm::vec4 c(color);
-	c /= 255;
-	return PushBackText(location, locationType, text, fontIndex, c);
-}
-
 size_t TextPage::PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color)
 {
 	if (text.empty())
@@ -74,24 +53,36 @@ size_t TextPage::PushBackText(const glm::vec2 & location, ELocationType location
 
 	mTextLineList.resize(mTextLineList.size() + 1);
 	TextLine & textLine = mTextLineList.back();
-	textLine.mFontIndex = fontIndex;
-	textLine.mColor = glm::packUnorm4x8(color);
-	textLine.mText = text;
-	textLine.mLocation = location;
-	textLine.mLocationType = locationType;
 	
-	BuildTextLine(textLine);
-
-	InvalidateRendererShaderBufferIfVisible();
+	InternalUpdateText(textLine, location, locationType, text, fontIndex, color);
 
 	return ret;
 }
 
-bool TextPage::UpdateText(size_t textLineIndex, const std::wstring & text)
+bool TextPage::UpdateText(size_t textLineIndex, const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color)
 {
 	if (textLineIndex >= mTextLineList.size())
 	{
-		PRINT_ERROR("[UpdateText] The page doesnot contains text lines n° %l)!", mTextLineList.size());
+		PRINT_ERROR("[TextPage::UpdateText] The page doesnot contains text lines n° %l)!", mTextLineList.size());
+		return false;
+	}
+
+	if (!mRenderer->IsValidFontIndex(fontIndex))
+	{
+		PRINT_ERROR("[TextPage::UpdateText] Undefined font index '%l'", fontIndex);
+		return false;
+	}
+
+	TextLine & textLine = mTextLineList[textLineIndex];
+	InternalUpdateText(textLine, location, locationType, text, fontIndex, color);
+	return true;
+}
+
+bool TextPage::UpdateTextString(size_t textLineIndex, const std::wstring & text, bool rebuild)
+{
+	if (textLineIndex >= mTextLineList.size())
+	{
+		PRINT_ERROR("[TextPage::UpdateTextString] The page doesnot contains text lines n° %l)!", mTextLineList.size());
 		return false;
 	}
 
@@ -99,18 +90,82 @@ bool TextPage::UpdateText(size_t textLineIndex, const std::wstring & text)
 
 	textLine.mText = text;
 
-	BuildTextLine(textLine);
-
-	InvalidateRendererShaderBufferIfVisible();
+	if (rebuild)
+	{
+		BuildTextLine(textLine);
+		InvalidateRendererShaderBufferIfVisible();
+	}
 
 	return true;
 }
+
+bool TextPage::UpdateTextLocation(size_t textLineIndex, const glm::vec2 & location, ELocationType locationType, bool rebuild)
+{
+	if (textLineIndex >= mTextLineList.size())
+	{
+		PRINT_ERROR("[TextPage::UpdateTextLocation] The page doesnot contains text lines n° %l)!", mTextLineList.size());
+		return false;
+	}
+
+	TextLine & textLine = mTextLineList[textLineIndex];
+	textLine.mLocation = location;
+	textLine.mLocationType = locationType;
+
+	if (rebuild)
+	{
+		BuildTextLine(textLine);
+		InvalidateRendererShaderBufferIfVisible();
+	}
+
+	return true;
+}
+
+bool TextPage::UpdateTextFont(size_t textLineIndex, GLuint fontIndex, bool rebuild)
+{
+	if (textLineIndex >= mTextLineList.size())
+	{
+		PRINT_ERROR("[TextPage::UpdateTextFont] The page doesnot contains text lines n° %l)!", mTextLineList.size());
+		return false;
+	}
+
+	TextLine & textLine = mTextLineList[textLineIndex];
+	textLine.mFontIndex = fontIndex;
+
+	if (rebuild)
+	{
+		BuildTextLine(textLine);
+		InvalidateRendererShaderBufferIfVisible();
+	}
+
+	return true;
+}
+
+bool TextPage::UpdateTextColor(size_t textLineIndex, const glm::vec4 & color, bool rebuild)
+{
+	if (textLineIndex >= mTextLineList.size())
+	{
+		PRINT_ERROR("[TextPage::UpdateTextColor] The page doesnot contains text lines n° %l)!", mTextLineList.size());
+		return false;
+	}
+
+	TextLine & textLine = mTextLineList[textLineIndex];
+	textLine.mColor = glm::packUnorm4x8(color);
+
+	if (rebuild)
+	{
+		BuildTextLine(textLine);
+		InvalidateRendererShaderBufferIfVisible();
+	}
+
+	return true;
+}
+
 
 void TextPage::EraseText(size_t index)
 {
 	if (index >= mTextLineList.size())
 	{
-		PRINT_WARNING("[PopBackText] The page is full (the page contains %l text lines)!", mTextLineList.size());
+		PRINT_WARNING("[TextPage::PopBackText] The page is full (the page contains %l text lines)!", mTextLineList.size());
 		return;
 	}
 
@@ -123,7 +178,7 @@ void TextPage::PopBackText()
 {
 	if (mTextLineList.empty())
 	{
-		PRINT_WARNING("[PopBackText] The page is empty!")
+		PRINT_WARNING("[TextPage::PopBackText] The page is empty!")
 	}
 
 	mTextLineList.pop_back();
@@ -135,7 +190,7 @@ void TextPage::ClearText()
 {
 	if (mTextLineList.empty())
 	{
-		PRINT_WARNING("[ClearText] The page is empty!")
+		PRINT_WARNING("[TextPage::ClearText] The page is empty!")
 	}
 
 	mTextLineList.clear();

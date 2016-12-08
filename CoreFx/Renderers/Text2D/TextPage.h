@@ -68,12 +68,22 @@ public:
 	bool GetIsVisible() const { return mIsVisible; }
 	void SetIsVisible(bool visible);
 
-	size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
-	size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
-	size_t PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
+	inline size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
+	inline size_t PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
+	inline size_t PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
 	size_t PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
 
-	bool UpdateText(size_t textLine, const std::wstring & text);
+	inline bool UpdateText(size_t textLineIndex, const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
+	inline bool UpdateText(size_t textLineIndex, const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
+	inline bool UpdateText(size_t textLineIndex, const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color);
+	bool UpdateText(size_t textLineIndex, const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
+
+	bool UpdateTextString(size_t textLineIndex, const std::wstring & text, bool rebuild = true);
+	inline bool UpdateTextLocation(size_t textLineIndex, const glm::ivec2 & location, bool rebuild = true);
+	bool UpdateTextLocation(size_t textLineIndex, const glm::vec2 & location, ELocationType locationType, bool rebuild = true);
+	bool UpdateTextFont(size_t textLineIndex, GLuint fontIndex, bool rebuild = true);
+	inline bool UpdateTextColor(size_t textLineIndex, const glm::u8vec4 & color, bool rebuild = true);
+	bool UpdateTextColor(size_t textLineIndex, const glm::vec4 & color, bool rebuild = true);
 
 	size_t GetTextCount() const { return mTextLineList.size(); }
 
@@ -90,6 +100,8 @@ protected:
 
 	void InvalidateRendererShaderBufferIfVisible();
 
+	inline void InternalUpdateText(TextLine & textLine, const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color);
+
 private:
 
 	TextRenderer * mRenderer;
@@ -99,6 +111,92 @@ private:
 
 typedef std::weak_ptr<TextPage> TextPageWeakPtr;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+inline size_t TextPage::PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color)
+{
+	glm::vec4 c(color);
+	c /= 255;
+	return PushBackText(location, text, fontIndex, c);
+}
+
+inline size_t TextPage::PushBackText(const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color)
+{
+	glm::vec2 loc((GLfloat)location.x, (GLfloat)location.y);
+	return PushBackText(loc, ELocationType::AbsolutePixel, text, fontIndex, color);
+}
+
+inline size_t TextPage::PushBackText(const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color)
+{
+	glm::vec4 c(color);
+	c /= 255;
+	return PushBackText(location, locationType, text, fontIndex, c);
+}
+
+inline bool TextPage::UpdateText(size_t textLineIndex, const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color)
+{
+	glm::vec4 c(color);
+	c /= 255;
+	return UpdateText(textLineIndex, location, text, fontIndex, c);
+}
+
+inline bool TextPage::UpdateText(size_t textLineIndex, const glm::ivec2 & location, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color)
+{
+	glm::vec2 loc((GLfloat)location.x, (GLfloat)location.y);
+	return UpdateText(textLineIndex, loc, ELocationType::AbsolutePixel, text, fontIndex, color);
+}
+
+inline bool TextPage::UpdateText(size_t textLineIndex, const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::u8vec4 & color)
+{
+	glm::vec4 c(color);
+	c /= 255;
+	return UpdateText(textLineIndex, location, locationType, text, fontIndex, c);
+}
+
+inline bool TextPage::UpdateTextLocation(size_t textLineIndex, const glm::ivec2 & location, bool rebuild)
+{
+	glm::vec2 loc((GLfloat)location.x, (GLfloat)location.y);
+	return UpdateTextLocation(textLineIndex, loc, ELocationType::AbsolutePixel, rebuild);
+
+}
+
+inline bool TextPage::UpdateTextColor(size_t textLineIndex, const glm::u8vec4 & color, bool rebuild)
+{
+	glm::vec4 c(color);
+	c /= 255;
+	return UpdateTextColor(textLineIndex, c, rebuild);
+}
+
+inline void TextPage::InternalUpdateText(TextLine & textLine, const glm::vec2 & location, ELocationType locationType, const std::wstring & text, GLuint fontIndex, const glm::vec4 & color)
+{
+	textLine.mFontIndex = fontIndex;
+	textLine.mColor = glm::packUnorm4x8(color);
+	textLine.mText = text;
+	textLine.mLocation = location;
+	textLine.mLocationType = locationType;
+
+	BuildTextLine(textLine);
+
+	InvalidateRendererShaderBufferIfVisible();
+}
 
 	} // namespace Renderers
 } // namespace CoreFx

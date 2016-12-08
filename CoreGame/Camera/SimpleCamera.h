@@ -104,6 +104,13 @@ private:
 
 	static CityPositionInfo mCityList[(int)ECity::__count__];
 
+	static glm::u8vec4 LightTextColor;
+	static glm::u8vec4 DarkTextColor;
+	static glm::u8vec4 RedTextColor;
+	static glm::u8vec4 BleuTextColor;
+	static glm::u8vec4 GreenTextColor;
+	static glm::u8vec4 OrangeTextColor;
+
 	static const int VK_W = 0x57;
 	static const int VK_S = 0x53;
 	static const int VK_A = 0x41;

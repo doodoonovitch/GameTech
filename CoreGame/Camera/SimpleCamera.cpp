@@ -8,6 +8,15 @@ using namespace CoreFx;
 namespace CoreGame
 {
 
+
+	glm::u8vec4 SimpleCamera::LightTextColor(234, 234, 234, 255); // #007F46
+	glm::u8vec4 SimpleCamera::DarkTextColor(96, 96, 96, 255);
+	glm::u8vec4 SimpleCamera::RedTextColor(198, 31, 25, 255);
+	glm::u8vec4 SimpleCamera::BleuTextColor(51, 128, 183, 255);
+	glm::u8vec4 SimpleCamera::GreenTextColor(0, 127, 70, 255);
+	glm::u8vec4 SimpleCamera::OrangeTextColor(255, 106, 0, 255);
+
+
 int ToMinutes(int hour, int minute) { return hour * 60 + minute; }
 
 SimpleCamera::CityPositionInfo SimpleCamera::mCityList[(int)SimpleCamera::ECity::__count__] =
@@ -41,9 +50,17 @@ void SimpleCamera::OnRender()
 		const int textBufferSize = 50;
 		static wchar_t textBuffer[textBufferSize];
 
+		auto page = mFrameInfoPage.lock();
 		auto fps = 1.0 / mDeltaTime;
-		swprintf_s(textBuffer, textBufferSize, L"%3.0f fps", fps);
-		mFrameInfoPage.lock()->UpdateText(mFpsTextLineIndex, textBuffer);
+		if (fps < 30)
+			page->UpdateTextColor(mFpsTextLineIndex, RedTextColor, false);
+		else if(fps < 60)
+			page->UpdateTextColor(mFpsTextLineIndex, BleuTextColor, false);
+		else
+			page->UpdateTextColor(mFpsTextLineIndex, GreenTextColor, false);
+
+		swprintf_s(textBuffer, textBufferSize, L"%3.0f", fps);
+		page->UpdateTextString(mFpsTextLineIndex, textBuffer);
 	}
 
 	engine->UpdateObjects();
@@ -873,14 +890,14 @@ void SimpleCamera::InitializeTextPages()
 	const GLuint headerLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight());
 	const GLuint normalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
 
-	const glm::u8vec4 color1(255, 106, 0, 255);
-	const glm::u8vec4 color2(255, 106, 0, 255);
-	const glm::u8vec4 color3(127, 0, 0, 255);
-	const glm::u8vec4 color4(100, 100, 100, 255);
+	glm::u8vec4 color1 = OrangeTextColor;
+	glm::u8vec4 color2 = RedTextColor;
+	glm::u8vec4 color3 = GreenTextColor;
+	glm::u8vec4 color4 = DarkTextColor;
 	
 	// ------------------------------------------------------------------------
 
-	mFpsTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(0, 0), L"xx fps", (GLuint)EFont::NormalItalic, color4);
+	mFpsTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(0, 0), L"xx fps", (GLuint)EFont::NormalItalic, BleuTextColor);
 	
 	// ------------------------------------------------------------------------
 
@@ -993,7 +1010,7 @@ void SimpleCamera::InitializeTextPages()
 	// --------------------------------------------------------------
 
 	row = 0;
-	mShowDeferredBuffersPage.lock()->PushBackText(glm::vec2(-0.3f, -0.9f), Renderers::TextPage::ELocationType::RelativeRatio, L"Press F2 to continue...", (GLuint)EFont::Header, color1);
+	mShowDeferredBuffersPage.lock()->PushBackText(glm::vec2(-0.3f, -0.9f), Renderers::TextPage::ELocationType::RelativeRatio, L"Press F2 to continue...", (GLuint)EFont::Header, DarkTextColor);
 
 	// --------------------------------------------------------------
 
@@ -1014,7 +1031,7 @@ void SimpleCamera::UpdateSunPosTextPage()
 
 	const GLuint normalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
 
-	const glm::u8vec4 color1(200, 200, 200, 255);
+	const glm::u8vec4 color1 = DarkTextColor;
 
 	int row = 100;
 
@@ -1058,7 +1075,7 @@ void SimpleCamera::UpdateSunPosTextPageTime()
 	wchar_t textBuffer[textBufferSize];
 
 	swprintf_s(textBuffer, textBufferSize, L"Time : %i:%i", (int)(mCurrentDayTime / 60), (int)(mCurrentDayTime % 60));
-	mSunPosPage.lock()->UpdateText(mTimeTextLineIndex, textBuffer);
+	mSunPosPage.lock()->UpdateTextString(mTimeTextLineIndex, textBuffer);
 }
 
 void SimpleCamera::UpdateShowDeferredBuffersText()
@@ -1081,7 +1098,7 @@ void SimpleCamera::UpdateShowDeferredBuffersText()
 		pagePtr->EraseText(1);
 	}
 
-	pagePtr->PushBackText(glm::vec2(-0.2f, 0.92f), Renderers::TextPage::ELocationType::RelativeRatio, sShowDeferredBuffersText[mShowDeferredBufferState-1], (GLuint)EFont::Header, glm::u8vec4(255, 106, 0, 255));
+	pagePtr->PushBackText(glm::vec2(-0.2f, 0.92f), Renderers::TextPage::ELocationType::RelativeRatio, sShowDeferredBuffersText[mShowDeferredBufferState-1], (GLuint)EFont::Header, OrangeTextColor);
 }
 
 SimpleCamera::SimpleCamera(GameProgram & gameProgram)
