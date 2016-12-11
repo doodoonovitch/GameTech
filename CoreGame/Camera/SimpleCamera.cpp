@@ -269,14 +269,14 @@ void SimpleCamera::OnInit()
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
 //#define CERBERUS_MODEL
-//#define SHIELD_MODEL
+#define SHIELD_MODEL
 //#define BBUNIT_MODEL
 //#define BARREL_MODEL
 
 //#define CUBESPHERE_MODEL
 //#define LOW_CUBESPHERE_MODEL
 //#define SPHERE_MODEL
-#define SPHERE001_MODEL
+//#define SPHERE001_MODEL
 //#define SPHERE_300_POLY_MODEL
 //#define SPHERE_1250_POLY_MODEL
 //#define SPHERE_5000_POLY_MODEL
@@ -426,7 +426,7 @@ void SimpleCamera::OnInit()
 
 				texList.resize(dataCtxBase.mTextureIndexBase + 4);
 				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/ArtoriasSword/Sword_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
@@ -435,15 +435,13 @@ void SimpleCamera::OnInit()
 					instancePerModel.push_back(glm::ivec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(0.95f, 0.93f, 0.88f), dataCtxBase.mTextureIndexBase + 1, .2f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.56f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 3].SetBaseColor(glm::vec3(0.95f, 0.93f, 0.88f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 1);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 2);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, dataCtxBase.mModelMappingIndexBase + 3);
-
+				for (GLuint i = 1; i < modelCount; ++i)
+					modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, i);
 			}
 #endif
 #ifdef BOX_MODEL
@@ -457,25 +455,27 @@ void SimpleCamera::OnInit()
 
 				texList.resize(dataCtxBase.mTextureIndexBase + 4);
 				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Dif.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Met.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Met.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Box/Textures/rough.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Box/Textures/Nor.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				const GLuint modelCount = 5;
+				const GLuint modelCount = 3;
 				for (GLuint i = 0; i < modelCount; ++i)
 					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.784314f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(0.9f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.784314f, 0.f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f, 0.784314f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(0.4f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 1);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 2);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 3);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 4);
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.952941f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(0.784314f, 0.f, 0.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+
+				//matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(0.784314f, 0.f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				//matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.f, 0.784314f, 0.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.952941f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				//matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(0.4f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+
+				for (GLuint i = 1; i < modelCount; ++i)
+					modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, i);
 			}
 #endif
 			//modelData.LoadModel("Medias/Objects/planet/planet.obj", "Medias/Objects/planet", opt.SetFlipWindingOrder(false).SetPreTransformVertices(false).SetFlipNormal(false));
@@ -523,27 +523,24 @@ void SimpleCamera::OnInit()
 
 				texList.resize(dataCtxBase.mTextureIndexBase + 4);
 				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Shield/shield_diffuse_map.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Shield/shield_metallic_map.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Shield/shield_metallic_map.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Shield/shield_roughness_map.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Shield/shield_normal_map.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				const GLuint modelCount = 5;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(3, 3, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.91f, 0.92f, 0.92f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.93f, 0.88f), dataCtxBase.mTextureIndexBase + 1, .5f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
 
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 1);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 2);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 3);
-				modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, 4);
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 3].SetBaseColor(glm::vec3(0.91f, 0.92f, 0.92f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 4].SetBaseColor(glm::vec3(0.95f, 0.93f, 0.88f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
-
+				for (GLuint i = 1; i < modelCount; ++i)
+					modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, i);
 			}
 #endif
 #ifdef BBUNIT_MODEL
@@ -558,47 +555,45 @@ void SimpleCamera::OnInit()
 
 				texList.resize(dataCtxBase.mTextureIndexBase + 8);
 				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/bb-unit/Body_Diffuse.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/bb-unit/Body_Specular.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/bb-unit/Body_Specular.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/bb-unit/Body_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/bb-unit/Body_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				texList[dataCtxBase.mTextureIndexBase + 4] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Diffuse.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				texList[dataCtxBase.mTextureIndexBase + 5] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Specular.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 5] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Specular.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 6] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 7] = Renderer::TextureDesc("Medias/Objects/bb-unit/Head_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				const GLuint modelCount = 1;
+				const GLuint modelCount = 3;
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount * 4);
 
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
-				matList[dataCtxBase.mMaterialIndexBase + 1] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-				matList[dataCtxBase.mMaterialIndexBase + 2] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-				matList[dataCtxBase.mMaterialIndexBase + 3] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderer::NoTexture, glm::vec3(0.56f, 0.57f, 0.58f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f, 0.f, 0.f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 4).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 5).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 6).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 7).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+				matList[dataCtxBase.mMaterialIndexBase + 3].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
 				if (modelCount >= 2)
 				{
-					matList[dataCtxBase.mMaterialIndexBase + 4] = Renderer::MaterialDesc(glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
-					matList[dataCtxBase.mMaterialIndexBase + 5] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-					matList[dataCtxBase.mMaterialIndexBase + 6] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(0.95f, 0.64f, 0.54f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-					matList[dataCtxBase.mMaterialIndexBase + 7] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderer::NoTexture, glm::vec3(0.95f, 0.64f, 0.54f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 4].SetBaseColor(glm::vec3(0.f, 1.f, 0.f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 5].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 6].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 4).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 5).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 6).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 7).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 7].SetBaseColor(glm::vec3(0.95f, 0.64f, 0.54f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 				}
 
 				if (modelCount >= 3)
 				{
-					matList[dataCtxBase.mMaterialIndexBase + 8] = Renderer::MaterialDesc(glm::vec3(0.f), Renderer::NoTexture, glm::vec3(1.f, 0.f, 0.f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
-					matList[dataCtxBase.mMaterialIndexBase + 9] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-					matList[dataCtxBase.mMaterialIndexBase + 10] = Renderer::MaterialDesc(glm::vec3(1.f), dataCtxBase.mTextureIndexBase + 4, glm::vec3(1.00f, 0.71f, 0.29f), dataCtxBase.mTextureIndexBase + 5, 1.f, dataCtxBase.mTextureIndexBase + 6, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 7);
-					matList[dataCtxBase.mMaterialIndexBase + 11] = Renderer::MaterialDesc(glm::vec3(0.5f), Renderer::NoTexture, glm::vec3(1.00f, 0.71f, 0.29f), Renderer::NoTexture, 1.f, Renderer::NoTexture, glm::vec3(0), Renderer::NoTexture, Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 8].SetBaseColor(glm::vec3(0.f, 0.f, 1.f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 9].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 10].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 4).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 5).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 6).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 7).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+					matList[dataCtxBase.mMaterialIndexBase + 11].SetBaseColor(glm::vec3(1.00f, 0.71f, 0.29f)).SetBaseColorTextureIndex(Renderer::NoTexture).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(Renderer::NoTexture).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 				}
 				
 				for (GLuint i = 0; i < modelCount; ++i)
-				{
-					instancePerModel.push_back(glm::uvec3(3, 4, dataCtxBase.mModelMappingIndexBase + i));
-					if (i >= 1)
-						modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, (i + 1) * 4);
-				}
+					instancePerModel.push_back(glm::uvec3(3, 1, dataCtxBase.mModelMappingIndexBase + i));
 
+				for (GLuint i = 1; i < modelCount; ++i)
+					modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, i * 4);
 			}
 #endif
 
@@ -615,19 +610,19 @@ void SimpleCamera::OnInit()
 
 				texList.resize(dataCtxBase.mTextureIndexBase + 4);
 				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Metallic.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Barrel/Barrel_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(4, 3, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(1.0f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.5f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
-
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 			}
+
 #endif
 
 			// Iron : 0.56f, 0.57f, 0.58f
@@ -648,11 +643,11 @@ void SimpleCamera::OnInit()
 
 				texList.resize(dataCtxBase.mTextureIndexBase + 4);
 				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_A.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
-				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_M.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_M.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_R.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_N.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				matList[dataCtxBase.mMaterialIndexBase + 0] = Renderer::MaterialDesc(glm::vec3(0.588235f), dataCtxBase.mTextureIndexBase + 0, glm::vec3(0.56f, 0.57f, 0.58f), dataCtxBase.mTextureIndexBase + 1, 1.f, dataCtxBase.mTextureIndexBase + 2, glm::vec3(0), Renderer::NoTexture, dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
@@ -742,11 +737,11 @@ void SimpleCamera::OnInit()
 		//Lights::SpotLight * spotLight2 = engine->CreateSpotLight(glm::vec3(15.f, 5.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 100.f, glm::normalize(glm::vec3(.5f, 0.5f, -1.f)), glm::radians(15.f), glm::radians(25.f));
 
 
-		//Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
-		//Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
-		//Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
-		//Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
-		//Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
+		Lights::PointLight * ptLight2 = engine->CreatePointLight(glm::vec3(-10.f, 10.f, -20.f), glm::vec3(1.f, 1.f, 1.f), 10000.f, 1000.f);
+		Lights::PointLight * ptLight3 = engine->CreatePointLight(glm::vec3(300.f, 50.f, 40.f), glm::vec3(1.f, 1.f, 1.f), 100000.f, 50000.f);
+		Lights::PointLight * ptLight1 = engine->CreatePointLight(glm::vec3(30.f, 2.f, 0.f), glm::vec3(1.f, 1.f, 1.f), 200.f, 30.f);
+		Lights::PointLight * ptLight4 = engine->CreatePointLight(glm::vec3(-200.f, 200.f, -200.f), glm::vec3(1.f, 1.f, 1.f), 250000.f, 250.f);
+		Lights::PointLight * ptLight5 = engine->CreatePointLight(glm::vec3(20.f, 30.f, 5.f), glm::vec3(1.f, 1.f, 1.f), 20000.f, 100.f);
 
 
 		mSunLight = engine->CreateDirectionalLight(glm::normalize(glm::vec3(1.f, -1.f, 0.f)), glm::vec3(1.f, 1.f, 1.f), 100.f);
@@ -780,7 +775,6 @@ void SimpleCamera::OnInit()
 	//		}
 	//	}
 	//}
-
 }
 
 void SimpleCamera::InitializeTextRenderer()
