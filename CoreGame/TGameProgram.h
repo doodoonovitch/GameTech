@@ -33,13 +33,13 @@ public:
 
 	}
 
-	virtual int RunProgram(int argc, char **argv, const wchar_t* title, int monitorIndex, const RECT & winCoord, bool fullscreen, uint8_t bitsPerPixel = 32) override
+	virtual int RunProgram(int argc, char **argv, const wchar_t* title, const wchar_t * displayDevice, const RECT & winCoord, bool fullscreen, uint8_t bitsPerPixel = 32) override
 	{
 		MSG		msg;
 		BOOL	done = FALSE;
 
 		// Create Our OpenGL Window
-		if (!CreateGLWindow(title, monitorIndex, winCoord, fullscreen, bitsPerPixel))
+		if (!CreateGLWindow(title, displayDevice, winCoord, fullscreen, bitsPerPixel))
 		{
 			return -1;
 		}
@@ -114,7 +114,7 @@ public:
 
 protected:
 
-	bool CreateGLWindow(const wchar_t* title, int monitorIndex, const RECT & winRect, bool fullscreenflag, BYTE bitsPerPixel)
+	bool CreateGLWindow(const wchar_t* title, const wchar_t * /*displayDevice*/, const RECT & winRect, bool fullscreenflag, BYTE bitsPerPixel)
 	{
 		PRINT_BEGIN_SECTION;
 		PRINT_MESSAGE("Application initialization.....");
@@ -179,7 +179,7 @@ protected:
 			dwStyle |							// Defined Window Style
 			WS_CLIPSIBLINGS |					// Required Window Style
 			WS_CLIPCHILDREN,					// Required Window Style
-			0, 0,								// Window Position
+			mWinRect.left, mWinRect.top,		// Window Position
 			mWinRect.right - mWinRect.left,		// Calculate Window Width
 			mWinRect.bottom - mWinRect.top,		// Calculate Window Height
 			NULL,								// No Parent Window
@@ -187,8 +187,8 @@ protected:
 			mHInstance,							// Instance
 			NULL)))								// Dont Pass Anything To WM_CREATE
 		{
+			DisplayLastErrorMessage(L"Window Creation Error.");
 			KillGLWindow();								// Reset The Display
-			MessageBox(NULL, L"Window Creation Error.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
@@ -220,43 +220,52 @@ protected:
 
 		if (!(mHDC = GetDC(mHWnd)))
 		{
+			DisplayLastErrorMessage(L"Can't Create A GL Device Context.");
 			KillGLWindow();
-			MessageBox(NULL, L"Can't Create A GL Device Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
+		//mHDC = CreateDC(displayDevice, NULL, NULL, NULL);
+		//if (mHDC == NULL)
+		//{
+		//	ErrorExit(L"Create Device Context");
+		//	return false;
+		//}
+
 		if (!(PixelFormat = ChoosePixelFormat(mHDC, &pfd)))	// Did Windows Find A Matching Pixel Format?
 		{
+			DisplayLastErrorMessage(L"Can't Find A Suitable PixelFormat.");
 			KillGLWindow();
-			MessageBox(NULL, L"Can't Find A Suitable PixelFormat.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!SetPixelFormat(mHDC, PixelFormat, &pfd))
 		{
+			DisplayLastErrorMessage(L"Can't Set The PixelFormat.");
 			KillGLWindow();
-			MessageBox(NULL, L"Can't Set The PixelFormat.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!(mHRC = wglCreateContext(mHDC)))				// Are We Able To Get A Rendering Context?
 		{
+			DisplayLastErrorMessage(L"Can't Create A GL Rendering Context.");
 			KillGLWindow();
-			MessageBox(NULL, L"Can't Create A GL Rendering Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		if (!wglMakeCurrent(mHDC, mHRC))					// Try To Activate The Rendering Context
 		{
-			KillGLWindow();	
-			MessageBox(NULL, L"Can't Activate The GL Rendering Context.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
+			DisplayLastErrorMessage(L"Can't Activate The GL Rendering Context.");
+			wglDeleteContext(mHRC);
+			mHRC = NULL;
+			KillGLWindow();
 			return false;
 		}
 
 		if (!InitGL())									// Initialize GL Library (GLEW...)
 		{
 			KillGLWindow();
-			MessageBox(NULL, L"Initialization Failed.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
+			DisplayLastErrorMessage(L"Initialization Failed.", L"ERROR");
 			return false;
 		}
 
@@ -309,43 +318,44 @@ protected:
 	}
 
 	// Code from Nehe Productions
-	GLvoid KillGLWindow(GLvoid)								// Properly Kill The Window
+	GLvoid KillGLWindow(GLvoid)									// Properly Kill The Window
 	{
-		if (mFullscreen)									// Are We In Fullscreen Mode?
+		if (mFullscreen)										// Are We In Fullscreen Mode?
 		{
-			ChangeDisplaySettings(NULL, 0);					// If So Switch Back To The Desktop
-			//ShowCursor(TRUE);								// Show Mouse Pointer
+			ChangeDisplaySettings(NULL, 0);						// If So Switch Back To The Desktop
+			//ShowCursor(TRUE);									// Show Mouse Pointer
 		}
 
-		if (mHRC)											// Do We Have A Rendering Context?
+		if (mHRC)												// Do We Have A Rendering Context?
 		{
 			if (!wglMakeCurrent(NULL, NULL))					// Are We Able To Release The DC And RC Contexts?
 			{
-				MessageBox(NULL, L"Release Of DC And RC Failed.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+				DisplayLastErrorMessage(L"Release Of DC And RC Failed.", L"SHUTDOWN ERROR");
 			}
 
 			if (!wglDeleteContext(mHRC))						// Are We Able To Delete The RC?
 			{
-				MessageBox(NULL, L"Release Rendering Context Failed.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+				DisplayLastErrorMessage(L"Release Rendering Context Failed.", L"SHUTDOWN ERROR");
 			}
 			mHRC = NULL;										// Set RC To NULL
 		}
 
 		if (mHDC && !ReleaseDC(mHWnd, mHDC))					// Are We Able To Release The DC
+		//if (mHDC && !DeleteDC(mHDC))					// Are We Able To Release The DC
 		{
-			MessageBox(NULL, L"Release Device Context Failed.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			DisplayLastErrorMessage(L"Release Device Context Failed.", L"SHUTDOWN ERROR");
 			mHDC = NULL;										// Set DC To NULL
 		}
 
-		if (mHWnd && !DestroyWindow(mHWnd))					// Are We Able To Destroy The Window?
+		if (mHWnd && !DestroyWindow(mHWnd))						// Are We Able To Destroy The Window?
 		{
-			MessageBox(NULL, L"Could Not Release hWnd.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			DisplayLastErrorMessage(L"Could Not Release hWnd.", L"SHUTDOWN ERROR");
 			mHWnd = NULL;										// Set mHWnd To NULL
 		}
 
-		if (!UnregisterClass(sWindowClassName, mHInstance))			// Are We Able To Unregister Class
+		if (!UnregisterClass(sWindowClassName, mHInstance))		// Are We Able To Unregister Class
 		{
-			MessageBox(NULL, L"Could Not Unregister Class.", L"SHUTDOWN ERROR", MB_OK | MB_ICONINFORMATION);
+			DisplayLastErrorMessage(L"Could Not Unregister Class.", L"SHUTDOWN ERROR");
 			mHInstance = NULL;									// Set mHInstance To NULL
 		}
 	}
@@ -519,23 +529,29 @@ private:
 
 protected:
 
-	void ErrorExit(LPTSTR lpszFunction)
+	DWORD DisplayLastErrorMessage(LPTSTR message, LPTSTR caption = L"ERROR", UINT uType = MB_OK | MB_ICONEXCLAMATION)
 	{
 		LPVOID lpMsgBuf;
 		LPVOID lpDisplayBuf;
-		DWORD dw = GetLastError();
+		DWORD dw = ::GetLastError();
 
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, dw, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
 
 		// Display the error message and exit the process
 
-		lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
-		StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("%s failed with error %d: %s"), lpszFunction, dw, lpMsgBuf);
-		MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK | MB_ICONEXCLAMATION);
+		lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)message) + 40) * sizeof(TCHAR));
+		StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("%s (error %d: %s)"), message, dw, lpMsgBuf);
+		MessageBox(NULL, (LPCTSTR)lpDisplayBuf, caption, uType);
 
 		LocalFree(lpMsgBuf);
 		LocalFree(lpDisplayBuf);
 
+		return dw;
+	}
+
+	void ErrorExit(LPTSTR lpszFunction, LPTSTR caption = L"ERROR", UINT uType = MB_OK | MB_ICONEXCLAMATION)
+	{
+		DWORD dw = DisplayLastErrorMessage(lpszFunction, caption, uType);
 		ExitProcess(dw);
 	}
 
