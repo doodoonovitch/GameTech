@@ -9,7 +9,7 @@ namespace CoreFx
 	namespace Renderers
 	{
 
-		class TextRenderer;
+	class TextRenderer;
 
 class TextPage
 {
@@ -92,6 +92,7 @@ public:
 	void ClearText();
 
 	int MeasureString(const std::wstring & text, GLuint fontIndex) const;
+	int MeasureStringInPixel(const std::wstring & text, GLuint fontIndex) const;
 
 protected:
 

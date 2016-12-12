@@ -214,16 +214,22 @@ int TextPage::MeasureString(const std::wstring & text, GLuint fontIndex) const
 		const TextRenderer::GlyphMetrics * gm = fi.GetGlyph(*charIt);
 		if (gm == nullptr)
 		{
-			width += TextRenderer::GlyphMetrics::toPixel(fi.GetDefaultWidth());
+			width += fi.GetDefaultWidth();
 		}
 		else
 		{
-			width += TextRenderer::GlyphMetrics::toPixel(gm->mAdvance.x);
+			width += gm->mAdvance.x;
 		}
 	}
 
 	return width;
 }
+
+int TextPage::MeasureStringInPixel(const std::wstring & text, GLuint fontIndex) const
+{
+	return TextRenderer::GlyphMetrics::toPixel(MeasureString(text, fontIndex));
+}
+
 
 void TextPage::BuildTextLine(TextPage::TextLine & textLine)
 {

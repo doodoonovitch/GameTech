@@ -50,17 +50,15 @@ void SimpleCamera::OnRender()
 		const int textBufferSize = 50;
 		static wchar_t textBuffer[textBufferSize];
 
-		auto page = mFrameInfoPage.lock();
 		auto fps = 1.0 / mDeltaTime;
 		if (fps < 30)
-			page->UpdateTextColor(mFpsTextLineIndex, RedTextColor, false);
+			mFpsPage.lock()->UpdateTextColor(mFpsTextLineIndex, RedTextColor, false);
 		else if(fps < 60)
-			page->UpdateTextColor(mFpsTextLineIndex, BleuTextColor, false);
+			mFpsPage.lock()->UpdateTextColor(mFpsTextLineIndex, BleuTextColor, false);
 		else
-			page->UpdateTextColor(mFpsTextLineIndex, GreenTextColor, false);
+			mFpsPage.lock()->UpdateTextColor(mFpsTextLineIndex, GreenTextColor, false);
 
-		swprintf_s(textBuffer, textBufferSize, L"%3.0f", fps);
-		page->UpdateTextString(mFpsTextLineIndex, textBuffer);
+		UpdateValueTextString(mFpsPage, mFpsTextLineIndex, fps, L"%3.0f");
 	}
 
 	engine->UpdateObjects();
@@ -853,6 +851,7 @@ void SimpleCamera::InitializeTextRenderer()
 	//mTestPage.lock()->PushBackText(glm::ivec2(300, 200), L"[page1] Test 2 - Font 2...", (GLuint)EFont::NormalItalic, glm::u8vec4(0, 127, 70, 255));
 
 	mHelpInfoPage = mTextRenderer->NewPage(true, mHelpInfoTextGroup);
+	mFpsPage = mTextRenderer->NewPage(true);
 	mFrameInfoPage = mTextRenderer->NewPage(true);
 	mSunPosPage = mTextRenderer->NewPage(true);
 	mShowDeferredBuffersPage = mTextRenderer->NewPage(true, mShowDeferredBuffersTextGroup);
@@ -889,13 +888,54 @@ void SimpleCamera::InitializeTextPages()
 	glm::u8vec4 color3 = GreenTextColor;
 	glm::u8vec4 color4 = DarkTextColor;
 	
+	int row = 0;
+	int col = 0;
 	// ------------------------------------------------------------------------
 
-	mFpsTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(0, 0), L"xx fps", (GLuint)EFont::NormalItalic, BleuTextColor);
+	mFpsTextLineIndex = mFpsPage.lock()->PushBackText(glm::ivec2(0, 0), L"xx fps", (GLuint)EFont::NormalItalic, BleuTextColor);
+
+	row = 50;
+
+	{
+		glm::u8vec4 labelColor = DarkTextColor;
+		glm::u8vec4 valueColor = GreenTextColor;
+
+		const wchar_t sExposure[] = L"Exposure : ";
+		const wchar_t sGamma[] = L"Gamma : ";
+		const wchar_t sSSAORadius[] = L"SSAO Radius : ";
+		const wchar_t sSSAOKernel[] = L"SSAO Kernel : ";
+
+		auto frameInfoPage = mFrameInfoPage.lock();
+
+		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sExposure, (GLuint)EFont::Normal, labelColor);
+		col = Column1 + frameInfoPage->MeasureStringInPixel(sExposure, (GLuint)EFont::Normal);
+		mExposureTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
+		row += normalLineHeight + Interline2;
+		UpdateValueTextString(mFrameInfoPage, mExposureTextLineIndex, Engine::GetInstance()->GetExposure(), L"%2.2f");
+
+		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sGamma, (GLuint)EFont::Normal, labelColor);
+		col = Column1 + frameInfoPage->MeasureStringInPixel(sGamma, (GLuint)EFont::Normal);
+		mGammaTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
+		row += normalLineHeight + Interline2;
+		UpdateValueTextString(mFrameInfoPage, mGammaTextLineIndex, Engine::GetInstance()->GetGamma(), L"%2.2f");
+
+		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sSSAORadius, (GLuint)EFont::Normal, labelColor);
+		col = Column1 + frameInfoPage->MeasureStringInPixel(sSSAORadius, (GLuint)EFont::Normal);
+		mSSAORadiusTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
+		row += normalLineHeight + Interline2;
+		UpdateValueTextString(mFrameInfoPage, mSSAORadiusTextLineIndex, Engine::GetInstance()->GetSSAORadius(), L"%2.2f");
+
+		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sSSAOKernel, (GLuint)EFont::Normal, labelColor);
+		col = Column1 + frameInfoPage->MeasureStringInPixel(sSSAOKernel, (GLuint)EFont::Normal);
+		mSSAOKernelTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
+		row += normalLineHeight + Interline2;
+		UpdateValueTextString(mFrameInfoPage, mSSAOKernelTextLineIndex, Engine::GetInstance()->GetSSAOKernelSize(), L"%i");
+	}
 	
 	// ------------------------------------------------------------------------
 
-	int row = 0;
+	row = 0;
+
 	const wchar_t * Title = L"Commands...";
 	int width = Renderers::TextRenderer::GlyphMetrics::toPixel(mHelpInfoPage.lock()->MeasureString(Title, (GLuint)EFont::Title));
 	int titleColumn = (CoreFx::Engine::GetInstance()->GetViewPortWidth() - width) / 2;
@@ -1027,7 +1067,7 @@ void SimpleCamera::UpdateSunPosTextPage()
 
 	const glm::u8vec4 color1 = DarkTextColor;
 
-	int row = 100;
+	int row = 200;
 
 	const int textBufferSize = 300;
 	wchar_t textBuffer[textBufferSize];
@@ -1216,6 +1256,7 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 			float exposure = engine->GetExposure();
 			exposure = glm::clamp(exposure + exposureInc, 0.01f, 10.0f);
 			engine->SetExposure(exposure);
+			UpdateValueTextString(mFrameInfoPage, mExposureTextLineIndex, exposure, L"%2.2f");
 		}
 		break;
 
@@ -1226,6 +1267,7 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 			float gamma = engine->GetGamma();
 			gamma = glm::clamp(gamma + gammaInc, 0.01f, 10.0f);
 			engine->SetGamma(gamma);
+			UpdateValueTextString(mFrameInfoPage, mGammaTextLineIndex, gamma, L"%2.2f");
 		}
 		break;
 
@@ -1295,6 +1337,7 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		{
 			float inc = key == 'o' ? +0.1f : -0.1f;
 			engine->SetSSAORadius(max(0.1f, engine->GetSSAORadius() + inc));
+			UpdateValueTextString(mFrameInfoPage, mSSAORadiusTextLineIndex, engine->GetSSAORadius(), L"%2.2f");
 		}
 		break;
 
@@ -1303,6 +1346,7 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		{
 			GLuint inc = key == 'k' ? +1 : -1;
 			engine->SetSSAOKernelSize(max(16, engine->GetSSAOKernelSize() + inc));
+			UpdateValueTextString(mFrameInfoPage, mSSAOKernelTextLineIndex, engine->GetSSAOKernelSize(), L"%i");
 		}
 		break;
 

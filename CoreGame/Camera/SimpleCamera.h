@@ -100,6 +100,15 @@ private:
 	void UpdateSunPosTextPage();
 	void UpdateSunPosTextPageTime();
 
+	template<typename TValue>
+	void UpdateValueTextString(CoreFx::Renderers::TextPageWeakPtr page, size_t lineIndex, TValue value, const wchar_t * mask = L"%3.0f")
+	{
+		const int textBufferSize = 50;
+		static wchar_t textBuffer[textBufferSize];
+		swprintf_s(textBuffer, textBufferSize, mask, value);
+		page.lock()->UpdateTextString(lineIndex, textBuffer);
+	}
+
 private:
 
 	static CityPositionInfo mCityList[(int)ECity::__count__];
@@ -139,6 +148,7 @@ private:
 
 	CoreFx::Renderers::TextPageWeakPtr mHelpInfoPage;
 	CoreFx::Renderers::TextPageWeakPtr mShowDeferredBuffersPage;
+	CoreFx::Renderers::TextPageWeakPtr mFpsPage;
 	CoreFx::Renderers::TextPageWeakPtr mFrameInfoPage;
 	CoreFx::Renderers::TextPageWeakPtr mSunPosPage;
 	//CoreFx::Renderers::TextPageWeakPtr mTestPage;
@@ -150,6 +160,10 @@ private:
 	CoreFx::Renderers::TextGroupWeakPtr mLastActiveTextGroup;
 
 	size_t mFpsTextLineIndex;
+	size_t mExposureTextLineIndex;
+	size_t mGammaTextLineIndex;
+	size_t mSSAORadiusTextLineIndex;
+	size_t mSSAOKernelTextLineIndex;
 
 	size_t mTimeTextLineIndex;
 
