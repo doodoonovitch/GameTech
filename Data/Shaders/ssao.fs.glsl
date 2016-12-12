@@ -44,7 +44,7 @@ void main(void)
         
 		// project sample position (to sample texture) (to get position on screen/texture)
 		vec4 offset = vec4(smp, 1.0);
-		offset = u_ProjMatrix * offset; 
+		offset = u_ViewProjMatrix * offset; 
 		offset.xyz /= offset.w;      
 		offset.xyz = offset.xyz * 0.5 + 0.5; 
 
