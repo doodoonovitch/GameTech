@@ -137,7 +137,7 @@ SkydomeRenderer::SkydomeRenderer(bool useTextureCache, GLsizei cacheTextureSize,
 		glUniformMatrix3fv(mShader.GetUniform(u_colorConvMat), 1, true, s_CM);
 		glUniform3fv(mShader.GetUniform(u_zenithDirection), 1, glm::value_ptr(zenith));
 
-		mShader.SetupFrameDataBlockBinding();
+		//mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
 
 	GL_CHECK_ERRORS;
@@ -300,7 +300,6 @@ void SkydomeRenderer::RenderWireFrame()
 {
 	mWireFrameShader.Use();
 		glBindVertexArray(mVaoID);
-		glUniformMatrix4fv(mShader.GetUniform(u_VPMatrix), 1, false, glm::value_ptr(Engine::GetInstance()->GetCamera()->GetViewProjectionMatrix()));
 			glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
 		glBindVertexArray(0);
 	mWireFrameShader.UnUse();

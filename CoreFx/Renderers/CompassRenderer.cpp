@@ -86,18 +86,16 @@ CompassRenderer::~CompassRenderer()
 
 void CompassRenderer::UpdateUniforms(Shader const & shader)
 {
-	glm::vec3 t(70.f, 70.f, 0.f);
-	glUniform3fv(shader.GetUniform(u_Translation), 1, glm::value_ptr(t)); GL_CHECK_ERRORS;
-
+	glUniform3f(shader.GetUniform(u_Translation), 70.f, 70.f, 0.f); 
 	Camera * cam = Engine::GetInstance()->GetCamera();
-	glUniform3fv(shader.GetUniform(u_ViewDir), 1, glm::value_ptr(cam->GetLook())); GL_CHECK_ERRORS;
+	glUniform3fv(shader.GetUniform(u_ViewDir), 1, glm::value_ptr(cam->GetLook())); 
 }
 
 void CompassRenderer::Render()
 {
 	mShader.Use();
-		UpdateUniforms(mShader);
 		glBindVertexArray(mVaoID);
+			UpdateUniforms(mShader);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(mCompassTexture->GetTarget(), mCompassTexture->GetResourceId());
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -108,8 +106,8 @@ void CompassRenderer::Render()
 void CompassRenderer::RenderWireFrame()
 {
 	mWireFrameShader.Use();
-		UpdateUniforms(mWireFrameShader);
 		glBindVertexArray(mVaoID);
+			UpdateUniforms(mWireFrameShader);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	mWireFrameShader.UnUse();

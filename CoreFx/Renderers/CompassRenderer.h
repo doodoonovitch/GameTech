@@ -21,7 +21,7 @@ public:
 
 private:
 
-	void UpdateUniforms(Shader const & shader);
+	static void UpdateUniforms(Shader const & shader);
 
 	enum EUniformIndex
 	{

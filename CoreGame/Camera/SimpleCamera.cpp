@@ -268,8 +268,8 @@ void SimpleCamera::OnInit()
 //#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
-//#define CERBERUS_MODEL
-#define SHIELD_MODEL
+#define CERBERUS_MODEL
+//#define SHIELD_MODEL
 //#define BBUNIT_MODEL
 //#define BARREL_MODEL
 

@@ -443,7 +443,7 @@ void Engine::InternalRenderObjects()
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	mSSAOBlurShader.UnUse();
-	
+
 	// -----------------------------------------------------------------------
 	// 
 	// -----------------------------------------------------------------------
@@ -564,7 +564,6 @@ void Engine::InternalRenderObjects()
 			}
 		}
 
-
 		// -----------------------------------------------------------------------
 		// wire frame pass
 		// -----------------------------------------------------------------------
@@ -585,25 +584,35 @@ void Engine::InternalRenderObjects()
 			mRenderers->ForEach([](Renderer * renderer)
 			{
 				if (renderer->GetIsInitialized())
+				{
 					renderer->RenderWireFrame();
+				}
 			});
 
 			if (mSkybox != nullptr && mSkybox->GetIsInitialized())
+			{
 				mSkybox->RenderWireFrame();
+			}				
 			else if (mSkydome != nullptr && mSkydome->GetIsInitialized())
+			{
 				mSkydome->RenderWireFrame();
+			}
+				
 
 			if (mIsDrawLightPositionEnabled)
 			{
 				if (mPointLightPositionRenderer->GetIsInitialized())
+				{
 					mPointLightPositionRenderer->RenderWireFrame();
+				}
 				if (mSpotLightPositionRenderer->GetIsInitialized())
+				{
 					mSpotLightPositionRenderer->RenderWireFrame();
+				}					
 			}
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glPolygonOffset(0.0f, 0.0f);
-
 			glDisable(GL_LINE_SMOOTH);
 		}
 
@@ -675,7 +684,7 @@ void Engine::InternalRenderObjects()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glDisable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 	mHUDRenderers->ForEach([](Renderer * renderer)
 	{
 		if (renderer->GetIsInitialized())
@@ -698,7 +707,7 @@ void Engine::InternalRenderObjects()
 		glDisable(GL_LINE_SMOOTH);
 	}
 
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 }
 
 void Engine::InternalRenderDeferredBuffers()
