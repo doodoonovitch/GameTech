@@ -22,7 +22,6 @@ uniform sampler2D u_NormalMapSampler;
 out TES_OUT
 {
 	vec2 TexUV;
-	vec3 ViewPosition;
 	vec3 Position;
 	vec3 Normal;
 	flat int MapIndex;
@@ -33,7 +32,6 @@ out TES_OUT
 out TES_OUT
 {
 	vec2 TexUV;
-	vec3 ViewPosition;
 	vec3 Position;
 	flat int MapIndex;
 } tes_out;
@@ -62,14 +60,11 @@ void main()
 	//tes_out.Normal = normalize(texture(u_NormalMapSampler, tc).rgb);
 #endif
 
-	vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1);
-
 	tes_out.Position = p.xyz;
-	tes_out.ViewPosition = viewPos.xyz;
 	tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
 	
-	gl_Position = u_ProjMatrix * viewPos;
+	gl_Position = u_ViewProjMatrix * p;
 }
 
 

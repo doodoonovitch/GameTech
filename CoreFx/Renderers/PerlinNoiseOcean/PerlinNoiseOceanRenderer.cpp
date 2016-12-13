@@ -128,20 +128,24 @@ void Renderer::LoadMainShader(const Desc & desc)
 
 	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
+	std::vector<std::string> lightFsGlsl(2);
+	PRINT_MESSAGE("Loading shader file : shaders/DeferredShadingCommon.incl.glsl");
+	Shader::MergeFile(lightFsGlsl[0], "shaders/DeferredShadingCommon.incl.glsl");
+
+	PRINT_MESSAGE("Loading shader file : shaders/HeightFieldOcean.deferred.fs.glsl");
 	if (desc.mNormalMode == ENormalMode::PerPixelNormal)
 	{
-		std::vector<std::string> shaderSources;
-		shaderSources.push_back("#define PER_PIXEL_NORMAL\n");
-
-		std::string csSource;
+		std::string csSource("#define PER_PIXEL_NORMAL\n");
 		Shader::MergeFile(csSource, "shaders/HeightFieldOcean.deferred.fs.glsl");
-		shaderSources.push_back(csSource);
-		mShader.LoadFromString(GL_FRAGMENT_SHADER, shaderSources);
+		lightFsGlsl[1] = csSource;
 	}
 	else
 	{
-		mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/HeightFieldOcean.deferred.fs.glsl");
+		Shader::MergeFile(lightFsGlsl[1], "shaders/HeightFieldOcean.deferred.fs.glsl");
 	}
+
+	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
+
 
 	mShader.CreateAndLinkProgram();
 	mShader.Use();

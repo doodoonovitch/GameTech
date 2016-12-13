@@ -124,7 +124,14 @@ void Renderer::LoadMainShader(const Desc & desc)
 
 	//mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/HeightFieldOcean.gs.glsl");
 
-	mShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/HeightFieldOcean.deferred.fs.glsl");
+	std::vector<std::string> lightFsGlsl(2);
+	PRINT_MESSAGE("Loading shader file : shaders/DeferredShadingCommon.incl.glsl");
+	Shader::MergeFile(lightFsGlsl[0], "shaders/DeferredShadingCommon.incl.glsl");
+
+	PRINT_MESSAGE("Loading shader file : shaders/HeightFieldOcean.deferred.fs.glsl");
+	Shader::MergeFile(lightFsGlsl[1], "shaders/HeightFieldOcean.deferred.fs.glsl");
+
+	mShader.LoadFromString(GL_FRAGMENT_SHADER, lightFsGlsl);
 
 	mShader.CreateAndLinkProgram();
 	mShader.Use();

@@ -19,7 +19,6 @@ in TCS_OUT
 out TES_OUT
 {
 	vec2 TexUV;
-	vec3 ViewPosition;
 	vec3 Position;
 	vec3 Normal;
 	flat int MapIndex;
@@ -54,15 +53,12 @@ void main()
 
 	vec3 normal = vec3(h0 - h1, 2 /** u_MapSize.x * u_dUV*/, h2 - h3);
 //#endif
-	vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, p.xyz), 1);
-
 	tes_out.Position = p.xyz;
-	tes_out.ViewPosition = viewPos.xyz;
 	tes_out.TexUV = tc;
 	tes_out.MapIndex = tes_in[0].MapIndex;
 	tes_out.Normal = normal;
 	
-	gl_Position = u_ProjMatrix * viewPos;
+	gl_Position = u_ViewProjMatrix * p;
 }
 
 

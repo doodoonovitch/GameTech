@@ -366,12 +366,6 @@
     <None Include="Renderers\PreethamScatter\Sol.table">
       <Filter>Renderers\PreethamScatter</Filter>
     </None>
-    <None Include="..\Data\Shaders\deepOcean.deferred.fs.glsl">
-      <Filter>Shaders\Ocean</Filter>
-    </None>
-    <None Include="..\Data\Shaders\deepOcean.gs.glsl">
-      <Filter>Shaders\Ocean</Filter>
-    </None>
     <None Include="..\Data\Shaders\deepOcean.tes.glsl">
       <Filter>Shaders\Ocean</Filter>
     </None>

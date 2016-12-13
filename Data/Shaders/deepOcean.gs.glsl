@@ -14,10 +14,8 @@ in TES_OUT
 out GS_OUT
 {
 	vec3 Position;
-	vec3 ViewPosition;
 	vec3 Normal;
 	//vec3 Tangent;
-	flat DualQuat ViewModelDQ;
 	//flat int MapIndex;
 } gs_out;
 
@@ -29,24 +27,16 @@ void main()
 	modelDQ.Qd = texelFetch(u_PerMapDataSampler, index + 1);
 
 	//DualQuat viewModelDQ = dqMul(u_ViewDQ, modelDQ);
-	DualQuat viewModelDQ = u_ViewDQ;
+	//DualQuat viewModelDQ = u_ViewDQ;
 
 	for(int i = 0; i < gl_in.length(); ++i )
 	{	
 		//gs_out.TexUV = gs_in[i].TexUV;
 		gs_out.Position = gl_in[i].gl_Position.xyz;
 		gs_out.Normal = gs_in[i].Normal;
-		gs_out.ViewModelDQ = viewModelDQ;
-		//gs_out.Tangent = gs_in[i].Tangent;
-		//gs_out.WorldPosition = dqTransformPoint(modelDQ, gl_in[i].gl_Position.xyz);
+		//gs_out.ViewModelDQ = viewModelDQ;
 
-		//vec4 viewPos = vec4(dqTransformPoint(u_ViewDQ, gs_out.WorldPosition), 1.0);
-		vec4 viewPos = vec4(dqTransformPoint(gs_out.ViewModelDQ, gl_in[i].gl_Position.xyz), 1);
-		gs_out.ViewPosition = viewPos.xyz;
-		gl_Position = u_ProjMatrix * viewPos;
-
-		//gs_out.WorldNormal = dqTransformNormal(gs_in[i].Normal, modelDQ);
-		//gs_out.ViewNormal = dqTransformNormal(gs_out.WorldNormal, u_ViewDQ);
+		gl_Position = u_ViewProjMatrix * vec4(gs_out.Position, 1);
 
 		EmitVertex();
 	}
