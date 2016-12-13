@@ -84,7 +84,7 @@ void main(void)
 		}
 		else if(u_BufferToShow == DEPTH_BUFFER)
 		{
-			vFragColor = vec4(vec3(1 - fi.mDepth), 1);
+			vFragColor = vec4(vec3(1 - fi.mDepthNDC), 1);
 		}
 		
 	}

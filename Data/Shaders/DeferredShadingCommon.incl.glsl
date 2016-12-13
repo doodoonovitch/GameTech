@@ -26,7 +26,7 @@ struct FragmentInfo
 	float mRoughness;
 	float mPorosity;
 
-	float mDepth;
+	float mDepthNDC;
 
 	uint mRendererId;
 
@@ -103,7 +103,8 @@ void UnpackFromGBuffer(out FragmentInfo fi, in vec2 texUV, in vec2 viewRay, in u
 	buffer1Data = texture(gbufferSampler, texUV, 0);
 	DecodeMaterialData(fi, buffer1Data);
 	
-	fi.mDepth = texture(depthSampler, texUV, 0).r;
-	fi.mPosition = PositionFromDepth(fi.mDepth, viewRay);
+	fi.mDepthNDC = texture(depthSampler, texUV, 0).x * 2.0 - 1.0;
+	vec4 posV = vec4(PositionFromDepth(fi.mDepthNDC, viewRay), 1);
+	fi.mPosition = (u_InvViewMatrix * posV).xyz;
 }
 

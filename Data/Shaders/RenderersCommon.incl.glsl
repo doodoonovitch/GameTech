@@ -108,12 +108,12 @@ struct ModelMaterial
 // Linearize depth
 //
 // ---------------------------------------------------------------------------
-float LinearizeDepth(float depth)
+float LinearizeDepth(float depthNDC)
 {
 	float n = u_NearFarFovYAspect.x;
 	float f = u_NearFarFovYAspect.y;
-	depth = depth * 2.0 - 1.0;
-	float zView = 2 * f * n / (depth * (f - n) - (f + n));
+	//depthNDC = depthNDC * 2.0 - 1.0;
+	float zView = 2 * f * n / (depthNDC * (f - n) - (f + n));
 
 	return zView;
 }
@@ -122,14 +122,13 @@ float LinearizeDepth(float depth)
 // Position reconstruction from depth
 //
 // ---------------------------------------------------------------------------
-vec3 PositionFromDepth(float depth, vec2 viewRay)
+vec3 PositionFromDepth(float depthNDC, vec2 viewRay)
 {
 
-	//float zView = u_ProjMatrix[3][2] / (2.0 * depth - 1.0 - u_ProjMatrix[2][2]);
-	float zView = LinearizeDepth(depth);
+	float zView = LinearizeDepth(depthNDC);
 	vec2 xyView = viewRay * -zView;
 
-	return (u_InvViewMatrix * vec4(xyView, zView, 1.0)).xyz;
+	return vec3(xyView, zView);
 }
 
 

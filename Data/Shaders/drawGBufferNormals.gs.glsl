@@ -13,11 +13,13 @@ struct FragmentInfo
 {
     vec3 Position;
     vec3 Normal;
+	float mDepthNDC;
 };
 
 void UnpackFromGBuffer(out FragmentInfo fi, vec2 texUV, vec2 viewRay)
 {
-    fi.Position = PositionFromDepth(texture(u_DepthSampler, texUV, 0).x, viewRay);
+	fi.mDepthNDC = texture(u_DepthSampler, texUV, 0).x * 2.0 - 1.0;
+    fi.Position = (u_InvViewMatrix * vec4(PositionFromDepth(fi.mDepthNDC, viewRay), 1)).xyz;
 	fi.Normal = texture(u_NBufferSampler, texUV, 0).xyz;
 }
 

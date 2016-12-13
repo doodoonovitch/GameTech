@@ -263,10 +263,10 @@ void SimpleCamera::OnInit()
 
 
 //#define ARTORIAS_SWORD_MODEL
-//#define BOX_MODEL
+#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
-#define CERBERUS_MODEL
+//#define CERBERUS_MODEL
 //#define SHIELD_MODEL
 //#define BBUNIT_MODEL
 //#define BARREL_MODEL
@@ -459,7 +459,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 3;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(6, 3, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(glm::uvec3(6, 4, dataCtxBase.mModelMappingIndexBase + i));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
@@ -772,6 +772,24 @@ void SimpleCamera::OnInit()
 	//			}
 	//		}
 	//	}
+	//}
+
+	//{
+	//	mCamera->Update();
+	//	glm::vec4 p(20.f, 30.f, 5.f, 1.f);
+	//	const glm::mat4 & P = mCamera->GetProjectionMatrix();
+	//	const glm::mat4 & V = mCamera->GetViewMatrix();
+	//	const glm::mat4 & VP = mCamera->GetViewProjectionMatrix();
+
+	//	glm::vec4 pView = V * p;
+	//	glm::vec4 pProj = VP * p;
+	//	glm::vec4 pNDS = pProj / pProj.w;
+	//	float linearDepth = CoreFx::Maths::Helpers::LinearizeDepth(pNDS.z, mCamera->GetNearZ(), mCamera->GetFarZ());
+
+	//	PRINT_MESSAGE("pView = (%f, %f, %f, %f)", pView.x, pView.y, pView.z, pView.w);
+	//	PRINT_MESSAGE("pProj = (%f, %f, %f, %f)", pProj.x, pProj.y, pProj.z, pProj.w);
+	//	PRINT_MESSAGE("pNDS = (%f, %f, %f, %f)", pNDS.x, pNDS.y, pNDS.z, pNDS.w);
+	//	PRINT_MESSAGE("linearDepth = %f", linearDepth);		
 	//}
 }
 

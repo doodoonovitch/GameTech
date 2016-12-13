@@ -30,6 +30,35 @@ static glm::vec3 AngleToDirection(GLfloat angleDegrees)
 }
 
 
+// =======================================================================
+//	depthNDC : depth in NDC space [-1;1]
+//	n : near plane
+//	f : far plane
+// =======================================================================
+static GLfloat LinearizeDepth(GLfloat depthNDC, GLfloat n, GLfloat f)
+{
+	GLfloat zView = 2.f * f * n / (depthNDC * (f - n) - (f + n));
+
+	return zView;
+}
+
+// =======================================================================
+// viewRay : view ray = in_Position.xy / vec2(u_ProjMatrix[0][0], u_ProjMatrix[1][1]); 
+//		in_Position.xy : [(-1-1);(1,1)]
+//	depthNDC : depth in NDC space [-1;1]
+//	n : near plane
+//	f : far plane
+// =======================================================================
+static glm::vec3 PositionFromDepth(const glm::vec2 & viewRay, GLfloat depthNDC, GLfloat n, GLfloat f)
+{
+	GLfloat zView = LinearizeDepth(depthNDC, n, f);
+	glm::vec2 xyView = viewRay * -zView;
+
+	return glm::vec3(xyView.x, xyView.y, zView);
+}
+
+
+
 
 // =======================================================================
 // =======================================================================
