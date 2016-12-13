@@ -263,13 +263,14 @@ void SimpleCamera::OnInit()
 
 
 //#define ARTORIAS_SWORD_MODEL
-#define BOX_MODEL
+//#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
-//#define CERBERUS_MODEL
+#define CERBERUS_MODEL
 //#define SHIELD_MODEL
 //#define BBUNIT_MODEL
 //#define BARREL_MODEL
+//#define SPONZA
 
 //#define CUBESPHERE_MODEL
 //#define LOW_CUBESPHERE_MODEL
@@ -646,6 +647,19 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_N.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+			}
+#endif
+#ifdef SPONZA
+			{
+				glm::mat4 m = glm::scale(glm::vec3(0.5f));
+				opt.SetPreTransformVertices(m);
+
+				//modelData.LoadModel("Medias/Objects/sponza/sponza.obj", "Medias/Objects/sponza/textures", opt, &dataCtxBase);
+				modelData.LoadModel("Medias/Objects/sponza/sponzaPBR.obj", "Medias/Objects/sponza/textures_pbr", opt, &dataCtxBase);
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
