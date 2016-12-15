@@ -97,6 +97,7 @@ namespace CoreFx
 
 #include "Engine.h"
 
+#include "Geometry\Helpers.h"
 #include "Geometry\ModelData.h"
 
 
@@ -105,12 +106,14 @@ namespace CoreFx
 #include "Renderables\Grid.h"
 #include "Renderables\Model.h"
 
-#include "Renderers\GridRenderer.h"
-#include "Renderers\AxisRenderer.h"
+#include "Renderers\DebugTools\GridRenderer.h"
+#include "Renderers\DebugTools\AxisRenderer.h"
+#include "Renderers\DebugTools\RadialGridRenderer.h"
 #include "Renderers\TerrainRenderer.h"
 #include "Renderers\PerlinNoiseOcean\PerlinNoiseOceanWaveProperty.h"
 #include "Renderers\PerlinNoiseOcean\PerlinNoiseOceanHeightMapCS.h"
 #include "Renderers\PerlinNoiseOcean\PerlinNoiseOceanRenderer.h"
+#include "Renderers\PerlinNoiseOcean\RadialGridOceanRenderer.h"
 #include "Renderers\DeepOcean\DeepOceanWaveProperty.h"
 #include "Renderers\DeepOcean\DeepOceanHeightMapCS.h"
 #include "Renderers\DeepOcean\DeepOceanRenderer.h"

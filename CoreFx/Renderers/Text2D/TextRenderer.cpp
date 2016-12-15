@@ -473,7 +473,7 @@ bool TextRenderer::LoadTexture(FT_Library ftLibrary)
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	mTexture = Engine::GetInstance()->GetTextureManager()->CreateTexture2DArray(1, GL_R8, mTextureSize.x, mTextureSize.y, mLayerCount);
+	mTexture = Engine::GetInstance()->GetTextureManager()->CreateTexture2DArray(1, GL_R8, mTextureSize.x, mTextureSize.y, mLayerCount, GL_NEAREST, GL_NEAREST, GL_CLAMP, GL_CLAMP);
 
 	glBindTexture(mTexture->GetTarget(), mTexture->GetResourceId()); GL_CHECK_ERRORS;
 

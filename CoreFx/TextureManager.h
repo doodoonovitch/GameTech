@@ -31,12 +31,12 @@ public:
 
 	TextureGroup const * LoadTextureGroup(TextureGroupId groupId, const std::vector<LoadTextureGroupDesc> & list, bool generateMipMap = true);
 
-	Texture2DArray const * CreateTexture2DArray(GLsizei mipMapCount, GLenum format, GLsizei width, GLsizei height, GLsizei depth);
+	Texture2DArray const * CreateTexture2DArray(GLsizei mipMapCount, GLenum format, GLsizei width, GLsizei height, GLsizei depth, GLenum texMinFilter, GLenum texMagFilter, GLenum wrapS, GLenum wrapT);
 	
 
 	void ReleaseTexture2D(Texture2D const *& texture);
 	void ReleaseCubeMapTexture(CubeMapTexture const *& texture);
-
+	void ReleaseTexture2DArray(Texture2DArray const *& texture);
 	void ReleaseTextureGroup(TextureGroup const *& texture);
 
 	Texture2D const * GetDefaultTexture2D()	const { return mDefault2D; }

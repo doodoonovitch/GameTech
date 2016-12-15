@@ -24,6 +24,9 @@ SkydomeRenderer::Cache::~Cache()
 bool SkydomeRenderer::Cache::Initialize(GLsizei cacheTextureSize)
 {
 	Engine * engine = Engine::GetInstance();
+	
+	const Camera * camera = engine->GetCamera();
+
 	mCubeMapTexture = engine->GetTextureManager()->CreateTextureCubeMap("SkyMap", cacheTextureSize, GL_RGB16F, false);
 
 	mCubeMapProjMatrix = new glm::mat4[6];
@@ -41,7 +44,7 @@ bool SkydomeRenderer::Cache::Initialize(GLsizei cacheTextureSize)
 	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_POSITIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, Z, -Y);
 	mCubeMapProjMatrix[GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X] = glm::lookAt(O, -Z, -Y);
 
-	glm::mat4 projMatrix = glm::perspective(glm::half_pi<GLfloat>(), 1.f, 1.f, 100.f);
+	glm::mat4 projMatrix = glm::perspective(glm::half_pi<GLfloat>(), 1.f, camera->GetNearZ(), camera->GetFarZ());
 	for (int i = 0; i < 6; ++i)
 	{
 		mCubeMapProjMatrix[i] = projMatrix * mCubeMapProjMatrix[i];
@@ -800,8 +803,8 @@ bool SkydomeRenderer::RenderCache()
 	glBindFramebuffer(GL_FRAMEBUFFER, mCache->mFBOs);
 	for (int face = 0; face < 6; ++face)
 	{
-		if ((face + GL_TEXTURE_CUBE_MAP_POSITIVE_X) == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y)
-			continue;
+		//if ((face + GL_TEXTURE_CUBE_MAP_POSITIVE_X) == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y)
+		//	continue;
 
 		glUniformMatrix4fv(mShader.GetUniform(u_VPMatrix), 1, false, glm::value_ptr(mCache->mCubeMapProjMatrix[face]));
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mCache->mCubeMapTexture->GetResourceId(), 0);

@@ -103,12 +103,6 @@
     <ClInclude Include="Renderers\RendererHelper.h">
       <Filter>Renderers</Filter>
     </ClInclude>
-    <ClInclude Include="Renderers\GridRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderers\AxisRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
     <ClInclude Include="Lights\Light.h">
       <Filter>Lights</Filter>
     </ClInclude>
@@ -211,6 +205,21 @@
     <ClInclude Include="Maths\SolarPosition.h">
       <Filter>Maths</Filter>
     </ClInclude>
+    <ClInclude Include="Renderers\DebugTools\AxisRenderer.h">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DebugTools\GridRenderer.h">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\DebugTools\RadialGridRenderer.h">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry\Helpers.h">
+      <Filter>Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\PerlinNoiseOcean\RadialGridOceanRenderer.h">
+      <Filter>Renderers\PerlinNoiseOcean</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shader.cpp" />
@@ -230,12 +239,6 @@
       <Filter>Renderables</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Renderers\GridRenderer.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderers\AxisRenderer.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
     <ClCompile Include="Lights\Light.cpp">
       <Filter>Lights</Filter>
     </ClCompile>
@@ -324,6 +327,18 @@
     </ClCompile>
     <ClCompile Include="Maths\SolarPosition.cpp">
       <Filter>Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DebugTools\AxisRenderer.cpp">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DebugTools\GridRenderer.cpp">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\DebugTools\RadialGridRenderer.cpp">
+      <Filter>Renderers\DebugTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\PerlinNoiseOcean\RadialGridOceanRenderer.cpp">
+      <Filter>Renderers\PerlinNoiseOcean</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -593,6 +608,18 @@
     </None>
     <None Include="..\Data\Shaders\Text.wireframe.fs.glsl">
       <Filter>Shaders\Text2D</Filter>
+    </None>
+    <None Include="..\Data\Shaders\RadialGridOcean.vs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\RadialGrid.vs.glsl">
+      <Filter>Shaders\Debug</Filter>
+    </None>
+    <None Include="..\Data\Shaders\RadialGridOcean.deferred.fs.glsl">
+      <Filter>Shaders\Ocean</Filter>
+    </None>
+    <None Include="..\Data\Shaders\RadialGridOcean.wireframe.fs.glsl">
+      <Filter>Shaders\Ocean</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

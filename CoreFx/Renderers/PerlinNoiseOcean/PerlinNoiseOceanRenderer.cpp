@@ -225,8 +225,8 @@ void Renderer::LoadHeightMapComputeShader(const Desc & desc)
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Height Map Compute) Shaders : .....");
 
 	mHeightMapCS = new HeightMapCS();
-	glm::vec2 scale = glm::vec2((GLfloat)mHeightMapTextureSize.x / (GLfloat)mMapSize.x, (GLfloat)mHeightMapTextureSize.y / (GLfloat)mMapSize.y);
-	mHeightMapCS->LoadShader(desc.mWaveProps, mHeightMapTextureSize, scale);
+	//glm::vec2 scale = glm::vec2((GLfloat)mHeightMapTextureSize.x / (GLfloat)mMapSize.x, (GLfloat)mHeightMapTextureSize.y / (GLfloat)mMapSize.y);
+	mHeightMapCS->LoadShader(desc.mWaveProps, mHeightMapTextureSize);
 
 	Engine::GetInstance()->AttachComputeShader(mHeightMapCS);
 

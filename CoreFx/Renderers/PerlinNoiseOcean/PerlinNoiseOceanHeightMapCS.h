@@ -30,7 +30,7 @@ public:
 	GLfloat GetMaxAmplitude() const	{ return mMaxAmplitude;	}
 	GLuint GetNormalMapTextureId() const { return mNormalMapTextureId; }
 
-	void LoadShader(const WavePropertyList & waveProps, const glm::ivec2 & textureSize, const glm::vec2 & scale);
+	void LoadShader(const WavePropertyList & waveProps, const glm::ivec2 & textureSize);
 
 private:
 
@@ -56,7 +56,6 @@ private:
 	{
 		u_WaveCount,
 		u_TextureSize,
-		u_Scale,
 		u_Time,
 		u_NoiseSampler,
 		__hmap_cs_uniforms_count__
@@ -87,7 +86,6 @@ private:
 	GLfloat mMaxAmplitude;
 
 	glm::ivec2 mTextureSize;
-	glm::vec2 mScale;
 
 	Shader mNormalCS;
 	GLuint mNormalMapTextureId;

@@ -193,7 +193,7 @@ void TextureManager::Initialize()
 void TextureManager::CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, const void * raster, bool generateMipMap, GLint internalFormat, GLenum rasterDataFormat, GLenum rasterDataType)
 {
 	//glTexImage2D(target, 0, internalFormat, w, h, 0, rasterDataFormat, rasterDataType, raster);
-	GLsizei numLevels = generateMipMap ? (GLsizei)(1 + floor(log2(max(w, h)))) : 1;
+	GLsizei numLevels = generateMipMap ? (GLsizei)(1 + floorf(log2f((float)max(w, h)))) : 1;
 	glTexStorage2D(target, numLevels, internalFormat, w, h);
 	GL_CHECK_ERRORS;
 	if (raster != nullptr)
@@ -202,7 +202,7 @@ void TextureManager::CreateTexStorage2D(GLenum target, uint32_t w, uint32_t h, c
 		GL_CHECK_ERRORS;
 	}
 
-	if (generateMipMap)
+	if (generateMipMap && raster != nullptr)
 	{
 		glGenerateMipmap(target);
 		GL_CHECK_ERRORS;
@@ -415,7 +415,7 @@ CubeMapTexture const * TextureManager::CreateTextureCubeMap(std::string const & 
 	GLuint id = 0;
 	GLenum target = GL_TEXTURE_CUBE_MAP;
 
-	GLsizei numLevels = generateMipMap ? (GLsizei)(1 + floor(log2(textureSize))) : 1;
+	GLsizei numLevels = generateMipMap ? (GLsizei)(1 + floorf(log2f((float)textureSize))) : 1;
 
 	glGenTextures(1, &id);
 	glBindTexture(target, id);
@@ -473,7 +473,12 @@ void TextureManager::ReleaseTextureGroup(TextureGroup const *& texture)
 	texture = nullptr;
 }
 
-Texture2DArray const * TextureManager::CreateTexture2DArray(GLsizei mipMapCount, GLenum format, GLsizei width, GLsizei height, GLsizei depth)
+void TextureManager::ReleaseTexture2DArray(Texture2DArray const *& texture)
+{
+	texture = nullptr;
+}
+
+Texture2DArray const * TextureManager::CreateTexture2DArray(GLsizei mipMapCount, GLenum format, GLsizei width, GLsizei height, GLsizei depth, GLenum texMinFilter, GLenum texMagFilter, GLenum wrapS, GLenum wrapT)
 {
 	GLuint id = 0;
 	GLenum target = GL_TEXTURE_2D_ARRAY;
@@ -481,6 +486,12 @@ Texture2DArray const * TextureManager::CreateTexture2DArray(GLsizei mipMapCount,
 	glGenTextures(1, &id); GL_CHECK_ERRORS;
 	glBindTexture(target, id); GL_CHECK_ERRORS;
 	glTexStorage3D(target, mipMapCount, format, width, height, depth); GL_CHECK_ERRORS;
+
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, wrapT);
+
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, texMinFilter);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, texMagFilter);
 
 	glBindTexture(target, 0); GL_CHECK_ERRORS;
 
@@ -567,7 +578,7 @@ TextureGroup const * TextureManager::LoadTextureGroup(TextureGroupId groupId, co
 
 GLsizei TextureManager::GetNumberOfMipMapLevels(uint32_t imgWidth, uint32_t imgHeight)
 {
-	return (GLsizei)(1 + floorf(log((float)max(imgWidth, imgHeight)) / log(2.f)));
+	return (GLsizei)(1 + floorf(log2((float)max(imgWidth, imgHeight))));
 }
 
 bool TextureManager::GetTiffImageSize(std::string const &tiffFilename, uint32_t & imgWidth, uint32_t & imgHeight)

@@ -10,7 +10,7 @@ namespace CoreGame
 
 
 	glm::u8vec4 SimpleCamera::LightTextColor(234, 234, 234, 255); // #007F46
-	glm::u8vec4 SimpleCamera::DarkTextColor(96, 96, 96, 255);
+	glm::u8vec4 SimpleCamera::DarkTextColor(173, 96, 96, 255);
 	glm::u8vec4 SimpleCamera::RedTextColor(198, 31, 25, 255);
 	glm::u8vec4 SimpleCamera::BleuTextColor(51, 128, 183, 255);
 	glm::u8vec4 SimpleCamera::GreenTextColor(0, 127, 70, 255);
@@ -98,7 +98,8 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
-#define PERLIN_NOISE_OCEAN_SAMPLE
+//#define PERLIN_NOISE_OCEAN_SAMPLE
+#define RADIAL_GRID_OCEAN_SAMPLE
 #define SKYDOME_SAMPLE
 //#define SKYBOX_SAMPLE
 #define COMPASS_SAMPLE
@@ -123,6 +124,7 @@ void SimpleCamera::OnInit()
 		CoreFx::Engine* engine = CoreFx::Engine::GetInstance();
 
 		mCamera = new CoreFx::Camera();
+		mCamera->SetupProjection(45.0f, 1.33333f, 1.f, 5000.f);
 		mCamera->LookAt(glm::vec3(10, 10.f, 20.f), glm::vec3(10.f, 10.f, 5.f), glm::vec3(0, 1, 0));
 		engine->SetCamera(mCamera);
 
@@ -134,8 +136,8 @@ void SimpleCamera::OnInit()
 
 		InitializeTextRenderer();
 
-		CoreFx::Renderers::GridRenderer * gridRenderer = new CoreFx::Renderers::GridRenderer(50, 50);
-		engine->AttachRenderer(gridRenderer);
+		//CoreFx::Renderers::RadialGridRenderer * gridRenderer = new CoreFx::Renderers::RadialGridRenderer(36, 100);
+		//engine->AttachRenderer(gridRenderer);
 
 		CoreFx::Renderers::AxisRenderer * axisRenderer = new CoreFx::Renderers::AxisRenderer();
 		engine->AttachRenderer(axisRenderer);
@@ -215,6 +217,15 @@ void SimpleCamera::OnInit()
 			engine->AttachRenderer(ocean);
 		}
 #endif // PERLIN_NOISE_OCEAN_SAMPLE
+#ifdef RADIAL_GRID_OCEAN_SAMPLE
+		{
+			Renderers::PerlinNoiseOcean::RadialGridOceanRenderer::Desc desc;
+			desc.SetGrid(240, 600, .1f, 36000.f/*mCamera->GetFarZ()*/);
+
+			mRadialGridOcean = new Renderers::PerlinNoiseOcean::RadialGridOceanRenderer(desc);
+			engine->AttachRenderer(mRadialGridOcean);
+		}
+#endif // RADIAL_GRID_OCEAN_SAMPLE
 
 #ifdef GERSTNER_WAVE_OCEAN_SAMPLE
 		{
@@ -805,6 +816,10 @@ void SimpleCamera::OnInit()
 	//	PRINT_MESSAGE("pNDS = (%f, %f, %f, %f)", pNDS.x, pNDS.y, pNDS.z, pNDS.w);
 	//	PRINT_MESSAGE("linearDepth = %f", linearDepth);		
 	//}
+
+	UpdateValueTextString(mFrameInfoPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
+	UpdateValueTextString(mFrameInfoPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
+
 }
 
 void SimpleCamera::InitializeTextRenderer()
@@ -936,24 +951,26 @@ void SimpleCamera::InitializeTextPages()
 		const wchar_t sGamma[] = L"Gamma : ";
 		const wchar_t sSSAORadius[] = L"SSAO Radius : ";
 		const wchar_t sSSAOKernel[] = L"SSAO Kernel : ";
+		const wchar_t sOceanTexScale[] = L"Ocean TexScale : ";
+		const wchar_t sOceanWaveAmplitude[] = L"Ocean Wave Amplitude : ";
 
 		auto frameInfoPage = mFrameInfoPage.lock();
 
 		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sExposure, (GLuint)EFont::Normal, labelColor);
 		col = Column1 + frameInfoPage->MeasureStringInPixel(sExposure, (GLuint)EFont::Normal);
-		mExposureTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
+		mExposureTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
 		row += normalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mExposureTextLineIndex, Engine::GetInstance()->GetExposure(), L"%2.2f");
 
 		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sGamma, (GLuint)EFont::Normal, labelColor);
 		col = Column1 + frameInfoPage->MeasureStringInPixel(sGamma, (GLuint)EFont::Normal);
-		mGammaTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
+		mGammaTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
 		row += normalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mGammaTextLineIndex, Engine::GetInstance()->GetGamma(), L"%2.2f");
 
 		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sSSAORadius, (GLuint)EFont::Normal, labelColor);
 		col = Column1 + frameInfoPage->MeasureStringInPixel(sSSAORadius, (GLuint)EFont::Normal);
-		mSSAORadiusTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
+		mSSAORadiusTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
 		row += normalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mSSAORadiusTextLineIndex, Engine::GetInstance()->GetSSAORadius(), L"%2.2f");
 
@@ -962,6 +979,19 @@ void SimpleCamera::InitializeTextPages()
 		mSSAOKernelTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
 		row += normalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mSSAOKernelTextLineIndex, Engine::GetInstance()->GetSSAOKernelSize(), L"%i");
+
+		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sOceanTexScale, (GLuint)EFont::Normal, labelColor);
+		col = Column1 + frameInfoPage->MeasureStringInPixel(sOceanTexScale, (GLuint)EFont::Normal);
+		mOceanTexScaleTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
+		row += normalLineHeight + Interline2;
+		//UpdateValueTextString(mFrameInfoPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
+
+		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sOceanWaveAmplitude, (GLuint)EFont::Normal, labelColor);
+		col = Column1 + frameInfoPage->MeasureStringInPixel(sOceanWaveAmplitude, (GLuint)EFont::Normal);
+		mOceanTexWaveAmplitudeTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
+		row += normalLineHeight + Interline2;
+		//UpdateValueTextString(mFrameInfoPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
+
 	}
 	
 	// ------------------------------------------------------------------------
@@ -1263,6 +1293,9 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 
 	float exposureInc = 0.01f;
 	float gammaInc = 0.01f;
+	GLfloat texScale = 0.5f;
+	GLfloat waveAmp = 0.5f;
+
 	switch (key)
 	{
 	case VK_SPACE:
@@ -1300,6 +1333,26 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 			gamma = glm::clamp(gamma + gammaInc, 0.01f, 10.0f);
 			engine->SetGamma(gamma);
 			UpdateValueTextString(mFrameInfoPage, mGammaTextLineIndex, gamma, L"%2.2f");
+		}
+		break;
+
+	case 'h':
+		texScale = -texScale;
+	case 'H':
+	{
+		GLfloat newValue = mRadialGridOcean->GetTexScale() + texScale;
+		mRadialGridOcean->SetTexScale(newValue);
+		UpdateValueTextString(mFrameInfoPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
+	}
+	break;
+
+	case 'j':
+		waveAmp = -waveAmp;
+	case 'J':
+		{
+			GLfloat newValue = mRadialGridOcean->GetWaveAmplitude() + waveAmp;
+			mRadialGridOcean->SetWaveAmplitude(newValue);
+			UpdateValueTextString(mFrameInfoPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
 		}
 		break;
 
@@ -1469,7 +1522,7 @@ void SimpleCamera::OnUpdate()
 		return;
 	}
 
-	if ((GetAsyncKeyState(VK_Z) & 0x8000) || (GetAsyncKeyState(VK_W) & 0x8000))
+	if (GetAsyncKeyState(VK_Z) & 0x8000)
 	{
 		dy += (speed);
 		bWalk = true;

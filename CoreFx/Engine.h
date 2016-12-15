@@ -225,6 +225,8 @@ public:
 	bool AttachSkydomeRenderer(Renderers::SkydomeRenderer * skydome);
 	bool DetachSkydomeRenderer(Renderers::SkydomeRenderer * skydome);
 
+	CubeMapTexture const * GetSkyCubeMap() const;
+
 	// Lights
 public:
 

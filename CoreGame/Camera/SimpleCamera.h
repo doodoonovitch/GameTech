@@ -159,13 +159,21 @@ private:
 
 	CoreFx::Renderers::TextGroupWeakPtr mLastActiveTextGroup;
 
+	CoreFx::Renderers::PerlinNoiseOcean::RadialGridOceanRenderer * mRadialGridOcean;
+
 	size_t mFpsTextLineIndex;
 	size_t mExposureTextLineIndex;
 	size_t mGammaTextLineIndex;
 	size_t mSSAORadiusTextLineIndex;
 	size_t mSSAOKernelTextLineIndex;
 
+	size_t mOceanTexScaleTextLineIndex;
+	size_t mOceanTexWaveAmplitudeTextLineIndex;
+
 	size_t mTimeTextLineIndex;
+
+	const wchar_t * OceanTexScaleFmt = L"%2.2f";
+	const wchar_t * OceanWaveAmplitudeFmt = L"%2.2f";
 
 	ECity mCity = ECity::Paris;
 	int mDayTimeIncMinutes = 10;

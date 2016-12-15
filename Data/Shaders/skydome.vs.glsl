@@ -61,6 +61,6 @@ void main()
 	//                                               
 	// Transform vertex                              
 	//                                               
-	vec4 pos = u_VPMatrix * vec4(in_Position, 0);
+	vec4 pos = u_VPMatrix * vec4(in_Position, 1);
 	gl_Position = pos.xyww;
 }

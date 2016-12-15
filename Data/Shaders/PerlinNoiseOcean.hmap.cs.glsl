@@ -14,7 +14,6 @@ layout (binding = 1, std430) coherent readonly buffer u_WaveParamsBlock
 
 uniform int u_WaveCount;
 uniform ivec2 u_TextureSize;
-uniform vec2 u_Scale;
 uniform float u_Time;
 uniform sampler2D u_NoiseSampler;
 
@@ -26,7 +25,7 @@ layout (local_size_x = 1, local_size_y = 1) in;
 void main(void)
 {
 	ivec2 p = ivec2(gl_GlobalInvocationID.xy);
-	vec2 tc = u_Scale * p / vec2(u_TextureSize);
+	vec2 tc = p / vec2(u_TextureSize);
 
 	float H = 0;
 
@@ -37,7 +36,7 @@ void main(void)
 			tc * u_WaveParams[baseIndex + WAVEPARAM_WAVE_LENGTH]
 			+ u_Time * u_WaveParams[baseIndex + WAVEPARAM_VELOCITY] * vec2(u_WaveParams[baseIndex + WAVEPARAM_DIR_X], u_WaveParams[baseIndex + WAVEPARAM_DIR_Y]);
 
-		H += u_WaveParams[baseIndex + WAVEPARAM_AMPLITUDE] * texture(u_NoiseSampler, uv).r;
+		H += u_WaveParams[baseIndex + WAVEPARAM_AMPLITUDE] * texture(u_NoiseSampler, fract(uv)).r;
 		baseIndex += WAVEPARAM_ITEMS_COUNT;
 	}
 

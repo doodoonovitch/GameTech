@@ -19,7 +19,7 @@ void PrintMessage(const char * messageFormat, va_list args)
 
 void PrintError(const char * messageFormat, va_list args)
 {
-	Logger::GetInstance()->Print("[Error] ");
+	Logger::GetInstance()->Print("##### [Error] ##### ");
 	Logger::GetInstance()->Print(messageFormat, args);
 	Logger::GetInstance()->Print("\n");
 }

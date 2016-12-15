@@ -588,6 +588,11 @@ void Engine::InternalRenderObjects()
 					renderer->RenderWireFrame();
 				}
 			});
+			mForwardRenderers->ForEach([](Renderer * renderer)
+			{
+				if (renderer->GetIsInitialized())
+					renderer->RenderWireFrame();
+			});
 
 			if (mSkybox != nullptr && mSkybox->GetIsInitialized())
 			{
@@ -1103,6 +1108,21 @@ void Engine::ComputeViewTransform(GLuint shaderStorageSourceId, GLuint shaderSto
 // =======================================================================
 // =======================================================================
 
+CubeMapTexture const * Engine::GetSkyCubeMap() const
+{
+	if (mSkydome != nullptr && mSkydome->UseCache())
+	{
+		return mSkydome->GetCacheTexture();
+	}
+	else if(mSkybox != nullptr)
+	{
+		return mSkybox->GetTexture();
+	}
+	else
+	{
+		return nullptr;
+	}
+}
 
 
 

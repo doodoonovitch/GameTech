@@ -14,7 +14,7 @@ namespace PerlinNoiseOcean
 
 HeightMapCS::HeightMapCS()
 	: ComputeShaderHelper<1>("PerlinNoiseOceanComputeShader")
-	, mNoiseTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/noise.tif", GL_REPEAT, GL_REPEAT))
+	, mNoiseTexture(Engine::GetInstance()->GetTextureManager()->LoadTexture2D("Medias/Textures/Hmap/WaterH01.tif", GL_REPEAT, GL_REPEAT))
 	, mWaveCount(0)
 	, mHeightMapTextureId(0)
 	, mMaxAmplitude(0)
@@ -33,12 +33,11 @@ HeightMapCS::~HeightMapCS()
 }
 
 
-void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec2 & textureSize, const glm::vec2 & scale)
+void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec2 & textureSize)
 {
 	PRINT_MESSAGE("Initialize Perlin Noise Ocean Renderer (Height Map Compute) Shaders : .....");
 
 	mTextureSize = textureSize;
-	mScale = scale;
 
 	mWaveCount = (GLint)waveProps.size();
 	assert(mWaveCount > 0);
@@ -67,7 +66,7 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 
 	glGenTextures(1, &mHeightMapTextureId);
 	glBindTexture(GL_TEXTURE_2D, mHeightMapTextureId);
-	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT, GL_R16F, GL_RED, GL_FLOAT);
+	TextureManager::CreateTexStorage2D(GL_TEXTURE_2D, mTextureSize.x, mTextureSize.y, nullptr, false, GL_LINEAR, GL_LINEAR/*GL_NEAREST, GL_NEAREST*/, GL_REPEAT, GL_REPEAT, GL_R16F, GL_RED, GL_FLOAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// ---------------------------------------
@@ -81,7 +80,6 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 	{
 		"u_WaveCount",
 		"u_TextureSize",
-		"u_Scale",
 		"u_Time",
 		"u_NoiseSampler"
 	};
@@ -90,7 +88,6 @@ void HeightMapCS::LoadShader(const WavePropertyList & waveProps, const glm::ivec
 
 	glUniform1i(mShader.GetUniform((int)EHMapCSUniforms::u_WaveCount), mWaveCount); GL_CHECK_ERRORS;
 	glUniform2iv(mShader.GetUniform((int)EHMapCSUniforms::u_TextureSize), 1, glm::value_ptr(mTextureSize)); GL_CHECK_ERRORS;
-	glUniform2fv(mShader.GetUniform((int)EHMapCSUniforms::u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform((int)EHMapCSUniforms::u_NoiseSampler), 0); GL_CHECK_ERRORS;
 
 
