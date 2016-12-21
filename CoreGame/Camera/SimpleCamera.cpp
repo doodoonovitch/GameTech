@@ -16,6 +16,8 @@ namespace CoreGame
 	glm::u8vec4 SimpleCamera::GreenTextColor(0, 127, 70, 255);
 	glm::u8vec4 SimpleCamera::OrangeTextColor(255, 106, 0, 255);
 
+	glm::u8vec4 SimpleCamera::mLabelColor(234, 234, 234, 255); // #007F46
+	glm::u8vec4 SimpleCamera::mValueColor(255, 106, 0, 255);
 
 int ToMinutes(int hour, int minute) { return hour * 60 + minute; }
 
@@ -224,6 +226,25 @@ void SimpleCamera::OnInit()
 
 			mRadialGridOcean = new Renderers::PerlinNoiseOcean::RadialGridOceanRenderer(desc);
 			engine->AttachRenderer(mRadialGridOcean);
+
+			const wchar_t sOceanTexScale[] = L"Ocean TexScale : ";
+			const wchar_t sOceanWaveAmplitude[] = L"Ocean Wave Amplitude : ";
+
+			int col;
+			auto page = mWaterRenderPage.lock();
+
+			page->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sOceanTexScale, (GLuint)EFont::Normal, mLabelColor);
+			col = mEngineInfoCol + page->MeasureStringInPixel(sOceanTexScale, (GLuint)EFont::Normal);
+			mOceanTexScaleTextLineIndex = page->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xx.xx", (GLuint)EFont::NormalBold, mValueColor);
+			mEngineInfoRow += mNormalLineHeight + Interline2;
+			UpdateValueTextString(mWaterRenderPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
+
+			page->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sOceanWaveAmplitude, (GLuint)EFont::Normal, mLabelColor);
+			col = mEngineInfoCol + page->MeasureStringInPixel(sOceanWaveAmplitude, (GLuint)EFont::Normal);
+			mOceanTexWaveAmplitudeTextLineIndex = page->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xx.xx", (GLuint)EFont::NormalBold, mValueColor);
+			mEngineInfoRow += mNormalLineHeight + Interline2;
+			UpdateValueTextString(mWaterRenderPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
+
 		}
 #endif // RADIAL_GRID_OCEAN_SAMPLE
 
@@ -817,9 +838,6 @@ void SimpleCamera::OnInit()
 	//	PRINT_MESSAGE("linearDepth = %f", linearDepth);		
 	//}
 
-	UpdateValueTextString(mFrameInfoPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
-	UpdateValueTextString(mFrameInfoPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
-
 }
 
 void SimpleCamera::InitializeTextRenderer()
@@ -901,6 +919,7 @@ void SimpleCamera::InitializeTextRenderer()
 	mFpsPage = mTextRenderer->NewPage(true);
 	mFrameInfoPage = mTextRenderer->NewPage(true);
 	mSunPosPage = mTextRenderer->NewPage(true);
+	mWaterRenderPage = mTextRenderer->NewPage(true);
 	mShowDeferredBuffersPage = mTextRenderer->NewPage(true, mShowDeferredBuffersTextGroup);
 
 	CoreFx::Engine::GetInstance()->AttachRenderer(mTextRenderer);
@@ -916,9 +935,6 @@ void SimpleCamera::InitializeTextPages()
 	const int Column2 = 100;
 	const int Column3 = 180;
 	const int Column4 = 300;
-	const int Interline0 = 14;
-	const int Interline1 = 6;
-	const int Interline2 = 4;
 
 	const Renderers::TextRenderer::FontInfo & fiNormal = mTextRenderer->GetFontInfo((GLuint)EFont::Normal);
 	const Renderers::TextRenderer::FontInfo & fiNormalBold = mTextRenderer->GetFontInfo((GLuint)EFont::NormalBold);
@@ -926,9 +942,9 @@ void SimpleCamera::InitializeTextPages()
 	const Renderers::TextRenderer::FontInfo & fiTitle = mTextRenderer->GetFontInfo((GLuint)EFont::Title);
 	const Renderers::TextRenderer::FontInfo & fiHeader = mTextRenderer->GetFontInfo((GLuint)EFont::Header);
 
-	const GLuint titleLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiTitle.GetLineHeight());
-	const GLuint headerLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight());
-	const GLuint normalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
+	mTitleLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiTitle.GetLineHeight());
+	mHeaderLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiHeader.GetLineHeight());
+	mNormalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
 
 	glm::u8vec4 color1 = OrangeTextColor;
 	glm::u8vec4 color2 = RedTextColor;
@@ -944,54 +960,36 @@ void SimpleCamera::InitializeTextPages()
 	row = 50;
 
 	{
-		glm::u8vec4 labelColor = DarkTextColor;
-		glm::u8vec4 valueColor = GreenTextColor;
-
 		const wchar_t sExposure[] = L"Exposure : ";
 		const wchar_t sGamma[] = L"Gamma : ";
 		const wchar_t sSSAORadius[] = L"SSAO Radius : ";
 		const wchar_t sSSAOKernel[] = L"SSAO Kernel : ";
-		const wchar_t sOceanTexScale[] = L"Ocean TexScale : ";
-		const wchar_t sOceanWaveAmplitude[] = L"Ocean Wave Amplitude : ";
 
 		auto frameInfoPage = mFrameInfoPage.lock();
 
-		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sExposure, (GLuint)EFont::Normal, labelColor);
-		col = Column1 + frameInfoPage->MeasureStringInPixel(sExposure, (GLuint)EFont::Normal);
-		mExposureTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
-		row += normalLineHeight + Interline2;
+		frameInfoPage->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sExposure, (GLuint)EFont::Normal, mLabelColor);
+		col = mEngineInfoCol + frameInfoPage->MeasureStringInPixel(sExposure, (GLuint)EFont::Normal);
+		mExposureTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xx.xx", (GLuint)EFont::NormalBold, mValueColor);
+		mEngineInfoRow += mNormalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mExposureTextLineIndex, Engine::GetInstance()->GetExposure(), L"%2.2f");
 
-		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sGamma, (GLuint)EFont::Normal, labelColor);
-		col = Column1 + frameInfoPage->MeasureStringInPixel(sGamma, (GLuint)EFont::Normal);
-		mGammaTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
-		row += normalLineHeight + Interline2;
+		frameInfoPage->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sGamma, (GLuint)EFont::Normal, mLabelColor);
+		col = mEngineInfoCol + frameInfoPage->MeasureStringInPixel(sGamma, (GLuint)EFont::Normal);
+		mGammaTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xx.xx", (GLuint)EFont::NormalBold, mValueColor);
+		mEngineInfoRow += mNormalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mGammaTextLineIndex, Engine::GetInstance()->GetGamma(), L"%2.2f");
 
-		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sSSAORadius, (GLuint)EFont::Normal, labelColor);
-		col = Column1 + frameInfoPage->MeasureStringInPixel(sSSAORadius, (GLuint)EFont::Normal);
-		mSSAORadiusTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
-		row += normalLineHeight + Interline2;
+		frameInfoPage->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sSSAORadius, (GLuint)EFont::Normal, mLabelColor);
+		col = mEngineInfoCol + frameInfoPage->MeasureStringInPixel(sSSAORadius, (GLuint)EFont::Normal);
+		mSSAORadiusTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xx.xx", (GLuint)EFont::NormalBold, mValueColor);
+		mEngineInfoRow += mNormalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mSSAORadiusTextLineIndex, Engine::GetInstance()->GetSSAORadius(), L"%2.2f");
 
-		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sSSAOKernel, (GLuint)EFont::Normal, labelColor);
-		col = Column1 + frameInfoPage->MeasureStringInPixel(sSSAOKernel, (GLuint)EFont::Normal);
-		mSSAOKernelTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xxxxx", (GLuint)EFont::NormalBold, valueColor);
-		row += normalLineHeight + Interline2;
+		frameInfoPage->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sSSAOKernel, (GLuint)EFont::Normal, mLabelColor);
+		col = mEngineInfoCol + frameInfoPage->MeasureStringInPixel(sSSAOKernel, (GLuint)EFont::Normal);
+		mSSAOKernelTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xxxxx", (GLuint)EFont::NormalBold, mValueColor);
+		mEngineInfoRow += mNormalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mSSAOKernelTextLineIndex, Engine::GetInstance()->GetSSAOKernelSize(), L"%i");
-
-		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sOceanTexScale, (GLuint)EFont::Normal, labelColor);
-		col = Column1 + frameInfoPage->MeasureStringInPixel(sOceanTexScale, (GLuint)EFont::Normal);
-		mOceanTexScaleTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
-		row += normalLineHeight + Interline2;
-		//UpdateValueTextString(mFrameInfoPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
-
-		frameInfoPage->PushBackText(glm::ivec2(Column1, row), sOceanWaveAmplitude, (GLuint)EFont::Normal, labelColor);
-		col = Column1 + frameInfoPage->MeasureStringInPixel(sOceanWaveAmplitude, (GLuint)EFont::Normal);
-		mOceanTexWaveAmplitudeTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, row), L"xx.xx", (GLuint)EFont::NormalBold, valueColor);
-		row += normalLineHeight + Interline2;
-		//UpdateValueTextString(mFrameInfoPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
-
 	}
 	
 	// ------------------------------------------------------------------------
@@ -1002,106 +1000,106 @@ void SimpleCamera::InitializeTextPages()
 	int width = Renderers::TextRenderer::GlyphMetrics::toPixel(mHelpInfoPage.lock()->MeasureString(Title, (GLuint)EFont::Title));
 	int titleColumn = (CoreFx::Engine::GetInstance()->GetViewPortWidth() - width) / 2;
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(titleColumn, row), Title, (GLuint)EFont::Title, color1);
-	row += titleLineHeight + Interline0;
+	row += mTitleLineHeight + Interline0;
 	//
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column1, row), L"Main commands", (GLuint)EFont::Header, color2);
-	row += headerLineHeight + Interline1;
+	row += mHeaderLineHeight + Interline1;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"Mouse Left Button", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column4, row), L": camera rotation", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"Mouse Right Button", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column4, row), L": camera strafe", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	row += +Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[Z][S]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": move forward/backward", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[Q][D]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": move left/right", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[SHIFT]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": move faster", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[CTRL]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": lock camera pitch rotation", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[E][e]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- exposure", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[G][g]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- gamma", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[G][g]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- gamma", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[+][-]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- move speed", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[*]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": default move speed", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[<][>]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- sun position", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[o][O]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- SSAO radius", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[k][K]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- SSAO kernel size", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[P][p]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": pause", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[ESC]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": quit", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	//
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column1, row), L"Debug-tools commands", (GLuint)EFont::Header, color2);
-	row += headerLineHeight + Interline1;
+	row += mHeaderLineHeight + Interline1;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[F2]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": view deferred rendering buffers", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[X][x]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": draw wireframes", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[B][b]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": draw normals", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[v][V]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- normals density", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[,][?]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": +/- normal length", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[L][l]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": draw lights position", (GLuint)EFont::Normal, color4);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	// --------------------------------------------------------------
 
@@ -1119,13 +1117,6 @@ void SimpleCamera::UpdateSunPosTextPage()
 {
 	const int Column1 = 50;
 	const int Column2 = 100;
-	const int Interline1 = 6;
-	const int Interline2 = 4;
-
-	const Renderers::TextRenderer::FontInfo & fiNormal = mTextRenderer->GetFontInfo((GLuint)EFont::Normal);
-	const Renderers::TextRenderer::FontInfo & fiNormalBold = mTextRenderer->GetFontInfo((GLuint)EFont::NormalBold);
-
-	const GLuint normalLineHeight = Renderers::TextRenderer::GlyphMetrics::toPixel(fiNormal.GetLineHeight());
 
 	const glm::u8vec4 color1 = DarkTextColor;
 
@@ -1142,27 +1133,27 @@ void SimpleCamera::UpdateSunPosTextPage()
 
 	swprintf_s(textBuffer, textBufferSize, L"City : %s", city.mName.c_str());
 	page->PushBackText(glm::ivec2(Column1, row), textBuffer, (GLuint)EFont::NormalBold, color1);
-	row += normalLineHeight + Interline1;
+	row += mNormalLineHeight + Interline1;
 
 	swprintf_s(textBuffer, textBufferSize, L"Latitude : %f, Longitude : %f", city.mLatitude, city.mLongitude);
 	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	swprintf_s(textBuffer, textBufferSize, L"Timezone : %i, Day saving : %i", city.mTimeZone, city.mDaySaving);
 	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	swprintf_s(textBuffer, textBufferSize, L"Sunrise : %i:%i, Sunset : %i:%i", (int)(city.mSunrise / 60), (int)(city.mSunrise % 60), (int)(city.mSunset / 60), (int)(city.mSunset % 60));
 	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	swprintf_s(textBuffer, textBufferSize, L"Date (year-month-day): %i-%i-%i", city.mYear, city.mMonth, city.mDay);
 	page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 
 	swprintf_s(textBuffer, textBufferSize, L"Time : %i:%i", (int)(mCurrentDayTime / 60), (int)(mCurrentDayTime % 60));
 	mTimeTextLineIndex = page->PushBackText(glm::ivec2(Column2, row), textBuffer, (GLuint)EFont::Normal, color1);
-	row += normalLineHeight + Interline2;
+	row += mNormalLineHeight + Interline2;
 }
 
 void SimpleCamera::UpdateSunPosTextPageTime()
@@ -1342,7 +1333,7 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 	{
 		GLfloat newValue = mRadialGridOcean->GetTexScale() + texScale;
 		mRadialGridOcean->SetTexScale(newValue);
-		UpdateValueTextString(mFrameInfoPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
+		UpdateValueTextString(mWaterRenderPage, mOceanTexScaleTextLineIndex, mRadialGridOcean->GetTexScale(), OceanTexScaleFmt);
 	}
 	break;
 
@@ -1352,7 +1343,7 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		{
 			GLfloat newValue = mRadialGridOcean->GetWaveAmplitude() + waveAmp;
 			mRadialGridOcean->SetWaveAmplitude(newValue);
-			UpdateValueTextString(mFrameInfoPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
+			UpdateValueTextString(mWaterRenderPage, mOceanTexWaveAmplitudeTextLineIndex, mRadialGridOcean->GetWaveAmplitude(), OceanWaveAmplitudeFmt);
 		}
 		break;
 

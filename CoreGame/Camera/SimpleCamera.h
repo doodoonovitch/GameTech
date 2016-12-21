@@ -120,6 +120,9 @@ private:
 	static glm::u8vec4 GreenTextColor;
 	static glm::u8vec4 OrangeTextColor;
 
+	static glm::u8vec4 mLabelColor;
+	static glm::u8vec4 mValueColor;
+
 	static const int VK_W = 0x57;
 	static const int VK_S = 0x53;
 	static const int VK_A = 0x41;
@@ -151,7 +154,7 @@ private:
 	CoreFx::Renderers::TextPageWeakPtr mFpsPage;
 	CoreFx::Renderers::TextPageWeakPtr mFrameInfoPage;
 	CoreFx::Renderers::TextPageWeakPtr mSunPosPage;
-	//CoreFx::Renderers::TextPageWeakPtr mTestPage;
+	CoreFx::Renderers::TextPageWeakPtr mWaterRenderPage;
 
 	CoreFx::Renderers::TextGroupWeakPtr mDefaultTextGroup;
 	CoreFx::Renderers::TextGroupWeakPtr mHelpInfoTextGroup;
@@ -174,6 +177,17 @@ private:
 
 	const wchar_t * OceanTexScaleFmt = L"%2.2f";
 	const wchar_t * OceanWaveAmplitudeFmt = L"%2.2f";
+
+	int mEngineInfoRow = 50;
+	int mEngineInfoCol = 10;
+
+	GLuint mTitleLineHeight;
+	GLuint mHeaderLineHeight;
+	GLuint mNormalLineHeight;
+
+	const int Interline0 = 14;
+	const int Interline1 = 6;
+	const int Interline2 = 4;
 
 	ECity mCity = ECity::Paris;
 	int mDayTimeIncMinutes = 10;
