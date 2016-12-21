@@ -272,7 +272,7 @@ Texture2D const * TextureManager::LoadTexture2D(std::string const &tiffFilename,
 	return returnTexture;
 }
 
-bool TextureManager::LoadTiffImage(GLsizei & width, GLsizei & height, std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth, uint32_t * desiredHeight, bool invertY)
+bool TextureManager::LoadTiffImage(GLsizei & width, GLsizei & height, std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, const uint32_t * desiredWidth, const uint32_t * desiredHeight, bool invertY)
 {
 	bool loaded = false;
 

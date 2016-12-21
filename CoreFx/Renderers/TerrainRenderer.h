@@ -14,51 +14,31 @@ class TerrainRenderer : public RendererHelper<1>
 {
 public:
 
-	struct MapDesc
-	{
-		MapDesc(const char * filename, GLint heightMapTextureWidth, bool invertY, const glm::vec3 & origin, const glm::quat & rotation)
-			: mFilename(filename)
-			, mHeightMapTextureWidth(heightMapTextureWidth)
-			, mInvertY(invertY)
-		{
-			mModelDQ.SetRotationTranslation(rotation, origin);
-		}
-
-		std::string mFilename;
-		GLint mHeightMapTextureWidth;
-		bool mInvertY = true;
-
-		Maths::DualQuaternion mModelDQ;
-	};
-
-	typedef std::vector<MapDesc> MapDescList;
-
 	struct MaterialDesc : Renderer::MaterialDesc
 	{
 		MaterialDesc()
 			: Renderer::MaterialDesc()
-			, mHeightMin(0.f)
-			, mHeightMax(1.f)
+			, mMinHeight(0.f)
+			, mMaxHeight(1.f)
 			, mTexScale(1.f)
+			, mMinSlope(0.f)
+			, mMaxSlope(1.f)
 		{}
 
 		MaterialDesc(const MaterialDesc & src)
 			: Renderer::MaterialDesc(src)
-			, mHeightMin(src.mHeightMin)
-			, mHeightMax(src.mHeightMax)
+			, mMinHeight(src.mMinHeight)
+			, mMaxHeight(src.mMaxHeight)
 			, mTexScale(src.mTexScale)
+			, mMinSlope(src.mMinSlope)
+			, mMaxSlope(src.mMaxSlope)
 		{
 		}
 
-		MaterialDesc & SetHeightMin(GLfloat value)
+		MaterialDesc & SetElevation(GLfloat minHeight, GLfloat maxHeight)
 		{
-			mHeightMin = value;
-			return *this;
-		}
-
-		MaterialDesc & SetHeightMax(GLfloat value)
-		{
-			mHeightMax = value;
+			mMinHeight = minHeight;
+			mMaxHeight = maxHeight;
 			return *this;
 		}
 
@@ -68,34 +48,103 @@ public:
 			return *this;
 		}
 
+		MaterialDesc & SetSlope(GLfloat minSlope, GLfloat maxSlope)
+		{
+			mMinSlope = minSlope;
+			mMaxSlope = maxSlope;
+			return *this;
+		}
 
-		GLfloat mHeightMin;
-		GLfloat mHeightMax;
+	protected:
+
+		friend class TerrainRenderer;
+
+		GLfloat mMinHeight;
+		GLfloat mMaxHeight;
 		GLfloat mTexScale;
+		GLfloat mMinSlope;
+		GLfloat mMaxSlope;
 	};
 
-	typedef std::vector<MaterialDesc> MaterialDescList;
+	struct MapDesc
+	{
+		MapDesc()
+		{
+		}
+
+		MapDesc(const char * filename, GLint heightMapTextureSize, bool invertY, const glm::vec3 & origin, const glm::quat & rotation)
+			: mFilename(filename)
+			, mHeightMapTextureSize(heightMapTextureSize)
+			, mInvertY(invertY)
+		{
+			mModelDQ.SetRotationTranslation(rotation, origin);
+		}
+
+		MapDesc(const MapDesc & src)
+			: mFilename(src.mFilename)
+			, mHeightMapTextureSize(src.mHeightMapTextureSize)
+			, mInvertY(src.mInvertY)
+			, mModelDQ(src.mModelDQ)
+		{
+			for (int i = 0; i < 4; ++i)
+			{
+				mMaterials[i] = src.mMaterials[i];
+			}
+		}
+
+		MapDesc & SetFilename(const std::string & filename)
+		{
+			mFilename = filename;
+			return *this;
+		}
+
+		MapDesc & SetHeightMapTextureSize(GLsizei mapSize)
+		{
+			mHeightMapTextureSize = mapSize;
+			return *this;
+		}
+
+		MapDesc & SetInvertY(bool value)
+		{
+			mInvertY = value;
+			return *this;
+		}
+
+		MapDesc & SetOriginRotation(const glm::vec3 & origin, const glm::quat & rotation)
+		{
+			mModelDQ.SetRotationTranslation(rotation, origin);
+			return *this;
+		}
+
+		MaterialDesc mMaterials[4];
+
+	protected:
+
+		friend class TerrainRenderer;
+
+		std::string mFilename;
+		GLsizei mHeightMapTextureSize = 512;
+		bool mInvertY = true;
+
+		Maths::DualQuaternion mModelDQ;
+	};
+
+	typedef std::vector<MapDesc> MapDescList;
+
+	//typedef std::vector<MaterialDesc> MaterialDescList;
 
 	struct Desc : public Renderer::Desc
 	{
-		Desc(GLint heightMapWidth, GLint heightMapDepth, const glm::vec3 & scale, GLfloat lowSlope = 0.7f, GLfloat highSlope = 0.6f)
+		Desc(GLsizei heightMapSize, const glm::vec3 & scale)
 			: Renderer::Desc()
-			, mHeightMapWidth(heightMapWidth)
-			, mHeightMapDepth(heightMapDepth)
+			, mHeightMapSize(heightMapSize)
 			, mScale(scale)
-			, mLowSlope(lowSlope)
-			, mHighSlope(highSlope)
 		{ }
 
-		GLint mHeightMapWidth;
-		GLint mHeightMapDepth;
+		GLsizei mHeightMapSize;
 		glm::vec3 mScale;
-		GLfloat mLowSlope;
-		GLfloat mHighSlope;
 
 		MapDescList mTerrains;
-		MaterialDescList mLowSlopeMaterials;
-		MaterialDescList mHighSlopeMaterials;
 	};
 
 public:
@@ -109,15 +158,15 @@ public:
 
 private:
 
-	void BuildMaterialShader(std::string & generatedSource, const Desc & desc);
-	static void GenerateGetMaterialByHeight(std::string & generatedSource, const MaterialDescList & matDescList, const TextureInfoList & texInfo);
-
 	void LoadShaders(const Desc & desc);
 	void LoadMainShader(const Desc & desc);
 	void LoadWireFrameShader(const Desc & desc);
-	void LoadHeightMap(const MapDescList & terrainDescList);
-	//void UpdateMaterialTextureIndex(const Desc & desc);
+	bool LoadHeightMap(const Desc & desc);
+	void UpdateMaterialTextureIndex(const Desc & desc);
 
+	//void GenerateBlendMap(const MapDesc & desc);
+	static GLfloat ComputeWeight(GLfloat value, GLfloat minExtend, GLfloat maxExtend);
+	
 private:
 
 	enum EUniformIndex
@@ -125,9 +174,10 @@ private:
 		u_PatchCount,
 		u_MapSize,
 		u_Scale,
-		u_TexScale,
-		u_HeightMap,
 		u_PerMapDataSampler,
+		u_HeightMap,
+		u_UvMap,
+		u_BlendMap,
 
 		__uniforms_count__
 	};
@@ -136,6 +186,7 @@ private:
 	{
 		u_PerInstanceWorlMatrix,
 		u_PerInstanceViewMatrix,
+		u_Materials
 	};
 
 	struct PerMapData
@@ -144,20 +195,27 @@ private:
 	};
 
 
-	const int FIRST_TEXTURE_SAMPLER_INDEX = 1;
+	const int FIRST_TEXTURE_SAMPLER_INDEX = 3;
 
 
-	glm::ivec2 mMapSize;
 	glm::ivec2 mPatchCount;
 	glm::vec3 mScale;
-	GLfloat mLowSlope;
-	GLfloat mHighSlope;
 
-	GLuint mHeightMapTextureId;
+	GLsizei mMapSize;
+
+	//GLuint mHeightMapTextureId;
 	GLint mMapCount;
 
 	ShaderStorageBuffer mPrecomputeDataBuffer;
 	ShaderStorageBuffer mLocationRawDataBuffer;
+	ShaderStorageBuffer mMaterialBuffer;
+
+	Texture2DArray const * mHeightMaps = nullptr;
+	Texture2DArray const * mUvMaps = nullptr;
+	Texture2DArray const * mBlendMaps = nullptr;
+
+	GLuint mMaterialCount;
+	ModelRenderer::ShaderMaterialList mShaderMaterialList;
 };
 
 

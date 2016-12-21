@@ -44,7 +44,7 @@ public:
 
 public:
 	
-	static bool LoadTiffImage(GLsizei & width, GLsizei & height, std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, uint32_t * desiredWidth = nullptr, uint32_t * desiredHeight = nullptr, bool invertY = true);
+	static bool LoadTiffImage(GLsizei & width, GLsizei & height, std::string const &tiffFilename, std::function<void(uint32_t w, uint32_t h, const uint32_t * raster)> func, const uint32_t * desiredWidth = nullptr, const uint32_t * desiredHeight = nullptr, bool invertY = true);
 
 	static bool GetTiffImageSize(std::string const &tiffFilename, uint32_t & imgWidth, uint32_t & imgHeight);
 

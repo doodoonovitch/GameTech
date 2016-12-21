@@ -118,7 +118,7 @@ public:
 	public:
 
 		MaterialDesc()
-			: mBaseColor(0.f)
+			: mBaseColor(1.f)
 			, mMetallic(1.f)
 			, mPorosity(0.0f)
 			, mRoughness(0.5f)

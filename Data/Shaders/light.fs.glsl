@@ -147,7 +147,7 @@ vec4 BRDFLight(FragmentInfo fi)
 
 	vec3 envFresnel = BRDF_Specular_F_Roughness(fi.mSpecularColor, fi.mRoughness * fi.mRoughness, NoV);
 
-	return vec4(color * ambientOcclusion + envColor * envFresnel, 1.0f);
+	return vec4(ambientOcclusion * (color + envColor * envFresnel), 1.0f);
 }
 
 void main(void)

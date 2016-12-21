@@ -138,6 +138,8 @@ protected:
 	static bool LoadCommonInclude(std::string & buffer, EInclude includeFileId);
 	static void InitializeComputeWorkgroupCount();
 
+	static void PrintError(const char * messageFormat, ...);
+
 protected:
 
 	//static std::string sCommonInclude;

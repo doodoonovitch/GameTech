@@ -117,7 +117,7 @@ bool Shader::LoadCommonInclude(std::string & buffer, EInclude includes)
 			{
 				if (!MergeFile(buffer, filename))
 				{
-					PRINT_ERROR("Error loading common include file : '%s' !", filename, 0);
+					PrintError("Error loading common include file : '%s' !", filename);
 					return false;
 				}
 			}
@@ -209,7 +209,7 @@ void Shader::LoadFromString(GLenum whichShader, const std::vector<std::string> &
 		GLchar *infoLog = new GLchar[infoLogLength + 1];
 		glGetShaderInfoLog(shader, infoLogLength, NULL, infoLog);
 		infoLog[infoLogLength] = 0;
-		PRINT_ERROR("%s Compile log : %s", ShaderName(whichShader), infoLog);
+		PrintError("%s Compile log : %s", ShaderName(whichShader), infoLog);
 		delete[] infoLog;
 	}
 	mShaders.push_back(shader);
@@ -227,7 +227,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::string& filename, EIncl
 	}
 	else
 	{
-		PRINT_ERROR("Error loading shader : '%s'!", filename.c_str());
+		PrintError("Error loading shader : '%s'!", filename.c_str());
 	}
 }
 
@@ -242,7 +242,7 @@ void Shader::LoadFromFile(GLenum whichShader, const std::vector<std::string> & f
 		string & buffer = buffers[i++];
 		if (!MergeFile(buffer, it))
 		{
-			PRINT_ERROR("Error loading shader file : '%s'!", it.c_str());
+			PrintError("Error loading shader file : '%s'!", it.c_str());
 			return;
 		}
 	}
@@ -292,7 +292,7 @@ void Shader::CreateAndLinkProgram()
 		GLchar *infoLog = new GLchar[infoLogLength + 1];
 		glGetProgramInfoLog(mProgram, infoLogLength, NULL, infoLog);
 		infoLog[infoLogLength] = 0;
-		PRINT_ERROR("Link log: %s", infoLog, 0);
+		PrintError("Link log: %s", infoLog);
 		delete[] infoLog;
 	}
 
@@ -387,6 +387,18 @@ int Shader::AddPerlinNoiseUniforms()
 	};
 
 	return AddUniforms(perlinNoiseUniforms, __PerlinNoise_uniforms_count__);
+}
+
+
+
+void Shader::PrintError(const char * messageFormat, ...)
+{
+	PRINT_ERROR("# # # # # # # # # # # # # # # # # # # # # # # #\n");
+	va_list args;
+	va_start(args, messageFormat);
+	CoreFx::Log::PrintError(messageFormat, args);
+	va_end(args);
+	PRINT_ERROR("# # # # # # # # # # # # # # # # # # # # # # # #\n");
 }
 
 } // namespace CoreFx

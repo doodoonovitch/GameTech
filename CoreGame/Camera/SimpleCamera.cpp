@@ -150,30 +150,53 @@ void SimpleCamera::OnInit()
 		{
 			float yScale = 100.f;
 
-			CoreFx::Renderers::TerrainRenderer::Desc desc(512, 512, glm::vec3(1.f, yScale, 1.f), 0.6f, 0.7f);
-			
-			desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/Terrain/Canyon_513x513.r32", 513, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
-			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/Terrain/SweetCanyon_513x513.r32", 513, true, glm::vec3(-512.f, 0.f, 0.f), glm::angleAxis(glm::radians(0.f), YAxis)));
-			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/Terrain/Canyon_513x513.r32", 513, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
-			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis)));
-			//desc.mTerrains.push_back(Renderers::TerrainRenderer::MapDesc("medias/alps-valley-height-2048.raw", 2048, true, glm::vec3(-512.f, 0.f, -512.f), glm::angleAxis(glm::radians(0.f), YAxis)));
+			CoreFx::Renderers::TerrainRenderer::Desc desc(512, glm::vec3(1.f, yScale, 1.f));
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_219.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 0
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_108.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 1
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_104.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat)); // 2
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_219.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 0
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_108.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 1
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_104.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 2
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_45.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 3
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_219.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 3
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_108.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 4
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_104.tif", TextureCategory::Specular, TextureWrap::Repeat, TextureWrap::Repeat)); // 5
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_219.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 4
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_108.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 5
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_104.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 6
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_45.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 7
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_219.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 6
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_108.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 7
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_104.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat)); // 8
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_219.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 8
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_108.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 9
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_104.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 10
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_45.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 11
 
-			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 2, glm::vec3(.1f), 1, 5, glm::vec3(0), Renderer::NoTexture, 8, 0.1f));
-			desc.mLowSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(.1f), 1, 4, glm::vec3(0), Renderer::NoTexture, 7, 0.1f));
-			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.f * yScale, 0.95f * yScale, glm::vec3(1.f), 0, glm::vec3(.1f), 1, 3, glm::vec3(0), Renderer::NoTexture, 6, 0.1f));
-			desc.mHighSlopeMaterials.push_back(Renderers::TerrainRenderer::MaterialDesc(0.91f * yScale, 1.f * yScale, glm::vec3(1.f), 1, glm::vec3(.1f), 1, 4, glm::vec3(0), Renderer::NoTexture, 7, 0.1f));
+			Renderers::TerrainRenderer::MapDesc mapDesc("medias/Terrain/rangitoto-and-motutapu-islands-15m-dem.tif", 512, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis));
+			desc.mTerrains.push_back(mapDesc);
+
+			mapDesc.mMaterials[0].SetElevation(0.f * yScale, 0.3f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.72f, 1.f)
+				//.SetSlope(0.f, 0.75f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(3)
+				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(7)
+				.SetNormalTextureIndex(11);
+
+			mapDesc.mMaterials[1].SetElevation(0.1f * yScale, .8f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.72f, 1.f)
+				//.SetSlope(0.f, 0.75f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(2)
+				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(6)
+				.SetNormalTextureIndex(10);
+
+			mapDesc.mMaterials[2].SetElevation(0.65f * yScale, 1.f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.72f, 1.f)
+				//.SetSlope(0.f, 0.75f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(1)
+				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(5)
+				.SetNormalTextureIndex(9);
+
+			mapDesc.mMaterials[3].SetElevation(0.f * yScale, 1.f * yScale).SetTexScale(0.1f)
+				//.SetSlope(0.72f, 1.f)
+				.SetSlope(0.f, 0.75f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(0)
+				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(4)
+				.SetNormalTextureIndex(8);
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);
@@ -222,7 +245,7 @@ void SimpleCamera::OnInit()
 #ifdef RADIAL_GRID_OCEAN_SAMPLE
 		{
 			Renderers::PerlinNoiseOcean::RadialGridOceanRenderer::Desc desc;
-			desc.SetGrid(240, 600, .1f, 36000.f/*mCamera->GetFarZ()*/);
+			desc.SetGrid(240, 600, .1f, 30000.f/*mCamera->GetFarZ()*/);
 
 			mRadialGridOcean = new Renderers::PerlinNoiseOcean::RadialGridOceanRenderer(desc);
 			engine->AttachRenderer(mRadialGridOcean);

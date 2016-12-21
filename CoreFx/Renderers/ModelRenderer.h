@@ -48,6 +48,34 @@ public:
 	Renderables::Model * CreateModelInstance(GLuint modelIndex);
 	void DeleteModelInstance(Renderables::Model * modelInstance);
 
+public:
+
+
+	struct ShaderMaterial
+	{
+		GLfloat mBaseColorR;
+		GLfloat mBaseColorG;
+		GLfloat mBaseColorB;
+
+		GLfloat mMetallic;
+		GLfloat mRoughness;
+		GLfloat mPorosity;
+		GLfloat mEmissive;
+
+		GLint mBaseColorSamplerIndex, mBaseColorTextureIndex;
+		GLint mMetallicSamplerIndex, mMetallicTextureIndex;
+		GLint mRoughnessSamplerIndex, mRoughnessTextureIndex;
+		GLint mNormalSamplerIndex, mNormalTextureIndex;
+		GLint mEmissiveSamplerIndex, mEmissiveTextureIndex;
+
+		//GLfloat __padding__[15];
+	};
+
+	static constexpr size_t cShaderMaterialSize = sizeof(ShaderMaterial);
+
+	typedef std::vector<ShaderMaterial> ShaderMaterialList;
+
+
 private:
 	
 	//enum class EMainShaderUniformIndex
@@ -119,31 +147,7 @@ private:
 
 	const int FIRST_TEXTURE_SAMPLER_INDEX = 0;
 
-	struct ShaderMaterial
-	{
-		GLfloat mBaseColorR;
-		GLfloat mBaseColorG;
-		GLfloat mBaseColorB;
-
-		GLfloat mMetallic;
-		GLfloat mRoughness;
-		GLfloat mPorosity;
-		GLfloat mEmissive;
-
-		GLint mBaseColorSamplerIndex, mBaseColorTextureIndex;
-		GLint mMetallicSamplerIndex, mMetallicTextureIndex;
-		GLint mRoughnessSamplerIndex, mRoughnessTextureIndex;
-		GLint mNormalSamplerIndex, mNormalTextureIndex;
-		GLint mEmissiveSamplerIndex, mEmissiveTextureIndex;
-
-		//GLfloat __padding__[15];
-	};
-
-	const size_t cShaderMaterialSize = sizeof(ShaderMaterial);
-	const size_t cPerInstanceDataSize = sizeof(PerInstanceData);
-
-
-	typedef std::vector<ShaderMaterial> ShaderMaterialList;
+	static constexpr size_t cPerInstanceDataSize = sizeof(PerInstanceData);
 
 private:
 

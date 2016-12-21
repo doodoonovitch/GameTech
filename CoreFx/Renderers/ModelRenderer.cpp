@@ -111,7 +111,7 @@ void ModelRenderer::SetModel(const Renderer::VertexDataVector & vertexList, cons
 	mPrecomputeDataBuffer.CreateResource(GL_DYNAMIC_COPY, GetCapacity() * cPerInstanceDataSize, nullptr);
 	mLocationRawDataBuffer.CreateResource(GL_STATIC_DRAW, GetCapacity() * cPerInstanceDataSize, nullptr);
 	mMaterialIndexBuffer.CreateResource(GL_STATIC_DRAW, mMaterialCount * sizeof(GLuint), nullptr);
-	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, mMaterialCount * cShaderMaterialSize, nullptr/*mShaderMaterialList.data()*/);
+	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, mMaterialCount * cShaderMaterialSize, mShaderMaterialList.data());
 
 	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mMaterialBuffer);
 	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mPrecomputeDataBuffer);
@@ -145,11 +145,9 @@ void ModelRenderer::Render()
 	mShader.Use();
 	glBindVertexArray(mVaoID);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mLocationRawDataBuffer.GetBufferId());
-
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mMaterialIndexBuffer.GetBufferId());
-
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_Materials, mMaterialBuffer.GetBufferId());
+	mLocationRawDataBuffer.BindBufferBase(u_PerInstanceDataBuffer);
+	mMaterialIndexBuffer.BindBufferBase(u_PerInstanceDataIndexBuffer);
+	mMaterialBuffer.BindBufferBase(u_Materials);
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
 	{
@@ -349,12 +347,12 @@ void ModelRenderer::UpdateShaderData()
 
 		// --------------------------------------------
 
-		glBindBuffer(target, mMaterialBuffer.GetBufferId());
-		GLuint * matBuffer = (GLuint *)glMapBuffer(target, GL_WRITE_ONLY);
-		const std::uint8_t * data = (const std::uint8_t *)mShaderMaterialList.data();
-		memcpy(matBuffer, data, mMaterialCount * cShaderMaterialSize);
-		glUnmapBuffer(target);
-		glBindBuffer(target, 0);
+		//glBindBuffer(target, mMaterialBuffer.GetBufferId());
+		//GLuint * matBuffer = (GLuint *)glMapBuffer(target, GL_WRITE_ONLY);
+		//const std::uint8_t * data = (const std::uint8_t *)mShaderMaterialList.data();
+		//memcpy(matBuffer, data, mMaterialCount * cShaderMaterialSize);
+		//glUnmapBuffer(target);
+		//glBindBuffer(target, 0);
 
 		// --------------------------------------------
 
