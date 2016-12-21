@@ -7,6 +7,7 @@ uniform sampler2D u_TextureSampler;
 
 uniform int u_Frame0;
 uniform sampler2DArray u_HeightMapsSampler;
+uniform sampler2DArray u_NormalMapsSampler;
 
 in VS_OUT
 {
@@ -18,9 +19,9 @@ void main()
 {
 	vec3 texUV = vec3(fs_in.TexUV, u_Frame0);
 
-	float nX = textureOffset(u_HeightMapsSampler, texUV, ivec2(-1, 0)).r - textureOffset(u_HeightMapsSampler, texUV, ivec2(1, 0)).r;
-	float nZ = textureOffset(u_HeightMapsSampler, texUV, ivec2(0, -1)).r - textureOffset(u_HeightMapsSampler, texUV, ivec2(0, 1)).r;
-	vec3 normal = normalize(vec3(nX, 2, nZ));
+	vec3 normal = texture(u_NormalMapsSampler, texUV).xyy;
+	normal.y = 2;
+	normal = normalize(normal);
 
 	MaterialData mat;
 

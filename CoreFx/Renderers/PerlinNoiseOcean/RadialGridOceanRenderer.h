@@ -128,6 +128,7 @@ private:
 		u_Scale,
 
 		u_HeightMapsSampler,
+		u_NormalMapsSampler,
 		u_SkyboxCubeMapSampler,
 		u_TextureSampler,
 
@@ -146,6 +147,7 @@ private:
 	GLsizei mIndexCount;
 
 	Texture2DArray const * mHeightMaps = nullptr;
+	Texture2DArray const * mNormalMaps = nullptr;
 	CubeMapTexture const * mCubeMapTexture;
 	Texture2D const * mOceanColorTexture;
 

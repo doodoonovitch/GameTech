@@ -85,6 +85,7 @@ void RadialGridOceanRenderer::LoadMainShader(const Desc & desc)
 		"u_Scale",
 
 		"u_HeightMapsSampler",
+		"u_NormalMapsSampler",
 		"u_SkyboxCubeMapSampler",
 		"u_TextureSampler",
 	};
@@ -124,8 +125,9 @@ void RadialGridOceanRenderer::LoadMainShader(const Desc & desc)
 	//glUniform1i(mShader.GetUniform(u_Frame1), 0); GL_CHECK_ERRORS;
 	glUniform2fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 	glUniform1i(mShader.GetUniform(u_HeightMapsSampler), 0); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 1); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_TextureSampler), 2); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_NormalMapsSampler), 1); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_SkyboxCubeMapSampler), 2); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_TextureSampler), 3); GL_CHECK_ERRORS;
 
 	mShader.SetupFrameDataBlockBinding();
 	mShader.UnUse();
@@ -211,9 +213,12 @@ void RadialGridOceanRenderer::Render()
 			glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
 
 			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(mNormalMaps->GetTarget(), mNormalMaps->GetResourceId());
+
+			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(cubeMapTexture->GetTarget(), cubeMapTexture->GetResourceId());
 			
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, mOceanColorTexture->GetResourceId());
 
 			glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_SHORT, nullptr);
@@ -464,7 +469,7 @@ bool RadialGridOceanRenderer::InitializeHeightMaps()
 
 	TextureManager * textureManager = Engine::GetInstance()->GetTextureManager();
 	mHeightMaps = textureManager->CreateTexture2DArray(mipMapCount, GL_R16F, WaterTexSize, WaterTexSize, TextureCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-	glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
+	mNormalMaps = textureManager->CreateTexture2DArray(mipMapCount, GL_RG16F, WaterTexSize, WaterTexSize, TextureCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	float *BMap = new float[TexelCount];
 	BYTE *BMap1 = new BYTE[TexelCount];
@@ -534,13 +539,39 @@ bool RadialGridOceanRenderer::InitializeHeightMaps()
 				}
 			}
 
-			// Load texture - with rejecting A-channel 
+			glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
 			glTexSubImage3D(mHeightMaps->GetTarget(), 0, 0, 0, l, WaterTexSize, WaterTexSize, 1, GL_RGBA, GL_FLOAT, pBuf);
+			GL_CHECK_ERRORS;
+
+			pB = pBuf;
+			for (int y = 0; y < WaterTexSize; y++)
+			{
+				for (int x = 0; x < WaterTexSize; x++)
+				{
+					int x_1 = x == 0 ? WaterTexSize - 1 : ((x - 1) % WaterTexSize);
+					float nX = BMap[y * WaterTexSize + x_1] - BMap[y * WaterTexSize + ((x + 1) % WaterTexSize)];
+					int y_1 = y == 0 ? WaterTexSize - 1 : ((y - 1) % WaterTexSize);
+					float nZ = BMap[y_1 * WaterTexSize + x] - BMap[((y + 1) % WaterTexSize) * WaterTexSize + x];
+					pB[0] = nX;
+					pB[1] = nZ;
+					pB += 4;
+				}
+			}
+
+			glBindTexture(mNormalMaps->GetTarget(), mNormalMaps->GetResourceId());
+			glTexSubImage3D(mNormalMaps->GetTarget(), 0, 0, 0, l, WaterTexSize, WaterTexSize, 1, GL_RGBA, GL_FLOAT, pBuf);
 			GL_CHECK_ERRORS;
 		}
 
+		glBindTexture(mNormalMaps->GetTarget(), mNormalMaps->GetResourceId());
+		glGenerateMipmap(mNormalMaps->GetTarget());
+		GL_CHECK_ERRORS;
+
+		glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
 		glGenerateMipmap(mHeightMaps->GetTarget());
 		GL_CHECK_ERRORS;
+
+		glBindTexture(mHeightMaps->GetTarget(), 0);
 	}
 
 	result = true;
