@@ -123,11 +123,14 @@ public:
 			, mPorosity(0.0f)
 			, mRoughness(0.5f)
 			, mEmissive(0.f)
+			, mHeightOffset(0.f)
+			, mHeightScale(1.f)
 			, mBaseColorTextureIndex(NoTexture)
 			, mMetallicTextureIndex(NoTexture)
 			, mRoughnessTextureIndex(NoTexture)
 			, mNormalTextureIndex(NoTexture)
 			, mEmissiveTextureIndex(NoTexture)
+			, mHeightTextureIndex(NoTexture)
 		{}
 
 		MaterialDesc(const MaterialDesc & src)
@@ -136,11 +139,14 @@ public:
 			, mPorosity(src.mPorosity)
 			, mRoughness(src.mRoughness)
 			, mEmissive(src.mEmissive)
+			, mHeightOffset(src.mHeightOffset)
+			, mHeightScale(src.mHeightScale)
 			, mBaseColorTextureIndex(src.mBaseColorTextureIndex)
 			, mMetallicTextureIndex(src.mMetallicTextureIndex)
 			, mRoughnessTextureIndex(src.mRoughnessTextureIndex)
 			, mNormalTextureIndex(src.mNormalTextureIndex)
 			, mEmissiveTextureIndex(src.mEmissiveTextureIndex)
+			, mHeightTextureIndex(src.mHeightTextureIndex)
 		{
 		}
 
@@ -174,6 +180,18 @@ public:
 			return *this;
 		}
 
+		MaterialDesc & SetHeightOffset(GLfloat value)
+		{
+			mHeightOffset = value;
+			return *this;
+		}
+
+		MaterialDesc & SetHeightScale(GLfloat value)
+		{
+			mHeightScale = value;
+			return *this;
+		}
+
 		MaterialDesc & SetBaseColorTextureIndex(TextureIndex value)
 		{
 			mBaseColorTextureIndex = value;
@@ -204,17 +222,26 @@ public:
 			return *this;
 		}
 
+		MaterialDesc & SetHeightTextureIndex(TextureIndex value)
+		{
+			mHeightTextureIndex = value;
+			return *this;
+		}
+
 
 		glm::vec3 mBaseColor;
 		GLfloat mMetallic;
 		GLfloat mPorosity;
 		GLfloat mRoughness;
 		GLfloat mEmissive;
+		GLfloat mHeightOffset;
+		GLfloat mHeightScale;
 		TextureIndex mBaseColorTextureIndex;
 		TextureIndex mMetallicTextureIndex;
 		TextureIndex mRoughnessTextureIndex;
 		TextureIndex mNormalTextureIndex;
 		TextureIndex mEmissiveTextureIndex;
+		TextureIndex mHeightTextureIndex;
 	};
 
 	typedef std::vector<MaterialDesc> MaterialDescList;

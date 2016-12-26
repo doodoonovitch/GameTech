@@ -162,6 +162,10 @@ void main(void)
 	{
 		vFragColor = vec4(fi.mEmissive, 1);
 	}
+	else if(fi.mRendererId == DEBUG_RENDERER_ID)
+	{
+		vFragColor = vec4(fi.mBaseColor.xyz, 1);
+	}
 	else if(fi.mRendererId > 0)
 	{
 		vFragColor = BRDFLight(fi);

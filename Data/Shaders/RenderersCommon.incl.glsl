@@ -58,6 +58,8 @@
 #define TERRAIN_RENDERER_ID							5
 #define DEEPOCEAN_RENDERER_ID						6
 #define SKYBOX_RENDERER_ID							7
+#define DEBUG_RENDERER_ID							8
+
 //
 // ---------------------------------------------------------------------------
 
@@ -87,12 +89,15 @@ struct ModelMaterial
 	float mRoughness;
 	float mPorosity;
 	float mEmissive;
+	float mHeightOffset;
+	float mHeightScale;
 
 	int mBaseColorSamplerIndex, mBaseColorTextureIndex;
 	int mMetallicSamplerIndex, mMetallicTextureIndex;
 	int mRoughnessSamplerIndex, mRoughnessTextureIndex;
 	int mNormalSamplerIndex, mNormalTextureIndex;
 	int mEmissiveSamplerIndex, mEmissiveTextureIndex;
+	int mHeightSamplerIndex, mHeightTextureIndex;
 };
 
 

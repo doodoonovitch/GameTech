@@ -97,7 +97,7 @@ void SimpleCamera::SetupViewportAndProjection()
 	}
 }
 
-//#define TERRAIN_SAMPLE
+#define TERRAIN_SAMPLE
 //#define DEEP_OCEAN_SAMPLE
 //#define GERSTNER_WAVE_OCEAN_SAMPLE
 //#define PERLIN_NOISE_OCEAN_SAMPLE
@@ -106,6 +106,8 @@ void SimpleCamera::SetupViewportAndProjection()
 //#define SKYBOX_SAMPLE
 #define COMPASS_SAMPLE
 #define MODEL_SAMPLE
+
+#define TEXFOLDER "medias/Textures/"
 
 void SimpleCamera::OnInit()
 {
@@ -148,55 +150,111 @@ void SimpleCamera::OnInit()
 
 #ifdef TERRAIN_SAMPLE
 		{
-			float yScale = 100.f;
+			float yScale = 150.f;
+			float xScale = 1.f;
 
-			CoreFx::Renderers::TerrainRenderer::Desc desc(512, glm::vec3(1.f, yScale, 1.f));
+			CoreFx::Renderers::TerrainRenderer::Desc desc(512, glm::vec3(xScale, yScale, xScale));
+
+			desc.mMaterials.resize(4);
+
+			Renderer::TextureDescList & texList = desc.mTextures;
+
+//#define USE_PBR_TEXTURES
+#ifdef USE_PBR_TEXTURES
+
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));				// 0
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));		// 1
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/mossy-ground1-albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));						// 2
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/planetsurface1-albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));						// 3
+
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));			// 4
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 5
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/mossy-ground1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));					// 6
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/planetsurface1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));				// 7
+
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));			// 8
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));	// 9
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/mossy-ground1-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));					// 10
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/planetsurface1-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));					// 11
+
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat));			// 12
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat));	// 13
+
+			desc.mMaterials[0].SetElevation(0.f * yScale, 0.8f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.79f, 1.f)
+				.SetStrength(0.5f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(3)
+				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(7)
+				.SetHeight(1.f).SetHeightTextureIndex(11);
+
+			desc.mMaterials[1].SetElevation(0.01f * yScale, .6f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.79f, 1.f)
+				.SetStrength(2.f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(2)
+				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(6)
+				.SetHeight(1.f).SetHeightTextureIndex(10);
+
+			desc.mMaterials[2].SetElevation(0.4f * yScale, 1.1f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.4f, 1.f)
+				.SetStrength(1.f)
+				.SetMetallic(1.f).SetMetallicTextureIndex(13).SetRoughness(1.f).SetRoughnessTextureIndex(5)
+				.SetHeight(1.f).SetHeightTextureIndex(9);
+
+			desc.mMaterials[3].SetElevation(0.f * yScale, 1.1f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.f, .8f)
+				.SetStrength(2.f)
+				.SetMetallic(1).SetMetallicTextureIndex(12).SetRoughness(1.f).SetRoughnessTextureIndex(4)
+				.SetHeight(1.f).SetHeightTextureIndex(8);
+
+#else //USE_PBR_TEXTURES
 
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_219.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 0
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_108.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 1
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_104.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 2
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/diffus_45.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));	// 3
 
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_219.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 4
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_108.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 5
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_104.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 6
-			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/specular_45.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 7
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/roughness_219.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 4
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/roughness_108.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 5
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/roughness_104.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 6
+			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/roughness_45.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 7
 
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_219.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 8
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_108.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 9
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_104.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 10
 			desc.mTextures.push_back(Renderer::TextureDesc("medias/TerrainTextures/height_45.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));		// 11
 
-			Renderers::TerrainRenderer::MapDesc mapDesc("medias/Terrain/rangitoto-and-motutapu-islands-15m-dem.tif", 512, true, glm::vec3(0.f), glm::angleAxis(glm::radians(180.f), YAxis));
-			desc.mTerrains.push_back(mapDesc);
-
-			mapDesc.mMaterials[0].SetElevation(0.f * yScale, 0.3f * yScale).SetTexScale(0.1f)
-				.SetSlope(0.72f, 1.f)
-				//.SetSlope(0.f, 0.75f)
+			desc.mMaterials[0].SetElevation(0.f * yScale, 0.8f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.79f, 1.f)
+				.SetStrength(0.5f)
 				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(3)
-				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(7)
-				.SetNormalTextureIndex(11);
+				.SetMetallic(0).SetRoughness(.8f).SetRoughnessTextureIndex(7)
+				.SetHeightOffset(0.f).SetHeightScale(0.9f).SetHeightTextureIndex(11);
 
-			mapDesc.mMaterials[1].SetElevation(0.1f * yScale, .8f * yScale).SetTexScale(0.1f)
-				.SetSlope(0.72f, 1.f)
-				//.SetSlope(0.f, 0.75f)
+			desc.mMaterials[1].SetElevation(0.01f * yScale, .6f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.79f, 1.f)
+				.SetStrength(2.f)
 				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(2)
-				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(6)
-				.SetNormalTextureIndex(10);
+				.SetMetallic(0).SetRoughness(.0f).SetRoughnessTextureIndex(6)
+				.SetHeightOffset(0.2f).SetHeightScale(1.f).SetHeightTextureIndex(10);
 
-			mapDesc.mMaterials[2].SetElevation(0.65f * yScale, 1.f * yScale).SetTexScale(0.1f)
-				.SetSlope(0.72f, 1.f)
-				//.SetSlope(0.f, 0.75f)
+			desc.mMaterials[2].SetElevation(0.4f * yScale, 1.1f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.4f, 1.f)
+				.SetStrength(1.f)
 				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(1)
-				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(5)
-				.SetNormalTextureIndex(9);
+				.SetMetallic(0.f).SetRoughness(.8f).SetRoughnessTextureIndex(5)
+				.SetHeightOffset(0.2f).SetHeightScale(1.2f).SetHeightTextureIndex(9);
 
-			mapDesc.mMaterials[3].SetElevation(0.f * yScale, 1.f * yScale).SetTexScale(0.1f)
-				//.SetSlope(0.72f, 1.f)
-				.SetSlope(0.f, 0.75f)
+			desc.mMaterials[3].SetElevation(0.f * yScale, 1.1f * yScale).SetTexScale(0.1f)
+				.SetSlope(0.f, .8f)
+				.SetStrength(2.f)
 				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(0)
-				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(4)
-				.SetNormalTextureIndex(8);
+				.SetMetallic(0).SetRoughness(.8f).SetRoughnessTextureIndex(4)
+				.SetHeightOffset(0.2f).SetHeightScale(1.3f).SetHeightTextureIndex(8);
+
+#endif // USE_PBR_TEXTURES
+
+			Renderers::TerrainRenderer::MapDesc mapDesc("medias/Terrain/rangitoto-and-motutapu-islands-15m-dem.tif", 512, true, glm::vec3(xScale * -512.f * .5f, -1.f, xScale * -512.f), glm::value_ptr(glm::ivec4(0, 1, 2, 3)));
+			desc.mTerrains.push_back(mapDesc);
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
 			engine->AttachRenderer(terrain);

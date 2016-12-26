@@ -14,6 +14,8 @@ class TerrainRenderer : public RendererHelper<1>
 {
 public:
 
+	static constexpr GLint BlendMaterialCount = 4;
+
 	struct MaterialDesc : Renderer::MaterialDesc
 	{
 		MaterialDesc()
@@ -23,6 +25,7 @@ public:
 			, mTexScale(1.f)
 			, mMinSlope(0.f)
 			, mMaxSlope(1.f)
+			, mStrength(1.f)
 		{}
 
 		MaterialDesc(const MaterialDesc & src)
@@ -32,6 +35,7 @@ public:
 			, mTexScale(src.mTexScale)
 			, mMinSlope(src.mMinSlope)
 			, mMaxSlope(src.mMaxSlope)
+			, mStrength(src.mStrength)
 		{
 		}
 
@@ -55,6 +59,12 @@ public:
 			return *this;
 		}
 
+		MaterialDesc & SetStrength(GLfloat value)
+		{
+			mStrength = value;
+			return *this;
+		}
+
 	protected:
 
 		friend class TerrainRenderer;
@@ -64,6 +74,7 @@ public:
 		GLfloat mTexScale;
 		GLfloat mMinSlope;
 		GLfloat mMaxSlope;
+		GLfloat mStrength;
 	};
 
 	struct MapDesc
@@ -72,24 +83,22 @@ public:
 		{
 		}
 
-		MapDesc(const char * filename, GLint heightMapTextureSize, bool invertY, const glm::vec3 & origin, const glm::quat & rotation)
+		MapDesc(const char * filename, GLint heightMapTextureSize, bool invertY, const glm::vec3 & origin, const GLint matIndex[BlendMaterialCount])
 			: mFilename(filename)
 			, mHeightMapTextureSize(heightMapTextureSize)
 			, mInvertY(invertY)
+			, mOrigin(origin)
 		{
-			mModelDQ.SetRotationTranslation(rotation, origin);
+			SetMaterials(matIndex);
 		}
 
 		MapDesc(const MapDesc & src)
 			: mFilename(src.mFilename)
 			, mHeightMapTextureSize(src.mHeightMapTextureSize)
 			, mInvertY(src.mInvertY)
-			, mModelDQ(src.mModelDQ)
+			, mOrigin(src.mOrigin)
+			, mMatIndex(src.mMatIndex)
 		{
-			for (int i = 0; i < 4; ++i)
-			{
-				mMaterials[i] = src.mMaterials[i];
-			}
 		}
 
 		MapDesc & SetFilename(const std::string & filename)
@@ -110,13 +119,20 @@ public:
 			return *this;
 		}
 
-		MapDesc & SetOriginRotation(const glm::vec3 & origin, const glm::quat & rotation)
+		MapDesc & SetOrigin(const glm::vec3 & origin)
 		{
-			mModelDQ.SetRotationTranslation(rotation, origin);
+			mOrigin = origin;
 			return *this;
 		}
 
-		MaterialDesc mMaterials[4];
+		MapDesc & SetMaterials(const GLint matIndex[BlendMaterialCount])
+		{
+			for (GLint i = 0; i < BlendMaterialCount; ++i)
+				mMatIndex[i] = matIndex[i];
+			return *this;
+		}
+
+
 
 	protected:
 
@@ -125,13 +141,13 @@ public:
 		std::string mFilename;
 		GLsizei mHeightMapTextureSize = 512;
 		bool mInvertY = true;
-
-		Maths::DualQuaternion mModelDQ;
+		glm::vec3  mOrigin;
+		glm::ivec4 mMatIndex;
 	};
 
 	typedef std::vector<MapDesc> MapDescList;
 
-	//typedef std::vector<MaterialDesc> MaterialDescList;
+	typedef std::vector<MaterialDesc> MaterialDescList;
 
 	struct Desc : public Renderer::Desc
 	{
@@ -141,9 +157,13 @@ public:
 			, mScale(scale)
 		{ }
 
+
+		bool CheckData() const;
+
 		GLsizei mHeightMapSize;
 		glm::vec3 mScale;
 
+		MaterialDescList mMaterials;
 		MapDescList mTerrains;
 	};
 
@@ -174,25 +194,27 @@ private:
 		u_PatchCount,
 		u_MapSize,
 		u_Scale,
-		u_PerMapDataSampler,
 		u_HeightMap,
-		u_UvMap,
 		u_BlendMap,
+		u_NormalMap,
 
 		__uniforms_count__
 	};
 
 	enum EBinding
 	{
-		u_PerInstanceWorlMatrix,
-		u_PerInstanceViewMatrix,
+		u_PerInstanceData,
 		u_Materials
 	};
 
-	struct PerMapData
+#pragma pack(push, 1)
+	struct TerrainPerInstanceData
 	{
-		Maths::DualQuaternion mModelDQ;
+		glm::ivec4 mMatIndex;
+		glm::vec3 mOrigin;
+		GLfloat __padding__[1];
 	};
+#pragma pack(pop)
 
 
 	const int FIRST_TEXTURE_SAMPLER_INDEX = 3;
@@ -203,18 +225,15 @@ private:
 
 	GLsizei mMapSize;
 
-	//GLuint mHeightMapTextureId;
 	GLint mMapCount;
 
-	ShaderStorageBuffer mPrecomputeDataBuffer;
-	ShaderStorageBuffer mLocationRawDataBuffer;
+	ShaderStorageBuffer mPerInstanceDataBuffer;
 	ShaderStorageBuffer mMaterialBuffer;
 
 	Texture2DArray const * mHeightMaps = nullptr;
-	Texture2DArray const * mUvMaps = nullptr;
+	Texture2DArray const * mNormalMaps = nullptr;
 	Texture2DArray const * mBlendMaps = nullptr;
 
-	GLuint mMaterialCount;
 	ModelRenderer::ShaderMaterialList mShaderMaterialList;
 };
 

@@ -170,9 +170,8 @@ void ModelRenderer::RenderWireFrame()
 	mWireFrameShader.Use();
 	glBindVertexArray(mVaoID);
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataBuffer, mLocationRawDataBuffer.GetBufferId());
-
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, u_PerInstanceDataIndexBuffer, mMaterialIndexBuffer.GetBufferId());
+	mLocationRawDataBuffer.BindBufferBase(u_PerInstanceDataBuffer);
+	mMaterialIndexBuffer.BindBufferBase(u_PerInstanceDataIndexBuffer);
 
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, mVboIDs[VBO_Indirect]);
 	glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, nullptr, mDrawCmdCount, sizeof(Renderer::DrawElementsIndirectCommand));
@@ -200,6 +199,8 @@ void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const Renderer::Mat
 		mat.mPorosity = materialDesc.mPorosity;
 		mat.mRoughness = materialDesc.mRoughness;
 		mat.mEmissive = materialDesc.mEmissive;
+		mat.mHeightOffset = materialDesc.mHeightOffset;
+		mat.mHeightScale = materialDesc.mHeightScale;
 
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
 		texIndexes.mBaseColor = materialDesc.mBaseColorTextureIndex;
@@ -207,9 +208,10 @@ void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const Renderer::Mat
 		texIndexes.mRoughness = materialDesc.mRoughnessTextureIndex;
 		texIndexes.mEmissive = materialDesc.mEmissiveTextureIndex;
 		texIndexes.mNormal = materialDesc.mNormalTextureIndex;
+		texIndexes.mHeight = materialDesc.mHeightTextureIndex;
 
 		{
-			PRINT_MESSAGE("\t\t- Material %i : Texture index (AMRNE) = (%i, %i, %i, %i, %i)", materialIndex, texIndexes.mBaseColor, texIndexes.mMetallic, texIndexes.mRoughness, texIndexes.mEmissive, texIndexes.mNormal);
+			PRINT_MESSAGE("\t\t- Material %i : Texture index (AMRNEH) = (%i, %i, %i, %i, %i, %i)", materialIndex, texIndexes.mBaseColor, texIndexes.mMetallic, texIndexes.mRoughness, texIndexes.mEmissive, texIndexes.mNormal, texIndexes.mHeight);
 			PRINT_MESSAGE("\t\t\tBaseColor=(%f, %f, %f), Metallic=%f, Porosity=%f, Roughness=%f, Emissive=%f", mat.mBaseColorR, mat.mBaseColorG, mat.mBaseColorB,
 				mat.mMetallic, mat.mPorosity, mat.mRoughness, mat.mEmissive);
 		}
@@ -252,7 +254,10 @@ void ModelRenderer::UpdateMaterialTextureIndex()
 		mat.mRoughnessTextureIndex	= texIndexes.mRoughness != NoTexture ? (GLint)texInfo[texIndexes.mRoughness].GetLayerIndex() : -1;
 		mat.mRoughnessSamplerIndex	= texIndexes.mRoughness != NoTexture ? (GLint)texInfo[texIndexes.mRoughness].GetSamplerIndex() : -1;
 
-		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) BaseColor=(%i, %i), Metallic=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i)", materialIndex, mat.mBaseColorSamplerIndex, mat.mBaseColorTextureIndex, mat.mMetallicSamplerIndex, mat.mMetallicTextureIndex, mat.mRoughnessSamplerIndex, mat.mRoughnessTextureIndex, mat.mNormalSamplerIndex, mat.mNormalTextureIndex, mat.mEmissiveSamplerIndex, mat.mEmissiveTextureIndex);
+		mat.mHeightTextureIndex = texIndexes.mHeight != NoTexture ? (GLint)texInfo[texIndexes.mHeight].GetLayerIndex() : -1;
+		mat.mHeightSamplerIndex = texIndexes.mHeight != NoTexture ? (GLint)texInfo[texIndexes.mHeight].GetSamplerIndex() : -1;
+
+		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) BaseColor=(%i, %i), Metallic=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i), Height=(%i, %i)", materialIndex, mat.mBaseColorSamplerIndex, mat.mBaseColorTextureIndex, mat.mMetallicSamplerIndex, mat.mMetallicTextureIndex, mat.mRoughnessSamplerIndex, mat.mRoughnessTextureIndex, mat.mNormalSamplerIndex, mat.mNormalTextureIndex, mat.mEmissiveSamplerIndex, mat.mEmissiveTextureIndex, mat.mHeightSamplerIndex, mat.mHeightTextureIndex);
 	}
 }
 

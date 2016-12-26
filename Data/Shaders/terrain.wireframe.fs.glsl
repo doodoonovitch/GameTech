@@ -1,11 +1,11 @@
 layout(location = 0) out vec4 outColor;
 
-in GS_OUT
+in TES_OUT
 {
 	vec4 Blend;
 	vec3 Position;
-	vec3 Normal;
 	vec2 TexUV;
+	//float MipmapLevel;
 	flat int MapIndex;
 } fs_in;
 

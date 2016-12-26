@@ -50,7 +50,7 @@ public:
 
 public:
 
-
+#pragma pack(push, 1)
 	struct ShaderMaterial
 	{
 		GLfloat mBaseColorR;
@@ -61,12 +61,15 @@ public:
 		GLfloat mRoughness;
 		GLfloat mPorosity;
 		GLfloat mEmissive;
+		GLfloat mHeightOffset;
+		GLfloat mHeightScale;
 
 		GLint mBaseColorSamplerIndex, mBaseColorTextureIndex;
 		GLint mMetallicSamplerIndex, mMetallicTextureIndex;
 		GLint mRoughnessSamplerIndex, mRoughnessTextureIndex;
 		GLint mNormalSamplerIndex, mNormalTextureIndex;
 		GLint mEmissiveSamplerIndex, mEmissiveTextureIndex;
+		GLint mHeightSamplerIndex, mHeightTextureIndex;
 
 		//GLfloat __padding__[15];
 	};
@@ -74,7 +77,7 @@ public:
 	static constexpr size_t cShaderMaterialSize = sizeof(ShaderMaterial);
 
 	typedef std::vector<ShaderMaterial> ShaderMaterialList;
-
+#pragma pack(pop)
 
 private:
 	
@@ -116,7 +119,7 @@ private:
 		TextureIndex mRoughness = Renderer::NoTexture;
 		TextureIndex mEmissive = Renderer::NoTexture;
 		TextureIndex mNormal = Renderer::NoTexture;
-
+		TextureIndex mHeight = Renderer::NoTexture;
 	};
 
 	typedef std::vector<MaterialTextureIndexes> MaterialTextureIndexesList;

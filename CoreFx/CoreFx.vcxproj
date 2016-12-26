@@ -322,7 +322,6 @@
     <None Include="..\Data\Shaders\skydome.vs.glsl" />
     <None Include="..\Data\Shaders\ssao.fs.glsl" />
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl" />
-    <None Include="..\Data\Shaders\terrain.gs.glsl" />
     <None Include="..\Data\Shaders\terrain.tcs.glsl" />
     <None Include="..\Data\Shaders\terrain.tes.glsl" />
     <None Include="..\Data\Shaders\terrain.vs.glsl" />

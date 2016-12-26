@@ -405,9 +405,6 @@
     <None Include="..\Data\Shaders\terrain.deferred.fs.glsl">
       <Filter>Shaders\Terrain</Filter>
     </None>
-    <None Include="..\Data\Shaders\terrain.gs.glsl">
-      <Filter>Shaders\Terrain</Filter>
-    </None>
     <None Include="..\Data\Shaders\terrain.tcs.glsl">
       <Filter>Shaders\Terrain</Filter>
     </None>

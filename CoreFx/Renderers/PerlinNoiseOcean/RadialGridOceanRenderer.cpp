@@ -233,9 +233,9 @@ void RadialGridOceanRenderer::RenderWireFrame()
 
 	mWireFrameShader.Use();
 
-		glUniform1i(mShader.GetUniform(u_Frame0), mFrame0); 
-		//glUniform1i(mShader.GetUniform(u_Frame1), mFrame1); 
-		glUniform2fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale));
+		glUniform1i(mWireFrameShader.GetUniform(u_Frame0), mFrame0);
+		//glUniform1i(mWireFrameShader.GetUniform(u_Frame1), mFrame1); 
+		glUniform2fv(mWireFrameShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale));
 
 		glBindVertexArray(mVaoID);
 

@@ -7,7 +7,29 @@ namespace CoreFx
 	namespace Renderers
 	{
 
+bool TerrainRenderer::Desc::CheckData() const
+{
+	if (mMaterials.empty() && !mTerrains.empty())
+	{
+		PRINT_ERROR("No terrains material !");
+		return false;
+	}
 
+	for (MapDescList::const_iterator it = mTerrains.begin(); it != mTerrains.end(); ++it)
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			auto matIndex = it->mMatIndex[i];
+			if (!(matIndex >= 0 && matIndex < mMaterials.size()))
+			{
+				PRINT_ERROR("Undefined terrains material index %li ! (materials count = %li)", matIndex, mMaterials.size());
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
 
 TerrainRenderer::TerrainRenderer(const Desc & desc)
 	: RendererHelper<1>("TerrainRenderer", "TerrainWireRenderer")
@@ -15,13 +37,16 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 	, mPatchCount(desc.mHeightMapSize / 64, desc.mHeightMapSize / 64)
 	, mScale(desc.mScale)
 	, mMapCount(0)
-	, mMaterialCount(0)
 {
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize TerrainRenderer.....");
 
-	mMaterialCount = (GLuint)desc.mTerrains.size() * 4;
-	mShaderMaterialList.resize(mMaterialCount);
+	if (!desc.CheckData())
+	{
+		goto ExitTerrainRendererInit;
+	}
+
+	mShaderMaterialList.resize(desc.mMaterials.size());
 
 	AddTextures(desc.mTextures);
 	BuildTextureMapping();
@@ -58,24 +83,36 @@ TerrainRenderer::TerrainRenderer(const Desc & desc)
 
 	LoadHeightMap(desc);
 
-	PerMapData * modelMatrixBuffer = new PerMapData[mMapCount];
-	for (int i = 0; i < mMapCount; ++i)
+	size_t perInstanceDataSize = mMapCount * sizeof(TerrainPerInstanceData);
+	TerrainPerInstanceData * perInstanceData = (TerrainPerInstanceData *)malloc(perInstanceDataSize);
+	TerrainPerInstanceData * ptr = perInstanceData;
+	for (MapDescList::const_iterator it = desc.mTerrains.begin(); it < desc.mTerrains.end(); ++it)
 	{
-		modelMatrixBuffer[i].mModelDQ = desc.mTerrains[i].mModelDQ;
+		ptr->mOrigin = it->mOrigin;
+		ptr->mMatIndex = it->mMatIndex;
+		ptr->__padding__[0] = 0.f;
+		++ptr;
 	}
-	mLocationRawDataBuffer.CreateResource(GL_STATIC_DRAW, mMapCount * sizeof(PerMapData), modelMatrixBuffer);
-	mPrecomputeDataBuffer.CreateResource(GL_DYNAMIC_COPY, mMapCount * sizeof(PerMapData), nullptr);
-	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, mMaterialCount * ModelRenderer::cShaderMaterialSize, nullptr/*mShaderMaterialList.data()*/);
+	mPerInstanceDataBuffer.CreateResource(GL_STATIC_DRAW, perInstanceDataSize, perInstanceData);
 
-	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mPrecomputeDataBuffer);
-	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mLocationRawDataBuffer);
+	free(perInstanceData);
+
+	size_t materialBufferSize = desc.mMaterials.size() * ModelRenderer::cShaderMaterialSize;
+	mMaterialBuffer.CreateResource(GL_STATIC_DRAW, materialBufferSize, mShaderMaterialList.data());
+
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mMaterialBuffer);
+	PRINT_GEN_SHADERSTORAGEBUFFER("[ModelRenderer]", mPerInstanceDataBuffer);
 	
 	LoadShaders(desc);
 
 	mIsInitialized = true;
 
+
+ExitTerrainRendererInit:
+
 	PRINT_MESSAGE(".....TerrainRenderer initialized!");
 	PRINT_END_SECTION;
+	
 }
 
 
@@ -100,8 +137,8 @@ void TerrainRenderer::LoadMainShader(const Desc & /*desc*/)
 		"u_MapSize",
 		"u_Scale",
 		"u_HeightMap",
-		"u_UvMap",
 		"u_BlendMap",
+		"u_NormalMap",
 	};
 
 
@@ -109,7 +146,6 @@ void TerrainRenderer::LoadMainShader(const Desc & /*desc*/)
 	mShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/terrain.vs.glsl");
 	mShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/terrain.tcs.glsl");
 	mShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tes.glsl");
-	mShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain.gs.glsl");
 
 	// fragment shader
 	std::vector<std::string> fsGlsl(3);
@@ -135,8 +171,8 @@ void TerrainRenderer::LoadMainShader(const Desc & /*desc*/)
 	glUniform3fv(mShader.GetUniform(u_Scale), 1, glm::value_ptr(mScale)); GL_CHECK_ERRORS;
 
 	glUniform1i(mShader.GetUniform(u_HeightMap), 0); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_UvMap), 1); GL_CHECK_ERRORS;
-	glUniform1i(mShader.GetUniform(u_BlendMap), 2); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_BlendMap), 1); GL_CHECK_ERRORS;
+	glUniform1i(mShader.GetUniform(u_NormalMap), 2); GL_CHECK_ERRORS;
 
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
@@ -164,7 +200,7 @@ void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 {
 	PRINT_MESSAGE("Initialize Terrain Renderer (Wire Frame) Shaders...");
 
-	const char * uniformNames[__uniforms_count__] =
+	const char * uniformNames[] =
 	{
 		"u_PatchCount",
 		"u_MapSize",
@@ -177,13 +213,12 @@ void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 	mWireFrameShader.LoadFromFile(GL_VERTEX_SHADER, "shaders/terrain.vs.glsl");
 	mWireFrameShader.LoadFromFile(GL_TESS_CONTROL_SHADER, "shaders/terrain.tcs.glsl");
 	mWireFrameShader.LoadFromFile(GL_TESS_EVALUATION_SHADER, "shaders/terrain.tes.glsl");
-	mWireFrameShader.LoadFromFile(GL_GEOMETRY_SHADER, "shaders/terrain.gs.glsl");
 	mWireFrameShader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/terrain.wireframe.fs.glsl");
 
 	mWireFrameShader.CreateAndLinkProgram();
 	mWireFrameShader.Use();
 
-	mWireFrameShader.AddUniforms(uniformNames, __uniforms_count__);
+	mWireFrameShader.AddUniforms(uniformNames, ARRAY_SIZE_IN_ELEMENTS(uniformNames));
 
 	//pass values of constant uniforms at initialization
 	glUniform2iv(mWireFrameShader.GetUniform(u_PatchCount), 1, glm::value_ptr(mPatchCount)); GL_CHECK_ERRORS;
@@ -203,9 +238,6 @@ void TerrainRenderer::LoadWireFrameShader(const Desc & /*desc*/)
 
 void TerrainRenderer::Update()
 {
-	Engine * engine = Engine::GetInstance();
-	const GLuint itemSize = sizeof(PerMapData) / sizeof(glm::vec4);
-	engine->ComputeViewTransform(mLocationRawDataBuffer.GetBufferId(), mPrecomputeDataBuffer.GetBufferId(), (GLuint)mMapCount, itemSize, itemSize);
 }
 
 void TerrainRenderer::Render()
@@ -214,7 +246,7 @@ void TerrainRenderer::Render()
 	//{
 	//	LoadShaders();
 	//}
-
+	
 	mShader.Use();
 	glBindVertexArray(mVaoID);
 
@@ -222,14 +254,10 @@ void TerrainRenderer::Render()
 	glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(mUvMaps->GetTarget(), mUvMaps->GetResourceId());
-
-	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(mBlendMaps->GetTarget(), mBlendMaps->GetResourceId());
 
-	mLocationRawDataBuffer.BindBufferBase(u_PerInstanceWorlMatrix);
-	mPrecomputeDataBuffer.BindBufferBase(u_PerInstanceViewMatrix);
-	mMaterialBuffer.BindBufferBase(u_Materials);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(mNormalMaps->GetTarget(), mNormalMaps->GetResourceId());
 
 	for (int i = 0; i < (int)mTextureMapping.mMapping.size(); ++i)
 	{
@@ -237,11 +265,15 @@ void TerrainRenderer::Render()
 		glBindTexture(mTextureMapping.mMapping[i].mTexture->GetTarget(), mTextureMapping.mMapping[i].mTexture->GetResourceId());
 	}
 
+	mPerInstanceDataBuffer.BindBufferBase(u_PerInstanceData);
+	mMaterialBuffer.BindBufferBase(u_Materials);
+
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
 
 	glBindVertexArray(0);
 	mShader.UnUse();
+	
 }
 
 void TerrainRenderer::RenderWireFrame()
@@ -252,8 +284,7 @@ void TerrainRenderer::RenderWireFrame()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
 
-	mLocationRawDataBuffer.BindBufferBase(u_PerInstanceWorlMatrix);
-	mPrecomputeDataBuffer.BindBufferBase(u_PerInstanceViewMatrix);
+	mPerInstanceDataBuffer.BindBufferBase(u_PerInstanceData);
 
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
 	glDrawArraysInstanced(GL_PATCHES, 0, 4, mPatchCount.x * mPatchCount.y * mMapCount);
@@ -273,6 +304,10 @@ bool TerrainRenderer::LoadHeightMap(const Desc & terrainDesc)
 		{ 0.f, 0.f, 0.f, 1.f }
 	};
 
+	const glm::vec4 nullVector(0.f);
+	const glm::ivec4 internalFormat(GL_R8, GL_RG8, GL_RGB8, GL_RGBA8);
+	const glm::ivec4 dataFormat(GL_RED, GL_RG, GL_RGB, GL_RGBA);
+
 	const MapDescList & terrainDescList = terrainDesc.mTerrains;
 
 	bool result = false;
@@ -281,25 +316,29 @@ bool TerrainRenderer::LoadHeightMap(const Desc & terrainDesc)
 
 	mMapCount = (GLint)terrainDescList.size();
 	size_t layerBufferTexelCount = mMapSize * mMapSize;
-	size_t heightBufferSize = layerBufferTexelCount * 3 * sizeof(GLfloat);
-	size_t uvBufferSize = layerBufferTexelCount * 2 * sizeof(GLfloat);
-	size_t blendBufferSize = layerBufferTexelCount * 4 * sizeof(GLubyte);
+	size_t heightBufferSize = layerBufferTexelCount * sizeof(GLfloat);
+	size_t normalBufferSize = layerBufferTexelCount * 3 * sizeof(GLfloat);
+	size_t blendBufferSize = layerBufferTexelCount * BlendMaterialCount * sizeof(GLubyte);
 
 	GLfloat * heightBuffer = (GLfloat*)malloc(heightBufferSize);
-	GLfloat * uvBuffer = (GLfloat*)malloc(uvBufferSize);
+	GLfloat * normalBuffer = (GLfloat*)malloc(normalBufferSize);
 	GLubyte * blendBuffer = (GLubyte*)malloc(blendBufferSize);
 
-	if (heightBuffer == nullptr || uvBuffer == nullptr || blendBuffer == nullptr)
+	if (heightBuffer == nullptr || blendBuffer == nullptr || normalBuffer == nullptr)
 	{
-		PRINT_MESSAGE("Error: Cannot allocate memory to load terrain height maps ! (Needed memory : %ld)\n", heightBufferSize + uvBufferSize + blendBufferSize);
+		PRINT_MESSAGE("Error: Cannot allocate memory to load terrain height maps ! (Needed memory : %ld)\n", heightBufferSize + blendBufferSize + normalBufferSize);
 		goto ExitLoadHeightMap;
 	}
 
 	TextureManager * textureManager = Engine::GetInstance()->GetTextureManager();
 
-	mHeightMaps = textureManager->CreateTexture2DArray(mipMapCount, GL_RGB16F, mMapSize, mMapSize, mMapCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-	mUvMaps = textureManager->CreateTexture2DArray(mipMapCount, GL_RG32F, mMapSize, mMapSize, mMapCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-	mBlendMaps = textureManager->CreateTexture2DArray(mipMapCount, GL_RGBA8, mMapSize, mMapSize, mMapCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+	mHeightMaps = textureManager->CreateTexture2DArray(mipMapCount, GL_R16F, mMapSize, mMapSize, mMapCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+	mNormalMaps = textureManager->CreateTexture2DArray(mipMapCount, GL_RGB16F, mMapSize, mMapSize, mMapCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+	mBlendMaps = textureManager->CreateTexture2DArray(mipMapCount, internalFormat[BlendMaterialCount - 1], mMapSize, mMapSize, mMapCount, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	PRINT_MESSAGE("Height maps texture : %li.", mHeightMaps->GetResourceId());
+	PRINT_MESSAGE("Normal maps texture : %li.", mNormalMaps->GetResourceId());
+	PRINT_MESSAGE("Blend maps texture : %li.", mBlendMaps->GetResourceId());
 
 	int mapIndex = 0;
 	for (MapDescList::const_iterator it = terrainDescList.begin(); it != terrainDescList.end(); ++it, ++mapIndex)
@@ -309,13 +348,12 @@ bool TerrainRenderer::LoadHeightMap(const Desc & terrainDesc)
 		assert(mapDesc.mHeightMapTextureSize >= mMapSize);
 
 		GLsizei texWidth, texHeight;
-		bool loaded = TextureManager::LoadTiffImage(texWidth, texHeight, mapDesc.mFilename, [this, heightBuffer, uvBuffer](uint32_t w, uint32_t h, const uint32_t * raster)
+		bool loaded = TextureManager::LoadTiffImage(texWidth, texHeight, mapDesc.mFilename, [this, heightBuffer](uint32_t w, uint32_t h, const uint32_t * raster)
 		{
 			h = std::min<uint32_t>(mMapSize, h);
 			w = std::min<uint32_t>(mMapSize, w);
 
 			GLfloat * heightPtr = heightBuffer;
-			GLfloat * uvPtr = uvBuffer;
 
 			const uint32_t * src = raster;
 			for (GLuint y = 0; y < h; ++y)
@@ -324,17 +362,16 @@ bool TerrainRenderer::LoadHeightMap(const Desc & terrainDesc)
 
 				for (GLuint x = 0; x < w; ++x)
 				{
-					GLfloat heightValue = ((GLfloat)((GLubyte *)src)[0]) / 255.f;
+					GLfloat heightValue = pow(((GLfloat)((GLubyte *)src)[0]) / 255.f, 1.7f);
 					++src;
+
+					assert(heightValue >= 0.f);
 
 					glm::vec2 d(mScale.x * (GLfloat)x, mScale.y * heightValue);
 					u += d.length();
 
 					heightPtr[0] = heightValue;
-					heightPtr += 3;
-
-					uvPtr[1] = u;
-					uvPtr += 2;
+					++heightPtr;
 				}
 			}
 		}, (uint32_t *)&mMapSize, (uint32_t *)&mMapSize);
@@ -345,55 +382,40 @@ bool TerrainRenderer::LoadHeightMap(const Desc & terrainDesc)
 			goto ExitLoadHeightMap;
 		}
 
-		// height (and texture uv) map generation
-		{
-			GLfloat v = 0;
-			GLfloat * heightPtr = heightBuffer;
-			GLfloat * uvPtr = uvBuffer;
-			for (GLint y = 0; y < mMapSize; ++y)
-			{
-				GLfloat heightValue = heightPtr[0];
-				glm::vec2 d(mScale.z * (GLfloat)y, mScale.y * heightValue);
-				v += d.length();
-
-				for (GLint x = 0; x < mMapSize; ++x)
-				{
-					uvPtr[2] = v;
-					uvPtr += 2;
-				}
-
-				heightPtr += mMapSize * 3;
-			}
-
-
-			glBindTexture(mUvMaps->GetTarget(), mUvMaps->GetResourceId());
-			glTexSubImage3D(mUvMaps->GetTarget(), 0, 0, 0, mapIndex, mMapSize, mMapSize, 1, GL_RG, GL_FLOAT, uvBuffer);
-			GL_CHECK_ERRORS;
-		}
+		glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
+		glTexSubImage3D(mHeightMaps->GetTarget(), 0, 0, 0, mapIndex, mMapSize, mMapSize, 1, GL_RED, GL_FLOAT, heightBuffer);
+		GL_CHECK_ERRORS;
 
 		// normal map generation
 		{
-			GLfloat * dxdzPtr = heightBuffer;
+			GLfloat * nPtr = normalBuffer;
 			for (GLint y = 0; y < mMapSize; ++y)
 			{
 				for (GLint x = 0; x < mMapSize; ++x)
 				{
-					glm::vec2 dxdz;
+					glm::vec3 n;
 
 					int x_1 = x == 0 ? mMapSize - 1 : ((x - 1) % mMapSize);
-					dxdz.x = heightBuffer[(y * mMapSize + x_1) * 3] - heightBuffer[(y * mMapSize + ((x + 1) % mMapSize)) * 3];
+					n.x = heightBuffer[(y * mMapSize + x_1)] - heightBuffer[(y * mMapSize + ((x + 1) % mMapSize))];
+					n.x *= mScale.y;
 
 					int y_1 = y == 0 ? mMapSize - 1 : ((y - 1) % mMapSize);
-					dxdz.y = heightBuffer[(y_1 * mMapSize + x) * 3] - heightBuffer[(((y + 1) % mMapSize) * mMapSize + x) * 3];
+					n.z = heightBuffer[(y_1 * mMapSize + x)] - heightBuffer[(((y + 1) % mMapSize) * mMapSize + x)];
+					n.z *= mScale.y;
 
-					dxdzPtr[0] = dxdz.x;
-					dxdzPtr[1] = dxdz.y;
-					dxdzPtr += 3;
+					n.y = mScale.x + mScale.z;
+					n = glm::normalize(n);
+
+					nPtr[0] = n.x;
+					nPtr[1] = n.y;
+					nPtr[2] = n.z;
+
+					nPtr += 3;
 				}
 			}
 
-			glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
-			glTexSubImage3D(mHeightMaps->GetTarget(), 0, 0, 0, mapIndex, mMapSize, mMapSize, 1, GL_RGB, GL_FLOAT, heightBuffer);
+			glBindTexture(mNormalMaps->GetTarget(), mNormalMaps->GetResourceId());
+			glTexSubImage3D(mNormalMaps->GetTarget(), 0, 0, 0, mapIndex, mMapSize, mMapSize, 1, GL_RGB, GL_FLOAT, normalBuffer);
 			GL_CHECK_ERRORS;
 		}
 
@@ -401,54 +423,58 @@ bool TerrainRenderer::LoadHeightMap(const Desc & terrainDesc)
 		{
 			GLubyte * blendPtr = blendBuffer;
 			GLfloat * heightPtr = heightBuffer;
+			GLfloat * normalPtr = normalBuffer;
 			for (GLint y = 0; y < mMapSize; ++y)
 			{
 				for (GLint x = 0; x < mMapSize; ++x)
 				{
 					GLfloat height = mScale.y * heightPtr[0];
 
-					glm::vec3 normal(heightPtr[1], 2.f, heightPtr[2]);
-					normal = glm::normalize(normal);
+					GLfloat slope = normalPtr[1];
 
-					GLfloat slope = normal.y;
-
-					heightPtr += 3;
+					normalPtr += 3;
+					++heightPtr;
 
 					glm::vec4 blendFactor(0.f);
 					GLfloat totalBlend = 0.f;
-					for (int i = 0; i < 4; ++i)
+					for (int i = 0; i < BlendMaterialCount; ++i)
 					{
-						const MaterialDesc & mat = mapDesc.mMaterials[i];
+						const MaterialDesc & mat = terrainDesc.mMaterials[mapDesc.mMatIndex[i]];
 						GLfloat heightBlend = ComputeWeight(height, mat.mMinHeight, mat.mMaxHeight);
 						GLfloat slopeBlend = ComputeWeight(slope, mat.mMinSlope, mat.mMaxSlope);
 
-						GLfloat blend = heightBlend * slopeBlend;
+						GLfloat blend = heightBlend * slopeBlend * mat.mStrength;
 						blendFactor += mask[i] * blend;
 						totalBlend += blend;
 					}
 
 					GLfloat blendScale = 255.f / totalBlend;
 					blendFactor *= blendScale;
-					for (int i = 0; i < 4; ++i)
+					//if (glm::dot(blendFactor, blendFactor) < 0.001f)
+					//{
+					//	blendFactor = glm::vec4(255.f, 0.f, 0.f, 0.f);
+					//}
+
+					for (int i = 0; i < BlendMaterialCount; ++i)
 					{
-						*blendPtr = glm::clamp<GLubyte>((GLubyte)blendFactor[i], 0, 255);
+						*blendPtr = (GLubyte)glm::clamp<GLfloat>(blendFactor[i], 0.f, 255.f);
 						++blendPtr;
 					}
 				}
 			}
 
 			glBindTexture(mBlendMaps->GetTarget(), mBlendMaps->GetResourceId());
-			glTexSubImage3D(mBlendMaps->GetTarget(), 0, 0, 0, mapIndex, mMapSize, mMapSize, 1, GL_RGBA, GL_UNSIGNED_BYTE, blendBuffer);
+			glTexSubImage3D(mBlendMaps->GetTarget(), 0, 0, 0, mapIndex, mMapSize, mMapSize, 1, dataFormat[BlendMaterialCount - 1], GL_UNSIGNED_BYTE, blendBuffer);
 			GL_CHECK_ERRORS;
 		}
 	}
 
-	glBindTexture(mUvMaps->GetTarget(), mUvMaps->GetResourceId());
-	glGenerateMipmap(mUvMaps->GetTarget());
-	GL_CHECK_ERRORS;
-
 	glBindTexture(mBlendMaps->GetTarget(), mBlendMaps->GetResourceId());
 	glGenerateMipmap(mBlendMaps->GetTarget());
+	GL_CHECK_ERRORS;
+
+	glBindTexture(mNormalMaps->GetTarget(), mNormalMaps->GetResourceId());
+	glGenerateMipmap(mNormalMaps->GetTarget());
 	GL_CHECK_ERRORS;
 
 	glBindTexture(mHeightMaps->GetTarget(), mHeightMaps->GetResourceId());
@@ -459,11 +485,11 @@ bool TerrainRenderer::LoadHeightMap(const Desc & terrainDesc)
 
 	result = true;
 
-	Engine::GetInstance()->DisplayTexture2DArray(mBlendMaps, 0);
+	//Engine::GetInstance()->DisplayTexture2DArray(mBlendMaps, 0);
 
 ExitLoadHeightMap:
 	free(heightBuffer);
-	free(uvBuffer);
+	free(normalBuffer);
 	free(blendBuffer);
 
 	return result;
@@ -476,44 +502,44 @@ void TerrainRenderer::UpdateMaterialTextureIndex(const Desc & desc)
 	const TextureInfoList & texInfo = GetTextureInfoList();
 
 	GLuint materialIndex = 0;
-	for (MapDescList::const_iterator it = desc.mTerrains.begin(); it != desc.mTerrains.end(); ++it)
+	for (MaterialDescList::const_iterator it = desc.mMaterials.begin(); it != desc.mMaterials.end(); ++it)
 	{
-		const MapDesc & mapDesc = *it;
+		const MaterialDesc & matDesc = *it;
+		
+		ModelRenderer::ShaderMaterial & mat = mShaderMaterialList[materialIndex];
 
-		for (int i = 0; i < 4; ++i)
-		{
-			const MaterialDesc & matDesc = mapDesc.mMaterials[i];
+		mat.mBaseColorR = matDesc.mBaseColor.r;
+		mat.mBaseColorG = matDesc.mBaseColor.g;
+		mat.mBaseColorB = matDesc.mBaseColor.b;
 
-			ModelRenderer::ShaderMaterial & mat = mShaderMaterialList[materialIndex];
+		mat.mMetallic = matDesc.mMetallic;
+		mat.mRoughness = matDesc.mRoughness;
+		mat.mPorosity = matDesc.mPorosity;
+		mat.mEmissive = matDesc.mEmissive;
+		mat.mHeightOffset = matDesc.mHeightOffset;
+		mat.mHeightScale = matDesc.mHeightScale;
 
-			mat.mBaseColorR = matDesc.mBaseColor.r;
-			mat.mBaseColorG = matDesc.mBaseColor.g;
-			mat.mBaseColorB = matDesc.mBaseColor.b;
-			
-			mat.mMetallic = matDesc.mMetallic;
-			mat.mRoughness = matDesc.mRoughness;
-			mat.mPorosity = matDesc.mPorosity;
-			mat.mEmissive = matDesc.mEmissive;
-			
-			mat.mBaseColorTextureIndex = matDesc.mBaseColorTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mBaseColorTextureIndex].GetLayerIndex() : -1;
-			mat.mBaseColorSamplerIndex = matDesc.mBaseColorTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mBaseColorTextureIndex].GetSamplerIndex() : -1;
+		mat.mBaseColorTextureIndex = matDesc.mBaseColorTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mBaseColorTextureIndex].GetLayerIndex() : -1;
+		mat.mBaseColorSamplerIndex = matDesc.mBaseColorTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mBaseColorTextureIndex].GetSamplerIndex() : -1;
 
-			mat.mMetallicTextureIndex = matDesc.mMetallicTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mMetallicTextureIndex].GetLayerIndex() : -1;
-			mat.mMetallicSamplerIndex = matDesc.mMetallicTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mMetallicTextureIndex].GetSamplerIndex() : -1;
+		mat.mMetallicTextureIndex = matDesc.mMetallicTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mMetallicTextureIndex].GetLayerIndex() : -1;
+		mat.mMetallicSamplerIndex = matDesc.mMetallicTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mMetallicTextureIndex].GetSamplerIndex() : -1;
 
-			mat.mEmissiveTextureIndex = matDesc.mEmissiveTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mEmissiveTextureIndex].GetLayerIndex() : -1;
-			mat.mEmissiveSamplerIndex = matDesc.mEmissiveTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mEmissiveTextureIndex].GetSamplerIndex() : -1;
+		mat.mEmissiveTextureIndex = matDesc.mEmissiveTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mEmissiveTextureIndex].GetLayerIndex() : -1;
+		mat.mEmissiveSamplerIndex = matDesc.mEmissiveTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mEmissiveTextureIndex].GetSamplerIndex() : -1;
 
-			mat.mNormalTextureIndex = matDesc.mNormalTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mNormalTextureIndex].GetLayerIndex() : -1;
-			mat.mNormalSamplerIndex = matDesc.mNormalTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mNormalTextureIndex].GetSamplerIndex() : -1;
+		mat.mNormalTextureIndex = matDesc.mNormalTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mNormalTextureIndex].GetLayerIndex() : -1;
+		mat.mNormalSamplerIndex = matDesc.mNormalTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mNormalTextureIndex].GetSamplerIndex() : -1;
 
-			mat.mRoughnessTextureIndex = matDesc.mRoughnessTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mRoughnessTextureIndex].GetLayerIndex() : -1;
-			mat.mRoughnessSamplerIndex = matDesc.mRoughnessTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mRoughnessTextureIndex].GetSamplerIndex() : -1;
+		mat.mRoughnessTextureIndex = matDesc.mRoughnessTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mRoughnessTextureIndex].GetLayerIndex() : -1;
+		mat.mRoughnessSamplerIndex = matDesc.mRoughnessTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mRoughnessTextureIndex].GetSamplerIndex() : -1;
 
-			PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) BaseColor=(%i, %i), Metallic=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i)", materialIndex, mat.mBaseColorSamplerIndex, mat.mBaseColorTextureIndex, mat.mMetallicSamplerIndex, mat.mMetallicTextureIndex, mat.mRoughnessSamplerIndex, mat.mRoughnessTextureIndex, mat.mNormalSamplerIndex, mat.mNormalTextureIndex, mat.mEmissiveSamplerIndex, mat.mEmissiveTextureIndex);
+		mat.mHeightTextureIndex = matDesc.mHeightTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mHeightTextureIndex].GetLayerIndex() : -1;
+		mat.mHeightSamplerIndex = matDesc.mHeightTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mHeightTextureIndex].GetSamplerIndex() : -1;
 
-			++materialIndex;
-		}
+		PRINT_MESSAGE("\t- Material %i : (Sampler, Texture) BaseColor=(%i, %i), Metallic=(%i, %i), Roughness=(%i, %i), Normal=(%i, %i), Emissive=(%i, %i), Height=(%i, %i)", materialIndex, mat.mBaseColorSamplerIndex, mat.mBaseColorTextureIndex, mat.mMetallicSamplerIndex, mat.mMetallicTextureIndex, mat.mRoughnessSamplerIndex, mat.mRoughnessTextureIndex, mat.mNormalSamplerIndex, mat.mNormalTextureIndex, mat.mEmissiveSamplerIndex, mat.mEmissiveTextureIndex, mat.mHeightSamplerIndex, mat.mHeightTextureIndex);
+
+		++materialIndex;
 	}
 }
 
@@ -531,7 +557,7 @@ GLfloat TerrainRenderer::ComputeWeight(GLfloat value, GLfloat minExtend, GLfloat
 		weight *= 2.0f;
 
 		weight *= weight;
-		weight = 1.f - weight;
+		weight = 1.f - std::fabs(weight);
 		weight = glm::clamp(weight, 0.001f, 1.f);
 	}
 

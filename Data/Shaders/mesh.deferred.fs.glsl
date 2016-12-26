@@ -30,7 +30,6 @@ void main(void)
 	mat.mRoughness = u_Materials[fs_in.MaterialIndex].mRoughness;
 	mat.mMetallic =  u_Materials[fs_in.MaterialIndex].mMetallic;
 	mat.mPorosity =  u_Materials[fs_in.MaterialIndex].mPorosity;
-	mat.mEmissive =  mat.mBaseColor * u_Materials[fs_in.MaterialIndex].mEmissive;
 
 	int baseColorTextureIndex = u_Materials[fs_in.MaterialIndex].mBaseColorTextureIndex;
 	if (baseColorTextureIndex != -1)
@@ -57,7 +56,11 @@ void main(void)
 	if(emissiveTextureIndex != -1)
 	{
 		int emissiveSamplerIndex = u_Materials[fs_in.MaterialIndex].mEmissiveSamplerIndex;
-		mat.mEmissive = mat.mEmissive * TexGet(emissiveSamplerIndex, vec2(fs_in.TexUV), emissiveTextureIndex).xyz;
+		mat.mEmissive = u_Materials[fs_in.MaterialIndex].mEmissive * TexGet(emissiveSamplerIndex, vec2(fs_in.TexUV), emissiveTextureIndex).xyz;
+	}
+	else
+	{
+		mat.mEmissive =  mat.mBaseColor * u_Materials[fs_in.MaterialIndex].mEmissive;
 	}
 
 	vec3 normal;
