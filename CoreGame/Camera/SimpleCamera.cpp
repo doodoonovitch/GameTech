@@ -127,6 +127,8 @@ void SimpleCamera::OnInit()
 
 		CoreFx::Engine* engine = CoreFx::Engine::GetInstance();
 
+		engine->SetExposure(0.6f);
+
 		mCamera = new CoreFx::Camera();
 		mCamera->SetupProjection(45.0f, 1.33333f, 1.f, 5000.f);
 		mCamera->LookAt(glm::vec3(10, 10.f, 20.f), glm::vec3(10.f, 10.f, 5.f), glm::vec3(0, 1, 0));
@@ -159,52 +161,55 @@ void SimpleCamera::OnInit()
 
 			Renderer::TextureDescList & texList = desc.mTextures;
 
-//#define USE_PBR_TEXTURES
+#define USE_PBR_TEXTURES
 #ifdef USE_PBR_TEXTURES
 
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));				// 0
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));		// 1
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/mossy-ground1-albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));						// 2
-			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/planetsurface1-albedo.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));						// 3
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/worn-coral-color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat));					// 3
 
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));			// 4
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 5
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/mossy-ground1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));					// 6
-			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/planetsurface1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));				// 7
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/worn-coral-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));				// 7
 
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));			// 8
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));	// 9
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/mossy-ground1-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));					// 10
-			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/planetsurface1-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));					// 11
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/worn-coral-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));					// 11
 
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat));			// 12
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat));	// 13
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/worn-coral-metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat));				// 14
 
 			desc.mMaterials[0].SetElevation(0.f * yScale, 0.8f * yScale).SetTexScale(0.1f)
 				.SetSlope(0.79f, 1.f)
 				.SetStrength(0.5f)
 				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(3)
-				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(7)
-				.SetHeight(1.f).SetHeightTextureIndex(11);
+				.SetMetallic(1.f).SetMetallicTextureIndex(14).SetRoughness(1.f).SetRoughnessTextureIndex(7)
+				.SetHeightScale(1.f).SetHeightOffset(0.f).SetHeightTextureIndex(11);
 
 			desc.mMaterials[1].SetElevation(0.01f * yScale, .6f * yScale).SetTexScale(0.1f)
 				.SetSlope(0.79f, 1.f)
 				.SetStrength(2.f)
 				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(2)
 				.SetMetallic(0).SetRoughness(1.f).SetRoughnessTextureIndex(6)
-				.SetHeight(1.f).SetHeightTextureIndex(10);
+				.SetHeightScale(1.f).SetHeightOffset(0.f).SetHeightTextureIndex(10);
 
 			desc.mMaterials[2].SetElevation(0.4f * yScale, 1.1f * yScale).SetTexScale(0.1f)
 				.SetSlope(0.4f, 1.f)
 				.SetStrength(1.f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(1)
 				.SetMetallic(1.f).SetMetallicTextureIndex(13).SetRoughness(1.f).SetRoughnessTextureIndex(5)
-				.SetHeight(1.f).SetHeightTextureIndex(9);
+				.SetHeightScale(1.f).SetHeightOffset(0.f).SetHeightTextureIndex(9);
 
 			desc.mMaterials[3].SetElevation(0.f * yScale, 1.1f * yScale).SetTexScale(0.1f)
 				.SetSlope(0.f, .8f)
 				.SetStrength(2.f)
+				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(0)
 				.SetMetallic(1).SetMetallicTextureIndex(12).SetRoughness(1.f).SetRoughnessTextureIndex(4)
-				.SetHeight(1.f).SetHeightTextureIndex(8);
+				.SetHeightScale(1.f).SetHeightOffset(0.f).SetHeightTextureIndex(8);
 
 #else //USE_PBR_TEXTURES
 
