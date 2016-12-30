@@ -19,7 +19,7 @@ layout (std430, binding = 1) buffer Materials
 
 uniform vec3 u_Scale;
 uniform float u_TriplanarBlendSharpness = 2.0;
-uniform float u_TexScale = 0.1;
+uniform float u_TexScale = 0.08;
 
 uniform sampler2DArray u_HeightMap;
 uniform sampler2DArray u_NormalMap;

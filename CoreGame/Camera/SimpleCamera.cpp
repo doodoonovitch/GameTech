@@ -127,7 +127,7 @@ void SimpleCamera::OnInit()
 
 		CoreFx::Engine* engine = CoreFx::Engine::GetInstance();
 
-		engine->SetExposure(0.6f);
+		engine->SetExposure(0.06f);
 
 		mCamera = new CoreFx::Camera();
 		mCamera->SetupProjection(45.0f, 1.33333f, 1.f, 5000.f);
@@ -187,7 +187,7 @@ void SimpleCamera::OnInit()
 				.SetSlope(0.79f, 1.f)
 				.SetStrength(0.5f)
 				.SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(3)
-				.SetMetallic(1.f).SetMetallicTextureIndex(14).SetRoughness(1.f).SetRoughnessTextureIndex(7)
+				.SetMetallic(0.f).SetMetallicTextureIndex(14).SetRoughness(1.f).SetRoughnessTextureIndex(7)
 				.SetHeightScale(1.f).SetHeightOffset(0.f).SetHeightTextureIndex(11);
 
 			desc.mMaterials[1].SetElevation(0.01f * yScale, .6f * yScale).SetTexScale(0.1f)
