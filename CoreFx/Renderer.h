@@ -176,7 +176,7 @@ public:
 
 		MaterialDesc & SetEmissive(GLfloat value)
 		{
-			SetValue(mEmissive, value, 0.f, 1.f);
+			mEmissive = value;
 			return *this;
 		}
 

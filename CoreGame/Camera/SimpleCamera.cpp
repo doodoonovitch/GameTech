@@ -109,6 +109,33 @@ void SimpleCamera::SetupViewportAndProjection()
 
 #define TEXFOLDER "medias/Textures/"
 
+struct InstancePerModelParams
+{
+	glm::uvec3 mInstanceCount = glm::uvec3(1, 1, 1);
+	glm::vec3 mSpacing = glm::vec3(10.f, 10.f, 10.f);
+
+	InstancePerModelParams()
+	{
+	}
+
+	InstancePerModelParams(const InstancePerModelParams & src)
+		: mInstanceCount(src.mInstanceCount)
+		, mSpacing(src.mSpacing)
+	{
+	}
+
+	InstancePerModelParams(const glm::uvec3 & instanceCount, const glm::vec3 & spacing)
+		: mInstanceCount(instanceCount)
+		, mSpacing(spacing)
+	{
+	}
+
+	InstancePerModelParams(const glm::uvec3 & instanceCount)
+		: mInstanceCount(instanceCount)
+	{
+	}
+};
+
 void SimpleCamera::OnInit()
 {
 	const glm::vec3 XAxis(1.f, 0.f, 0.f);
@@ -172,7 +199,7 @@ void SimpleCamera::OnInit()
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));			// 4
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));	// 5
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/mossy-ground1-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));					// 6
-			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Ground/worn-coral-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));				// 7
+			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/worn-coral-roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat));				// 7
 
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/cliff-rockface1-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));			// 8
 			texList.push_back(Renderer::TextureDesc(TEXFOLDER "Rock & Stone/wornredishroughrockface-height.tif", TextureCategory::HeightMap, TextureWrap::Repeat, TextureWrap::Repeat));	// 9
@@ -422,7 +449,7 @@ void SimpleCamera::OnInit()
 			opt.SetLogInfo(true);
 			//opt.SetLogBoneInfo(true);
 
-			std::vector<glm::uvec3> instancePerModel;
+			std::vector<InstancePerModelParams> instancePerModel;
 
 			Geometry::ModelData modelData;
 			Geometry::ModelData::DataContextBase dataCtxBase;
@@ -505,7 +532,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 4;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				
@@ -550,7 +577,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 4;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::ivec3(5, 5, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::ivec3(5, 5, dataCtxBase.mModelMappingIndexBase + i)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.56f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
@@ -579,7 +606,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 3;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(6, 4, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(6, 4, dataCtxBase.mModelMappingIndexBase + i)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
@@ -614,7 +641,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i)));
 			}
 #endif
 #ifdef LARACROFT_MODEL
@@ -626,7 +653,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i)));
 			}
 #endif
 #ifdef SHIELD_MODEL
@@ -647,7 +674,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 5;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(3, 3, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(3, 3, dataCtxBase.mModelMappingIndexBase + i)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
@@ -708,7 +735,7 @@ void SimpleCamera::OnInit()
 				}
 				
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(3, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(3, 1, dataCtxBase.mModelMappingIndexBase + i)));
 
 				for (GLuint i = 1; i < modelCount; ++i)
 					modelData.CopyAndAddModel(dataCtxBase.mModelMappingIndexBase, i * 4);
@@ -734,7 +761,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(4, 3, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 3, dataCtxBase.mModelMappingIndexBase + i)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
@@ -769,12 +796,12 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(20, 20, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(5.f, 5.f, 20.f)));
 			}
 #endif
 #ifdef UFO_MODEL
 			{
-				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				glm::mat4 m = glm::scale(glm::vec3(.1f));
 				//opt.SetFlipWindingOrder(true);
 				opt.SetPreTransformVertices(m);
 
@@ -792,16 +819,16 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 5] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 				texList[dataCtxBase.mTextureIndexBase + 6] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_diffuse2_glow.tif", TextureCategory::Emissive, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
-				matList.resize(dataCtxBase.mMaterialIndexBase + 2);
+				matList.resize(dataCtxBase.mMaterialIndexBase + 3);
 
-				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetEmissive(1.f).SetEmissiveTextureIndex(dataCtxBase.mTextureIndexBase + 3);
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetEmissive(100.f).SetEmissiveTextureIndex(dataCtxBase.mTextureIndexBase + 3);
 
-				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 4).SetMetallic(0.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(.5f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 5).SetEmissive(1.f).SetEmissiveTextureIndex(dataCtxBase.mTextureIndexBase + 6);
+				matList[dataCtxBase.mMaterialIndexBase + 2].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 4).SetMetallic(0.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(.5f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 5).SetEmissive(100.f).SetEmissiveTextureIndex(dataCtxBase.mTextureIndexBase + 6);
 
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i)));
 			}
 #endif
 #ifdef SPONZA
@@ -814,15 +841,15 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i)));
 			}
 #endif
 
 			GLuint capacity = 0;
 			GLuint modelCount = (GLuint)instancePerModel.size();
-			for (std::vector<glm::uvec3>::const_iterator it = instancePerModel.begin(); it != instancePerModel.end(); ++it)
+			for (std::vector<InstancePerModelParams>::const_iterator it = instancePerModel.begin(); it != instancePerModel.end(); ++it)
 			{
-				capacity += it->x * it->y;
+				capacity += it->mInstanceCount.x * it->mInstanceCount.y;
 			}
 
 			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData, capacity > 0 ? capacity : 1);
@@ -831,7 +858,6 @@ void SimpleCamera::OnInit()
 				GLuint modelCount = (GLuint)modelData.GetModelMappingList().size();
 
 				glm::vec3 position = glm::vec3(0.f, 10.f, 0.f);
-				glm::vec3 transl = glm::vec3(10.f, 10.f, -10.f);
 
 				glm::vec3 rotAngle(0.f);
 				glm::vec3 p(0.f);
@@ -840,7 +866,9 @@ void SimpleCamera::OnInit()
 
 				for (GLuint i = 0; i < modelCount; ++i)
 				{
-					const glm::uvec3 & modelInfo = instancePerModel[i];
+					const InstancePerModelParams & modelParam = instancePerModel[i];
+					const glm::uvec3 & modelInfo = modelParam.mInstanceCount;
+					const glm::vec3 & spacing = modelParam.mSpacing;
 
 					glm::quat qX = glm::angleAxis(rotAngle.x, XAxis);
 					rotAngle.x += rotX;
@@ -872,13 +900,13 @@ void SimpleCamera::OnInit()
 								//model->GetFrame()->SetScale(scale);
 							}
 
-							p.z += transl.z;
+							p.z += spacing.z;
 						}
 
-						p.y += transl.y;
+						p.y += spacing.y;
 					}
 
-					p.x += transl.x;
+					p.x += spacing.x;
 				}
 
 				PRINT_MESSAGE("Model instance count = %li.", modelRenderer->GetCount());
