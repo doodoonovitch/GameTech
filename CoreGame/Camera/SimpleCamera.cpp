@@ -384,7 +384,8 @@ void SimpleCamera::OnInit()
 //#define BOX_MODEL
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
-#define CERBERUS_MODEL
+//#define CERBERUS_MODEL
+#define UFO_MODEL
 //#define SHIELD_MODEL
 //#define BBUNIT_MODEL
 //#define BARREL_MODEL
@@ -765,6 +766,38 @@ void SimpleCamera::OnInit()
 				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Cerberus/Textures/Cerberus_N.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
 
 				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.56f, 0.57f, 0.58f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i));
+			}
+#endif
+#ifdef UFO_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				//opt.SetFlipWindingOrder(true);
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/Ufo/Low_poly_UFO.obj", "Medias/Objects/Ufo/Textures", opt, &dataCtxBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 7);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_diffuse.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_diffuse_glow.tif", TextureCategory::Emissive, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 4] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_diffuse2.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 5] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 6] = Renderer::TextureDesc("Medias/Objects/Ufo/Textures/ufo_diffuse2_glow.tif", TextureCategory::Emissive, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + 2);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetEmissive(1.f).SetEmissiveTextureIndex(dataCtxBase.mTextureIndexBase + 3);
+
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 4).SetMetallic(0.f).SetMetallicTextureIndex(Renderer::NoTexture).SetRoughness(.5f).SetRoughnessTextureIndex(Renderer::NoTexture).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 5).SetEmissive(1.f).SetEmissiveTextureIndex(dataCtxBase.mTextureIndexBase + 6);
+
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
