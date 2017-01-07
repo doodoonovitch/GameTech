@@ -1245,6 +1245,7 @@ void SimpleCamera::InitializeTextPages()
 	{
 		const wchar_t sExposure[] = L"Exposure : ";
 		const wchar_t sGamma[] = L"Gamma : ";
+		const wchar_t sSSAOStatus[] = L"SSAO : ";
 		const wchar_t sSSAORadius[] = L"SSAO Radius : ";
 		const wchar_t sSSAOKernel[] = L"SSAO Kernel : ";
 
@@ -1261,6 +1262,11 @@ void SimpleCamera::InitializeTextPages()
 		mGammaTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xx.xx", (GLuint)EFont::NormalBold, mValueColor);
 		mEngineInfoRow += mNormalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mGammaTextLineIndex, Engine::GetInstance()->GetGamma(), L"%2.2f");
+
+		frameInfoPage->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sSSAOStatus, (GLuint)EFont::Normal, mLabelColor);
+		col = mEngineInfoCol + frameInfoPage->MeasureStringInPixel(sSSAOStatus, (GLuint)EFont::Normal);
+		mSSAOStatusIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), Engine::GetInstance()->IsSSAOEnable() ? L"enabled" : L"disabled", (GLuint)EFont::NormalBold, mValueColor);
+		mEngineInfoRow += mNormalLineHeight + Interline2;
 
 		frameInfoPage->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sSSAORadius, (GLuint)EFont::Normal, mLabelColor);
 		col = mEngineInfoCol + frameInfoPage->MeasureStringInPixel(sSSAORadius, (GLuint)EFont::Normal);
@@ -1364,6 +1370,10 @@ void SimpleCamera::InitializeTextPages()
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": view deferred rendering buffers", (GLuint)EFont::Normal, color4);
 	row += mNormalLineHeight + Interline2;
 
+	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[F3]", (GLuint)EFont::NormalBold, color3);
+	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": enable / disable SSAO", (GLuint)EFont::Normal, color4);
+	row += mNormalLineHeight + Interline2;
+
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column2, row), L"[X][x]", (GLuint)EFont::NormalBold, color3);
 	mHelpInfoPage.lock()->PushBackText(glm::ivec2(Column3, row), L": draw wireframes", (GLuint)EFont::Normal, color4);
 	row += mNormalLineHeight + Interline2;
@@ -1403,7 +1413,7 @@ void SimpleCamera::UpdateSunPosTextPage()
 
 	const glm::u8vec4 color1 = DarkTextColor;
 
-	int row = 200;
+	int row = 300;
 
 	const int textBufferSize = 300;
 	wchar_t textBuffer[textBufferSize];
@@ -1741,7 +1751,6 @@ void SimpleCamera::OnKeyDown(WPARAM key, bool wasPressed, int /*repeatCount*/, b
 		UpdateSunPosition();
 		UpdateSunPosTextPage();
 		break;
-
 	}
 	//glutPostRedisplay();
 }
@@ -1845,12 +1854,35 @@ void SimpleCamera::OnUpdate()
 		wasF1Pressed = false;
 	}
 
+	static bool wasF3Pressed = false;
+	if (GetAsyncKeyState(VK_F3) & 0x8000)
+	{
+		if (mShowDeferredBufferState == 0)
+		{
+			if (!wasF3Pressed)
+			{
+				Engine::GetInstance()->EnableSSAO(!Engine::GetInstance()->IsSSAOEnable());
+				mFrameInfoPage.lock()->UpdateTextString(mSSAOStatusIndex, Engine::GetInstance()->IsSSAOEnable() ? L"enabled" : L"disabled");
+			}
+			wasF3Pressed = true;
+		}
+	}
+	else
+	{
+		wasF3Pressed = false;
+	}
+
 	static bool wasF2Pressed = false;
 	if (GetAsyncKeyState(VK_F2) & 0x8000)
 	{
 		if (!wasF2Pressed)
 		{
 			mShowDeferredBufferState = (mShowDeferredBufferState + 1) % (GLint)Engine::EDeferredDebug::__count__;
+			if (!Engine::GetInstance()->IsSSAOEnable() && (mShowDeferredBufferState == (GLint)Engine::EDeferredDebug::ShowSSAOBuffer))
+			{
+				mShowDeferredBufferState = (mShowDeferredBufferState + 1) % (GLint)Engine::EDeferredDebug::__count__;
+			}
+
 			if (mShowDeferredBufferState == 0)
 			{
 				Engine::GetInstance()->DisableDeferredDebug();

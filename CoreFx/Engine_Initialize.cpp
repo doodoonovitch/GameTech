@@ -460,6 +460,7 @@ void Engine::InternalInitializeDeferredPassShader()
 		"u_lightDataSampler",
 		"u_EnvMapSampler",
 		"u_IsEnvMapHDR",
+		"u_IsSSAOEnabled",
 	};
 
 	mDeferredShader.CreateAndLinkProgram();
@@ -474,8 +475,8 @@ void Engine::InternalInitializeDeferredPassShader()
 	glUniform1i(mDeferredShader.GetUniform(u_DepthSampler), 2);
 	glUniform1i(mDeferredShader.GetUniform(u_NBufferSampler), 3);
 	glUniform1i(mDeferredShader.GetUniform(u_GBuffer1Sampler), 4);
-	glUniform1i(mDeferredShader.GetUniform(u_SSAOSampler), 5);
-	glUniform1i(mDeferredShader.GetUniform(u_EnvMapSampler), 6);
+	glUniform1i(mDeferredShader.GetUniform(u_EnvMapSampler), 5);
+	glUniform1i(mDeferredShader.GetUniform(u_SSAOSampler), 6);
 	
 	//glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
 	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)

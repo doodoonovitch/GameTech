@@ -290,6 +290,16 @@ public:
 	}
 
 
+	bool IsSSAOEnable() const
+	{
+		return mIsSSAOEnabled != 0;
+	}
+
+	void EnableSSAO(bool enable)
+	{
+		mIsSSAOEnabled = enable;
+	}
+
 	// ---------------------------------------------------------------------------
 	// Debug Tools
 	//
@@ -456,6 +466,7 @@ private:
 		u_lightDataSampler,
 		u_EnvMapSampler,
 		u_IsEnvMapHDR,
+		u_IsSSAOEnabled,
 
 		__deferred_uniforms_count__
 	};
@@ -681,6 +692,8 @@ private:
 
 	const CubeMapTexture * mEnvMapTexture = nullptr;
 	GLboolean mIsEnvMapHDR = false;
+
+	GLboolean mIsSSAOEnabled = true;
 
 };
 

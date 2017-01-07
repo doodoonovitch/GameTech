@@ -169,6 +169,7 @@ private:
 	size_t mGammaTextLineIndex;
 	size_t mSSAORadiusTextLineIndex;
 	size_t mSSAOKernelTextLineIndex;
+	size_t mSSAOStatusIndex;
 
 	size_t mOceanTexScaleTextLineIndex;
 	size_t mOceanTexWaveAmplitudeTextLineIndex;

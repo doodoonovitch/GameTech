@@ -380,70 +380,72 @@ void Engine::InternalRenderObjects()
 	// SSAO pass
 	// -----------------------------------------------------------------------
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[SSAO_FBO]);
-	glDisable(GL_DEPTH_TEST);
-	glDepthMask(GL_FALSE);
+	if (mIsSSAOEnabled)
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[SSAO_FBO]);
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
 
-	mSSAOShader.Use();
+		mSSAOShader.Use();
 
-	glUniform1f(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_Radius), mSSAORadius);
-	glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_KernelSize), mSSAOKernelSize);
-	glUniform2fv(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_NoiseScale), 1, glm::value_ptr(mNoiseScale));
+		glUniform1f(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_Radius), mSSAORadius);
+		glUniform1i(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_KernelSize), mSSAOKernelSize);
+		glUniform2fv(mSSAOShader.GetUniform((int)ESSAOShaderUniformIndex::u_NoiseScale), 1, glm::value_ptr(mNoiseScale));
 
-	glBindVertexArray(mQuad->GetVao());
+		glBindVertexArray(mQuad->GetVao());
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Noise]);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Noise]);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_1D, mSSAOBuffers[SSAOBuffer_Kernel]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_1D, mSSAOBuffers[SSAOBuffer_Kernel]);
 
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
 
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
 
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-	mSSAOShader.UnUse();
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+		mSSAOShader.UnUse();
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
 
-	// -----------------------------------------------------------------------
-	// SSAO blur
-	// -----------------------------------------------------------------------
-	
-	mSSAOBlurShader.Use();
+		// -----------------------------------------------------------------------
+		// SSAO blur
+		// -----------------------------------------------------------------------
 
-	glUniform2i(mSSAOBlurShader.GetUniform((int)ESSAOBlurShaderUniformIndex::u_TexOffset), 1, 0);
-	
-	glBindImageTexture(0, mSSAOBuffers[SSAOBuffer_Temp], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
+		mSSAOBlurShader.Use();
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
+		glUniform2i(mSSAOBlurShader.GetUniform((int)ESSAOBlurShaderUniformIndex::u_TexOffset), 1, 0);
 
-	glDispatchCompute(mGBufferWidth, mGBufferHeight, 1);
+		glBindImageTexture(0, mSSAOBuffers[SSAOBuffer_Temp], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
 
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
 
-	glUniform2i(mSSAOBlurShader.GetUniform((int)ESSAOBlurShaderUniformIndex::u_TexOffset), 0, 1);
+		glDispatchCompute(mGBufferWidth, mGBufferHeight, 1);
 
-	glBindImageTexture(0, mSSAOBuffers[SSAOBuffer_Main], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Temp]);
+		glUniform2i(mSSAOBlurShader.GetUniform((int)ESSAOBlurShaderUniformIndex::u_TexOffset), 0, 1);
 
-	glDispatchCompute(mGBufferWidth, mGBufferHeight, 1);
+		glBindImageTexture(0, mSSAOBuffers[SSAOBuffer_Main], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R16F);
 
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Temp]);
 
-	mSSAOBlurShader.UnUse();
+		glDispatchCompute(mGBufferWidth, mGBufferHeight, 1);
 
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+		mSSAOBlurShader.UnUse();
+	}
 	// -----------------------------------------------------------------------
 	// 
 	// -----------------------------------------------------------------------
@@ -462,6 +464,9 @@ void Engine::InternalRenderObjects()
 		glDisable(GL_DEPTH_TEST);
 
 		mDeferredShader.Use();
+
+		glUniform1i(mDeferredShader.GetUniform(u_IsSSAOEnabled), mIsSSAOEnabled);
+
 		glBindVertexArray(mQuad->GetVao());
 
 		glActiveTexture(GL_TEXTURE0);
@@ -480,11 +485,13 @@ void Engine::InternalRenderObjects()
 		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
 
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
-
-		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(mEnvMapTexture->GetTarget(), mEnvMapTexture->GetResourceId());
-		
+
+		if (mIsSSAOEnabled)
+		{
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
+		}
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);

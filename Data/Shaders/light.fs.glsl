@@ -17,6 +17,7 @@ uniform sampler2D u_SSAOSampler;
 uniform samplerCube u_EnvMapSampler;
 
 uniform bool u_IsEnvMapHDR;
+uniform bool u_IsSSAOEnabled;
 
 
 
@@ -135,7 +136,15 @@ vec4 BRDFLight(FragmentInfo fi)
 		++lightIndex;
 	}
 	
-	float ambientOcclusion = texture(u_SSAOSampler, fs_in.TexUV, 0).r;
+	float ambientOcclusion;
+	if (u_IsSSAOEnabled)
+	{
+		ambientOcclusion = texture(u_SSAOSampler, fs_in.TexUV, 0).r;
+	}
+	else
+	{
+		ambientOcclusion = 1.f;
+	}
 
     vec3 r = reflect(-v, fi.mNormal);
 	vec3 envColor = texture(u_EnvMapSampler, r).rgb;
