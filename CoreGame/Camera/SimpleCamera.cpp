@@ -412,7 +412,12 @@ void SimpleCamera::OnInit()
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
 //#define CERBERUS_MODEL
-#define UFO_MODEL
+//#define UFO_MODEL
+//#define ASHTRAY_MODEL
+//#define CONE_MODEL
+#define PIPEBOMB_MODEL
+//#define SLINGER_MODEL
+//#define ROUGHAXE_MODEL
 //#define SHIELD_MODEL
 //#define BBUNIT_MODEL
 //#define BARREL_MODEL
@@ -799,6 +804,137 @@ void SimpleCamera::OnInit()
 					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(20, 20, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(5.f, 5.f, 20.f)));
 			}
 #endif
+#ifdef ASHTRAY_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(.01f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/AshtrayPBR/Ashtray.obj", "Medias/Objects/AshtrayPBR/Textures", opt, &dataCtxBase);
+				
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/AshtrayPBR/Textures/Aschenbecher_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/AshtrayPBR/Textures/Aschenbecher_01_Metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/AshtrayPBR/Textures/Aschenbecher_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/AshtrayPBR/Textures/Aschenbecher_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + 1);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);			
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i)));
+			}
+#endif
+#ifdef CONE_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/ConePBR/Cone_01.obj", "Medias/Objects/ConePBR/Textures", opt, &dataCtxBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/ConePBR/Textures/Cone_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/ConePBR/Textures/Cone_01_Metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/ConePBR/Textures/Cone_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/ConePBR/Textures/Cone_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + 1);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(40, 40, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(15.f)));
+			}
+#endif
+#ifdef PIPEBOMB_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/PipeBombPBR/PipeBomb.obj", "Medias/Objects/PipeBombPBR/Textures", opt, &dataCtxBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/PipeBombPBR/Textures/Pipe_Bomb_01_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/PipeBombPBR/Textures/Pipe_Bomb_01_Metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/PipeBombPBR/Textures/Pipe_Bomb_01_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/PipeBombPBR/Textures/Pipe_Bomb_01_Normal.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + 1);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(40, 40, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+			}
+#endif
+#ifdef SLINGER_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/SMG-60-MinigunPBR/Slinger_00.obj", "Medias/Objects/SMG-60-MinigunPBR/Textures", opt, &dataCtxBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 4);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/SMG-60-MinigunPBR/Textures/Slinger_Base_Color.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/SMG-60-MinigunPBR/Textures/Slinger_Base_Metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/SMG-60-MinigunPBR/Textures/Slinger_Base_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/SMG-60-MinigunPBR/Textures/Slinger_Base_NormalGL.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + 1);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(40, 40, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+			}
+#endif
+#ifdef ROUGHAXE_MODEL
+			{
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
+				opt.SetPreTransformVertices(m);
+
+				modelData.LoadModel("Medias/Objects/RoughAxePBR/RoughAxe.fbx", "Medias/Objects/RoughAxePBR/Textures", opt, &dataCtxBase);
+
+				Renderer::MaterialDescList & matList = modelData.GetMaterialDescList();
+				Renderer::TextureDescList & texList = modelData.GetTextureDescList();
+
+				texList.resize(dataCtxBase.mTextureIndexBase + 8);
+				texList[dataCtxBase.mTextureIndexBase + 0] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHandle_BaseColor.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 1] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHandle_Metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 2] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHandle_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 3] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHandle_NormalGL.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 4] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHead_BaseColor.tif", TextureCategory::Diffuse, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 5] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHead_Metallic.tif", TextureCategory::Metallic, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 6] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHead_Roughness.tif", TextureCategory::Roughness, TextureWrap::Repeat, TextureWrap::Repeat, false);
+				texList[dataCtxBase.mTextureIndexBase + 7] = Renderer::TextureDesc("Medias/Objects/RoughAxePBR/Textures/RoughAxe_RoughWarAxeHead_NormalGL.tif", TextureCategory::NormalMap, TextureWrap::Repeat, TextureWrap::Repeat, false);
+
+				matList.resize(dataCtxBase.mMaterialIndexBase + 2);
+
+				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 4).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 5).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 6).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 7).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+				matList[dataCtxBase.mMaterialIndexBase + 1].SetBaseColor(glm::vec3(1.f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(1.f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
+
+				const GLuint modelCount = 1;
+				for (GLuint i = 0; i < modelCount; ++i)
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(40, 40, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+			}
+#endif
 #ifdef UFO_MODEL
 			{
 				glm::mat4 m = glm::scale(glm::vec3(.1f));
@@ -828,7 +964,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(5, 1, dataCtxBase.mModelMappingIndexBase + i)));
 			}
 #endif
 #ifdef SPONZA
