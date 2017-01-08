@@ -518,6 +518,7 @@ void TerrainRenderer::UpdateMaterialTextureIndex(const Desc & desc)
 		mat.mEmissive = matDesc.mEmissive;
 		mat.mHeightOffset = matDesc.mHeightOffset;
 		mat.mHeightScale = matDesc.mHeightScale;
+		mat.mEnvMapType = (GLuint)matDesc.mEnvMapType;
 
 		mat.mBaseColorTextureIndex = matDesc.mBaseColorTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mBaseColorTextureIndex].GetLayerIndex() : -1;
 		mat.mBaseColorSamplerIndex = matDesc.mBaseColorTextureIndex != NoTexture ? (GLint)texInfo[matDesc.mBaseColorTextureIndex].GetSamplerIndex() : -1;

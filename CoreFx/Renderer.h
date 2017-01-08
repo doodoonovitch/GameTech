@@ -106,6 +106,12 @@ public:
 	typedef std::uint8_t TextureIndex;
 	static constexpr TextureIndex NoTexture = (TextureIndex)-1;
 
+	enum class EEnvMapType
+	{
+		EnvMap_1,
+		EnvMap_2
+	};
+
 	struct MaterialDesc
 	{
 	protected:
@@ -131,6 +137,7 @@ public:
 			, mNormalTextureIndex(NoTexture)
 			, mEmissiveTextureIndex(NoTexture)
 			, mHeightTextureIndex(NoTexture)
+			, mEnvMapType(EEnvMapType::EnvMap_2)
 		{}
 
 		MaterialDesc(const MaterialDesc & src)
@@ -147,6 +154,7 @@ public:
 			, mNormalTextureIndex(src.mNormalTextureIndex)
 			, mEmissiveTextureIndex(src.mEmissiveTextureIndex)
 			, mHeightTextureIndex(src.mHeightTextureIndex)
+			, mEnvMapType(src.mEnvMapType)
 		{
 		}
 
@@ -228,6 +236,11 @@ public:
 			return *this;
 		}
 
+		MaterialDesc & SetEnvMapType(EEnvMapType envMapType)
+		{
+			mEnvMapType = envMapType;
+			return *this;
+		}
 
 		glm::vec3 mBaseColor;
 		GLfloat mMetallic;
@@ -242,6 +255,8 @@ public:
 		TextureIndex mNormalTextureIndex;
 		TextureIndex mEmissiveTextureIndex;
 		TextureIndex mHeightTextureIndex;
+		EEnvMapType mEnvMapType;
+
 	};
 
 	typedef std::vector<MaterialDesc> MaterialDescList;
@@ -290,6 +305,9 @@ public:
 	virtual void RenderWireFrame() = 0;
 
 	bool GetIsInitialized() const { return mIsInitialized; }
+	bool GetIsUsedToGenerateEnvMap() const { return mUseToGenEnvMap; }
+
+	void SetIsUsedToGenerateEnvMap(bool value) { mUseToGenEnvMap = value; }
 
 	ERenderPass GetRenderPass() const { return mRenderPass; }
 
@@ -317,6 +335,7 @@ protected:
 	TextureMapping mTextureMapping;
 	ERenderPass mRenderPass;
 	bool mIsInitialized;
+	bool mUseToGenEnvMap;
 
 };
 

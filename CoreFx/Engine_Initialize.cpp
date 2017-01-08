@@ -75,58 +75,48 @@ void Engine::InternalGenerateBuffersAndFBOs()
 	InternalCreateGBuffers();
 	InternalCreateHdrBuffers();
 	InternalCreateSSAOBuffers();
+	InternalInitializeCubemapGen();
 }
 
-void Engine::InternalCreateGBuffers()
+GLenum Engine::CreateGBuffers(GLuint * gbuffers, GLuint fbo, GLsizei width, GLsizei height)
 {
-	PRINT_BEGIN_SECTION;
-	PRINT_MESSAGE("Initialize Deferred framebuffers.....");
-	PRINT_MESSAGE("Size = %li x %li", mGBufferWidth, mGBufferHeight);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, mFBOs[Deferred_FBO]);
-	glGenTextures((int)EGBuffer::__gBuffer_count__, mGBuffers);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glGenTextures((int)EGBuffer::__gBuffer_count__, gbuffers);
 	GL_CHECK_ERRORS;
 
-	PRINT_GEN_FRAMEBUFFER("[Engine]", mFBOs[Deferred_FBO]);
-	//PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_PositionBuffer]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::NormalBuffer]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::UI32Buffer1]);
-	PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::DepthBuffer]);
-
-
-	//glBindTexture(GL_TEXTURE_2D, mGBuffers[gBuffer_PositionBuffer]);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+	//glBindTexture(GL_TEXTURE_2D, gbuffers[gBuffer_PositionBuffer]);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mGBuffers[gBuffer_PositionBuffer], 0);
+	//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, gbuffers[gBuffer_PositionBuffer], 0);
 	//GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
+	glBindTexture(GL_TEXTURE_2D, gbuffers[(int)EGBuffer::NormalBuffer]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::NormalBuffer], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gbuffers[(int)EGBuffer::NormalBuffer], 0);
 	GL_CHECK_ERRORS;
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, mGBufferWidth, mGBufferHeight, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, nullptr);
+	glBindTexture(GL_TEXTURE_2D, gbuffers[(int)EGBuffer::UI32Buffer1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32UI, width, height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gbuffers[(int)EGBuffer::UI32Buffer1], 0);
 	GL_CHECK_ERRORS;
 
 
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, mGBufferWidth, mGBufferHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glBindTexture(GL_TEXTURE_2D, gbuffers[(int)EGBuffer::DepthBuffer]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gbuffers[(int)EGBuffer::DepthBuffer], 0);
 	GL_CHECK_ERRORS;
 	//glGenRenderbuffers(1, &mDepthRBO);
 	//glBindRenderbuffer(GL_RENDERBUFFER, mDepthRBO);
-	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, mGBufferWidth, mGBufferHeight);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, width, height);
 	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthRBO);
 	//GL_CHECK_ERRORS;
 	//PRINT_GEN_RENDERBUFFER("[Engine]", mDepthRBO);
@@ -135,17 +125,58 @@ void Engine::InternalCreateGBuffers()
 	static const GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	glDrawBuffers(ARRAY_SIZE_IN_ELEMENTS(drawBuffers), drawBuffers); GL_CHECK_ERRORS;
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return status;
+}
+
+void Engine::InternalCreateGBuffers()
+{
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize Deferred framebuffers.....");
+	PRINT_MESSAGE("Size = %li x %li", mGBufferWidth, mGBufferHeight);
+
+	if (CreateGBuffers(mGBuffers, mFBOs[Deferred_FBO], mGBufferWidth, mGBufferHeight) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		PRINT_MESSAGE(".....failed!");
 	}
 	else
 	{
+		PRINT_GEN_FRAMEBUFFER("[Engine]", mFBOs[Deferred_FBO]);
+		//PRINT_GEN_TEXTURE("[Engine]", mGBuffers[gBuffer_PositionBuffer]);
+		PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::NormalBuffer]);
+		PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::UI32Buffer1]);
+		PRINT_GEN_TEXTURE("[Engine]", mGBuffers[(int)EGBuffer::DepthBuffer]);
+
 		PRINT_MESSAGE("...complete!");
 	}
 	PRINT_END_SECTION;
+}
 
+GLenum Engine::CreateHDRBuffers(GLuint * buffers, GLuint fbo, GLuint depthBufferId, GLsizei width, GLsizei height)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glGenTextures(1, buffers);
+	GL_CHECK_ERRORS;
+
+	glBindTexture(GL_TEXTURE_2D, depthBufferId);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBufferId, 0);
+	GL_CHECK_ERRORS;
+
+	glBindTexture(GL_TEXTURE_2D, *buffers);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *buffers, 0);
+	GL_CHECK_ERRORS;
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
+
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return status;
 }
 
 void Engine::InternalCreateHdrBuffers()
@@ -154,37 +185,18 @@ void Engine::InternalCreateHdrBuffers()
 	PRINT_MESSAGE("Initialize HDR framebuffers.....");
 	PRINT_MESSAGE("Size = %li x %li", mGBufferWidth, mGBufferHeight);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, mFBOs[HDR_FBO]);
-	glGenTextures(1, &mHdrBuffer);
-	GL_CHECK_ERRORS;
-
-	PRINT_GEN_FRAMEBUFFER("[Engine]", mFBOs[HDR_FBO]);
-	PRINT_GEN_TEXTURE("[Engine]", mHdrBuffer);
-
-	glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer]);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::DepthBuffer], 0);
-	GL_CHECK_ERRORS;
-
-	glBindTexture(GL_TEXTURE_2D, mHdrBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mGBufferWidth, mGBufferHeight, 0, GL_RGB, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mHdrBuffer, 0);
-	GL_CHECK_ERRORS;
-
-	glDrawBuffer(GL_COLOR_ATTACHMENT0); GL_CHECK_ERRORS;
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	if (CreateHDRBuffers(&mHdrBuffer, mFBOs[HDR_FBO], mGBuffers[(int)EGBuffer::DepthBuffer], mGBufferWidth, mGBufferHeight) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		PRINT_MESSAGE(".....failed!");
 	}
 	else
 	{
+		PRINT_GEN_FRAMEBUFFER("[Engine]", mFBOs[HDR_FBO]);
+		PRINT_GEN_TEXTURE("[Engine]", mHdrBuffer);
+
 		PRINT_MESSAGE("...complete!");
 	}
 	PRINT_END_SECTION;
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	PRINT_BEGIN_SECTION;
 	PRINT_MESSAGE("Initialize Forward framebuffers.....");
@@ -458,7 +470,9 @@ void Engine::InternalInitializeDeferredPassShader()
 		"u_SSAOSampler",
 		"u_lightDescSampler",
 		"u_lightDataSampler",
-		"u_EnvMapSampler",
+		"u_EnvMap1Sampler",
+		"u_EnvMap2Sampler",
+		"u_HasEnvMap",
 		"u_IsEnvMapHDR",
 		"u_IsSSAOEnabled",
 	};
@@ -475,8 +489,9 @@ void Engine::InternalInitializeDeferredPassShader()
 	glUniform1i(mDeferredShader.GetUniform(u_DepthSampler), 2);
 	glUniform1i(mDeferredShader.GetUniform(u_NBufferSampler), 3);
 	glUniform1i(mDeferredShader.GetUniform(u_GBuffer1Sampler), 4);
-	glUniform1i(mDeferredShader.GetUniform(u_EnvMapSampler), 5);
-	glUniform1i(mDeferredShader.GetUniform(u_SSAOSampler), 6);
+	glUniform1i(mDeferredShader.GetUniform(u_EnvMap1Sampler), 5);
+	glUniform1i(mDeferredShader.GetUniform(u_EnvMap2Sampler), 6);
+	glUniform1i(mDeferredShader.GetUniform(u_SSAOSampler), 7);
 	
 	//glUniform1i(mDeferredShader.GetUniform(u_materialDataSampler), 2);
 	//for (int i = 0; i < (int)mLightPassTextureMapping.mMapping.size(); ++i)
@@ -777,6 +792,80 @@ void Engine::InternalInitializePreComputeMatrixShader()
 //	});
 //}
 //
+
+void Engine::InternalInitializeCubemapGen()
+{
+	mEnvmapGen.mCamera = new Camera[6];
+
+	for (int i = 0; i < 6; ++i)
+	{
+		mEnvmapGen.mCamera[i].SetupProjection(glm::half_pi<GLfloat>(), ((GLfloat)mEnvmapGen.mTextureSize.x) / ((GLfloat)mEnvmapGen.mTextureSize.y), mEnvmapGen.mNearZ, mEnvmapGen.mFarZ);
+	}
+
+	const glm::vec3 X(1.f, 0.f, 0.f);
+	const glm::vec3 Y(0.f, 1.f, 0.f);
+	const glm::vec3 Z(0.f, 0.f, 1.f);
+	const glm::vec3 O(0.f, 0.f, 0.f);
+
+	mEnvmapGen.mCamera[GL_TEXTURE_CUBE_MAP_POSITIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, X, -Y);
+	mEnvmapGen.mCamera[GL_TEXTURE_CUBE_MAP_NEGATIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -X, -Y);
+	mEnvmapGen.mCamera[GL_TEXTURE_CUBE_MAP_POSITIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, Y, -Z);
+	mEnvmapGen.mCamera[GL_TEXTURE_CUBE_MAP_NEGATIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -Y, Z);
+	mEnvmapGen.mCamera[GL_TEXTURE_CUBE_MAP_POSITIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, Z, -Y);
+	mEnvmapGen.mCamera[GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -Z, -Y);
+
+	glGenFramebuffers((int)EnvmapGenData::EFBOIndex::__fbo_count_envmapgen__, mEnvmapGen.mFBOs);
+
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Initialize Deferred framebuffers for Cubemap generation.....");
+	PRINT_MESSAGE("Size = %li x %li", mEnvmapGen.mTextureSize.x, mEnvmapGen.mTextureSize.y);
+
+	if (CreateGBuffers(mEnvmapGen.mGBuffers, mEnvmapGen.mFBOs[(int)EnvmapGenData::EFBOIndex::Deferred_FBO_EnvmapGen], mEnvmapGen.mTextureSize.x, mEnvmapGen.mTextureSize.y) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		PRINT_MESSAGE(".....failed!");
+	}
+	else
+	{
+		PRINT_GEN_FRAMEBUFFER("[Engine]", mEnvmapGen.mFBOs[(int)EnvmapGenData::EFBOIndex::Deferred_FBO_EnvmapGen]);
+		//PRINT_GEN_TEXTURE("[Engine]", mEnvmapGen.mGBuffers[gBuffer_PositionBuffer]);
+		PRINT_GEN_TEXTURE("[Engine]", mEnvmapGen.mGBuffers[(int)EGBuffer::NormalBuffer]);
+		PRINT_GEN_TEXTURE("[Engine]", mEnvmapGen.mGBuffers[(int)EGBuffer::UI32Buffer1]);
+		PRINT_GEN_TEXTURE("[Engine]", mEnvmapGen.mGBuffers[(int)EGBuffer::DepthBuffer]);
+
+		PRINT_MESSAGE("...complete!");
+	}
+	PRINT_END_SECTION;
+
+	PRINT_BEGIN_SECTION;
+	PRINT_MESSAGE("Cubemap texture and frame buffer initialization.....");
+	PRINT_MESSAGE("Size = %li x %li", mEnvmapGen.mTextureSize.x, mEnvmapGen.mTextureSize.y);
+
+	mEnvmapGen.mTexture = GetTextureManager()->CreateTextureCubeMap("GeneratedCubemap", mEnvmapGen.mTextureSize.x, GL_RGB16F, false);
+	PRINT_MESSAGE("Cubemap texture buffer id : %li", mEnvmapGen.mTexture->GetResourceId());
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, mEnvmapGen.mFBOs[(int)EnvmapGenData::EFBOIndex::HDR_FBO_EnvmapGen]);
+
+	glBindTexture(GL_TEXTURE_2D, mEnvmapGen.mGBuffers[(int)EGBuffer::DepthBuffer]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mEnvmapGen.mGBuffers[(int)EGBuffer::DepthBuffer], 0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		PRINT_ERROR("Depth buffer binding has failed!");
+	}
+
+	// clear texture
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	for (int face = 0; face < 6; ++face)
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mEnvmapGen.mTexture->GetResourceId(), 0);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	PRINT_END_SECTION;
+
+}
 
 
 	// =======================================================================

@@ -289,6 +289,7 @@ void SimpleCamera::OnInit()
 			desc.mTerrains.push_back(mapDesc);
 
 			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
+			terrain->SetIsUsedToGenerateEnvMap(true);
 			engine->AttachRenderer(terrain);
 		}
 #endif // TERRAIN_SAMPLE
@@ -338,6 +339,7 @@ void SimpleCamera::OnInit()
 			desc.SetGrid(240, 600, .1f, 30000.f/*mCamera->GetFarZ()*/);
 
 			mRadialGridOcean = new Renderers::PerlinNoiseOcean::RadialGridOceanRenderer(desc);
+			mRadialGridOcean->SetIsUsedToGenerateEnvMap(true);
 			engine->AttachRenderer(mRadialGridOcean);
 
 			const wchar_t sOceanTexScale[] = L"Ocean TexScale : ";
@@ -389,7 +391,7 @@ void SimpleCamera::OnInit()
 
 #ifdef SKYDOME_SAMPLE
 		{
-			mSkydome = new Renderers::SkydomeRenderer(true, 256);
+			mSkydome = new Renderers::SkydomeRenderer(glm::vec3(7.0 / 255.0, 136.0 / 255.0, 143.0 / 255.0), true, 256);
 			engine->AttachSkydomeRenderer(mSkydome);
 		}
 #endif // SKYDOME_SAMPLE
@@ -429,7 +431,7 @@ void SimpleCamera::OnInit()
 //#define SPHERE001_MODEL
 //#define SPHERE_300_POLY_MODEL
 //#define SPHERE_1250_POLY_MODEL
-//#define SPHERE_5000_POLY_MODEL
+#define SPHERE_5000_POLY_MODEL
 //#define SPHERE_20000_POLY_MODEL
 //#define SPHERE_79600_POLY_MODEL
 //#define SPHERE_318400_POLY_MODEL
@@ -801,7 +803,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(20, 20, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(5.f, 5.f, 20.f)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(2, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(5.f, 5.f, 20.f)));
 			}
 #endif
 #ifdef ASHTRAY_MODEL
@@ -876,7 +878,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(40, 40, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
 			}
 #endif
 #ifdef SLINGER_MODEL
@@ -1083,6 +1085,86 @@ void SimpleCamera::OnInit()
 
 	PRINT_MESSAGE("Initialization successfull");
 
+	//{
+	//	//mCamera->Update();
+	//	//const glm::mat4 & viewMat = mCamera->GetViewMatrix();
+	//	//const glm::mat4 & invViewMat = mCamera->GetInverseViewMatrix();
+	//	//PRINT_MESSAGE("View matrix :");
+	//	//PRINT_MATRIX(viewMat);
+	//	//PRINT_MESSAGE("Inverse View matrix :");
+	//	//PRINT_MATRIX(invViewMat);
+
+	//	const glm::vec3 X(1.f, 0.f, 0.f);
+	//	const glm::vec3 Y(0.f, 1.f, 0.f);
+	//	const glm::vec3 Z(0.f, 0.f, 1.f);
+	//	const glm::vec3 O(0.f, 0.f, 0.f);
+
+	//	glm::vec3 lookAtVectors[6] =
+	//	{
+	//		X,
+	//		-X,
+	//		Y, 
+	//		-Y,
+	//		Z,
+	//		-Z
+	//	};
+
+	//	glm::vec3 upVectors[6] =
+	//	{
+	//		-Y, 
+	//		Y,
+	//		Z,
+	//		-Z,
+	//		-Y,
+	//		-Y
+	//	};
+
+	//	Camera cubeMapCam[6];
+
+	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_POSITIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, X, -Y);
+	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_NEGATIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -X, -Y);
+	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_POSITIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, Y, Z);
+	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_NEGATIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -Y, -Z);
+	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_POSITIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, Z, -Y);
+	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -Z, -Y);
+
+	//	glm::mat4 cubeMapMatrix[6], invCubeMapMatrix[6];
+
+	//	glm::vec3 pos(1.f, 2.f, 3.f);
+
+	//	glm::mat4 m = glm::lookAt(pos, glm::vec3(2.5f), upVectors[0]);
+
+	//	for (int j = 0; j < 3; ++j)
+	//	{
+	//		pos += glm::vec3(1.f, -1.f, 2.f);
+
+	//		PRINT_MESSAGE("");
+	//		PRINT_MESSAGE("Origin = (%f, \t%f, \t%f)", pos.x, pos.y, pos.z);
+
+	//		for (int i = 0; i < 6; ++i)
+	//		{
+	//			cubeMapCam[i].SetPosition(pos);
+	//			cubeMapCam[i].Update();
+	//			cubeMapMatrix[i] = glm::lookAt(pos, pos + lookAtVectors[i], upVectors[i]);
+	//			invCubeMapMatrix[i] = glm::inverse(cubeMapMatrix[i]);
+
+	//			PRINT_MESSAGE("");
+	//			PRINT_MESSAGE("Face %i", i);
+	//			PRINT_MESSAGE("cubeMapCam[%i] matrix :", i);
+	//			PRINT_MATRIX(cubeMapCam[i].GetViewMatrix());
+	//			PRINT_MESSAGE("cubeMapMatrix[%i] :", i);
+	//			PRINT_MATRIX(cubeMapMatrix[i]);
+
+	//			//PRINT_MESSAGE("cubeMapCam[%i] inverse matrix :", i);
+	//			//PRINT_MATRIX(cubeMapCam[i].GetInverseViewMatrix());
+	//			//PRINT_MESSAGE("invCubeMapMatrix[%i] :", i);
+	//			//PRINT_MATRIX(invCubeMapMatrix[i]);
+	//		}
+	//	}
+
+	//	//getchar();
+	//}
+
 
 	//{
 	//	mCamera->Update();
@@ -1248,6 +1330,7 @@ void SimpleCamera::InitializeTextPages()
 		const wchar_t sSSAOStatus[] = L"SSAO : ";
 		const wchar_t sSSAORadius[] = L"SSAO Radius : ";
 		const wchar_t sSSAOKernel[] = L"SSAO Kernel : ";
+		const wchar_t sEnvMapGenStatus[] = L"EnvMap generation : ";
 
 		auto frameInfoPage = mFrameInfoPage.lock();
 
@@ -1279,6 +1362,11 @@ void SimpleCamera::InitializeTextPages()
 		mSSAOKernelTextLineIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), L"xxxxx", (GLuint)EFont::NormalBold, mValueColor);
 		mEngineInfoRow += mNormalLineHeight + Interline2;
 		UpdateValueTextString(mFrameInfoPage, mSSAOKernelTextLineIndex, Engine::GetInstance()->GetSSAOKernelSize(), L"%i");
+		
+		frameInfoPage->PushBackText(glm::ivec2(mEngineInfoCol, mEngineInfoRow), sEnvMapGenStatus, (GLuint)EFont::Normal, mLabelColor);
+		col = mEngineInfoCol + frameInfoPage->MeasureStringInPixel(sEnvMapGenStatus, (GLuint)EFont::Normal);
+		mEnvMapGenEnabledIndex = mFrameInfoPage.lock()->PushBackText(glm::ivec2(col, mEngineInfoRow), Engine::GetInstance()->IsEnvMapGenEnabled() ? L"enabled" : L"disabled", (GLuint)EFont::NormalBold, mValueColor);
+		mEngineInfoRow += mNormalLineHeight + Interline2;		
 	}
 	
 	// ------------------------------------------------------------------------
@@ -1899,6 +1987,24 @@ void SimpleCamera::OnUpdate()
 	}
 	else
 		wasF2Pressed = false;
+
+	static bool wasF4Pressed = false;
+	if (GetAsyncKeyState(VK_F4) & 0x8000)
+	{
+		if (mShowDeferredBufferState == 0)
+		{
+			if (!wasF4Pressed)
+			{
+				Engine::GetInstance()->EnableEnvMapGen(!Engine::GetInstance()->IsEnvMapGenEnabled());
+				mFrameInfoPage.lock()->UpdateTextString(mEnvMapGenEnabledIndex, Engine::GetInstance()->IsEnvMapGenEnabled() ? L"enabled" : L"disabled");
+			}
+			wasF4Pressed = true;
+		}
+	}
+	else
+	{
+		wasF4Pressed = false;
+	}
 
 	
 	if (bWalk)

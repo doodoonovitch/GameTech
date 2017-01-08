@@ -13,6 +13,7 @@ struct MaterialData
 	float mPorosity;
 
 	uint mRendererId;
+	uint mEnvMapType;
 };
 
 struct FragmentInfo
@@ -29,6 +30,7 @@ struct FragmentInfo
 	float mDepthNDC;
 
 	uint mRendererId;
+	uint mEnvMapType;
 
 	vec3 mDiffuseColor;
 	vec3 mSpecularColor;
@@ -58,7 +60,8 @@ void EncodeMaterialData(out uvec4 outUI32Buffer1, MaterialData inData)
 
 	//outUI32Buffer1.x = packUnorm4x8(vec4(inData.mRendererId / 255, inData.mMetallic, inData.mRoughness, inData.mPorosity));
 
-	outUI32Buffer1.y = packUnorm4x8(vec4(0, inData.mBaseColor));
+	temp = packUnorm4x8(vec4(0, inData.mBaseColor));
+	outUI32Buffer1.y = temp | (inData.mEnvMapType & Mask_0x000000FF);
 
 	outUI32Buffer1.z = packHalf2x16(inData.mEmissive.xy);
 	outUI32Buffer1.w = packHalf2x16(vec2(0, inData.mEmissive.z));
@@ -72,6 +75,8 @@ void EncodeMaterialData(out uvec4 outUI32Buffer1, MaterialData inData)
 void DecodeMaterialData(out FragmentInfo outData, uvec4 inUI32Buffer1)
 {
 	outData.mRendererId = inUI32Buffer1.x & Mask_0x000000FF;
+	outData.mEnvMapType = inUI32Buffer1.y & Mask_0x000000FF;
+
 	vec4 abcd = unpackUnorm4x8(inUI32Buffer1.x & Mask_0xFFFFFF00);
 	//vec4 abcd = unpackUnorm4x8(inUI32Buffer1.x);
 	//outData.mRendererId = uint(round(abcd.x * 255));

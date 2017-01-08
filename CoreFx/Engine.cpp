@@ -194,7 +194,19 @@ void Engine::UpdateObjects()
 {
 	assert(mCamera != nullptr);
 	assert(mCamera->GetFrame() != nullptr);
-	mCamera->Update();
+	if (mCamera->GetFrame()->IsModified())
+	{
+		mCamera->Update();
+		if (mEnvmapGen.mEnabled)
+		{
+			glm::vec3 pos = mCamera->GetPosition();
+			for (int i = 0; i < 6; ++i)
+			{
+				mEnvmapGen.mCamera[i].SetPosition(pos);
+				mEnvmapGen.mCamera[i].Update();
+			}
+		}
+	}
 
 	//for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
 	//{
@@ -206,54 +218,8 @@ void Engine::UpdateObjects()
 	//}
 }
 
-void Engine::RenderObjects()
+void Engine::InternalUpdateFrameDataUniformBuffer(const Camera & camera)
 {
-	if (mFBOs[Deferred_FBO] == 0)
-	{
-		InternalGenerateBuffersAndFBOs();
-	}
-
-	if (mEnvMapTexture == nullptr)
-	{
-		if (mSkydome != nullptr && mSkydome->UseCache())
-		{
-			mEnvMapTexture = mSkydome->GetCacheTexture();
-			mIsEnvMapHDR = GL_TRUE;
-		}
-		else if (mSkybox != nullptr)
-		{
-			mEnvMapTexture = mSkybox->GetTexture();
-			mIsEnvMapHDR = (GLboolean) mSkybox->IsHDR();
-		}
-		else
-		{
-			mEnvMapTexture = mTextureManager->GetDefaultCubeMapTexture();
-			mIsEnvMapHDR = GL_FALSE;
-		}
-
-		mDeferredShader.Use();
-		glUniform1i(mDeferredShader.GetUniform(u_IsEnvMapHDR), mIsEnvMapHDR);
-		mDeferredShader.UnUse();
-	}
-
-	// Fill light data buffer 
-	// -----------------------------------------------------------------------
-	glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId());
-	std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
-	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
-	{
-		mLights[i]->ForEach([&lightDataBuffer](Lights::Light * light)
-		{
-			GLsizei dataSize = light->GetDataSize();
-			memcpy(lightDataBuffer, light->GetData(), dataSize);
-			lightDataBuffer += dataSize;
-		});
-	}
-	glUnmapBuffer(GL_TEXTURE_BUFFER);
-	glBindBuffer(GL_TEXTURE_BUFFER, 0);
-	// -----------------------------------------------------------------------
-
-
 	// Frame data buffer
 	// -----------------------------------------------------------------------
 	glBindBuffer(GL_UNIFORM_BUFFER, mBufferIds[FrameData_BufferId]);
@@ -261,30 +227,30 @@ void Engine::RenderObjects()
 	std::uint8_t * buffer = (std::uint8_t *)glMapBufferRange(GL_UNIFORM_BUFFER, 0, mFrameDataSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 	assert(buffer != nullptr);
 
-	glm::vec4 eyePos(mCamera->GetFrame()->GetPosition(), 1.f);
-	glm::vec4 depthRangeFovAspect(mCamera->GetNearZ(), mCamera->GetFarZ(), mCamera->GetFovY(), mCamera->GetAspect());
-	glm::vec4 bufferViewportSize(mGBufferWidth, mGBufferHeight, mViewportSize.x, mViewportSize.y);
-	glm::vec4 leftRightTopBottom(0, mViewportSize.x, 0, mViewportSize.y);
+	glm::vec4 eyePos(camera.GetFrame()->GetPosition(), 1.f);
+	glm::vec4 depthRangeFovAspect(camera.GetNearZ(), camera.GetFarZ(), camera.GetFovY(), camera.GetAspect());
+	//glm::vec4 bufferViewportSize(mGBufferWidth, mGBufferHeight, mViewportSize.x, mViewportSize.y);
+	//glm::vec4 leftRightTopBottom(0, mViewportSize.x, 0, mViewportSize.y);
 
-	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(mCamera->GetProjectionMatrix()), sizeof(glm::mat4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(mCamera->GetInverseProjectionMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ProjMatrix], glm::value_ptr(camera.GetProjectionMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_InvProjMatrix], glm::value_ptr(camera.GetInverseProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_OrthoProjMatrix], glm::value_ptr(mOrthoProjMatrix), sizeof(glm::mat4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(mCamera->GetViewMatrix()), sizeof(glm::mat4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_InvViewMatrix], glm::value_ptr(mCamera->GetInverseViewMatrix()), sizeof(glm::mat4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_ViewProjMatrix], glm::value_ptr(mCamera->GetViewProjectionMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ViewMatrix], glm::value_ptr(camera.GetViewMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_InvViewMatrix], glm::value_ptr(camera.GetInverseViewMatrix()), sizeof(glm::mat4));
+	memcpy(buffer + mFrameDataUniformOffsets[u_ViewProjMatrix], glm::value_ptr(camera.GetViewProjectionMatrix()), sizeof(glm::mat4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewDQ], &mCamera->GetViewDQ(), sizeof(Maths::DualQuat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_ViewPosition], glm::value_ptr(eyePos), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_AmbientLight], glm::value_ptr(mAmbientLight), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_WireFrameDrawColor], glm::value_ptr(mWireFrameColor), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_VertexNormalColor], glm::value_ptr(mDrawVertexNormalColor), sizeof(glm::vec4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_BufferViewportSize], glm::value_ptr(bufferViewportSize), sizeof(glm::vec4));
+	//memcpy(buffer + mFrameDataUniformOffsets[u_BufferViewportSize], glm::value_ptr(bufferViewportSize), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_NearFarFovYAspect], glm::value_ptr(depthRangeFovAspect), sizeof(glm::vec4));
-	memcpy(buffer + mFrameDataUniformOffsets[u_LeftRightTopBottom], glm::value_ptr(leftRightTopBottom), sizeof(glm::vec4));
+	//memcpy(buffer + mFrameDataUniformOffsets[u_LeftRightTopBottom], glm::value_ptr(leftRightTopBottom), sizeof(glm::vec4));
 	memcpy(buffer + mFrameDataUniformOffsets[u_TimeDeltaTime], mTimeDeltaTime, sizeof(GLfloat) * 2);
 	memcpy(buffer + mFrameDataUniformOffsets[u_NormalMagnitude], &mDrawVertexNormalMagnitude, sizeof(GLfloat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_Exposure], &mExposure, sizeof(GLfloat));
 	memcpy(buffer + mFrameDataUniformOffsets[u_InvGamma], &mInvGamma, sizeof(GLfloat));
-	
+
 
 	static const int lightUniformVarIndex[(int)Lights::Light::__light_type_count__] = { u_PointLightCount, u_SpotLightCount, u_DirectionalLightCount };
 	for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
@@ -295,10 +261,128 @@ void Engine::RenderObjects()
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	// -----------------------------------------------------------------------
+}
+
+void Engine::RenderObjects()
+{
 
 	if (mDisplayTexture == nullptr)
 	{
+		if (mFBOs[Deferred_FBO] == 0)
+		{
+			InternalGenerateBuffersAndFBOs();
+		}
+
+		if (mPrecompEnvMapTexture == nullptr)
+		{
+			if (mSkydome != nullptr && mSkydome->UseCache())
+			{
+				mEnvMapTexture1 = mSkydome->GetCacheTexture();
+				mIsEnvMapHDR1 = GL_TRUE;
+				mHasEnvMap1 = GL_TRUE;
+			}
+			else if (mSkybox != nullptr)
+			{
+				mEnvMapTexture1 = mSkybox->GetTexture();
+				mIsEnvMapHDR1 = (GLboolean)mSkybox->IsHDR();
+				mHasEnvMap1 = GL_TRUE;
+			}
+			else
+			{
+				mEnvMapTexture1 = nullptr;
+				mIsEnvMapHDR1 = GL_FALSE;
+				mHasEnvMap1 = GL_FALSE;
+			}
+		}
+		else
+		{
+			mEnvMapTexture1 = mPrecompEnvMapTexture;
+			mHasEnvMap1 = GL_TRUE;
+			mIsEnvMapHDR1 = GL_TRUE;
+		}
+
+		if (mEnvmapGen.mEnabled)
+		{
+			mHasEnvMap2 = GL_TRUE;
+			mEnvMapTexture2 = mEnvmapGen.mTexture;
+			mIsEnvMapHDR2 = GL_TRUE;
+		}
+		else
+		{
+			mHasEnvMap2 = mHasEnvMap1;
+			mEnvMapTexture2 = mEnvMapTexture1;
+			mIsEnvMapHDR2 = mIsEnvMapHDR1;
+		}
+
+		// Fill light data buffer 
+		// -----------------------------------------------------------------------
+		glBindBuffer(GL_TEXTURE_BUFFER, mLightDataBuffer.GetBufferId());
+		std::uint8_t * lightDataBuffer = (std::uint8_t *)glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+		for (int i = 0; i < (int)Lights::Light::__light_type_count__; ++i)
+		{
+			mLights[i]->ForEach([&lightDataBuffer](Lights::Light * light)
+			{
+				GLsizei dataSize = light->GetDataSize();
+				memcpy(lightDataBuffer, light->GetData(), dataSize);
+				lightDataBuffer += dataSize;
+			});
+		}
+		glUnmapBuffer(GL_TEXTURE_BUFFER);
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+		// -----------------------------------------------------------------------
+
+		InternalUpdateFrameDataUniformBuffer(*mCamera);
+
 		InternalComputePass();
+
+		if (mSkydome != nullptr)
+		{
+			if (mSkydome->GetIsInitialized() && mSkydome->IsCacheInvalidated())
+			{
+				if (mSkydome->RenderCache())
+				{
+					if (mEnvmapGen.mEnabled)
+					{
+						glViewport(0, 0, mEnvmapGen.mTextureSize.x, mEnvmapGen.mTextureSize.y);
+					}
+					else
+					{
+						glViewport(mViewportOrigin.x, mViewportOrigin.y, mViewportSize.x, mViewportSize.y);
+					}
+				}
+			}
+		}
+
+		glDisable(GL_BLEND);
+
+		mRenderers->ForEach([](Renderer * renderer)
+		{
+			renderer->Update();
+		});
+
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+		//glFinish();
+
+		if (mEnvmapGen.mEnabled)
+		{
+			glViewport(0, 0, mEnvmapGen.mTextureSize.x, mEnvmapGen.mTextureSize.y);
+
+			glm::vec3 pos = mCamera->GetPosition();
+			for (int face = 0; face < 6; ++face)
+			{
+				mEnvmapGen.mCamera[face].SetPosition(pos);
+				mEnvmapGen.mCamera[face].Update();
+
+				InternalUpdateFrameDataUniformBuffer(mEnvmapGen.mCamera[face]);
+				InternalEnvMapRenderObjects(face);
+			}
+
+			InternalUpdateFrameDataUniformBuffer(*mCamera);
+			glViewport(mViewportOrigin.x, mViewportOrigin.y, mViewportSize.x, mViewportSize.y);
+		}
+
+
 		InternalRenderObjects();
 	}
 	else
@@ -316,30 +400,121 @@ void Engine::InternalComputePass()
 	});
 }
 
-void Engine::InternalRenderObjects()
+void Engine::InternalEnvMapRenderObjects(int face)
 {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	// -----------------------------------------------------------------------
+	// Geometry pass
+	// -----------------------------------------------------------------------
+
+	//static const GLuint uintZeros[] = { 0, 0, 0, 0 };
+	//static const GLfloat floatZeros[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	//static const GLfloat floatOnes[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mEnvmapGen.mFBOs[(int)EnvmapGenData::EFBOIndex::Deferred_FBO_EnvmapGen]);
+
 	glDisable(GL_BLEND);
 
-	if (mSkydome != nullptr)
-	{
-		if (mSkydome->GetIsInitialized() && mSkydome->IsCacheInvalidated())
-		{
-			if (mSkydome->RenderCache())
-			{
-				glViewport(mViewportOrigin.x, mViewportOrigin.y, mViewportSize.x, mViewportSize.y);
-			}
-		}
-	}
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 
-	//glFinish();
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	//glDepthFunc(GL_LEQUAL);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearDepth(1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT /*| GL_STENCIL_BUFFER_BIT*/);
+	glStencilMask(0x00);
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		renderer->Update();
+		if (renderer->GetIsInitialized() && renderer->GetIsUsedToGenerateEnvMap())
+		{
+			renderer->Render();
+		}
 	});
 
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	// -----------------------------------------------------------------------
+	// light pass
+	// -----------------------------------------------------------------------
 
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mEnvmapGen.mFBOs[(int)EnvmapGenData::EFBOIndex::HDR_FBO_EnvmapGen]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mEnvmapGen.mTexture->GetResourceId(), 0);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
+
+	mDeferredShader.Use();
+
+	glUniform1i(mDeferredShader.GetUniform(u_IsSSAOEnabled), GL_FALSE);	
+	glUniform1i(mDeferredShader.GetUniform(u_HasEnvMap), mHasEnvMap1);
+	glUniform1i(mDeferredShader.GetUniform(u_IsEnvMapHDR), mIsEnvMapHDR1);
+
+	glBindVertexArray(mQuad->GetVao());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_BUFFER, GetLightDescBuffer().GetTextureId());
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_BUFFER, GetLightDataBuffer().GetTextureId());
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, mEnvmapGen.mGBuffers[(int)EGBuffer::DepthBuffer]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, mEnvmapGen.mGBuffers[(int)EGBuffer::NormalBuffer]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, mEnvmapGen.mGBuffers[(int)EGBuffer::UI32Buffer1]);
+
+	if (mIsEnvMapHDR1)
+	{
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(mEnvMapTexture1->GetTarget(), mEnvMapTexture1->GetResourceId());
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(mEnvMapTexture1->GetTarget(), mEnvMapTexture1->GetResourceId());
+	}
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	mDeferredShader.UnUse();
+
+	// -----------------------------------------------------------------------
+	// HDR skydome / skybox render
+	// -----------------------------------------------------------------------
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	if (mSkybox != nullptr)
+	{
+		if (/*mSkybox->IsHDR() &&*/ mSkybox->GetIsInitialized())
+		{
+			mSkybox->Render();
+		}
+	}
+	else if (mSkydome != nullptr)
+	{
+		if (mSkydome->GetIsInitialized())
+		{
+			mSkydome->Render();
+		}
+	}
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
+
+
+
+void Engine::InternalRenderObjects()
+{
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// -----------------------------------------------------------------------
@@ -466,6 +641,8 @@ void Engine::InternalRenderObjects()
 		mDeferredShader.Use();
 
 		glUniform1i(mDeferredShader.GetUniform(u_IsSSAOEnabled), mIsSSAOEnabled);
+		glUniform1i(mDeferredShader.GetUniform(u_HasEnvMap), mHasEnvMap2);
+		glUniform1i(mDeferredShader.GetUniform(u_IsEnvMapHDR), mIsEnvMapHDR2);
 
 		glBindVertexArray(mQuad->GetVao());
 
@@ -484,12 +661,18 @@ void Engine::InternalRenderObjects()
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, mGBuffers[(int)EGBuffer::UI32Buffer1]);
 
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(mEnvMapTexture->GetTarget(), mEnvMapTexture->GetResourceId());
+		if (mHasEnvMap2)
+		{
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(mEnvMapTexture1->GetTarget(), mEnvMapTexture1->GetResourceId());
+
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(mEnvMapTexture2->GetTarget(), mEnvMapTexture2->GetResourceId());
+		}
 
 		if (mIsSSAOEnabled)
 		{
-			glActiveTexture(GL_TEXTURE6);
+			glActiveTexture(GL_TEXTURE7);
 			glBindTexture(GL_TEXTURE_2D, mSSAOBuffers[SSAOBuffer_Main]);
 		}
 
@@ -521,7 +704,6 @@ void Engine::InternalRenderObjects()
 		// -----------------------------------------------------------------------
 		// tone mapping pass
 		// -----------------------------------------------------------------------
-
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBOs[Forward_FBO]);
 		//glClear(GL_COLOR_BUFFER_BIT);
 		glDepthMask(GL_FALSE);
@@ -604,12 +786,12 @@ void Engine::InternalRenderObjects()
 			if (mSkybox != nullptr && mSkybox->GetIsInitialized())
 			{
 				mSkybox->RenderWireFrame();
-			}				
+			}
 			else if (mSkydome != nullptr && mSkydome->GetIsInitialized())
 			{
 				mSkydome->RenderWireFrame();
 			}
-				
+
 
 			if (mIsDrawLightPositionEnabled)
 			{
@@ -620,7 +802,7 @@ void Engine::InternalRenderObjects()
 				if (mSpotLightPositionRenderer->GetIsInitialized())
 				{
 					mSpotLightPositionRenderer->RenderWireFrame();
-				}					
+				}
 			}
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

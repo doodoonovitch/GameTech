@@ -98,6 +98,9 @@ struct ModelMaterial
 	int mNormalSamplerIndex, mNormalTextureIndex;
 	int mEmissiveSamplerIndex, mEmissiveTextureIndex;
 	int mHeightSamplerIndex, mHeightTextureIndex;
+
+	uint mEnvMapType;
+
 };
 
 

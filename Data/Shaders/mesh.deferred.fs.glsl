@@ -30,6 +30,8 @@ void main(void)
 	mat.mRoughness = u_Materials[fs_in.MaterialIndex].mRoughness;
 	mat.mMetallic =  u_Materials[fs_in.MaterialIndex].mMetallic;
 	mat.mPorosity =  u_Materials[fs_in.MaterialIndex].mPorosity;
+	mat.mEnvMapType = u_Materials[fs_in.MaterialIndex].mEnvMapType;
+
 
 	int baseColorTextureIndex = u_Materials[fs_in.MaterialIndex].mBaseColorTextureIndex;
 	if (baseColorTextureIndex != -1)

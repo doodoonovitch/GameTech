@@ -201,6 +201,7 @@ void ModelRenderer::SetMaterial(std::uint16_t materialIndex, const Renderer::Mat
 		mat.mEmissive = materialDesc.mEmissive;
 		mat.mHeightOffset = materialDesc.mHeightOffset;
 		mat.mHeightScale = materialDesc.mHeightScale;
+		mat.mEnvMapType = (GLuint)materialDesc.mEnvMapType;
 
 		MaterialTextureIndexes & texIndexes = mMaterialTextureIndexesList[materialIndex];
 		texIndexes.mBaseColor = materialDesc.mBaseColorTextureIndex;

@@ -68,9 +68,9 @@ private:
 		u_AmbientLight,
 		u_WireFrameDrawColor,
 		u_VertexNormalColor,
-		u_BufferViewportSize,
+		//u_BufferViewportSize,
 		u_NearFarFovYAspect,
-		u_LeftRightTopBottom,
+		//u_LeftRightTopBottom,
 		u_TimeDeltaTime,
 		u_NormalMagnitude,
 		u_Exposure,
@@ -300,6 +300,17 @@ public:
 		mIsSSAOEnabled = enable;
 	}
 
+
+	bool IsEnvMapGenEnabled() const
+	{
+		return mEnvmapGen.mEnabled;
+	}
+
+	void EnableEnvMapGen(bool enable)
+	{
+		mEnvmapGen.mEnabled = enable;
+	}
+
 	// ---------------------------------------------------------------------------
 	// Debug Tools
 	//
@@ -413,6 +424,9 @@ private:
 	void InternalGenerateBuffersAndFBOs();
 	void InternalReleaseBuffersAndFBOs();
 
+	static GLenum CreateGBuffers(GLuint * gbuffers, GLuint fbo, GLsizei width, GLsizei height);
+	static GLenum CreateHDRBuffers(GLuint * buffers, GLuint fbo, GLuint depthBufferId, GLsizei width, GLsizei height);
+
 	void InternalCreateGBuffers();
 	void InternalReleaseGBuffers();
 
@@ -437,15 +451,21 @@ private:
 	void InternalInitializePreComputeMatrixShader();
 
 	void InternalUpdateDrawGBufferNormalsPatchCount();
+	void InternalUpdateFrameDataUniformBuffer(const Camera & camera);
 
 
 	void InternalComputePass();
 	void InternalRenderObjects();
+	void InternalEnvMapRenderObjects(int face);
 	void InternalDisplayTexture();
 	void InternalRenderDeferredBuffers();
 
 	void InternalInitializeFrameConstainers();
 	void InternalReleaseFrameConstainers();
+
+	void InternalInitializeCubemapGen();
+	void InternalReleaseCubemapGen();
+
 
 	Engine();
 	~Engine();
@@ -464,7 +484,9 @@ private:
 		u_SSAOSampler,
 		u_lightDescSampler,
 		u_lightDataSampler,
-		u_EnvMapSampler,
+		u_EnvMap1Sampler,
+		u_EnvMap2Sampler,
+		u_HasEnvMap,
 		u_IsEnvMapHDR,
 		u_IsSSAOEnabled,
 
@@ -643,9 +665,9 @@ private:
 		"u_AmbientLight",
 		"u_WireFrameDrawColor",
 		"u_VertexNormalColor",
-		"u_BufferViewportSize",
+		//"u_BufferViewportSize",
 		"u_NearFarFovYAspect",
-		"u_LeftRightTopBottom",
+		//"u_LeftRightTopBottom",
 		"u_TimeDeltaTime",
 		"u_NormalMagnitude",
 		"u_Exposure",
@@ -690,11 +712,49 @@ private:
 
 	GLint mDeferredDebugState = 0;
 
-	const CubeMapTexture * mEnvMapTexture = nullptr;
-	GLboolean mIsEnvMapHDR = false;
+	const CubeMapTexture * mPrecompEnvMapTexture = nullptr;
+	const CubeMapTexture * mEnvMapTexture1 = nullptr;
+	const CubeMapTexture * mEnvMapTexture2 = nullptr;
+	GLboolean mHasEnvMap1 = false;
+	GLboolean mHasEnvMap2 = false;
+	GLboolean mIsEnvMapHDR1 = false;
+	GLboolean mIsEnvMapHDR2 = false;
 
 	GLboolean mIsSSAOEnabled = true;
+	
+	struct EnvmapGenData
+	{
+		enum class EFBOIndex
+		{
+			Deferred_FBO_EnvmapGen,
+			HDR_FBO_EnvmapGen,
 
+			__fbo_count_envmapgen__
+		};
+
+
+		GLfloat mNearZ = 1.f;
+		GLfloat mFarZ = 1000.f;
+
+		Camera * mCamera;
+
+		CubeMapTexture const * mTexture = nullptr;
+
+		glm::ivec2 mTextureSize = glm::ivec2(128);
+
+		GLuint mFBOs[(int)EFBOIndex::__fbo_count_envmapgen__];
+		GLuint mGBuffers[(int)EGBuffer::__gBuffer_count__];
+
+		bool mEnabled = false;
+
+		EnvmapGenData()
+		{
+			memset(mGBuffers, 0, sizeof(mGBuffers));
+			memset(mFBOs, 0, sizeof(mFBOs));
+		}
+	};
+
+	EnvmapGenData mEnvmapGen;
 };
 
 

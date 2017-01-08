@@ -56,6 +56,18 @@ void PrintWarning(const char * messageFormat, ...)
 	va_end(args);
 }
 
+void PrintMatrix(const glm::mat4 & m)
+{
+	const glm::mat4::col_type & c0 = m[0];
+	const glm::mat4::col_type & c1 = m[1];
+	const glm::mat4::col_type & c2 = m[2];
+	const glm::mat4::col_type & c3 = m[3];
+	PrintMessage("\t%f \t%f \t%f \t%f", c0.x, c1.x, c2.x, c3.x);
+	PrintMessage("\t%f \t%f \t%f \t%f", c0.y, c1.y, c2.y, c3.y);
+	PrintMessage("\t%f \t%f \t%f \t%f", c0.z, c1.z, c2.z, c3.z);
+	PrintMessage("\t%f \t%f \t%f \t%f", c0.w, c1.w, c2.w, c3.w);
+}
+
 Logger * Logger::sInstance = nullptr;
 
 void Logger::InitializeLogger()

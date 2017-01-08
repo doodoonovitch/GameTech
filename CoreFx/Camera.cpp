@@ -37,7 +37,7 @@ void Camera::Update()
 	}
 }
 
-void Camera::SetupProjection(const float fovy, const float aspRatio, float zNear, float zFar)
+void Camera::SetupProjection(const float fovy, const float aspRatio, float zNear, float zFar, bool updateMatrix)
 {
 	mNearZ = zNear;
 	mFarZ = zFar;
@@ -47,8 +47,11 @@ void Camera::SetupProjection(const float fovy, const float aspRatio, float zNear
 	mNearWindowHeight = 2.0f * mNearZ * tanf(0.5f*mFovY);
 	mFarWindowHeight = 2.0f * mFarZ * tanf(0.5f*mFovY);
 
-	mProj = glm::perspective(mFovY, mAspect, mNearZ, mFarZ);
-	mInvProj = glm::inverse(mProj);
+	if (updateMatrix)
+	{
+		mProj = glm::perspective(mFovY, mAspect, mNearZ, mFarZ);
+		mInvProj = glm::inverse(mProj);
+	}
 } 
 
 glm::mat4 Camera::GetMatrixUsingYawPitchRoll(const float yaw, const float pitch, const float roll)
@@ -60,11 +63,12 @@ void Camera::LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::v
 {
 	GetFrame()->SetPosition(position);
 
-	glm::vec3 zAxis = glm::normalize(GetFrame()->GetPosition() - target);
-	glm::vec3 xAxis = glm::normalize(glm::cross(up, zAxis));
-	glm::vec3 yAxis = glm::cross(zAxis, xAxis);
+	//glm::vec3 zAxis = glm::normalize(GetFrame()->GetPosition() - target);
+	//glm::vec3 xAxis = glm::normalize(glm::cross(up, zAxis));
+	//glm::vec3 yAxis = glm::cross(zAxis, xAxis);
+	//glm::mat3 m(xAxis, yAxis, zAxis);
 
-	glm::mat3 m(xAxis, yAxis, zAxis);	
+	glm::mat4 m = glm::lookAt(glm::vec3(0.f), target - position, up);
 
 	GetFrame()->SetRotation(glm::quat(m));
 }

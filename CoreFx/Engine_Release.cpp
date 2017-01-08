@@ -74,6 +74,7 @@ void Engine::InternalReleaseBuffersAndFBOs()
 	InternalReleaseSSAOBuffers();
 	InternalReleaseHdrBuffers();
 	InternalReleaseGBuffers();
+	InternalReleaseCubemapGen();
 
 	glDeleteFramebuffers(__fbo_count__, mFBOs);
 	memset(mFBOs, 0, sizeof(mFBOs));
@@ -101,6 +102,16 @@ void Engine::InternalReleaseSSAOBuffers()
 	memset(mSSAOBuffers, 0, sizeof(mSSAOBuffers));
 }
 
+void Engine::InternalReleaseCubemapGen()
+{
+	glDeleteTextures((int)EGBuffer::__gBuffer_count__, mEnvmapGen.mGBuffers);
+	memset(mEnvmapGen.mGBuffers, 0, sizeof(mEnvmapGen.mGBuffers));
+
+	glDeleteFramebuffers((int)EnvmapGenData::EFBOIndex::__fbo_count_envmapgen__, mEnvmapGen.mFBOs);
+	memset(mEnvmapGen.mFBOs, 0, sizeof(mEnvmapGen.mFBOs));
+
+	SAFE_DELETE_ARRAY(mEnvmapGen.mCamera);
+}
 
 	// =======================================================================
 	// =======================================================================

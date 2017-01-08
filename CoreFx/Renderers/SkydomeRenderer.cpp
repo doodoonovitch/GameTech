@@ -65,7 +65,7 @@ bool SkydomeRenderer::Cache::Initialize(GLsizei cacheTextureSize)
 	}
 
 	// clear texture
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(mClearColor.x, mClearColor.y, mClearColor.z, 0.0f);
 	for (int face = 0; face < 6; ++face)
 	{
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mCubeMapTexture->GetResourceId(), 0);
@@ -81,7 +81,7 @@ bool SkydomeRenderer::Cache::Initialize(GLsizei cacheTextureSize)
 }
 
 
-SkydomeRenderer::SkydomeRenderer(bool useTextureCache, GLsizei cacheTextureSize, const int rings, const int segments)
+SkydomeRenderer::SkydomeRenderer(const glm::vec3 & clearColor, bool useTextureCache, GLsizei cacheTextureSize, const int rings, const int segments)
 	: RendererHelper<2>("SkydomeRenderer", "SkydomeWireFrameRenderer", Renderer::Forward_Pass)
 	, mCache(nullptr)
 {
@@ -185,6 +185,7 @@ SkydomeRenderer::SkydomeRenderer(bool useTextureCache, GLsizei cacheTextureSize,
 	if (useTextureCache)
 	{
 		mCache = new Cache();
+		mCache->mClearColor = clearColor;
 		mIsInitialized = mCache->Initialize(cacheTextureSize);
 	}
 	else
@@ -801,16 +802,16 @@ bool SkydomeRenderer::RenderCache()
 	glBindVertexArray(mVaoID);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mCache->mFBOs);
+
+	glClearColor(mCache->mClearColor.x, mCache->mClearColor.y, mCache->mClearColor.z, 1.0f);
+
 	for (int face = 0; face < 6; ++face)
 	{
-		//if ((face + GL_TEXTURE_CUBE_MAP_POSITIVE_X) == GL_TEXTURE_CUBE_MAP_NEGATIVE_Y)
-		//	continue;
-
 		glUniformMatrix4fv(mShader.GetUniform(u_VPMatrix), 1, false, glm::value_ptr(mCache->mCubeMapProjMatrix[face]));
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mCache->mCubeMapTexture->GetResourceId(), 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-		glClear(GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		glDrawElements(GL_TRIANGLE_STRIP, mIndiceCount, GL_UNSIGNED_SHORT, nullptr);
 	}
 

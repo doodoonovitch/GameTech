@@ -46,6 +46,8 @@ extern void PrintMessage(const char * messageFormat, va_list args);
 extern void PrintError(const char * messageFormat, va_list args);
 extern void PrintWarning(const char * messageFormat, va_list args);
 
+extern void PrintMatrix(const glm::mat4 & m);
+
 // =======================================================================
 // =======================================================================
 } // namepsace Log

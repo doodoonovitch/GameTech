@@ -32,6 +32,7 @@ void main()
 	mat.mMetallic =  1;
 	mat.mPorosity =  0;
 	mat.mEmissive =  vec3(0);
+	mat.mEnvMapType = 0;
 
 	outNormal = normal;
 	EncodeMaterialData(outUI32Buffer1, mat);

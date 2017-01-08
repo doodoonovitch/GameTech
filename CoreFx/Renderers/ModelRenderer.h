@@ -71,7 +71,9 @@ public:
 		GLint mEmissiveSamplerIndex, mEmissiveTextureIndex;
 		GLint mHeightSamplerIndex, mHeightTextureIndex;
 
-		//GLfloat __padding__[15];
+		GLuint mEnvMapType;
+
+		//GLfloat __padding__[14];
 	};
 
 	static constexpr size_t cShaderMaterialSize = sizeof(ShaderMaterial);

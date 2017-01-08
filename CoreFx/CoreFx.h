@@ -95,13 +95,14 @@ namespace CoreFx
 #include "DDS.h"
 #include "TextureManager.h"
 
+#include "Camera.h"
+
 #include "Engine.h"
 
 #include "Geometry\Helpers.h"
 #include "Geometry\ModelData.h"
 
 
-#include "Camera.h"
 #include "Renderables\Axis.h"
 #include "Renderables\Grid.h"
 #include "Renderables\Model.h"

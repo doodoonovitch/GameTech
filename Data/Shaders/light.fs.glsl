@@ -14,8 +14,10 @@ uniform sampler2D u_NBufferSampler;
 uniform usampler2D u_GBuffer1Sampler;
 uniform sampler2D u_SSAOSampler;
 
-uniform samplerCube u_EnvMapSampler;
+uniform samplerCube u_EnvMap1Sampler;
+uniform samplerCube u_EnvMap2Sampler;
 
+uniform bool u_HasEnvMap;
 uniform bool u_IsEnvMapHDR;
 uniform bool u_IsSSAOEnabled;
 
@@ -146,17 +148,33 @@ vec4 BRDFLight(FragmentInfo fi)
 		ambientOcclusion = 1.f;
 	}
 
-    vec3 r = reflect(-v, fi.mNormal);
-	vec3 envColor = texture(u_EnvMapSampler, r).rgb;
-
-	if(!u_IsEnvMapHDR)
-	{
-		envColor = pow(envColor, vec3(2.2));
-	}
-
 	vec3 envFresnel = BRDF_Specular_F_Roughness(fi.mSpecularColor, fi.mRoughness * fi.mRoughness, NoV);
 
-	return vec4(fi.mEmissive + ambientOcclusion * (color + envColor * envFresnel), 1.0f);
+	if (u_HasEnvMap)
+	{
+		vec3 r = reflect(-v, fi.mNormal);
+		vec3 envColor;
+		
+		if (fi.mEnvMapType == 0)
+		{
+			envColor = texture(u_EnvMap1Sampler, r).rgb;
+		}
+		else
+		{
+			envColor = texture(u_EnvMap2Sampler, r).rgb;
+		}
+
+		if(!u_IsEnvMapHDR)
+		{
+			envColor = pow(envColor, vec3(2.2));
+		}
+
+		return vec4(fi.mEmissive + ambientOcclusion * (color + envColor * envFresnel), 1.0f);
+	}
+	else
+	{
+		return vec4(fi.mEmissive + ambientOcclusion * color, 1.0f);
+	}
 }
 
 void main(void)

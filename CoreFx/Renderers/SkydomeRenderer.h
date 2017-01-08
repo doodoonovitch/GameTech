@@ -13,7 +13,7 @@ namespace CoreFx
 class SkydomeRenderer : public RendererHelper<2>
 {
 public:
-	SkydomeRenderer(bool useTextureCache = false, GLsizei cacheTextureSize = 256, const int rings = 128, const int segments = 128);
+	SkydomeRenderer(const glm::vec3 & clearColor, bool useTextureCache = false, GLsizei cacheTextureSize = 256, const int rings = 128, const int segments = 128);
 
 	virtual ~SkydomeRenderer();
 
@@ -26,6 +26,7 @@ public:
 	bool IsCacheInvalidated() const { return (mCache != nullptr) ? (!mCache->mIsBuilt) : false; }
 	bool UseCache() const { return mCache != nullptr; }
 	void InvalidateCache() { if(mCache != nullptr) mCache->mIsBuilt = false; }
+
 
 	CubeMapTexture const * GetCacheTexture() const { return mCache != nullptr ? mCache->mCubeMapTexture : nullptr; }
 
@@ -223,6 +224,7 @@ private:
 		SkyboxRenderer * mSkyboxRenderer = nullptr;
 		CubeMapTexture const * mCubeMapTexture = nullptr;
 		glm::mat4 * mCubeMapProjMatrix = nullptr;
+		glm::vec3 mClearColor = glm::vec3(0.f);
 		GLuint mFBOs = 0;
 		GLuint mDepthBuffer = 0;
 		bool mIsBuilt = false;

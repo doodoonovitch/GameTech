@@ -19,9 +19,9 @@ layout (std140, shared) uniform FrameData
 	vec4 u_WireFrameDrawColor;
 	vec4 u_VertexNormalColor;
 
-	vec4 u_BufferViewportSize;
+	//vec4 u_BufferViewportSize;
 	vec4 u_NearFarFovYAspect;
-	vec4 u_LeftRightTopBottom;
+	//vec4 u_LeftRightTopBottom;
 	
 	vec2 u_TimeDeltaTime;
 

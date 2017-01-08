@@ -36,6 +36,7 @@
 #define PRINT_MESSAGE_VA(messageFormat, valist) CoreFx::Log::PrintMessage(messageFormat, valist);
 #define PRINT_ERROR_VA(messageFormat, valist) CoreFx::Log::PrintError(messageFormat, valist);
 #define PRINT_WARNING_VA(messageFormat, valist) CoreFx::Log::PrintWarning(messageFormat, valist);
+#define PRINT_MATRIX(m) CoreFx::Log::PrintMatrix(m);
 #else
 #define PRINT_MESSAGE(messageFormat, ...) {}
 #define PRINT_ERROR(messageFormat, ...) {}
@@ -43,6 +44,7 @@
 #define PRINT_MESSAGE_VA(messageFormat, valist) {}
 #define PRINT_ERROR_VA(messageFormat, valist) {}
 #define PRINT_WARNING_VA(messageFormat, valist) {}
+#define PRINT_MATRIX(m) {}
 #endif
 
 

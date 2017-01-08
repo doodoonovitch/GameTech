@@ -245,6 +245,8 @@ void main()
 	matData.mRoughness = 0;
 	matData.mMetallic = 0;
 	matData.mEmissive = vec3(0);
+	matData.mEnvMapType = 0;
+
 
 	vec3 texCoord = vec3(fs_in.TexUV, fs_in.MapIndex);
 	vec3 normal = normalize(texture(u_NormalMap, texCoord).xyz);
