@@ -431,8 +431,8 @@ void SimpleCamera::OnInit()
 //#define SPHERE001_MODEL
 //#define SPHERE_300_POLY_MODEL
 //#define SPHERE_1250_POLY_MODEL
-#define SPHERE_5000_POLY_MODEL
-//#define SPHERE_20000_POLY_MODEL
+//#define SPHERE_5000_POLY_MODEL
+#define SPHERE_20000_POLY_MODEL
 //#define SPHERE_79600_POLY_MODEL
 //#define SPHERE_318400_POLY_MODEL
 #if defined(CUBESPHERE_MODEL) \
@@ -491,7 +491,7 @@ void SimpleCamera::OnInit()
 
 #ifdef SPHERE001_MODEL
 				{
-					glm::mat4 m = glm::scale(glm::vec3(.3f));
+					glm::mat4 m = glm::scale(glm::vec3(1.f));
 					opt.SetPreTransformVertices(m);
 					modelData.LoadModel("Medias/Objects/Sphere/sphere001.obj", "Medias/Objects/Sphere", opt, &dataCtxBase);
 				}
@@ -504,7 +504,7 @@ void SimpleCamera::OnInit()
 				|| defined(SPHERE_79600_POLY_MODEL) \
 				|| defined(SPHERE_318400_POLY_MODEL)
 				{
-					glm::mat4 m = glm::scale(glm::vec3(.05f));
+					glm::mat4 m = glm::scale(glm::vec3(.1f));
 					opt.SetPreTransformVertices(m);
 #ifdef SPHERE_300_POLY_MODEL
 					modelData.LoadModel("Medias/Objects/Sphere/300_polygon_sphere_100mm.STL", "Medias/Objects/Sphere", opt, &dataCtxBase);
@@ -539,7 +539,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 4;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(15.f)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				
@@ -878,7 +878,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(1, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(10, 10, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
 			}
 #endif
 #ifdef SLINGER_MODEL
