@@ -142,6 +142,10 @@ void SimpleCamera::OnInit()
 	const glm::vec3 YAxis(0.f, 1.f, 0.f);
 	const glm::vec3 ZAxis(0.f, 0.f, 1.f);
 
+	const glm::vec3 camPos(10, 10.f, 20.f);
+	const glm::vec3 camTrg(12.f, 10.f, 5.f);
+
+
 	GL_CHECK_ERRORS;
 
 	SetCity(ECity::Paris);
@@ -158,7 +162,7 @@ void SimpleCamera::OnInit()
 
 		mCamera = new CoreFx::Camera();
 		mCamera->SetupProjection(45.0f, 1.33333f, 1.f, 5000.f);
-		mCamera->LookAt(glm::vec3(10, 10.f, 20.f), glm::vec3(10.f, 10.f, 5.f), glm::vec3(0, 1, 0));
+		mCamera->LookAt(camPos, camTrg, YAxis);
 		engine->SetCamera(mCamera);
 
 		SetupViewportAndProjection();
@@ -878,7 +882,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(10, 10, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(2, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
 			}
 #endif
 #ifdef SLINGER_MODEL
@@ -1084,87 +1088,94 @@ void SimpleCamera::OnInit()
 	engine->CreateDynamicResources();
 
 	PRINT_MESSAGE("Initialization successfull");
+	/*
+	{
+		mCamera->Update();
+		const glm::mat4 & viewMat = mCamera->GetViewMatrix();
+		const glm::mat4 & invViewMat = mCamera->GetInverseViewMatrix();
+		const glm::mat4 & lookAtMat = glm::lookAt(camPos, camTrg, YAxis);
+		const glm::mat4 & invLookAtMat = glm::inverse(lookAtMat);
+		PRINT_MESSAGE("View matrix :");
+		PRINT_MATRIX(viewMat);
+		PRINT_MESSAGE("Look at matrix :");
+		PRINT_MATRIX(lookAtMat);		
+		PRINT_MESSAGE("Inverse View matrix :");
+		PRINT_MATRIX(invViewMat);
+		PRINT_MESSAGE("Inverse Look at matrix :");
+		PRINT_MATRIX(invLookAtMat);
 
-	//{
-	//	//mCamera->Update();
-	//	//const glm::mat4 & viewMat = mCamera->GetViewMatrix();
-	//	//const glm::mat4 & invViewMat = mCamera->GetInverseViewMatrix();
-	//	//PRINT_MESSAGE("View matrix :");
-	//	//PRINT_MATRIX(viewMat);
-	//	//PRINT_MESSAGE("Inverse View matrix :");
-	//	//PRINT_MATRIX(invViewMat);
+		const glm::vec3 X(1.f, 0.f, 0.f);
+		const glm::vec3 Y(0.f, 1.f, 0.f);
+		const glm::vec3 Z(0.f, 0.f, 1.f);
+		const glm::vec3 O(0.f, 0.f, 0.f);
 
-	//	const glm::vec3 X(1.f, 0.f, 0.f);
-	//	const glm::vec3 Y(0.f, 1.f, 0.f);
-	//	const glm::vec3 Z(0.f, 0.f, 1.f);
-	//	const glm::vec3 O(0.f, 0.f, 0.f);
+		glm::vec3 lookAtVectors[6] =
+		{
+			X,
+			-X,
+			Y, 
+			-Y,
+			Z,
+			-Z
+		};
 
-	//	glm::vec3 lookAtVectors[6] =
-	//	{
-	//		X,
-	//		-X,
-	//		Y, 
-	//		-Y,
-	//		Z,
-	//		-Z
-	//	};
+		glm::vec3 upVectors[6] =
+		{
+			-Y, 
+			Y,
+			Z,
+			-Z,
+			-Y,
+			-Y
+		};
 
-	//	glm::vec3 upVectors[6] =
-	//	{
-	//		-Y, 
-	//		Y,
-	//		Z,
-	//		-Z,
-	//		-Y,
-	//		-Y
-	//	};
+		Camera cubeMapCam[6];
 
-	//	Camera cubeMapCam[6];
+		for (int i = 0; i < 6; ++i)
+		{
+			cubeMapCam[i].LookAt(O, lookAtVectors[i], upVectors[i]);
+		}
 
-	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_POSITIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, X, -Y);
-	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_NEGATIVE_X - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -X, -Y);
-	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_POSITIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, Y, Z);
-	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_NEGATIVE_Y - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -Y, -Z);
-	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_POSITIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, Z, -Y);
-	//	cubeMapCam[GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - GL_TEXTURE_CUBE_MAP_POSITIVE_X].LookAt(O, -Z, -Y);
+		glm::mat4 cubeMapMatrix[6], invCubeMapMatrix[6];
 
-	//	glm::mat4 cubeMapMatrix[6], invCubeMapMatrix[6];
+		glm::vec3 pos(1.f, 2.f, 3.f);
 
-	//	glm::vec3 pos(1.f, 2.f, 3.f);
+		glm::mat4 m = glm::lookAt(pos, glm::vec3(2.5f), upVectors[0]);
 
-	//	glm::mat4 m = glm::lookAt(pos, glm::vec3(2.5f), upVectors[0]);
+		for (int j = 0; j < 1; ++j)
+		{
+			pos += glm::vec3(1.f, -1.f, 2.f);
 
-	//	for (int j = 0; j < 3; ++j)
-	//	{
-	//		pos += glm::vec3(1.f, -1.f, 2.f);
+			PRINT_MESSAGE("");
+			PRINT_MESSAGE("Origin = (%f, \t%f, \t%f)", pos.x, pos.y, pos.z);
 
-	//		PRINT_MESSAGE("");
-	//		PRINT_MESSAGE("Origin = (%f, \t%f, \t%f)", pos.x, pos.y, pos.z);
+			for (int i = 0; i < 6; ++i)
+			{
+				cubeMapCam[i].SetPosition(pos);
+				cubeMapCam[i].Update();
+				cubeMapMatrix[i] = glm::lookAt(pos, pos + lookAtVectors[i], upVectors[i]);
+				invCubeMapMatrix[i] = glm::inverse(cubeMapMatrix[i]);
 
-	//		for (int i = 0; i < 6; ++i)
-	//		{
-	//			cubeMapCam[i].SetPosition(pos);
-	//			cubeMapCam[i].Update();
-	//			cubeMapMatrix[i] = glm::lookAt(pos, pos + lookAtVectors[i], upVectors[i]);
-	//			invCubeMapMatrix[i] = glm::inverse(cubeMapMatrix[i]);
+				PRINT_MESSAGE("");
+				PRINT_MESSAGE("Face %i", i);
+				PRINT_MESSAGE("cubeMapCam[%i] matrix :", i);
+				PRINT_MATRIX(cubeMapCam[i].GetViewMatrix());
+				PRINT_MESSAGE("cubeMapMatrix[%i] :", i);
+				PRINT_MATRIX(cubeMapMatrix[i]);
 
-	//			PRINT_MESSAGE("");
-	//			PRINT_MESSAGE("Face %i", i);
-	//			PRINT_MESSAGE("cubeMapCam[%i] matrix :", i);
-	//			PRINT_MATRIX(cubeMapCam[i].GetViewMatrix());
-	//			PRINT_MESSAGE("cubeMapMatrix[%i] :", i);
-	//			PRINT_MATRIX(cubeMapMatrix[i]);
+				//PRINT_MESSAGE("cubeMapCam[%i] inverse matrix :", i);
+				//PRINT_MATRIX(cubeMapCam[i].GetInverseViewMatrix());
+				//PRINT_MESSAGE("invCubeMapMatrix[%i] :", i);
+				//PRINT_MATRIX(invCubeMapMatrix[i]);
+			}
+		}
 
-	//			//PRINT_MESSAGE("cubeMapCam[%i] inverse matrix :", i);
-	//			//PRINT_MATRIX(cubeMapCam[i].GetInverseViewMatrix());
-	//			//PRINT_MESSAGE("invCubeMapMatrix[%i] :", i);
-	//			//PRINT_MATRIX(invCubeMapMatrix[i]);
-	//		}
-	//	}
+		const CubeMapTexture * mTex = Engine::GetInstance()->GetTextureManager()->LoadTextureCubeMap("Medias\\CubeMaps\\Skybox1");
+		PRINT_MESSAGE("Skybox1-cubemap : %li", mTex->GetResourceId());
 
-	//	//getchar();
-	//}
-
+		//getchar();
+	}
+	*/
 
 	//{
 	//	mCamera->Update();

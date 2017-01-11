@@ -733,6 +733,10 @@ private:
 		};
 
 
+		//glm::mat4 mProjMatrix;
+		//glm::mat4 mViewMatrix[6];
+		//glm::mat4 mInvViewMatrix[6];
+
 		GLfloat mNearZ = 1.f;
 		GLfloat mFarZ = 1000.f;
 

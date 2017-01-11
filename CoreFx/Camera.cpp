@@ -25,7 +25,7 @@ void Camera::Update()
 {
 	if (GetFrame()->IsModified())
 	{
-		mViewDQ =  GetFrame()->GetDualQuaternion().GetConjugate();
+		mViewDQ = GetFrame()->GetDualQuaternion().GetConjugate();
 		mView = mViewDQ.GetMatrix();
 		mViewProj = mProj * mView;
 
@@ -61,16 +61,27 @@ glm::mat4 Camera::GetMatrixUsingYawPitchRoll(const float yaw, const float pitch,
 
 void Camera::LookAt(glm::vec3 const & position, glm::vec3 const & target, glm::vec3 const & up)
 {
-	GetFrame()->SetPosition(position);
+	//GetFrame()->SetPosition(position);
 
-	//glm::vec3 zAxis = glm::normalize(GetFrame()->GetPosition() - target);
-	//glm::vec3 xAxis = glm::normalize(glm::cross(up, zAxis));
-	//glm::vec3 yAxis = glm::cross(zAxis, xAxis);
-	//glm::mat3 m(xAxis, yAxis, zAxis);
+	//glm::mat4 m = glm::lookAt(glm::vec3(0.f), target - position, up);
+	//m = glm::inverse(m);
 
-	glm::mat4 m = glm::lookAt(glm::vec3(0.f), target - position, up);
+	glm::vec3 const f(normalize(target - position));
+	glm::vec3 const s(normalize(cross(f, up)));
+	glm::vec3 const u(cross(s, f));
+	glm::mat3 m;
+	m[0][0] = s.x;
+	m[0][1] = s.y;
+	m[0][2] = s.z;
+	m[1][0] = u.x;
+	m[1][1] = u.y;
+	m[1][2] = u.z;
+	m[2][0] = -f.x;
+	m[2][1] = -f.y;
+	m[2][2] = -f.z;
 
 	GetFrame()->SetRotation(glm::quat(m));
+	GetFrame()->SetPosition(position);
 }
  
 void Camera::Pitch(float angle)
