@@ -749,7 +749,7 @@ private:
 		GLuint mFBOs[(int)EFBOIndex::__fbo_count_envmapgen__];
 		GLuint mGBuffers[(int)EGBuffer::__gBuffer_count__];
 
-		bool mEnabled = false;
+		bool mEnabled = true;
 
 		EnvmapGenData()
 		{

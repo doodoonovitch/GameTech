@@ -331,7 +331,7 @@ void Engine::RenderObjects()
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
 		// -----------------------------------------------------------------------
 
-		InternalUpdateFrameDataUniformBuffer(*mCamera);
+		//InternalUpdateFrameDataUniformBuffer(*mCamera);
 
 		InternalComputePass();
 
@@ -341,14 +341,6 @@ void Engine::RenderObjects()
 			{
 				if (mSkydome->RenderCache())
 				{
-					if (mEnvmapGen.mEnabled)
-					{
-						glViewport(0, 0, mEnvmapGen.mTextureSize.x, mEnvmapGen.mTextureSize.y);
-					}
-					else
-					{
-						glViewport(mViewportOrigin.x, mViewportOrigin.y, mViewportSize.x, mViewportSize.y);
-					}
 				}
 			}
 		}
@@ -377,11 +369,11 @@ void Engine::RenderObjects()
 				InternalUpdateFrameDataUniformBuffer(mEnvmapGen.mCamera[face]);
 				InternalEnvMapRenderObjects(face);
 			}
-
-			InternalUpdateFrameDataUniformBuffer(*mCamera);
-			glViewport(mViewportOrigin.x, mViewportOrigin.y, mViewportSize.x, mViewportSize.y);
 		}
 
+		InternalUpdateFrameDataUniformBuffer(*mCamera);
+
+		glViewport(mViewportOrigin.x, mViewportOrigin.y, mViewportSize.x, mViewportSize.y);
 
 		InternalRenderObjects();
 	}

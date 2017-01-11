@@ -418,13 +418,13 @@ void SimpleCamera::OnInit()
 //#define NANOSUIT_MODEL
 //#define LARACROFT_MODEL
 //#define CERBERUS_MODEL
-//#define UFO_MODEL
+#define UFO_MODEL
 //#define ASHTRAY_MODEL
-//#define CONE_MODEL
+#define CONE_MODEL
 #define PIPEBOMB_MODEL
 //#define SLINGER_MODEL
 //#define ROUGHAXE_MODEL
-//#define SHIELD_MODEL
+#define SHIELD_MODEL
 //#define BBUNIT_MODEL
 //#define BARREL_MODEL
 //#define SPONZA
@@ -572,7 +572,7 @@ void SimpleCamera::OnInit()
 
 #ifdef ARTORIAS_SWORD_MODEL
 			{
-				glm::mat4 m = glm::scale(glm::vec3(0.4f));
+				glm::mat4 m = glm::scale(glm::vec3(1.f));
 				opt.SetPreTransformVertices(m);
 
 				modelData.LoadModel("Medias/Objects/ArtoriasSword/Artorias_Sword.obj", "Medias/Objects/ArtoriasSword", opt, &dataCtxBase);
@@ -588,7 +588,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 4;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::ivec3(5, 5, dataCtxBase.mModelMappingIndexBase + i)));
+					instancePerModel.push_back(InstancePerModelParams(glm::ivec3(3, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(15.f)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 				matList[dataCtxBase.mMaterialIndexBase + 0].SetBaseColor(glm::vec3(0.56f)).SetBaseColorTextureIndex(dataCtxBase.mTextureIndexBase + 0).SetMetallic(1.f).SetMetallicTextureIndex(dataCtxBase.mTextureIndexBase + 1).SetRoughness(.5f).SetRoughnessTextureIndex(dataCtxBase.mTextureIndexBase + 2).SetNormalTextureIndex(dataCtxBase.mTextureIndexBase + 3).SetEmissive(0.f).SetEmissiveTextureIndex(Renderer::NoTexture);
@@ -685,7 +685,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 5;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(3, 3, dataCtxBase.mModelMappingIndexBase + i)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(15.f)));
 
 				matList.resize(dataCtxBase.mMaterialIndexBase + modelCount);
 
@@ -857,7 +857,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(40, 40, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(15.f)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(15.f)));
 			}
 #endif
 #ifdef PIPEBOMB_MODEL
@@ -882,7 +882,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(2, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
 			}
 #endif
 #ifdef SLINGER_MODEL
@@ -907,7 +907,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(40, 40, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(3, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(30.f)));
 			}
 #endif
 #ifdef ROUGHAXE_MODEL
@@ -943,7 +943,7 @@ void SimpleCamera::OnInit()
 #endif
 #ifdef UFO_MODEL
 			{
-				glm::mat4 m = glm::scale(glm::vec3(.1f));
+				glm::mat4 m = glm::scale(glm::vec3(.3f));
 				//opt.SetFlipWindingOrder(true);
 				opt.SetPreTransformVertices(m);
 
@@ -970,7 +970,7 @@ void SimpleCamera::OnInit()
 
 				const GLuint modelCount = 1;
 				for (GLuint i = 0; i < modelCount; ++i)
-					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(5, 1, dataCtxBase.mModelMappingIndexBase + i)));
+					instancePerModel.push_back(InstancePerModelParams(glm::uvec3(4, 1, dataCtxBase.mModelMappingIndexBase + i), glm::vec3(35.f)));
 			}
 #endif
 #ifdef SPONZA
