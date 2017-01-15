@@ -36,6 +36,8 @@ protected:
 
 	static Logger * sInstance;
 
+	std::mutex mMutex;
+
 };
 
 

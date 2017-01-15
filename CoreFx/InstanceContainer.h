@@ -106,7 +106,7 @@ public:
 		for (unsigned int i = 0; i < threadCount; ++i)
 		{
 			size_t startIndex = n;
-			size_t count = d * threadCount;
+			size_t count = d;
 			if (r > 0)
 			{
 				++count;

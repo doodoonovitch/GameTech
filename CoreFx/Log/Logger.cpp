@@ -99,6 +99,7 @@ void Logger::Print(const char* messageFormat, ...)
 
 void Logger::Print(const char* messageFormat, va_list args)
 {
+	std::lock_guard<std::mutex> lock(mMutex);
 	vprintf_s(messageFormat, args);
 }
 

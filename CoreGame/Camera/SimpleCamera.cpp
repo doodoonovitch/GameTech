@@ -1121,7 +1121,7 @@ void SimpleCamera::OnInit()
 
 		glm::vec3 upVectors[6] =
 		{
-			-Y, 
+			-Y,
 			Y,
 			Z,
 			-Z,
@@ -1214,6 +1214,25 @@ void SimpleCamera::OnInit()
 	//	PRINT_MESSAGE("linearDepth = %f", linearDepth);		
 	//}
 
+	//{
+	//	CoreFx::InstanceContainer<CoreFx::Renderables::Grid> list(10, 10);
+	//	for (int i = 0; i < list.GetCapacity(); ++i)
+	//	{
+	//		CoreFx::Renderables::Grid * o = new CoreFx::Renderables::Grid();
+	//		list.Attach(o);
+	//	}
+
+	//	int testVar1 = 1;
+	//	list.ForEach([testVar1](CoreFx::Renderables::Grid * o) {
+	//		PRINT_MESSAGE("ForEach : testVar1 = %i, objectId = %li", testVar1, o->GetInstanceId());
+	//	});
+	//	list.ParallelForEach([testVar1](CoreFx::Renderables::Grid * o) {
+	//		PRINT_MESSAGE("ParallelForEach : testVar1 = %i, objectId = %li", testVar1, o->GetInstanceId());
+	//	});
+
+	//	getchar();
+	//}
+	
 }
 
 void SimpleCamera::InitializeTextRenderer()

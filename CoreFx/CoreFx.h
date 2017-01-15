@@ -37,6 +37,7 @@
 #include <type_traits>
 #include <string>
 #include <thread>
+#include <mutex>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
