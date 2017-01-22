@@ -176,8 +176,8 @@ void SimpleCamera::OnInit()
 		//CoreFx::Renderers::RadialGridRenderer * gridRenderer = new CoreFx::Renderers::RadialGridRenderer(36, 100);
 		//engine->AttachRenderer(gridRenderer);
 
-		CoreFx::Renderers::AxisRenderer * axisRenderer = new CoreFx::Renderers::AxisRenderer();
-		engine->AttachRenderer(axisRenderer);
+		//CoreFx::Renderers::AxisRenderer * axisRenderer = new CoreFx::Renderers::AxisRenderer();
+		//engine->AttachRenderer(axisRenderer);
 		
 		//engine->EnableDeferredDebug((Engine::EDeferredDebug)(mShowDeferredBufferState = (GLint)Engine::EDeferredDebug::ShowNormalBuffer));
 
@@ -292,9 +292,9 @@ void SimpleCamera::OnInit()
 			Renderers::TerrainRenderer::MapDesc mapDesc("medias/Terrain/rangitoto-and-motutapu-islands-15m-dem.tif", 512, true, glm::vec3(xScale * -512.f * .5f, -1.f, xScale * -512.f), glm::value_ptr(glm::ivec4(0, 1, 2, 3)));
 			desc.mTerrains.push_back(mapDesc);
 
-			Renderers::TerrainRenderer * terrain = new Renderers::TerrainRenderer(desc);
-			terrain->SetIsUsedToGenerateEnvMap(true);
-			engine->AttachRenderer(terrain);
+			mTerrain = new Renderers::TerrainRenderer(desc);
+			mTerrain->SetIsUsedToGenerateEnvMap(true);
+			engine->AttachRenderer(mTerrain);
 		}
 #endif // TERRAIN_SAMPLE
 
@@ -388,8 +388,8 @@ void SimpleCamera::OnInit()
 
 #ifdef SKYBOX_SAMPLE
 		{
-			Renderers::SkyboxRenderer * skybox = new Renderers::SkyboxRenderer("medias/CubeMaps/Skybox1");
-			engine->AttachSkyboxRenderer(skybox);
+			mSkybox = new Renderers::SkyboxRenderer("medias/CubeMaps/Skybox1");
+			engine->AttachSkyboxRenderer(mSkybox);
 		}
 #endif
 
@@ -404,8 +404,8 @@ void SimpleCamera::OnInit()
 		{
 			engine->GetTextureManager()->LoadTexture2D("medias/compass.tif");
 
-			Renderers::CompassRenderer * compass = new Renderers::CompassRenderer();
-			engine->AttachRenderer(compass);
+			mCompass = new Renderers::CompassRenderer();
+			engine->AttachRenderer(mCompass);
 		}
 #endif // COMPASS_SAMPLE
 
@@ -994,8 +994,8 @@ void SimpleCamera::OnInit()
 				capacity += it->mInstanceCount.x * it->mInstanceCount.y;
 			}
 
-			Renderers::ModelRenderer * modelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData, capacity > 0 ? capacity : 1);
-			if (modelRenderer != nullptr)
+			mModelRenderer = Renderers::ModelRenderer::CreateFromModel(engine, modelData, capacity > 0 ? capacity : 1);
+			if (mModelRenderer != nullptr)
 			{
 				GLuint modelCount = (GLuint)modelData.GetModelMappingList().size();
 
@@ -1034,7 +1034,7 @@ void SimpleCamera::OnInit()
 
 							glm::quat qRot = qX * qY * qZ;
 
-							Renderables::Model * model = modelRenderer->CreateModelInstance(modelId);
+							Renderables::Model * model = mModelRenderer->CreateModelInstance(modelId);
 							if (model != nullptr)
 							{
 								model->GetFrame()->SetPosition(position + p);
@@ -1051,7 +1051,7 @@ void SimpleCamera::OnInit()
 					p.x += spacing.x;
 				}
 
-				PRINT_MESSAGE("Model instance count = %li.", modelRenderer->GetCount());
+				PRINT_MESSAGE("Model instance count = %li.", mModelRenderer->GetCount());
 			}
 			else
 			{
@@ -1084,6 +1084,13 @@ void SimpleCamera::OnInit()
 
 	UpdateSunPosition();
 	UpdateSunPosTextPage();
+
+	//mModelRenderer->SetIsEnabled(false);
+	//mCompass->SetIsEnabled(false);
+	//mTerrain->SetIsEnabled(false);
+	//mRadialGridOcean->SetIsEnabled(false);
+	//mTextRenderer->SetIsEnabled(false);
+	//mSkydome->SetIsEnabled(false);
 
 	engine->CreateDynamicResources();
 

@@ -337,7 +337,7 @@ void Engine::RenderObjects()
 
 		if (mSkydome != nullptr)
 		{
-			if (mSkydome->GetIsInitialized() && mSkydome->IsCacheInvalidated())
+			if (mSkydome->GetIsInitialized() && mSkydome->GetIsEnabled() && mSkydome->IsCacheInvalidated())
 			{
 				if (mSkydome->RenderCache())
 				{
@@ -349,7 +349,10 @@ void Engine::RenderObjects()
 
 		mRenderers->ForEach([](Renderer * renderer)
 		{
-			renderer->Update();
+			if (renderer->GetIsInitialized() && renderer->GetIsEnabled())
+			{
+				renderer->Update();
+			}
 		});
 
 		glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -424,7 +427,7 @@ void Engine::InternalEnvMapRenderObjects(int face)
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		if (renderer->GetIsInitialized() && renderer->GetIsUsedToGenerateEnvMap())
+		if (renderer->GetIsInitialized() && renderer->GetIsEnabled() && renderer->GetIsUsedToGenerateEnvMap())
 		{
 			renderer->Render();
 		}
@@ -487,14 +490,14 @@ void Engine::InternalEnvMapRenderObjects(int face)
 
 	if (mSkybox != nullptr)
 	{
-		if (/*mSkybox->IsHDR() &&*/ mSkybox->GetIsInitialized())
+		if (/*mSkybox->IsHDR() &&*/ mSkybox->GetIsInitialized() && mSkybox->GetIsEnabled())
 		{
 			mSkybox->Render();
 		}
 	}
 	else if (mSkydome != nullptr)
 	{
-		if (mSkydome->GetIsInitialized())
+		if (mSkydome->GetIsInitialized() && mSkydome->GetIsEnabled())
 		{
 			mSkydome->Render();
 		}
@@ -537,7 +540,7 @@ void Engine::InternalRenderObjects()
 
 	mRenderers->ForEach([](Renderer * renderer)
 	{
-		if (renderer->GetIsInitialized())
+		if (renderer->GetIsInitialized() && renderer->GetIsEnabled())
 		{
 			renderer->Render();
 		}			
@@ -680,14 +683,14 @@ void Engine::InternalRenderObjects()
 
 		if (mSkybox != nullptr)
 		{
-			if (mSkybox->IsHDR() && mSkybox->GetIsInitialized())
+			if (mSkybox->IsHDR() && mSkybox->GetIsInitialized() && mSkybox->GetIsEnabled())
 			{
 				mSkybox->Render();
 			}
 		}
 		else if (mSkydome != nullptr)
 		{
-			if (mSkydome->GetIsInitialized())
+			if (mSkydome->GetIsInitialized() && mSkydome->GetIsEnabled())
 			{
 				mSkydome->Render();
 			}
@@ -724,7 +727,7 @@ void Engine::InternalRenderObjects()
 		//glDisable(GL_CULL_FACE);
 		mForwardRenderers->ForEach([](Renderer * renderer)
 		{
-			if (renderer->GetIsInitialized())
+			if (renderer->GetIsInitialized() && renderer->GetIsEnabled())
 				renderer->Render();
 		});
 		//glEnable(GL_CULL_FACE);
@@ -739,7 +742,7 @@ void Engine::InternalRenderObjects()
 
 		if (mSkybox != nullptr)
 		{
-			if (!mSkybox->IsHDR() && mSkybox->GetIsInitialized())
+			if (!mSkybox->IsHDR() && mSkybox->GetIsInitialized() && mSkybox->GetIsEnabled())
 			{
 				mSkybox->Render();
 			}
@@ -764,22 +767,22 @@ void Engine::InternalRenderObjects()
 
 			mRenderers->ForEach([](Renderer * renderer)
 			{
-				if (renderer->GetIsInitialized())
+				if (renderer->GetIsInitialized() && renderer->GetIsEnabled())
 				{
 					renderer->RenderWireFrame();
 				}
 			});
 			mForwardRenderers->ForEach([](Renderer * renderer)
 			{
-				if (renderer->GetIsInitialized())
+				if (renderer->GetIsInitialized() && renderer->GetIsEnabled())
 					renderer->RenderWireFrame();
 			});
 
-			if (mSkybox != nullptr && mSkybox->GetIsInitialized())
+			if (mSkybox != nullptr && mSkybox->GetIsInitialized() && mSkybox->GetIsEnabled())
 			{
 				mSkybox->RenderWireFrame();
 			}
-			else if (mSkydome != nullptr && mSkydome->GetIsInitialized())
+			else if (mSkydome != nullptr && mSkydome->GetIsInitialized() && mSkydome->GetIsEnabled())
 			{
 				mSkydome->RenderWireFrame();
 			}
@@ -873,7 +876,7 @@ void Engine::InternalRenderObjects()
 	//glDisable(GL_CULL_FACE);
 	mHUDRenderers->ForEach([](Renderer * renderer)
 	{
-		if (renderer->GetIsInitialized())
+		if (renderer->GetIsInitialized() && renderer->GetIsEnabled())
 			renderer->Render();
 	});
 
@@ -885,7 +888,7 @@ void Engine::InternalRenderObjects()
 
 		mHUDRenderers->ForEach([](Renderer * renderer)
 		{
-			if (renderer->GetIsInitialized())
+			if (renderer->GetIsInitialized() && renderer->GetIsEnabled())
 				renderer->RenderWireFrame();
 		});
 

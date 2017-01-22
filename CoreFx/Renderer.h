@@ -305,7 +305,10 @@ public:
 	virtual void RenderWireFrame() = 0;
 
 	bool GetIsInitialized() const { return mIsInitialized; }
+	bool GetIsEnabled() const { return mIsEnabled; }
 	bool GetIsUsedToGenerateEnvMap() const { return mUseToGenEnvMap; }
+
+	void SetIsEnabled(bool isEnabled) { mIsEnabled = isEnabled; }
 
 	void SetIsUsedToGenerateEnvMap(bool value) { mUseToGenEnvMap = value; }
 
@@ -335,6 +338,7 @@ protected:
 	TextureMapping mTextureMapping;
 	ERenderPass mRenderPass;
 	bool mIsInitialized;
+	bool mIsEnabled;
 	bool mUseToGenEnvMap;
 
 };

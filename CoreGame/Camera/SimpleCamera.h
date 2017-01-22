@@ -145,9 +145,15 @@ private:
 	float mRotX = 0.f, mRotY = 135.f, mDist = 0.f;
 
 	CoreFx::Camera* mCamera = nullptr;
-	CoreFx::Renderers::SkydomeRenderer * mSkydome = nullptr;
 	CoreFx::Lights::DirectionalLight * mSunLight = nullptr;
+
+	CoreFx::Renderers::SkyboxRenderer * mSkybox = nullptr;
+	CoreFx::Renderers::SkydomeRenderer * mSkydome = nullptr;
 	CoreFx::Renderers::TextRenderer * mTextRenderer = nullptr;
+	CoreFx::Renderers::PerlinNoiseOcean::RadialGridOceanRenderer * mRadialGridOcean = nullptr;
+	CoreFx::Renderers::TerrainRenderer * mTerrain = nullptr;
+	CoreFx::Renderers::CompassRenderer * mCompass = nullptr;
+	CoreFx::Renderers::ModelRenderer * mModelRenderer = nullptr;
 
 	CoreFx::Renderers::TextPageWeakPtr mHelpInfoPage;
 	CoreFx::Renderers::TextPageWeakPtr mShowDeferredBuffersPage;
@@ -161,8 +167,6 @@ private:
 	CoreFx::Renderers::TextGroupWeakPtr mShowDeferredBuffersTextGroup;
 
 	CoreFx::Renderers::TextGroupWeakPtr mLastActiveTextGroup;
-
-	CoreFx::Renderers::PerlinNoiseOcean::RadialGridOceanRenderer * mRadialGridOcean;
 
 	size_t mFpsTextLineIndex;
 	size_t mExposureTextLineIndex;

@@ -9,6 +9,8 @@ namespace CoreFx
 Renderer::Renderer(ERenderPass renderPass)
 	: mRenderPass(renderPass)
 	, mIsInitialized(false)
+	, mIsEnabled(true)
+	, mUseToGenEnvMap(false)
 {
 }
 
